@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './StatusBadge';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
@@ -35,7 +35,7 @@ export function PortfolioCard({ portfolio, rank }: PortfolioCardProps) {
             <StatusBadge status={portfolio.status} />
           </div>
 
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground">
               {portfolio.strategy_type === 'GenAI' ? (
                 <Sparkles className="h-3 w-3" />
@@ -47,8 +47,9 @@ export function PortfolioCard({ portfolio, rank }: PortfolioCardProps) {
             <span className="px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground">
               {portfolio.objective}
             </span>
-            <span className="px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground">
-              {portfolio.risk_level} Risk
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20">
+              <Shield className="h-3 w-3" />
+              Creator invested
             </span>
           </div>
 
@@ -74,17 +75,17 @@ export function PortfolioCard({ portfolio, rank }: PortfolioCardProps) {
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Followers</p>
+              <p className="text-xs text-muted-foreground mb-1">Investors</p>
               <div className="flex items-center gap-1 font-semibold">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                {portfolio.followers_count.toLocaleString()}
+                {portfolio.investors_count.toLocaleString()}
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Allocated</span>
+              <span className="text-muted-foreground">Total Allocated</span>
               <span className="font-medium">{formatCurrency(portfolio.allocated_amount)}</span>
             </div>
           </div>

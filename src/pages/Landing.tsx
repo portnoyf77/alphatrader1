@@ -9,8 +9,8 @@ import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 
 export default function Landing() {
   const totalAllocated = mockPortfolios.reduce((acc, p) => acc + p.allocated_amount, 0);
-  const totalFollowers = mockPortfolios.reduce((acc, p) => acc + p.followers_count, 0);
-
+  const totalInvestors = mockPortfolios.reduce((acc, p) => acc + p.investors_count, 0);
+  const totalCreatorInvestment = mockPortfolios.reduce((acc, p) => acc + p.creator_investment, 0);
   return (
     <PageLayout showDisclaimer={false}>
       {/* Hero Section */}
@@ -67,8 +67,12 @@ export default function Landing() {
               <p className="text-muted-foreground mt-1">Capital Allocated</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
-              <p className="text-muted-foreground mt-1">Total Followers</p>
+              <p className="text-3xl md:text-4xl font-bold gradient-text">{totalInvestors.toLocaleString()}</p>
+              <p className="text-muted-foreground mt-1">Active Investors</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl md:text-4xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
+              <p className="text-muted-foreground mt-1">Creator Investments</p>
             </div>
             <div className="text-center">
               <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>

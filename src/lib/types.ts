@@ -30,8 +30,9 @@ export interface Portfolio {
   risk_level: RiskLevel;
   holdings: Holding[];
   performance: PerformanceMetrics;
-  followers_count: number;
+  investors_count: number;
   allocated_amount: number;
+  creator_investment: number; // Creator's own money invested (skin in the game)
   creator_fee_pct: number;
   creator_est_monthly_earnings: number;
   description_rationale: string;
