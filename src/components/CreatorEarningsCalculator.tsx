@@ -5,11 +5,11 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
 export function CreatorEarningsCalculator() {
-  const [followers, setFollowers] = useState([500]);
+  const [investors, setInvestors] = useState([500]);
   const [avgAllocation, setAvgAllocation] = useState([5000]);
 
   // Platform fee: 1% annually, Creator gets 20% of that
-  const totalAllocated = followers[0] * avgAllocation[0];
+  const totalAllocated = investors[0] * avgAllocation[0];
   const platformFee = totalAllocated * 0.01; // 1% annual platform fee
   const creatorShare = platformFee * 0.20; // 20% to creator
   const monthlyEarnings = creatorShare / 12;
@@ -23,20 +23,20 @@ export function CreatorEarningsCalculator() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Followers Slider */}
+        {/* Investors Slider */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Followers
+              Investors
             </Label>
             <span className="text-lg font-semibold text-primary">
-              {followers[0].toLocaleString()}
+              {investors[0].toLocaleString()}
             </span>
           </div>
           <Slider
-            value={followers}
-            onValueChange={setFollowers}
+            value={investors}
+            onValueChange={setInvestors}
             min={100}
             max={5000}
             step={100}
@@ -53,7 +53,7 @@ export function CreatorEarningsCalculator() {
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              Avg. Allocation per Follower
+              Avg. Allocation per Investor
             </Label>
             <span className="text-lg font-semibold text-primary">
               ${avgAllocation[0].toLocaleString()}

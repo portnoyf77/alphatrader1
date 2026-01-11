@@ -37,16 +37,6 @@ export default function PortfolioDetail() {
     );
   }
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    toast({
-      title: isFollowing ? "Unfollowed" : "Following!",
-      description: isFollowing 
-        ? `You unfollowed ${portfolio.name}` 
-        : `You're now following ${portfolio.name}`,
-    });
-  };
-
   const handleAllocate = () => {
     setShowAllocateModal(false);
     toast({
@@ -90,20 +80,12 @@ export default function PortfolioDetail() {
 
             <div className="flex gap-3">
               <Button 
-                variant={isFollowing ? "secondary" : "outline"}
-                onClick={handleFollow}
-                disabled={isDisabled}
-              >
-                <Heart className={cn("h-4 w-4 mr-2", isFollowing && "fill-current text-destructive")} />
-                {isFollowing ? 'Following' : 'Follow'}
-              </Button>
-              <Button 
                 onClick={() => setShowAllocateModal(true)}
                 disabled={isDisabled}
                 className="glow-primary"
               >
                 <DollarSign className="h-4 w-4 mr-2" />
-                Allocate (mock)
+                Invest in Portfolio
               </Button>
             </div>
           </div>
@@ -124,10 +106,18 @@ export default function PortfolioDetail() {
             </Card>
             <Card className="glass-card">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">Followers</p>
+                <p className="text-sm text-muted-foreground mb-1">Investors</p>
                 <p className="text-2xl font-bold flex items-center gap-2">
                   <Users className="h-5 w-5 text-muted-foreground" />
-                  {portfolio.followers_count.toLocaleString()}
+                  {portfolio.investors_count.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="glass-card bg-success/5 border-success/30">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground mb-1">Creator Invested</p>
+                <p className="text-2xl font-bold text-success">
+                  {formatCurrency(portfolio.creator_investment)}
                 </p>
               </CardContent>
             </Card>

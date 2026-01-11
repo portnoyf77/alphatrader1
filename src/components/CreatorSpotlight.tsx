@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { TrendingUp, Users, DollarSign, Crown } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Crown, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/mockData';
@@ -27,7 +27,7 @@ export function CreatorSpotlight({ portfolios }: CreatorSpotlightProps) {
             Top earning portfolio creators
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            These creators have built trusted strategies that thousands follow. 
+            These creators have built trusted strategies with their own money invested. 
             See how much they're earning from their expertise.
           </p>
         </div>
@@ -63,14 +63,20 @@ export function CreatorSpotlight({ portfolios }: CreatorSpotlightProps) {
                   <p className="text-sm text-muted-foreground">by {portfolio.creator_name}</p>
                 </Link>
 
+                {/* Skin in the game badge */}
+                <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20">
+                  <Shield className="h-3 w-3" />
+                  {formatCurrency(portfolio.creator_investment)} invested
+                </div>
+
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="p-3 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
                       <Users className="h-3 w-3" />
-                      Followers
+                      Investors
                     </div>
-                    <p className="font-semibold">{portfolio.followers_count.toLocaleString()}</p>
+                    <p className="font-semibold">{portfolio.investors_count.toLocaleString()}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">

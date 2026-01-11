@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Plus, Play, Eye, EyeOff, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Share2 } from 'lucide-react';
+import { Plus, Play, Eye, EyeOff, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Share2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StatusBadge } from '@/components/StatusBadge';
-import { formatCurrency, formatPercent, mockPortfolios, mockEarningsHistory, mockFollowerGrowth } from '@/lib/mockData';
+import { formatCurrency, formatPercent, mockPortfolios, mockEarningsHistory, mockInvestorGrowth } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
@@ -24,9 +24,10 @@ const creatorRank = 3;
 const totalCreators = 47;
 
 export default function Dashboard() {
-  const totalFollowers = myPortfolios.reduce((acc, p) => acc + p.followers_count, 0);
+  const totalInvestors = myPortfolios.reduce((acc, p) => acc + p.investors_count, 0);
   const totalAllocated = myPortfolios.reduce((acc, p) => acc + p.allocated_amount, 0);
-  const newFollowersThisMonth = 574;
+  const totalCreatorInvestment = myPortfolios.reduce((acc, p) => acc + p.creator_investment, 0);
+  const newInvestorsThisMonth = 574;
 
   // Calculate projected monthly earnings based on growth
   const lastMonthEarnings = mockEarningsHistory[mockEarningsHistory.length - 2]?.earnings || 0;
@@ -70,12 +71,12 @@ export default function Dashboard() {
           </Card>
           <Card className="glass-card">
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Total Followers</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Investors</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold">{totalFollowers.toLocaleString()}</p>
+                <p className="text-3xl font-bold">{totalInvestors.toLocaleString()}</p>
                 <span className="text-xs text-success flex items-center">
                   <ArrowUpRight className="h-3 w-3" />
-                  +{newFollowersThisMonth}
+                  +{newInvestorsThisMonth}
                 </span>
               </div>
             </CardContent>
@@ -104,6 +105,22 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Your Investment (Skin in the Game) */}
+        <Card className="glass-card mb-8 bg-success/5 border-success/30">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Shield className="h-6 w-6 text-success" />
+              <div>
+                <p className="text-sm text-muted-foreground">Your Total Investment (Skin in the Game)</p>
+                <p className="text-2xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground max-w-xs text-right">
+              Every portfolio you publish has your own money invested, building trust with investors.
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Earnings Analytics Row */}
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
@@ -168,18 +185,18 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Follower Growth Chart */}
+          {/* Investor Growth Chart */}
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />
-                Follower Growth
+                Investor Growth
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockFollowerGrowth}>
+                  <LineChart data={mockInvestorGrowth}>
                     <XAxis 
                       dataKey="month" 
                       axisLine={false} 
@@ -197,11 +214,11 @@ export default function Dashboard() {
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px'
                       }}
-                      formatter={(value: number) => [value.toLocaleString(), 'Followers']}
+                      formatter={(value: number) => [value.toLocaleString(), 'Investors']}
                     />
                     <Line 
                       type="monotone" 
-                      dataKey="followers" 
+                      dataKey="investors" 
                       stroke="hsl(var(--primary))" 
                       strokeWidth={2}
                       dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }}
@@ -212,7 +229,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
                 <div>
                   <p className="text-xs text-muted-foreground">New this month</p>
-                  <p className="text-lg font-semibold text-success">+{newFollowersThisMonth}</p>
+                  <p className="text-lg font-semibold text-success">+{newInvestorsThisMonth}</p>
                 </div>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Share2 className="h-4 w-4" />
@@ -237,9 +254,9 @@ export default function Dashboard() {
                       <TableHead>Portfolio</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">30d Return</TableHead>
-                      <TableHead className="text-right">Followers</TableHead>
+                      <TableHead className="text-right">Investors</TableHead>
+                      <TableHead className="text-right">Your Investment</TableHead>
                       <TableHead className="text-right">Earnings/mo</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -270,26 +287,13 @@ export default function Dashboard() {
                           {formatPercent(portfolio.performance.return_30d)}
                         </TableCell>
                         <TableCell className="text-right">
-                          {portfolio.followers_count.toLocaleString()}
+                          {portfolio.investors_count.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right text-success">
+                          {formatCurrency(portfolio.creator_investment)}
                         </TableCell>
                         <TableCell className="text-right text-primary font-medium">
                           ${portfolio.creator_est_monthly_earnings.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" asChild>
-                              <Link to={`/portfolio/${portfolio.id}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              {portfolio.status === 'Simulated' ? (
-                                <Eye className="h-4 w-4" />
-                              ) : (
-                                <EyeOff className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
