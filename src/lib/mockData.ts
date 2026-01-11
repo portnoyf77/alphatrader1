@@ -310,6 +310,36 @@ export const mockPortfolios: Portfolio[] = [
   },
 ];
 
+// Aggregate creator stats
+export const creatorStats = {
+  totalCreatorEarnings30d: mockPortfolios.reduce((acc, p) => acc + p.creator_est_monthly_earnings, 0),
+  topCreatorEarnings: Math.max(...mockPortfolios.map(p => p.creator_est_monthly_earnings)),
+  avgEarningsPerPortfolio: Math.round(
+    mockPortfolios.reduce((acc, p) => acc + p.creator_est_monthly_earnings, 0) / mockPortfolios.length
+  ),
+  totalCreators: new Set(mockPortfolios.map(p => p.creator_name)).size,
+};
+
+// Mock earnings history for dashboard charts
+export const mockEarningsHistory = [
+  { month: 'Aug', earnings: 1200 },
+  { month: 'Sep', earnings: 1850 },
+  { month: 'Oct', earnings: 2400 },
+  { month: 'Nov', earnings: 3100 },
+  { month: 'Dec', earnings: 5200 },
+  { month: 'Jan', earnings: 7580 },
+];
+
+// Mock follower growth data
+export const mockFollowerGrowth = [
+  { month: 'Aug', followers: 1200 },
+  { month: 'Sep', followers: 1890 },
+  { month: 'Oct', followers: 2650 },
+  { month: 'Nov', followers: 3420 },
+  { month: 'Dec', followers: 4180 },
+  { month: 'Jan', followers: 4754 },
+];
+
 export const generateChartData = (days: number, returnPct: number): ChartDataPoint[] => {
   const data: ChartDataPoint[] = [];
   const startDate = new Date();

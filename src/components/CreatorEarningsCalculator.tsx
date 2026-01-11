@@ -1,0 +1,115 @@
+import { useState } from 'react';
+import { DollarSign, Users, Calculator, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+
+export function CreatorEarningsCalculator() {
+  const [followers, setFollowers] = useState([500]);
+  const [avgAllocation, setAvgAllocation] = useState([5000]);
+
+  // Platform fee: 1% annually, Creator gets 20% of that
+  const totalAllocated = followers[0] * avgAllocation[0];
+  const platformFee = totalAllocated * 0.01; // 1% annual platform fee
+  const creatorShare = platformFee * 0.20; // 20% to creator
+  const monthlyEarnings = creatorShare / 12;
+
+  return (
+    <Card className="glass-card overflow-hidden">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Calculator className="h-5 w-5 text-primary" />
+          Earnings Calculator
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Followers Slider */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              Followers
+            </Label>
+            <span className="text-lg font-semibold text-primary">
+              {followers[0].toLocaleString()}
+            </span>
+          </div>
+          <Slider
+            value={followers}
+            onValueChange={setFollowers}
+            min={100}
+            max={5000}
+            step={100}
+            className="py-2"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>100</span>
+            <span>5,000</span>
+          </div>
+        </div>
+
+        {/* Average Allocation Slider */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              Avg. Allocation per Follower
+            </Label>
+            <span className="text-lg font-semibold text-primary">
+              ${avgAllocation[0].toLocaleString()}
+            </span>
+          </div>
+          <Slider
+            value={avgAllocation}
+            onValueChange={setAvgAllocation}
+            min={1000}
+            max={25000}
+            step={500}
+            className="py-2"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>$1,000</span>
+            <span>$25,000</span>
+          </div>
+        </div>
+
+        {/* Calculation Breakdown */}
+        <div className="pt-4 border-t border-border/50">
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Total AUM</span>
+              <span>${totalAllocated.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Platform fee (1% annually)</span>
+              <span>${platformFee.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Your share (20%)</span>
+              <span>${creatorShare.toLocaleString()}/year</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Result */}
+        <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+          <p className="text-sm text-muted-foreground mb-1">
+            Your estimated monthly earnings
+          </p>
+          <p className="text-3xl font-bold gradient-text">
+            ${Math.round(monthlyEarnings).toLocaleString()}
+          </p>
+          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+            <ArrowRight className="h-3 w-3" />
+            That's ${Math.round(creatorShare).toLocaleString()} per year
+          </p>
+        </div>
+
+        <p className="text-xs text-muted-foreground text-center">
+          Based on 1% annual platform fee with 20% creator share. 
+          Actual earnings depend on allocation and retention.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
