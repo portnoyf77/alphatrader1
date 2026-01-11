@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, TrendingUp, PenTool } from 'lucide-react';
+import { ArrowRight, TrendingUp, PenTool, DollarSign, Users, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { creatorStats } from '@/lib/mockData';
 
 type UserType = 'investor' | 'creator';
 
@@ -77,7 +79,7 @@ export default function Onboarding() {
 
               <Card
                 className={cn(
-                  "cursor-pointer transition-all duration-200 hover:border-primary/50",
+                  "cursor-pointer transition-all duration-200 hover:border-primary/50 relative overflow-hidden",
                   userType === 'creator' && "border-primary bg-primary/5"
                 )}
                 onClick={() => setUserType('creator')}
@@ -87,18 +89,71 @@ export default function Onboarding() {
                     <PenTool className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-2">I want to create strategies</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-3">
                     Build, simulate, and publish your own investment strategies.
                   </p>
+                  
+                  {/* Earnings highlight for creator path */}
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">Earn from your expertise</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Top creators earn ${creatorStats.topCreatorEarnings.toLocaleString()}/mo. 
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1 underline cursor-help">How?</span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[250px]">
+                            <p>When investors allocate to your portfolio, you earn 20% of the 1% annual platform fee. More followers = more earnings!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
 
+          {/* Creator-specific messaging */}
+          {userType === 'creator' && (
+            <div className="mb-8 p-4 rounded-lg bg-card border border-border/50 animate-fade-in">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h4 className="font-medium mb-1">What you'll be able to do</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      Build portfolios with GenAI or manually
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      Simulate performance with real market data
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      Publish and build your following
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      Earn passive income from allocations
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Investment Preferences Form */}
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="objective">Investment Objective</Label>
+              <Label htmlFor="objective">
+                {userType === 'creator' ? 'Primary Strategy Focus' : 'Investment Objective'}
+              </Label>
               <Select value={objective} onValueChange={setObjective}>
                 <SelectTrigger id="objective" className="bg-secondary">
                   <SelectValue placeholder="Select your objective" />
@@ -153,9 +208,15 @@ export default function Onboarding() {
               size="lg"
               className="w-full h-14 text-lg glow-primary"
             >
-              Continue
+              {userType === 'creator' ? 'Start Building' : 'Continue'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
+            
+            {userType === 'creator' && (
+              <p className="text-center text-xs text-muted-foreground mt-3">
+                You can always switch between investing and creating later.
+              </p>
+            )}
           </div>
         </div>
       </div>
