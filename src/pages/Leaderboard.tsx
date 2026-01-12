@@ -1,18 +1,21 @@
 import { useState, useMemo } from 'react';
-import { Info } from 'lucide-react';
+import { Info, CheckCircle2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PortfolioCard } from '@/components/PortfolioCard';
-import { mockPortfolios } from '@/lib/mockData';
+import { getValidatedPortfolios } from '@/lib/mockData';
 
 type LeaderboardTab = 'risk-adjusted' | 'consistent' | 'best-30d' | 'lowest-drawdown';
 
 export default function Leaderboard() {
   const [activeTab, setActiveTab] = useState<LeaderboardTab>('risk-adjusted');
 
+  // Only show validated portfolios in leaderboard
+  const validatedPortfolios = useMemo(() => getValidatedPortfolios(), []);
+
   const sortedPortfolios = useMemo(() => {
-    const portfolios = [...mockPortfolios];
+    const portfolios = [...validatedPortfolios];
     
     switch (activeTab) {
       case 'risk-adjusted':
@@ -37,7 +40,7 @@ export default function Leaderboard() {
       default:
         return portfolios;
     }
-  }, [activeTab]);
+  }, [activeTab, validatedPortfolios]);
 
   const tabDescriptions: Record<LeaderboardTab, string> = {
     'risk-adjusted': 'Ranked by risk-adjusted returns (return / volatility ratio)',
@@ -53,7 +56,7 @@ export default function Leaderboard() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Leaderboard</h1>
             <p className="text-muted-foreground">
-              Top performing portfolios across different metrics.
+              Top performing validated portfolios across different metrics.
             </p>
           </div>
           
@@ -67,12 +70,17 @@ export default function Leaderboard() {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <p>
-                  Leaderboards emphasize consistency and risk controls, not just short-term returns. 
-                  This helps identify sustainable strategies over those with unsustainable risks.
+                  Rankings include only validated strategies that have demonstrated consistent performance under real market conditions. Simulated-only strategies are not eligible for leaderboard placement.
                 </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+        </div>
+
+        {/* Validation notice */}
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-success/10 border border-success/20 text-success text-sm mb-6">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span>All strategies shown have completed validation and meet performance stability criteria.</span>
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as LeaderboardTab)}>
@@ -102,6 +110,7 @@ export default function Leaderboard() {
                   key={portfolio.id} 
                   portfolio={portfolio} 
                   rank={index + 1}
+                  showValidationBadge
                 />
               ))}
             </div>
