@@ -104,7 +104,7 @@ export default function PortfolioDetail() {
                 <ValidationBadge status={portfolio.validation_status} />
               </div>
               <div className="flex items-center gap-4 text-muted-foreground">
-                <span>by {portfolio.creator_name}</span>
+                <span className="font-mono">{portfolio.creator_id}</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   Created {new Date(portfolio.created_date).toLocaleDateString()}

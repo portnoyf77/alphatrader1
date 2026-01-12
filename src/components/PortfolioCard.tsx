@@ -3,7 +3,9 @@ import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './StatusBadge';
 import { ValidationBadge } from './ValidationBadge';
+import { PortfolioThumbnail } from './PortfolioThumbnail';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
+import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';
 
@@ -16,6 +18,7 @@ interface PortfolioCardProps {
 export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: PortfolioCardProps) {
   const isPositive = portfolio.performance.return_30d >= 0;
   const isValidated = portfolio.validation_status === 'validated' && portfolio.validation_criteria_met;
+  const gemstone = portfolio.sectors[0] ? getGemstoneForSector(portfolio.sectors[0]) : 'Quartz';
 
   return (
     <Link to={`/portfolio/${portfolio.id}`}>
@@ -28,11 +31,18 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
                   #{rank}
                 </div>
               )}
+              <PortfolioThumbnail
+                sectors={portfolio.sectors}
+                geoFocus={portfolio.geo_focus}
+                riskLevel={portfolio.risk_level}
+                gemstone={gemstone}
+                size="sm"
+              />
               <div>
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {portfolio.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">{portfolio.creator_name}</p>
+                <p className="text-sm text-muted-foreground font-mono">{portfolio.creator_id}</p>
               </div>
             </div>
             {showValidationBadge && isValidated ? (
