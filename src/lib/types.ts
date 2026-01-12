@@ -2,6 +2,7 @@ export type PortfolioStatus = 'Simulated' | 'Live' | 'Live (coming soon)';
 export type StrategyType = 'GenAI' | 'Manual';
 export type Objective = 'Growth' | 'Income' | 'Low volatility' | 'Balanced';
 export type RiskLevel = 'Low' | 'Medium' | 'High';
+export type ValidationStatus = 'simulated' | 'in_validation' | 'validated';
 
 export interface Holding {
   ticker: string;
@@ -38,6 +39,10 @@ export interface Portfolio {
   description_rationale: string;
   risks: string;
   last_rebalanced_date: string;
+  // Validation fields
+  validation_status: ValidationStatus;
+  validation_criteria_met: boolean;
+  validation_summary?: string;
 }
 
 export interface ChartDataPoint {

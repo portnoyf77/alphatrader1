@@ -32,6 +32,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'This portfolio combines broad market exposure with targeted growth sectors. The GenAI allocation engine identified optimal weights based on historical correlations and forward-looking momentum indicators.',
     risks: 'Higher exposure to technology and innovation sectors may result in increased volatility during market corrections. International holdings add currency risk.',
     last_rebalanced_date: '2024-12-28',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 60 days of real-market simulation with stable drawdown profile and consistent risk-adjusted returns.',
   },
   {
     id: '2',
@@ -64,6 +67,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'A classic balanced approach designed for investors seeking steady returns with minimized downside risk. Bond allocation provides stability while dividend stocks add income.',
     risks: 'Rising interest rates may negatively impact bond holdings. Lower growth potential compared to aggressive strategies.',
     last_rebalanced_date: '2024-12-20',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 75 days with excellent consistency score and low volatility metrics.',
   },
   {
     id: '3',
@@ -96,6 +102,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Concentrated bet on technology leadership, particularly semiconductors and AI-adjacent companies. This portfolio aims to capture the ongoing tech revolution.',
     risks: 'Extreme sector concentration. High correlation between holdings amplifies drawdowns. Not suitable for risk-averse investors.',
     last_rebalanced_date: '2025-01-05',
+    validation_status: 'simulated',
+    validation_criteria_met: false,
+    validation_summary: undefined,
   },
   {
     id: '4',
@@ -128,6 +137,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Built for investors seeking regular income through dividends. Focus on quality dividend payers with history of consistent payouts and growth.',
     risks: 'Dividend cuts during economic downturns. REIT exposure adds real estate market risk. May underperform in bull markets.',
     last_rebalanced_date: '2024-12-15',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 90 days with strong income consistency and low drawdown profile.',
   },
   {
     id: '5',
@@ -160,6 +172,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Diversified global approach with exposure to developed and emerging markets, plus gold as an inflation hedge and portfolio stabilizer.',
     risks: 'Currency fluctuations, geopolitical risks in emerging markets, and gold price volatility. Requires longer time horizon.',
     last_rebalanced_date: '2024-12-22',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 45 days with balanced risk metrics across global asset classes.',
   },
   {
     id: '6',
@@ -192,6 +207,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Thematic portfolio betting on the energy transition. Captures growth in solar, batteries, and clean technology sectors.',
     risks: 'Highly volatile sector dependent on government policies and subsidies. Competition from traditional energy during transitions.',
     last_rebalanced_date: '2024-12-18',
+    validation_status: 'in_validation',
+    validation_criteria_met: false,
+    validation_summary: undefined,
   },
   {
     id: '7',
@@ -224,6 +242,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Inspired by Ray Dalio\'s All-Weather concept. Designed to perform reasonably in any economic environment through strategic asset class diversification.',
     risks: 'May significantly underperform during strong bull markets. Long-term treasury exposure sensitive to interest rate changes.',
     last_rebalanced_date: '2024-12-10',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 120 days with exceptional consistency score and minimal drawdown.',
   },
   {
     id: '8',
@@ -256,6 +277,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Combines defensive healthcare with high-growth biotech and genomics. Benefiting from aging demographics and medical innovation.',
     risks: 'Biotech holdings can be volatile. FDA approval risks, patent cliffs, and healthcare policy changes.',
     last_rebalanced_date: '2024-12-25',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 80 days with solid risk-adjusted returns in healthcare sector.',
   },
   {
     id: '9',
@@ -288,6 +312,9 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'Betting on the value factor comeback. Focuses on undervalued companies across market caps and geographies.',
     risks: 'Value traps, slower growth during momentum-driven markets, small-cap volatility.',
     last_rebalanced_date: '2024-12-30',
+    validation_status: 'simulated',
+    validation_criteria_met: false,
+    validation_summary: undefined,
   },
   {
     id: '10',
@@ -317,8 +344,15 @@ export const mockPortfolios: Portfolio[] = [
     description_rationale: 'The classic 60/40 portfolio that has stood the test of time. Maximum simplicity with just two holdings.',
     risks: 'Bond-stock correlation may increase during stress. 2022 showed both can decline together. Interest rate sensitivity.',
     last_rebalanced_date: '2024-12-01',
+    validation_status: 'validated',
+    validation_criteria_met: true,
+    validation_summary: 'Validated after 150 days with proven track record and stable performance metrics.',
   },
 ];
+
+// Get only validated portfolios for marketplace
+export const getValidatedPortfolios = () => 
+  mockPortfolios.filter(p => p.validation_status === 'validated' && p.validation_criteria_met);
 
 // Aggregate creator stats
 export const creatorStats = {

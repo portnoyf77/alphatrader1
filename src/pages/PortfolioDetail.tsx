@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, Share2 } from 'lucide-react';
+import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ValidationBadge } from '@/components/ValidationBadge';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { mockPortfolios, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +22,6 @@ export default function PortfolioDetail() {
   const { toast } = useToast();
   const [showAllocateModal, setShowAllocateModal] = useState(false);
   const [allocateAmount, setAllocateAmount] = useState('');
-  const [isFollowing, setIsFollowing] = useState(false);
 
   const portfolio = mockPortfolios.find(p => p.id === id);
 
@@ -37,6 +38,10 @@ export default function PortfolioDetail() {
     );
   }
 
+  const isValidated = portfolio.validation_status === 'validated' && portfolio.validation_criteria_met;
+  const isSimulatedOnly = portfolio.validation_status === 'simulated';
+  const isInValidation = portfolio.validation_status === 'in_validation';
+
   const handleAllocate = () => {
     setShowAllocateModal(false);
     toast({
@@ -48,7 +53,7 @@ export default function PortfolioDetail() {
   const estimatedFee = parseFloat(allocateAmount || '0') * 0.01; // 1% annual fee
   const creatorShare = estimatedFee * (portfolio.creator_fee_pct / 100);
 
-  const isDisabled = portfolio.status === 'Live (coming soon)';
+  const isDisabled = portfolio.status === 'Live (coming soon)' || !isValidated;
 
   return (
     <PageLayout>
@@ -62,12 +67,41 @@ export default function PortfolioDetail() {
             </Link>
           </Button>
 
+          {/* Validation Warning Banner for non-validated portfolios */}
+          {!isValidated && (
+            <Card className="mb-6 border-warning/50 bg-warning/10">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  {isSimulatedOnly ? (
+                    <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                  ) : (
+                    <Clock className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="font-medium text-warning-foreground">
+                      {isSimulatedOnly 
+                        ? "This strategy is still in validation and is not publicly listed."
+                        : "This strategy is currently being validated."
+                      }
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isSimulatedOnly
+                        ? "Strategies must complete validation before they can accept investors. Only validated strategies appear in the marketplace."
+                        : "Validation is evaluating consistency, drawdown, and volatility vs benchmarks. This may take a few more days."
+                      }
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold">{portfolio.name}</h1>
-                <StatusBadge status={portfolio.status} />
+                <ValidationBadge status={portfolio.validation_status} />
               </div>
               <div className="flex items-center gap-4 text-muted-foreground">
                 <span>by {portfolio.creator_name}</span>
@@ -79,16 +113,51 @@ export default function PortfolioDetail() {
             </div>
 
             <div className="flex gap-3">
-              <Button 
-                onClick={() => setShowAllocateModal(true)}
-                disabled={isDisabled}
-                className="glow-primary"
-              >
-                <DollarSign className="h-4 w-4 mr-2" />
-                Invest in Portfolio
-              </Button>
+              {isValidated ? (
+                <Button 
+                  onClick={() => setShowAllocateModal(true)}
+                  disabled={portfolio.status === 'Live (coming soon)'}
+                  className="glow-primary"
+                >
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Invest in Portfolio
+                </Button>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button disabled className="opacity-50 cursor-not-allowed">
+                        <Clock className="h-4 w-4 mr-2" />
+                        In Validation
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <p className="text-sm">
+                        This strategy must complete validation before it can accept investors.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           </div>
+
+          {/* Validation Summary (for validated portfolios) */}
+          {isValidated && portfolio.validation_summary && (
+            <Card className="mb-6 border-success/30 bg-success/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-success/20">
+                    <DollarSign className="h-4 w-4 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-success">Validation Complete</p>
+                    <p className="text-sm text-muted-foreground mt-1">{portfolio.validation_summary}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

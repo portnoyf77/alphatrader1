@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Play, Eye, EyeOff, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Share2, Shield } from 'lucide-react';
+import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Share2, Shield, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { StatusBadge } from '@/components/StatusBadge';
+import { ValidationBadge } from '@/components/ValidationBadge';
 import { formatCurrency, formatPercent, mockPortfolios, mockEarningsHistory, mockInvestorGrowth } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -24,6 +27,12 @@ const creatorRank = 3;
 const totalCreators = 47;
 
 export default function Dashboard() {
+  const [showOnlyValidated, setShowOnlyValidated] = useState(false);
+
+  const filteredPortfolios = showOnlyValidated 
+    ? myPortfolios.filter(p => p.validation_status === 'validated' && p.validation_criteria_met)
+    : myPortfolios;
+
   const totalInvestors = myPortfolios.reduce((acc, p) => acc + p.investors_count, 0);
   const totalAllocated = myPortfolios.reduce((acc, p) => acc + p.allocated_amount, 0);
   const totalCreatorInvestment = myPortfolios.reduce((acc, p) => acc + p.creator_investment, 0);
@@ -34,6 +43,10 @@ export default function Dashboard() {
   const currentEarnings = mockEarningsHistory[mockEarningsHistory.length - 1]?.earnings || 0;
   const growthRate = lastMonthEarnings > 0 ? ((currentEarnings - lastMonthEarnings) / lastMonthEarnings) : 0;
   const projectedNextMonth = Math.round(currentEarnings * (1 + growthRate * 0.5)); // Conservative projection
+
+  const validatedCount = myPortfolios.filter(p => p.validation_status === 'validated').length;
+  const simulatedCount = myPortfolios.filter(p => p.validation_status === 'simulated').length;
+  const inValidationCount = myPortfolios.filter(p => p.validation_status === 'in_validation').length;
 
   return (
     <PageLayout>
@@ -67,6 +80,11 @@ export default function Dashboard() {
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground mb-1">Total Portfolios</p>
               <p className="text-3xl font-bold">{myPortfolios.length}</p>
+              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                <span className="text-success">{validatedCount} validated</span>
+                {simulatedCount > 0 && <span>• {simulatedCount} simulated</span>}
+                {inValidationCount > 0 && <span>• {inValidationCount} validating</span>}
+              </div>
             </CardContent>
           </Card>
           <Card className="glass-card">
@@ -244,15 +262,26 @@ export default function Dashboard() {
           {/* My Portfolios */}
           <div className="lg:col-span-2">
             <Card className="glass-card">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>My Portfolios</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Switch
+                    id="validated-filter"
+                    checked={showOnlyValidated}
+                    onCheckedChange={setShowOnlyValidated}
+                  />
+                  <Label htmlFor="validated-filter" className="text-sm text-muted-foreground cursor-pointer">
+                    Validated only
+                  </Label>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Validation</TableHead>
                       <TableHead className="text-right">30d Return</TableHead>
                       <TableHead className="text-right">Investors</TableHead>
                       <TableHead className="text-right">Your Investment</TableHead>
@@ -260,7 +289,7 @@ export default function Dashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {myPortfolios.map((portfolio) => (
+                    {filteredPortfolios.map((portfolio) => (
                       <TableRow key={portfolio.id}>
                         <TableCell>
                           <Link 
@@ -278,7 +307,7 @@ export default function Dashboard() {
                           </Link>
                         </TableCell>
                         <TableCell>
-                          <StatusBadge status={portfolio.status} />
+                          <ValidationBadge status={portfolio.validation_status} showTooltip={false} />
                         </TableCell>
                         <TableCell className={cn(
                           "text-right font-medium",
@@ -299,6 +328,11 @@ export default function Dashboard() {
                     ))}
                   </TableBody>
                 </Table>
+                {filteredPortfolios.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No validated portfolios yet. Submit your strategies for validation to list them in the marketplace.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -331,7 +365,12 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     {myPortfolios.map((portfolio) => (
                       <div key={portfolio.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
-                        <span className="text-sm truncate max-w-[150px]">{portfolio.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm truncate max-w-[120px]">{portfolio.name}</span>
+                          {portfolio.validation_status === 'validated' && (
+                            <span className="w-2 h-2 rounded-full bg-success" title="Validated" />
+                          )}
+                        </div>
                         <span className="text-sm font-medium text-primary">
                           ${portfolio.creator_est_monthly_earnings.toLocaleString()}
                         </span>

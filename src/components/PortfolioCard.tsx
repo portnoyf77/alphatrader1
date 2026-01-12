@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './StatusBadge';
+import { ValidationBadge } from './ValidationBadge';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';
@@ -9,10 +10,12 @@ import type { Portfolio } from '@/lib/types';
 interface PortfolioCardProps {
   portfolio: Portfolio;
   rank?: number;
+  showValidationBadge?: boolean;
 }
 
-export function PortfolioCard({ portfolio, rank }: PortfolioCardProps) {
+export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: PortfolioCardProps) {
   const isPositive = portfolio.performance.return_30d >= 0;
+  const isValidated = portfolio.validation_status === 'validated' && portfolio.validation_criteria_met;
 
   return (
     <Link to={`/portfolio/${portfolio.id}`}>
@@ -32,7 +35,14 @@ export function PortfolioCard({ portfolio, rank }: PortfolioCardProps) {
                 <p className="text-sm text-muted-foreground">{portfolio.creator_name}</p>
               </div>
             </div>
-            <StatusBadge status={portfolio.status} />
+            {showValidationBadge && isValidated ? (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-success text-xs border border-success/20">
+                <CheckCircle2 className="h-3 w-3" />
+                Validated
+              </div>
+            ) : (
+              <StatusBadge status={portfolio.status} />
+            )}
           </div>
 
           <div className="flex items-center gap-2 mb-4 flex-wrap">
