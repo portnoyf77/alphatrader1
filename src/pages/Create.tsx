@@ -12,8 +12,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
-import { StrategyQuestionnaire } from '@/components/strategy-creation/StrategyQuestionnaire';
-import { GemRefinementAnimation } from '@/components/strategy-creation/GemRefinementAnimation';
+import { ConversationalQA } from '@/components/strategy-creation/ConversationalQA';
+import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
 import { StrategyProfile, initialProfile } from '@/lib/strategyProfile';
 
 interface HoldingRow {
@@ -410,7 +410,7 @@ export default function Create() {
     switch (creationStep) {
       case 'questionnaire':
         return (
-          <StrategyQuestionnaire
+          <ConversationalQA
             onComplete={handleQuestionnaireComplete}
             onCancel={() => navigate(-1)}
           />
@@ -418,7 +418,7 @@ export default function Create() {
       
       case 'animation':
         return (
-          <GemRefinementAnimation
+          <ParticleCrystallizationAnimation
             profile={strategyProfile}
             onComplete={handleAnimationComplete}
           />
