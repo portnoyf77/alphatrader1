@@ -7,7 +7,7 @@ import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
 import Create from "./pages/Create";
 import Simulation from "./pages/Simulation";
-import PortfolioDetail from "./pages/PortfolioDetail";
+import StrategyDetail from "./pages/StrategyDetail";
 import Explore from "./pages/Explore";
 import Leaderboard from "./pages/Leaderboard";
 import Dashboard from "./pages/Dashboard";
@@ -26,7 +26,8 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/create" element={<Create />} />
           <Route path="/simulation/:id" element={<Simulation />} />
-          <Route path="/portfolio/:id" element={<PortfolioDetail />} />
+          <Route path="/strategy/:id" element={<StrategyDetail />} />
+          <Route path="/portfolio/:id" element={<StrategyDetail />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
