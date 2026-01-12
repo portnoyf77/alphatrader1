@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, ChevronDown, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle } from 'lucide-react';
+import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -203,6 +203,208 @@ export default function Create() {
     navigate('/simulation/new');
   };
 
+  // Render results content after animation completes
+  const renderResultsContent = () => (
+    <div className="space-y-6 animate-fade-in">
+      {generatedPortfolio && (
+        <>
+          {/* Portfolio Header */}
+          <Card className="glass-card border-primary/50">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>{generatedPortfolio.name}</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={handleStartOver}>
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Start Over
+                  </Button>
+                  <span className="text-sm font-normal px-3 py-1 rounded-full bg-primary/20 text-primary">
+                    AI Generated
+                  </span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Strategy Breakdown */}
+              <div className="mb-6">
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Info className="h-4 w-4 text-primary" />
+                  Allocation Strategy
+                </h4>
+                <div className="flex gap-1 h-8 rounded-lg overflow-hidden mb-3">
+                  {generatedPortfolio.strategyBreakdown.map((item, idx) => (
+                    <div 
+                      key={item.role}
+                      className="relative flex items-center justify-center text-xs font-medium"
+                      style={{ 
+                        width: `${item.percentage}%`,
+                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
+                                       idx === 1 ? 'hsl(var(--success))' : 
+                                       idx === 2 ? 'hsl(var(--accent))' : 
+                                       idx === 3 ? 'hsl(var(--muted))' : 
+                                       'hsl(var(--warning))',
+                        color: idx === 3 ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))'
+                      }}
+                    >
+                      {item.percentage}%
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3 text-xs">
+                  {generatedPortfolio.strategyBreakdown.map((item, idx) => (
+                    <div key={item.role} className="flex items-center gap-1.5">
+                      <div 
+                        className="w-3 h-3 rounded"
+                        style={{ 
+                          backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
+                                         idx === 1 ? 'hsl(var(--success))' : 
+                                         idx === 2 ? 'hsl(var(--accent))' : 
+                                         idx === 3 ? 'hsl(var(--muted))' : 
+                                         'hsl(var(--warning))'
+                        }}
+                      />
+                      <span className="text-muted-foreground">{item.role}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Holdings with Explanations */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Holdings & Rationale</CardTitle>
+              <p className="text-sm text-muted-foreground">Click on each holding to see why it was selected</p>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {generatedPortfolio.holdings.map((holding) => (
+                  <AccordionItem key={holding.ticker} value={holding.ticker} className="border-border/50">
+                    <AccordionTrigger className="hover:no-underline py-4">
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="flex items-center gap-3">
+                          <div className="text-left">
+                            <span className="font-semibold text-foreground">{holding.ticker}</span>
+                            <span className="text-muted-foreground ml-2 text-sm hidden sm:inline">{holding.name}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`}>
+                            {roleIcons[holding.role]}
+                            {holding.role}
+                          </Badge>
+                          <span className="font-medium text-primary min-w-[3rem] text-right">{holding.weight}%</span>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      <div className="space-y-4 pt-2 pl-2">
+                        <div>
+                          <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
+                            <Sparkles className="h-3.5 w-3.5 text-primary" />
+                            Why {holding.ticker}?
+                          </h5>
+                          <p className="text-sm text-muted-foreground">{holding.explanation}</p>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
+                            <TrendingUp className="h-3.5 w-3.5 text-success" />
+                            How it matches your goals
+                          </h5>
+                          <p className="text-sm text-muted-foreground">{holding.alignment}</p>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-sm mb-2">Key Characteristics</h5>
+                          <div className="flex flex-wrap gap-2">
+                            {holding.characteristics.map((char, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {char}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
+                            <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+                            Trade-off to Consider
+                          </h5>
+                          <p className="text-sm text-muted-foreground">{holding.tradeoff}</p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+
+          {/* Excluded Holdings */}
+          {generatedPortfolio.excluded.length > 0 && (
+            <Card className="glass-card border-warning/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  Why Not These Funds?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {generatedPortfolio.excluded.map((item) => (
+                    <div key={item.ticker} className="flex items-start gap-3 text-sm">
+                      <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shrink-0">
+                        {item.ticker}
+                      </Badge>
+                      <span className="text-muted-foreground">{item.reason}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Overall Strategy Rationale */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-lg">Strategy Rationale</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p>
+            </CardContent>
+          </Card>
+
+          {/* Key Risks */}
+          <Card className="glass-card border-destructive/30">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Key Risks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{generatedPortfolio.risks}</p>
+            </CardContent>
+          </Card>
+
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={handleSave} className="flex-1">
+              <Save className="h-4 w-4 mr-2" />
+              Save Draft
+            </Button>
+            <Button onClick={handleRunSimulation} className="flex-1 glow-primary">
+              Run Simulation
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            💡 Recommended: Simulation helps you understand risk before allocating real money.
+          </p>
+        </>
+      )}
+    </div>
+  );
+
   // Render GenAI tab content based on step
   const renderGenAIContent = () => {
     switch (creationStep) {
@@ -227,234 +429,33 @@ export default function Create() {
     }
   };
 
-  const renderResultsContent = () => (
-    <div className="space-y-6 animate-fade-in">
+  return (
+    <PageLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Create Strategy</h1>
+            <p className="text-muted-foreground">
+              Build your investment strategy with AI assistance or manually configure holdings.
+            </p>
+          </div>
 
-              {/* Generated Output */}
-              {generatedPortfolio && (
-                <div className="space-y-6 animate-fade-in">
-                  {/* Portfolio Header */}
-                  <Card className="glass-card border-primary/50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>{generatedPortfolio.name}</span>
-                        <span className="text-sm font-normal px-3 py-1 rounded-full bg-primary/20 text-primary">
-                          AI Generated
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {/* Keywords detected */}
-                      <div className="mb-4">
-                        <span className="text-sm text-muted-foreground">Keywords detected from your prompt:</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {generatedPortfolio.promptKeywords.map((keyword) => (
-                            <Badge key={keyword} variant="secondary" className="capitalize">
-                              {keyword}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="genai" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI-Assisted
+              </TabsTrigger>
+              <TabsTrigger value="manual" className="flex items-center gap-2">
+                <Wrench className="h-4 w-4" />
+                Manual
+              </TabsTrigger>
+            </TabsList>
 
-                      {/* Strategy Breakdown */}
-                      <div className="mb-6">
-                        <h4 className="font-medium mb-3 flex items-center gap-2">
-                          <Info className="h-4 w-4 text-primary" />
-                          Allocation Strategy
-                        </h4>
-                        <div className="flex gap-1 h-8 rounded-lg overflow-hidden mb-3">
-                          {generatedPortfolio.strategyBreakdown.map((item, idx) => (
-                            <div 
-                              key={item.role}
-                              className="relative flex items-center justify-center text-xs font-medium"
-                              style={{ 
-                                width: `${item.percentage}%`,
-                                backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
-                                               idx === 1 ? 'hsl(var(--success))' : 
-                                               idx === 2 ? 'hsl(var(--accent))' : 
-                                               idx === 3 ? 'hsl(var(--muted))' : 
-                                               'hsl(var(--warning))',
-                                color: idx === 3 ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))'
-                              }}
-                            >
-                              {item.percentage}%
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex flex-wrap gap-3 text-xs">
-                          {generatedPortfolio.strategyBreakdown.map((item, idx) => (
-                            <div key={item.role} className="flex items-center gap-1.5">
-                              <div 
-                                className="w-3 h-3 rounded"
-                                style={{ 
-                                  backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
-                                                 idx === 1 ? 'hsl(var(--success))' : 
-                                                 idx === 2 ? 'hsl(var(--accent))' : 
-                                                 idx === 3 ? 'hsl(var(--muted))' : 
-                                                 'hsl(var(--warning))'
-                                }}
-                              />
-                              <span className="text-muted-foreground">{item.role}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Holdings with Explanations */}
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Holdings & Rationale</CardTitle>
-                      <p className="text-sm text-muted-foreground">Click on each holding to see why it was selected</p>
-                    </CardHeader>
-                    <CardContent>
-                      <Accordion type="single" collapsible className="w-full">
-                        {generatedPortfolio.holdings.map((holding) => (
-                          <AccordionItem key={holding.ticker} value={holding.ticker} className="border-border/50">
-                            <AccordionTrigger className="hover:no-underline py-4">
-                              <div className="flex items-center justify-between w-full pr-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="text-left">
-                                    <span className="font-semibold text-foreground">{holding.ticker}</span>
-                                    <span className="text-muted-foreground ml-2 text-sm hidden sm:inline">{holding.name}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`}>
-                                    {roleIcons[holding.role]}
-                                    {holding.role}
-                                  </Badge>
-                                  <span className="font-medium text-primary min-w-[3rem] text-right">{holding.weight}%</span>
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-4">
-                              <div className="space-y-4 pt-2 pl-2">
-                                {/* Why this fund */}
-                                <div>
-                                  <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
-                                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                                    Why {holding.ticker}?
-                                  </h5>
-                                  <p className="text-sm text-muted-foreground">{holding.explanation}</p>
-                                </div>
-
-                                {/* Alignment with goals */}
-                                <div>
-                                  <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
-                                    <TrendingUp className="h-3.5 w-3.5 text-success" />
-                                    How it matches your goals
-                                  </h5>
-                                  <p className="text-sm text-muted-foreground">{holding.alignment}</p>
-                                </div>
-
-                                {/* Key characteristics */}
-                                <div>
-                                  <h5 className="font-medium text-sm mb-2">Key Characteristics</h5>
-                                  <div className="flex flex-wrap gap-2">
-                                    {holding.characteristics.map((char, idx) => (
-                                      <Badge key={idx} variant="secondary" className="text-xs">
-                                        {char}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Trade-off */}
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                  <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
-                                    <AlertTriangle className="h-3.5 w-3.5 text-warning" />
-                                    Trade-off to Consider
-                                  </h5>
-                                  <p className="text-sm text-muted-foreground">{holding.tradeoff}</p>
-                                </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </CardContent>
-                  </Card>
-
-                  {/* Excluded Holdings */}
-                  {generatedPortfolio.excluded.length > 0 && (
-                    <Card className="glass-card border-warning/30">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <AlertTriangle className="h-4 w-4 text-warning" />
-                          Why Not These Funds?
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {generatedPortfolio.excluded.map((item) => (
-                            <div key={item.ticker} className="flex items-start gap-3 text-sm">
-                              <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shrink-0">
-                                {item.ticker}
-                              </Badge>
-                              <span className="text-muted-foreground">{item.reason}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Overall Strategy Rationale */}
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Strategy Rationale</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="prose prose-sm prose-invert max-w-none">
-                        {generatedPortfolio.rationale.split('\n').map((line, idx) => (
-                          <p key={idx} className="text-sm text-muted-foreground whitespace-pre-wrap">
-                            {line.replace(/\*\*(.*?)\*\*/g, (_, text) => text)}
-                          </p>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Key Risks */}
-                  <Card className="glass-card border-destructive/30">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-destructive" />
-                        Key Risks
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="prose prose-sm prose-invert max-w-none">
-                        {generatedPortfolio.risks.split('\n').map((line, idx) => (
-                          <p key={idx} className="text-sm text-muted-foreground whitespace-pre-wrap">
-                            {line.replace(/\*\*(.*?)\*\*/g, (_, text) => text)}
-                          </p>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <div className="flex gap-4">
-                    <Button variant="outline" onClick={handleSave} className="flex-1">
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Draft
-                    </Button>
-                    <Button onClick={handleRunSimulation} className="flex-1 glow-primary">
-                      Run Simulation
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    💡 Recommended: Simulation helps you understand risk before allocating real money.
-                  </p>
-                </div>
-              )}
+            <TabsContent value="genai" className="space-y-6">
+              {renderGenAIContent()}
             </TabsContent>
 
-            {/* Manual Tab */}
             <TabsContent value="manual" className="space-y-6">
               <Card className="glass-card">
                 <CardHeader>
