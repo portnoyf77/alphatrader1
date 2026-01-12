@@ -161,51 +161,88 @@ export default function PortfolioDetail() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="glass-card">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">30d Return</p>
-                <p className={cn(
-                  "text-2xl font-bold flex items-center gap-1",
-                  portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive"
-                )}>
-                  {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-                  {formatPercent(portfolio.performance.return_30d)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">Investors</p>
-                <p className="text-2xl font-bold flex items-center gap-2">
-                  <Users className="h-5 w-5 text-muted-foreground" />
-                  {portfolio.investors_count.toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="glass-card bg-success/5 border-success/30">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">Creator Invested</p>
-                <p className="text-2xl font-bold text-success">
-                  {formatCurrency(portfolio.creator_investment)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">Allocated</p>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(portfolio.allocated_amount)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">Consistency</p>
-                <p className="text-2xl font-bold">
-                  {portfolio.performance.consistency_score}/100
-                </p>
-              </CardContent>
-            </Card>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="glass-card cursor-help">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-1">30d Return</p>
+                      <p className={cn(
+                        "text-2xl font-bold flex items-center gap-1",
+                        portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive"
+                      )}>
+                        {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                        {formatPercent(portfolio.performance.return_30d)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Portfolio return over the last 30 calendar days
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="glass-card cursor-help">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Investors</p>
+                      <p className="text-2xl font-bold flex items-center gap-2">
+                        <Users className="h-5 w-5 text-muted-foreground" />
+                        {portfolio.investors_count.toLocaleString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Number of investors currently following this portfolio
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="glass-card bg-success/5 border-success/30 cursor-help">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Creator Invested</p>
+                      <p className="text-2xl font-bold text-success">
+                        {formatCurrency(portfolio.creator_investment)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Amount the creator has invested in their own portfolio ("skin in the game")
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="glass-card cursor-help">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Allocated</p>
+                      <p className="text-2xl font-bold">
+                        {formatCurrency(portfolio.allocated_amount)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Total capital allocated by all investors to this portfolio
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="glass-card cursor-help">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Consistency</p>
+                      <p className="text-2xl font-bold">
+                        {portfolio.performance.consistency_score}/100
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Score measuring how consistently the portfolio performs relative to benchmarks (higher is better)
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Tabs */}

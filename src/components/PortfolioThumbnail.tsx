@@ -2,6 +2,7 @@ import { Laptop, Heart, Globe, Zap, Shield, DollarSign, Gem, BarChart3, Leaf, Tr
 import { cn } from '@/lib/utils';
 import { RiskLevel, GeoFocus } from '@/lib/types';
 import { getRiskGradient, getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PortfolioThumbnailProps {
   sectors: string[];
@@ -50,11 +51,19 @@ const geoLabels: Record<GeoFocus, { label: string; flag: string }> = {
   'International': { label: 'INT', flag: '🌐' },
 };
 
-// Risk colors
-const riskColors: Record<RiskLevel, string> = {
-  'Low': 'text-cyan-400',
-  'Medium': 'text-violet-400',
-  'High': 'text-orange-400',
+// Risk config with tooltips
+const riskConfig: Record<RiskLevel, { color: string; tooltip: string }> = {
+  'Low': { color: 'text-cyan-400', tooltip: 'Low Risk - Conservative strategy with focus on capital preservation' },
+  'Medium': { color: 'text-violet-400', tooltip: 'Medium Risk - Balanced approach between growth and stability' },
+  'High': { color: 'text-orange-400', tooltip: 'High Risk - Aggressive growth strategy with higher volatility' },
+};
+
+// Geo tooltips
+const geoTooltips: Record<GeoFocus, string> = {
+  'US': 'Focused on United States markets',
+  'Global': 'Diversified across global markets',
+  'Emerging Markets': 'Focused on emerging market economies',
+  'International': 'International developed markets excluding US',
 };
 
 const sizeClasses = {
@@ -85,44 +94,68 @@ export function PortfolioThumbnail({
   const displayGemstone = gemstone || (sectors[0] ? getGemstoneForSector(sectors[0]) : 'Quartz');
   const gemstoneColors = getGemstoneColor(displayGemstone);
 
-  return (
-    <div
-      className={cn(
-        'relative rounded-xl overflow-hidden border flex flex-col',
-        `bg-gradient-to-br ${gradient}`,
-        gemstoneColors.border,
-        sizeClasses[size],
-        className
-      )}
-    >
-      {/* Sector icons centered */}
-      <div className="flex-1 flex items-center justify-center gap-0.5 p-1.5">
-        {displaySectors.slice(0, 2).map((sector, idx) => {
-          const Icon = sectorIcons[sector] || BarChart3;
-          return (
-            <div
-              key={idx}
-              className={cn(
-                'p-1 rounded backdrop-blur-sm',
-                gemstoneColors.bg
-              )}
-            >
-              <Icon className={cn(iconSizes[size], gemstoneColors.text)} />
-            </div>
-          );
-        })}
-      </div>
+  const riskInfo = riskConfig[riskLevel];
 
-      {/* Bottom bar with geo and risk indicator */}
-      <div className="bg-background/90 backdrop-blur-sm px-1.5 py-0.5 flex items-center justify-between">
-        <span className="flex items-center gap-0.5 text-[8px]">
-          <span>{geoInfo.flag}</span>
-          <span className="text-muted-foreground">{geoInfo.label}</span>
-        </span>
-        <span className={cn('text-[8px] font-medium', riskColors[riskLevel])}>
-          {riskLevel[0]}
-        </span>
+  return (
+    <TooltipProvider delayDuration={200}>
+      <div
+        className={cn(
+          'relative rounded-xl overflow-hidden border flex flex-col',
+          `bg-gradient-to-br ${gradient}`,
+          gemstoneColors.border,
+          sizeClasses[size],
+          className
+        )}
+      >
+        {/* Sector icons centered */}
+        <div className="flex-1 flex items-center justify-center gap-0.5 p-1.5">
+          {displaySectors.slice(0, 2).map((sector, idx) => {
+            const Icon = sectorIcons[sector] || BarChart3;
+            return (
+              <Tooltip key={idx}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      'p-1 rounded backdrop-blur-sm cursor-help',
+                      gemstoneColors.bg
+                    )}
+                  >
+                    <Icon className={cn(iconSizes[size], gemstoneColors.text)} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  {sector}
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+
+        {/* Bottom bar with geo and risk indicator */}
+        <div className="bg-background/90 backdrop-blur-sm px-1.5 py-0.5 flex items-center justify-between">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-0.5 text-[8px] cursor-help">
+                <span>{geoInfo.flag}</span>
+                <span className="text-muted-foreground">{geoInfo.label}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {geoTooltips[geoFocus]}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className={cn('text-[8px] font-medium cursor-help', riskInfo.color)}>
+                {riskLevel[0]}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {riskInfo.tooltip}
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
