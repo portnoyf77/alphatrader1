@@ -59,10 +59,6 @@ export default function Landing() {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold gradient-text">{mockPortfolios.length}+</p>
-              <p className="text-muted-foreground mt-1">Portfolios Created</p>
-            </div>
-            <div className="text-center">
               <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
               <p className="text-muted-foreground mt-1">Capital Allocated</p>
             </div>
@@ -72,7 +68,7 @@ export default function Landing() {
             </div>
             <div className="text-center">
               <p className="text-3xl md:text-4xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
-              <p className="text-muted-foreground mt-1">Creator Investments</p>
+              <p className="text-muted-foreground mt-1">Creator Skin in Game</p>
             </div>
             <div className="text-center">
               <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
