@@ -84,20 +84,50 @@ export default function Leaderboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as LeaderboardTab)}>
-          <TabsList className="bg-secondary mb-6 flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="risk-adjusted" className="flex-1 sm:flex-none">
-              Risk-Adjusted
-            </TabsTrigger>
-            <TabsTrigger value="consistent" className="flex-1 sm:flex-none">
-              Most Consistent
-            </TabsTrigger>
-            <TabsTrigger value="best-30d" className="flex-1 sm:flex-none">
-              Best 30-Day
-            </TabsTrigger>
-            <TabsTrigger value="lowest-drawdown" className="flex-1 sm:flex-none">
-              Lowest Drawdown
-            </TabsTrigger>
-          </TabsList>
+          <TooltipProvider delayDuration={200}>
+            <TabsList className="bg-secondary mb-6 flex-wrap h-auto gap-1 p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="risk-adjusted" className="flex-1 sm:flex-none">
+                    Risk-Adjusted
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Return divided by volatility - higher is better
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="consistent" className="flex-1 sm:flex-none">
+                    Most Consistent
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Portfolios with the most stable, predictable returns
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="best-30d" className="flex-1 sm:flex-none">
+                    Best 30-Day
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Highest absolute returns in the last 30 days
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="lowest-drawdown" className="flex-1 sm:flex-none">
+                    Lowest Drawdown
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Smallest peak-to-trough decline - more capital preservation
+                </TooltipContent>
+              </Tooltip>
+            </TabsList>
+          </TooltipProvider>
 
           <p className="text-sm text-muted-foreground mb-6">
             {tabDescriptions[activeTab]}

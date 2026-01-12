@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign } from 'lucide-react';
+import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CreatorSpotlight } from '@/components/CreatorSpotlight';
 import { HowCreatorsEarn } from '@/components/HowCreatorsEarn';
 import { CreatorEarningsCalculator } from '@/components/CreatorEarningsCalculator';
 import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Landing() {
   const totalAllocated = mockPortfolios.reduce((acc, p) => acc + p.allocated_amount, 0);
@@ -57,24 +58,54 @@ export default function Landing() {
       {/* Stats Section - Enhanced with creator earnings */}
       <section className="border-y border-border/50 bg-card/50">
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
-              <p className="text-muted-foreground mt-1">Capital Allocated</p>
+          <TooltipProvider delayDuration={200}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-center cursor-help">
+                    <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
+                    <p className="text-muted-foreground mt-1">Capital Allocated</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Total capital allocated by investors across all portfolios on the platform
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-center cursor-help">
+                    <p className="text-3xl md:text-4xl font-bold gradient-text">{totalInvestors.toLocaleString()}</p>
+                    <p className="text-muted-foreground mt-1">Active Investors</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Number of unique investors currently following portfolios
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-center cursor-help">
+                    <p className="text-3xl md:text-4xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
+                    <p className="text-muted-foreground mt-1">Creator Skin in Game</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Total amount creators have invested in their own portfolios, aligning their interests with followers
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-center cursor-help">
+                    <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
+                    <p className="text-muted-foreground mt-1">Creator Earnings (30d)</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Total earnings paid to creators from management fees in the last 30 days
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold gradient-text">{totalInvestors.toLocaleString()}</p>
-              <p className="text-muted-foreground mt-1">Active Investors</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
-              <p className="text-muted-foreground mt-1">Creator Skin in Game</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
-              <p className="text-muted-foreground mt-1">Creator Earnings (30d)</p>
-            </div>
-          </div>
+          </TooltipProvider>
         </div>
       </section>
 

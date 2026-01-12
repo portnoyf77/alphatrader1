@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './StatusBadge';
 import { ValidationBadge } from './ValidationBadge';
 import { PortfolioThumbnail } from './PortfolioThumbnail';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
 import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
@@ -55,53 +56,101 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
             )}
           </div>
 
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground">
-              {portfolio.strategy_type === 'GenAI' ? (
-                <Sparkles className="h-3 w-3" />
-              ) : (
-                <Wrench className="h-3 w-3" />
-              )}
-              {portfolio.strategy_type}
-            </span>
-            <span className="px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground">
-              {portfolio.objective}
-            </span>
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20">
-              <Shield className="h-3 w-3" />
-              Creator invested
-            </span>
-          </div>
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
+                    {portfolio.strategy_type === 'GenAI' ? (
+                      <Sparkles className="h-3 w-3" />
+                    ) : (
+                      <Wrench className="h-3 w-3" />
+                    )}
+                    {portfolio.strategy_type}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  {portfolio.strategy_type === 'GenAI' 
+                    ? 'Portfolio created using AI-powered optimization' 
+                    : 'Portfolio manually constructed by creator'}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
+                    {portfolio.objective}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Primary investment objective
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20 cursor-help">
+                    <Shield className="h-3 w-3" />
+                    Creator invested
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Creator has {formatCurrency(portfolio.creator_investment)} of their own capital invested
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">30d Return</p>
-              <div className={cn(
-                "flex items-center gap-1 font-semibold",
-                isPositive ? "text-success" : "text-destructive"
-              )}>
-                {isPositive ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                {formatPercent(portfolio.performance.return_30d)}
-              </div>
+          <TooltipProvider delayDuration={200}>
+            <div className="grid grid-cols-3 gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help">
+                    <p className="text-xs text-muted-foreground mb-1">30d Return</p>
+                    <div className={cn(
+                      "flex items-center gap-1 font-semibold",
+                      isPositive ? "text-success" : "text-destructive"
+                    )}>
+                      {isPositive ? (
+                        <TrendingUp className="h-4 w-4" />
+                      ) : (
+                        <TrendingDown className="h-4 w-4" />
+                      )}
+                      {formatPercent(portfolio.performance.return_30d)}
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Portfolio return over the last 30 days
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help">
+                    <p className="text-xs text-muted-foreground mb-1">Max Drawdown</p>
+                    <p className="font-semibold text-destructive">
+                      {formatPercent(portfolio.performance.max_drawdown, false)}
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  Largest peak-to-trough decline - indicates potential loss during downturns
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help">
+                    <p className="text-xs text-muted-foreground mb-1">Investors</p>
+                    <div className="flex items-center gap-1 font-semibold">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      {portfolio.investors_count.toLocaleString()}
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  Number of investors following this portfolio
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Max Drawdown</p>
-              <p className="font-semibold text-destructive">
-                {formatPercent(portfolio.performance.max_drawdown, false)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Investors</p>
-              <div className="flex items-center gap-1 font-semibold">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                {portfolio.investors_count.toLocaleString()}
-              </div>
-            </div>
-          </div>
+          </TooltipProvider>
 
           <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex items-center justify-between text-sm">
