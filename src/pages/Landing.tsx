@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, HelpCircle } from 'lucide-react';
+import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, Lock, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CreatorSpotlight } from '@/components/CreatorSpotlight';
 import { HowCreatorsEarn } from '@/components/HowCreatorsEarn';
 import { CreatorEarningsCalculator } from '@/components/CreatorEarningsCalculator';
-import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
+import { mockStrategies, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Landing() {
-  const totalAllocated = mockPortfolios.reduce((acc, p) => acc + p.allocated_amount, 0);
-  const totalInvestors = mockPortfolios.reduce((acc, p) => acc + p.investors_count, 0);
-  const totalCreatorInvestment = mockPortfolios.reduce((acc, p) => acc + p.creator_investment, 0);
+  const validatedStrategies = mockStrategies.filter(s => s.status === 'validated_listed');
+  const totalAllocated = validatedStrategies.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
+  const totalFollowers = validatedStrategies.reduce((acc, s) => acc + s.followers_count, 0);
+  const totalCreatorInvestment = validatedStrategies.reduce((acc, s) => acc + s.creator_investment, 0);
   return (
     <PageLayout showDisclaimer={false}>
       {/* Hero Section */}
@@ -74,8 +76,8 @@ export default function Landing() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-center cursor-help">
-                    <p className="text-3xl md:text-4xl font-bold gradient-text">{totalInvestors.toLocaleString()}</p>
-                    <p className="text-muted-foreground mt-1">Active Investors</p>
+                    <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
+                    <p className="text-muted-foreground mt-1">Active Followers</p>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[200px]">
@@ -173,7 +175,7 @@ export default function Landing() {
       </section>
 
       {/* Creator Spotlight Section */}
-      <CreatorSpotlight portfolios={mockPortfolios} />
+      <CreatorSpotlight strategies={validatedStrategies} />
 
       {/* How Creators Earn Section */}
       <HowCreatorsEarn />
