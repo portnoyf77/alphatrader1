@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Wrench, Plus, Trash2, Loader2, ArrowRight, Save, ChevronDown, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle } from 'lucide-react';
+import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, ChevronDown, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,6 +12,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
+import { StrategyQuestionnaire } from '@/components/strategy-creation/StrategyQuestionnaire';
+import { GemRefinementAnimation } from '@/components/strategy-creation/GemRefinementAnimation';
+import { StrategyProfile, initialProfile } from '@/lib/strategyProfile';
 
 interface HoldingRow {
   id: string;
@@ -37,68 +39,62 @@ interface ExcludedHolding {
   reason: string;
 }
 
-const portfolioNames = [
-  'Harborline Growth', 'Cedar Peak Balanced', 'Apex Momentum', 'Evergreen Value',
-  'Summit Capital', 'Ridgeline Income', 'Horizon Alpha', 'Cascade Diversified'
-];
-
 const enhancedGeneratedHoldings: GeneratedHolding[] = [
   { 
     ticker: 'VTI', 
     name: 'Vanguard Total Stock Market ETF', 
     weight: 35,
     role: 'Core',
-    explanation: 'VTI provides comprehensive exposure to the entire U.S. stock market, including large, mid, and small-cap stocks. With over 3,500 holdings, it offers instant diversification across all sectors of the American economy.',
+    explanation: 'VTI provides comprehensive exposure to the entire U.S. stock market, including large, mid, and small-cap stocks.',
     alignment: 'Matches your growth objective while providing the broad diversification needed for medium-risk tolerance.',
-    characteristics: ['Ultra-low 0.03% expense ratio', 'High liquidity with $1T+ AUM', 'Covers 3,500+ U.S. stocks', 'Market-cap weighted'],
-    tradeoff: 'Lower potential upside than concentrated sector bets, but significantly reduces single-stock risk and provides steady long-term growth.'
+    characteristics: ['Ultra-low 0.03% expense ratio', 'High liquidity with $1T+ AUM', 'Covers 3,500+ U.S. stocks'],
+    tradeoff: 'Lower potential upside than concentrated sector bets, but significantly reduces single-stock risk.'
   },
   { 
     ticker: 'VXUS', 
     name: 'Vanguard Total Intl Stock ETF', 
     weight: 20,
     role: 'International',
-    explanation: 'VXUS delivers exposure to developed and emerging markets outside the U.S., covering over 7,800 stocks across Europe, Asia, and beyond. This geographic diversification reduces dependence on U.S. market performance.',
+    explanation: 'VXUS delivers exposure to developed and emerging markets outside the U.S.',
     alignment: 'Directly addresses your request for international exposure while maintaining a growth orientation.',
-    characteristics: ['0.07% expense ratio', '7,800+ international stocks', 'Covers 40+ countries', 'Includes emerging markets'],
-    tradeoff: 'Introduces currency risk and exposure to potentially less stable economies, but provides valuable diversification when U.S. markets underperform.'
+    characteristics: ['0.07% expense ratio', '7,800+ international stocks', 'Covers 40+ countries'],
+    tradeoff: 'Introduces currency risk but provides valuable diversification when U.S. markets underperform.'
   },
   { 
     ticker: 'QQQ', 
     name: 'Invesco QQQ Trust', 
     weight: 20,
     role: 'Growth',
-    explanation: 'QQQ tracks the Nasdaq-100 Index, providing concentrated exposure to the largest non-financial companies listed on the Nasdaq. This includes tech giants like Apple, Microsoft, and NVIDIA, positioning the portfolio for technology-driven growth.',
+    explanation: 'QQQ tracks the Nasdaq-100 Index, providing concentrated exposure to tech giants.',
     alignment: 'Fulfills your tech sector focus requirement with exposure to market-leading innovation companies.',
-    characteristics: ['Heavy tech concentration (50%+)', 'Top 100 Nasdaq companies', 'Strong historical performance', '0.20% expense ratio'],
-    tradeoff: 'Higher volatility than broad market ETFs. May experience larger drawdowns during tech corrections, but historically delivers outsized returns during bull markets.'
+    characteristics: ['Heavy tech concentration (50%+)', 'Top 100 Nasdaq companies', 'Strong historical performance'],
+    tradeoff: 'Higher volatility than broad market ETFs but historically delivers outsized returns during bull markets.'
   },
   { 
     ticker: 'BND', 
     name: 'Vanguard Total Bond Market ETF', 
     weight: 15,
     role: 'Stability',
-    explanation: 'BND provides exposure to the entire U.S. investment-grade bond market, including government, corporate, and mortgage-backed securities. It acts as a portfolio stabilizer, typically moving inversely to stocks during market stress.',
+    explanation: 'BND provides exposure to the entire U.S. investment-grade bond market.',
     alignment: 'Addresses your medium-risk tolerance by adding a buffer against equity volatility.',
-    characteristics: ['0.03% expense ratio', '10,000+ bond holdings', 'Investment-grade focus', 'Duration ~6.5 years'],
-    tradeoff: 'Lower returns than equities over long periods and sensitivity to rising interest rates, but provides crucial downside protection during market crashes.'
+    characteristics: ['0.03% expense ratio', '10,000+ bond holdings', 'Investment-grade focus'],
+    tradeoff: 'Lower returns than equities but provides crucial downside protection during market crashes.'
   },
   { 
     ticker: 'GLD', 
     name: 'SPDR Gold Shares', 
     weight: 10,
     role: 'Hedge',
-    explanation: 'GLD tracks the price of physical gold bullion, serving as an inflation hedge and safe-haven asset. Gold often appreciates during periods of economic uncertainty, currency devaluation, or geopolitical instability.',
-    alignment: 'Provides portfolio insurance against inflation and economic uncertainty, supporting your medium-risk strategy.',
-    characteristics: ['Physical gold backing', 'High liquidity', 'Inflation protection', 'Currency hedge'],
-    tradeoff: 'No dividend income and can underperform during strong economic growth, but provides valuable protection during crises and inflationary periods.'
+    explanation: 'GLD tracks the price of physical gold bullion, serving as an inflation hedge.',
+    alignment: 'Provides portfolio insurance against inflation and economic uncertainty.',
+    characteristics: ['Physical gold backing', 'High liquidity', 'Inflation protection'],
+    tradeoff: 'No dividend income but provides valuable protection during crises and inflationary periods.'
   },
 ];
 
 const excludedHoldings: ExcludedHolding[] = [
   { ticker: 'XLE', name: 'Energy Select Sector SPDR', reason: 'Excluded per your fossil fuel avoidance preference' },
   { ticker: 'VDE', name: 'Vanguard Energy ETF', reason: 'Excluded per your fossil fuel avoidance preference' },
-  { ticker: 'XLF', name: 'Financial Select Sector SPDR', reason: 'Sector concentration not aligned with diversification goal' },
 ];
 
 const roleColors: Record<GeneratedHolding['role'], string> = {
@@ -117,14 +113,17 @@ const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
   International: <Globe className="h-3 w-3" />,
 };
 
+type CreationStep = 'questionnaire' | 'animation' | 'results';
+
 export default function Create() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('genai');
   
-  // GenAI state
-  const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  // GenAI state - new questionnaire flow
+  const [creationStep, setCreationStep] = useState<CreationStep>('questionnaire');
+  const [strategyProfile, setStrategyProfile] = useState<StrategyProfile>(initialProfile);
+  const [generatedStrategyName, setGeneratedStrategyName] = useState<string>('');
   const [generatedPortfolio, setGeneratedPortfolio] = useState<{
     name: string;
     holdings: GeneratedHolding[];
@@ -132,7 +131,6 @@ export default function Create() {
     strategyBreakdown: { role: string; percentage: number }[];
     rationale: string;
     risks: string;
-    promptKeywords: string[];
   } | null>(null);
 
   // Manual state
@@ -142,24 +140,19 @@ export default function Create() {
   const [manualObjective, setManualObjective] = useState('');
   const [manualRisk, setManualRisk] = useState('');
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+  const handleQuestionnaireComplete = (profile: StrategyProfile) => {
+    setStrategyProfile(profile);
+    setCreationStep('animation');
+  };
+
+  const handleAnimationComplete = (strategyName: string) => {
+    setGeneratedStrategyName(strategyName);
     
-    setIsGenerating(true);
-    
-    // Simulate AI generation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const randomName = portfolioNames[Math.floor(Math.random() * portfolioNames.length)];
-    
-    // Extract keywords from prompt (simplified simulation)
-    const keywords = prompt.toLowerCase().match(/growth|risk|tech|international|avoid|fossil|healthcare|balanced/g) || [];
-    const uniqueKeywords = [...new Set(keywords)];
-    
+    // Generate portfolio based on profile
     setGeneratedPortfolio({
-      name: randomName,
+      name: strategyName,
       holdings: enhancedGeneratedHoldings,
-      excluded: excludedHoldings,
+      excluded: strategyProfile.restrictions.includes('fossil-fuels') ? excludedHoldings : [],
       strategyBreakdown: [
         { role: 'Core Equity', percentage: 35 },
         { role: 'Growth Accelerator', percentage: 20 },
@@ -167,12 +160,18 @@ export default function Create() {
         { role: 'Stability Buffer', percentage: 15 },
         { role: 'Inflation Hedge', percentage: 10 },
       ],
-      rationale: `Based on your request for "${prompt.slice(0, 80)}${prompt.length > 80 ? '...' : ''}", this portfolio is structured around a **core-satellite approach**:\n\n• **Core (35%)**: VTI provides stable, broad market exposure as the portfolio foundation\n• **Growth Satellite (20%)**: QQQ adds tech-focused alpha generation potential\n• **International Satellite (20%)**: VXUS reduces U.S. concentration risk\n• **Defensive Layer (25%)**: BND and GLD provide downside protection and inflation hedging\n\nThis allocation targets long-term wealth accumulation while maintaining the risk guardrails appropriate for your medium-risk tolerance.`,
-      risks: 'This portfolio carries **moderate equity risk** with the following key exposures:\n\n• **Technology Concentration**: 20% in QQQ amplifies sensitivity to tech sector corrections\n• **Currency Risk**: International holdings (VXUS) introduce foreign exchange volatility\n• **Interest Rate Sensitivity**: Bond holdings (BND) may decline when rates rise\n• **Commodity Volatility**: Gold (GLD) can experience significant price swings',
-      promptKeywords: uniqueKeywords.length > 0 ? uniqueKeywords : ['growth', 'diversified'],
+      rationale: `Based on your ${strategyProfile.primaryGoal} goal with a ${strategyProfile.timeline}-year timeline, this portfolio is structured around a core-satellite approach optimized for your ${strategyProfile.riskStatement === 'maximum-growth' ? 'aggressive' : strategyProfile.riskStatement === 'protect' ? 'conservative' : 'balanced'} risk profile.`,
+      risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
     });
     
-    setIsGenerating(false);
+    setCreationStep('results');
+  };
+
+  const handleStartOver = () => {
+    setCreationStep('questionnaire');
+    setStrategyProfile(initialProfile);
+    setGeneratedPortfolio(null);
+    setGeneratedStrategyName('');
   };
 
   const addManualRow = () => {
@@ -204,68 +203,32 @@ export default function Create() {
     navigate('/simulation/new');
   };
 
-  return (
-    <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
-            <p className="text-muted-foreground">
-              Build a new portfolio using AI assistance or manual selection.
-            </p>
-          </div>
+  // Render GenAI tab content based on step
+  const renderGenAIContent = () => {
+    switch (creationStep) {
+      case 'questionnaire':
+        return (
+          <StrategyQuestionnaire
+            onComplete={handleQuestionnaireComplete}
+            onCancel={() => navigate(-1)}
+          />
+        );
+      
+      case 'animation':
+        return (
+          <GemRefinementAnimation
+            profile={strategyProfile}
+            onComplete={handleAnimationComplete}
+          />
+        );
+      
+      case 'results':
+        return renderResultsContent();
+    }
+  };
 
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="genai" className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                GenAI
-              </TabsTrigger>
-              <TabsTrigger value="manual" className="gap-2">
-                <Wrench className="h-4 w-4" />
-                Manual
-              </TabsTrigger>
-            </TabsList>
-
-            {/* GenAI Tab */}
-            <TabsContent value="genai" className="space-y-6">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Describe Your Investment Goals
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="prompt">What do you want your portfolio to achieve?</Label>
-                    <Textarea
-                      id="prompt"
-                      placeholder="e.g., Growth portfolio, medium risk, avoid fossil fuels, include some international exposure. Focus on tech and healthcare sectors."
-                      className="mt-2 min-h-[120px] bg-secondary"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleGenerate} 
-                    disabled={!prompt.trim() || isGenerating}
-                    className="w-full"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating portfolio...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Generate Portfolio
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+  const renderResultsContent = () => (
+    <div className="space-y-6 animate-fade-in">
 
               {/* Generated Output */}
               {generatedPortfolio && (
