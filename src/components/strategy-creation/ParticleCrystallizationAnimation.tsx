@@ -5,7 +5,6 @@ import {
   deriveRiskLevel,
   deriveGemstone,
   generateStrategyNumber,
-  gemstoneColors,
 } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
 
@@ -25,13 +24,21 @@ const PHASE_TIMINGS = {
 };
 
 const PROGRESS_MESSAGES = [
-  'Analyzing your investment profile...',
-  'Matching optimal asset allocations...',
-  'Calculating risk-adjusted portfolios...',
-  'Crystallizing your strategy...',
+  'Entering the Upside Down...',
+  'Channeling supernatural forces...',
+  'Crystallizing from the void...',
+  'Your strategy emerges...',
 ];
 
 const PARTICLE_COUNT = 120;
+
+// Stranger Things color palette
+const strangerColors = {
+  primary: '#ff1744',   // Neon red
+  secondary: '#ff4081', // Eleven pink
+  accent: '#00d4ff',    // Electric blue
+  glow: '#ff6b6b',      // Soft red glow
+};
 
 export function ParticleCrystallizationAnimation({ 
   profile, 
@@ -46,16 +53,36 @@ export function ParticleCrystallizationAnimation({
   const riskLevel = deriveRiskLevel(profile);
   const gemstoneType = deriveGemstone(profile);
   const strategyNumber = useMemo(() => generateStrategyNumber(riskLevel), [riskLevel]);
-  const strategyName = `${gemstoneType}-${strategyNumber}`;
-  const colors = gemstoneColors[gemstoneType] || gemstoneColors.Diamond;
   
-  // Generate particle colors (variations of gem color)
+  // Stranger Things themed naming
+  const stNames: Record<string, string> = {
+    'Sapphire': 'Eleven',
+    'Emerald': 'Hawkins',
+    'Peridot': 'Portal',
+    'Topaz': 'Hopper',
+    'Ruby': 'Demogorgon',
+    'Onyx': 'Shadow',
+    'Amber': 'Byers',
+    'Diamond': 'Mindflayer',
+    'Pearl': 'Wheeler',
+    'Opal': 'Vecna',
+  };
+  
+  const thematicName = stNames[gemstoneType] || 'Stranger';
+  const strategyName = `${thematicName}-${strategyNumber}`;
+  
+  // Generate particle colors (Stranger Things palette)
   const particleColors = useMemo(() => {
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-      const colorSet = [colors.primary, colors.secondary, colors.glow];
-      return colorSet[i % 3];
+      const colorSet = [
+        strangerColors.primary, 
+        strangerColors.secondary, 
+        strangerColors.accent,
+        strangerColors.glow,
+      ];
+      return colorSet[i % 4];
     });
-  }, [colors]);
+  }, []);
   
   // Intensity based on risk level
   const intensity = riskLevel === 'High' ? 1.5 : riskLevel === 'Medium' ? 1 : 0.7;
@@ -118,14 +145,42 @@ export function ParticleCrystallizationAnimation({
 
   return (
     <div className="particle-animation-container relative min-h-[600px] flex flex-col items-center justify-center overflow-hidden">
-      {/* Background gradient */}
+      {/* Upside Down background effect */}
       <div 
         className="absolute inset-0 transition-opacity duration-1000"
         style={{
-          background: `radial-gradient(circle at center, ${colors.glow}15 0%, transparent 70%)`,
-          opacity: phase === 'complete' || phase === 'reveal' ? 1 : 0.3,
+          background: `radial-gradient(ellipse at center, ${strangerColors.primary}15 0%, transparent 60%)`,
+          opacity: phase === 'complete' || phase === 'reveal' ? 1 : 0.4,
         }}
       />
+      
+      {/* Floating ash particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full ash-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${6 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Portal vortex effect during crystallization */}
+      {(phase === 'crystallizing' || phase === 'reveal' || phase === 'complete') && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div 
+            className="w-64 h-64 rounded-full portal-glow"
+            style={{
+              background: `radial-gradient(circle, transparent 30%, ${strangerColors.primary}10 70%, transparent 100%)`,
+            }}
+          />
+        </div>
+      )}
       
       {/* Light rays during crystallization */}
       {(phase === 'crystallizing' || phase === 'reveal' || phase === 'complete') && (
@@ -135,10 +190,10 @@ export function ParticleCrystallizationAnimation({
               key={i}
               className="absolute w-1 h-32 origin-bottom animate-light-ray"
               style={{
-                background: `linear-gradient(to top, ${colors.glow}40, transparent)`,
+                background: `linear-gradient(to top, ${strangerColors.primary}60, transparent)`,
                 transform: `rotate(${i * 45}deg)`,
                 animationDelay: `${i * 0.1}s`,
-                opacity: intensity * 0.6,
+                opacity: intensity * 0.7,
               }}
             />
           ))}
@@ -158,7 +213,7 @@ export function ParticleCrystallizationAnimation({
           />
         ))}
         
-        {/* Gem SVG - appears during reveal */}
+        {/* Gem SVG - Stranger Things red crystal */}
         {showGem && (
           <svg
             viewBox="0 0 100 100"
@@ -167,46 +222,46 @@ export function ParticleCrystallizationAnimation({
               showGem ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
             )}
             style={{
-              filter: `drop-shadow(0 0 ${20 * intensity}px ${colors.glow})`,
+              filter: `drop-shadow(0 0 ${25 * intensity}px ${strangerColors.primary})`,
             }}
           >
             <defs>
-              <linearGradient id="gemGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor={colors.glow} />
-                <stop offset="50%" stopColor={colors.primary} />
-                <stop offset="100%" stopColor={colors.secondary} />
+              <linearGradient id="gemGradientST" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={strangerColors.glow} />
+                <stop offset="50%" stopColor={strangerColors.primary} />
+                <stop offset="100%" stopColor="#8b0000" />
               </linearGradient>
             </defs>
             {/* Gem facets */}
             <polygon 
               points="50,5 95,35 80,95 20,95 5,35" 
-              fill="url(#gemGradient)"
+              fill="url(#gemGradientST)"
               className="animate-gem-appear"
             />
             <polygon 
               points="50,5 50,50 95,35" 
-              fill={colors.glow}
-              fillOpacity={0.4}
+              fill={strangerColors.glow}
+              fillOpacity={0.5}
             />
             <polygon 
               points="50,50 95,35 80,95" 
-              fill={colors.primary}
-              fillOpacity={0.3}
-            />
-            <polygon 
-              points="50,50 80,95 20,95" 
-              fill={colors.secondary}
-              fillOpacity={0.3}
-            />
-            <polygon 
-              points="50,50 20,95 5,35" 
-              fill={colors.primary}
+              fill={strangerColors.primary}
               fillOpacity={0.4}
             />
             <polygon 
-              points="50,5 5,35 50,50" 
-              fill={colors.glow}
+              points="50,50 80,95 20,95" 
+              fill="#8b0000"
+              fillOpacity={0.4}
+            />
+            <polygon 
+              points="50,50 20,95 5,35" 
+              fill={strangerColors.primary}
               fillOpacity={0.5}
+            />
+            <polygon 
+              points="50,5 5,35 50,50" 
+              fill={strangerColors.glow}
+              fillOpacity={0.6}
             />
           </svg>
         )}
@@ -214,16 +269,16 @@ export function ParticleCrystallizationAnimation({
         {/* Sparkles around gem */}
         {showGem && (
           <div className="absolute inset-0 flex items-center justify-center">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
                 className="absolute w-2 h-2 rounded-full animate-sparkle-burst"
                 style={{
-                  backgroundColor: colors.glow,
-                  boxShadow: `0 0 10px ${colors.glow}`,
-                  '--sparkle-angle': `${i * 60}deg`,
-                  '--sparkle-distance': '80px',
-                  animationDelay: `${i * 0.15}s`,
+                  backgroundColor: i % 2 === 0 ? strangerColors.primary : strangerColors.accent,
+                  boxShadow: `0 0 10px ${i % 2 === 0 ? strangerColors.primary : strangerColors.accent}`,
+                  '--sparkle-angle': `${i * 45}deg`,
+                  '--sparkle-distance': '90px',
+                  animationDelay: `${i * 0.12}s`,
                 } as React.CSSProperties}
               />
             ))}
@@ -231,19 +286,22 @@ export function ParticleCrystallizationAnimation({
         )}
       </div>
       
-      {/* Strategy name reveal */}
+      {/* Strategy name reveal - Stranger Things typography */}
       <div className={cn(
         'mt-8 text-center transition-all duration-1000',
         showName ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       )}>
         <h2 
-          className="text-4xl font-bold mb-2"
-          style={{ color: colors.glow }}
+          className="font-display text-4xl font-bold mb-2 text-flicker"
+          style={{ 
+            color: strangerColors.primary,
+            textShadow: `0 0 10px ${strangerColors.primary}, 0 0 20px ${strangerColors.primary}, 0 0 30px ${strangerColors.primary}`,
+          }}
         >
           {strategyName}
         </h2>
-        <p className="text-muted-foreground">
-          Your personalized {riskLevel.toLowerCase()}-risk investment strategy
+        <p className="text-muted-foreground font-display tracking-wider">
+          Your {riskLevel.toLowerCase()}-risk investment strategy
         </p>
       </div>
       
@@ -252,7 +310,7 @@ export function ParticleCrystallizationAnimation({
         'absolute bottom-16 left-0 right-0 text-center transition-opacity duration-500',
         showName ? 'opacity-0' : 'opacity-100'
       )}>
-        <p className="text-muted-foreground animate-pulse">
+        <p className="text-muted-foreground animate-pulse font-display tracking-wide">
           {PROGRESS_MESSAGES[messageIndex]}
         </p>
       </div>
@@ -270,7 +328,7 @@ export function ParticleCrystallizationAnimation({
               key={p}
               className={cn(
                 'h-2 rounded-full transition-all duration-500',
-                isActive ? 'w-6 bg-primary' : 'w-2',
+                isActive ? 'w-6 bg-primary shadow-[0_0_10px_hsl(350_100%_55%)]' : 'w-2',
                 isComplete ? 'bg-primary' : 'bg-muted'
               )}
             />
