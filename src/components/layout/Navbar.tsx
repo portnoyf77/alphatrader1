@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { href: '/explore', label: 'Explore' },
+  { href: '/explore', label: 'Marketplace' },
   { href: '/create', label: 'Create' },
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/dashboard', label: 'Dashboard' },
@@ -19,7 +19,6 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -27,7 +26,6 @@ export function Navbar() {
             <span className="text-lg font-bold">MVP Investing</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -45,14 +43,12 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
           <div className="hidden md:block">
             <Button asChild className="glow-primary">
-              <Link to="/create">Create Portfolio</Link>
+              <Link to="/create">Create Strategy</Link>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 rounded-lg hover:bg-secondary"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -61,7 +57,6 @@ export function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
@@ -81,9 +76,7 @@ export function Navbar() {
                 </Link>
               ))}
               <Button asChild className="mt-2">
-                <Link to="/create" onClick={() => setMobileMenuOpen(false)}>
-                  Create Portfolio
-                </Link>
+                <Link to="/create" onClick={() => setMobileMenuOpen(false)}>Create Strategy</Link>
               </Button>
             </div>
           </div>

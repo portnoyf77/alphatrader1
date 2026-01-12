@@ -1,3 +1,11 @@
+// Strategy status types
+export type StrategyStatus = 'private' | 'validated_listed' | 'inactive';
+export type VisibilityMode = 'masked' | 'transparent';
+export type ChangeType = 'minor_rebalance' | 'structural_change' | 'liquidation';
+export type TurnoverLevel = 'low' | 'medium' | 'high';
+export type ActivityEventType = 'rebalance' | 'risk_alert' | 'version_upgrade' | 'paused_new_allocations' | 'unpaused' | 'inactive';
+
+// Legacy types (keeping for backward compatibility in creator build experience)
 export type PortfolioStatus = 'Simulated' | 'Live' | 'Live (coming soon)';
 export type StrategyType = 'GenAI' | 'Manual';
 export type Objective = 'Growth' | 'Income' | 'Low volatility' | 'Balanced';
@@ -20,10 +28,105 @@ export interface PerformanceMetrics {
   consistency_score: number;
 }
 
+export interface VersionHistoryEntry {
+  version: string;
+  date: string;
+  change_type: ChangeType | 'initial';
+  change_summary: string;
+}
+
+export interface ActivityLogEntry {
+  date: string;
+  event_type: ActivityEventType;
+  summary: string;
+}
+
+export interface ExposureBreakdown {
+  label: string;
+  percent: number;
+}
+
+// Main Strategy interface (formerly Portfolio for public views)
+export interface Strategy {
+  id: string;
+  strategy_name: string;
+  creator_id: string;
+  creator_avatar?: string;
+  
+  // Status and visibility
+  status: StrategyStatus;
+  visibility_mode: VisibilityMode;
+  validation_status: ValidationStatus;
+  validation_criteria_met: boolean;
+  validation_summary?: string;
+  
+  // Creation and dates
+  created_date: string;
+  last_rebalanced_date: string;
+  
+  // Strategy characteristics
+  strategy_type: StrategyType;
+  objective: Objective;
+  risk_level: RiskLevel;
+  
+  // Risk profile and constraints
+  allowed_assets: string[];
+  leverage_allowed: boolean;
+  max_single_sector_exposure_pct: number;
+  max_turnover: TurnoverLevel;
+  strategy_capacity_limit_usd: number;
+  
+  // Holdings (only shown if visibility_mode = 'transparent')
+  holdings: Holding[];
+  
+  // Masked exposure (shown when visibility_mode = 'masked')
+  exposure_breakdown: ExposureBreakdown[];
+  top_themes: string[];
+  turnover_estimate: TurnoverLevel;
+  disclosure_text_public: string;
+  
+  // Performance
+  performance: PerformanceMetrics;
+  
+  // Versioning
+  current_version: string;
+  last_change_type: ChangeType;
+  version_history: VersionHistoryEntry[];
+  
+  // Activity log (public-safe)
+  activity_log: ActivityLogEntry[];
+  
+  // Follower state
+  followers_count: number;
+  allocated_amount_usd: number;
+  new_allocations_paused: boolean;
+  creator_fee_pct: number;
+  creator_est_monthly_earnings_usd: number;
+  creator_investment: number;
+  
+  // Follower protections
+  requires_opt_in_for_structural_changes: boolean;
+  exit_window_days: number;
+  auto_exit_on_liquidation: boolean;
+  
+  // Pending updates (for structural changes requiring opt-in)
+  pending_version?: string;
+  pending_change_summary?: string;
+  
+  // Portfolio identity fields
+  sectors: string[];
+  geo_focus: GeoFocus;
+  
+  // Rationale and risks
+  description_rationale: string;
+  risks: string;
+}
+
+// Legacy Portfolio type alias (for creator build experience)
 export interface Portfolio {
   id: string;
   name: string;
-  creator_id: string; // Anonymous user ID (e.g., @inv_7x2k)
+  creator_id: string;
   creator_avatar?: string;
   status: PortfolioStatus;
   created_date: string;
@@ -34,18 +137,16 @@ export interface Portfolio {
   performance: PerformanceMetrics;
   investors_count: number;
   allocated_amount: number;
-  creator_investment: number; // Creator's own money invested (skin in the game)
+  creator_investment: number;
   creator_fee_pct: number;
   creator_est_monthly_earnings: number;
   description_rationale: string;
   risks: string;
   last_rebalanced_date: string;
-  // Validation fields
   validation_status: ValidationStatus;
   validation_criteria_met: boolean;
   validation_summary?: string;
-  // Portfolio identity fields
-  sectors: string[]; // Top 3 sectors from holdings
+  sectors: string[];
   geo_focus: GeoFocus;
 }
 
