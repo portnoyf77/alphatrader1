@@ -45,22 +45,28 @@ const sectorIcons: Record<string, React.ElementType> = {
 // Geo focus labels
 const geoLabels: Record<GeoFocus, { label: string; flag: string }> = {
   'US': { label: 'US', flag: '🇺🇸' },
-  'Global': { label: 'Global', flag: '🌍' },
+  'Global': { label: 'GLB', flag: '🌍' },
   'Emerging Markets': { label: 'EM', flag: '🌏' },
-  'International': { label: "Int'l", flag: '🌐' },
+  'International': { label: 'INT', flag: '🌐' },
 };
 
-// Risk labels
-const riskLabels: Record<RiskLevel, { label: string; color: string }> = {
-  'Low': { label: 'Low Risk', color: 'text-cyan-400' },
-  'Medium': { label: 'Med Risk', color: 'text-purple-400' },
-  'High': { label: 'High Risk', color: 'text-orange-400' },
+// Risk colors
+const riskColors: Record<RiskLevel, string> = {
+  'Low': 'text-cyan-400',
+  'Medium': 'text-violet-400',
+  'High': 'text-orange-400',
 };
 
 const sizeClasses = {
-  sm: 'w-16 h-16',
+  sm: 'w-14 h-14',
   md: 'w-20 h-20',
   lg: 'w-24 h-24',
+};
+
+const iconSizes = {
+  sm: 'h-3 w-3',
+  md: 'h-4 w-4',
+  lg: 'h-5 w-5',
 };
 
 export function PortfolioThumbnail({
@@ -74,7 +80,6 @@ export function PortfolioThumbnail({
   const gradient = getRiskGradient(riskLevel);
   const displaySectors = sectors.slice(0, 3);
   const geoInfo = geoLabels[geoFocus];
-  const riskInfo = riskLabels[riskLevel];
   
   // Get gemstone from first sector if not provided
   const displayGemstone = gemstone || (sectors[0] ? getGemstoneForSector(sectors[0]) : 'Quartz');
@@ -83,38 +88,40 @@ export function PortfolioThumbnail({
   return (
     <div
       className={cn(
-        'relative rounded-xl overflow-hidden border',
+        'relative rounded-xl overflow-hidden border flex flex-col',
         `bg-gradient-to-br ${gradient}`,
         gemstoneColors.border,
         sizeClasses[size],
         className
       )}
     >
-      {/* Sector icons */}
-      <div className="absolute inset-0 flex items-center justify-center gap-1 p-2">
-        {displaySectors.map((sector, idx) => {
+      {/* Sector icons centered */}
+      <div className="flex-1 flex items-center justify-center gap-0.5 p-1.5">
+        {displaySectors.slice(0, 2).map((sector, idx) => {
           const Icon = sectorIcons[sector] || BarChart3;
           return (
             <div
               key={idx}
               className={cn(
-                'p-1.5 rounded-md backdrop-blur-sm',
+                'p-1 rounded backdrop-blur-sm',
                 gemstoneColors.bg
               )}
             >
-              <Icon className={cn('h-3.5 w-3.5', gemstoneColors.text)} />
+              <Icon className={cn(iconSizes[size], gemstoneColors.text)} />
             </div>
           );
         })}
       </div>
 
-      {/* Bottom bar with geo and risk */}
-      <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm px-1.5 py-1 flex items-center justify-between text-[9px]">
-        <span className="flex items-center gap-0.5">
+      {/* Bottom bar with geo and risk indicator */}
+      <div className="bg-background/90 backdrop-blur-sm px-1.5 py-0.5 flex items-center justify-between">
+        <span className="flex items-center gap-0.5 text-[8px]">
           <span>{geoInfo.flag}</span>
           <span className="text-muted-foreground">{geoInfo.label}</span>
         </span>
-        <span className={riskInfo.color}>{riskInfo.label}</span>
+        <span className={cn('text-[8px] font-medium', riskColors[riskLevel])}>
+          {riskLevel[0]}
+        </span>
       </div>
     </div>
   );
