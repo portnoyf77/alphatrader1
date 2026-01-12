@@ -3,8 +3,8 @@ import { Portfolio, ChartDataPoint, Comment } from './types';
 export const mockPortfolios: Portfolio[] = [
   {
     id: '1',
-    name: 'Harborline Growth',
-    creator_name: 'Alex Chen',
+    name: 'Sapphire-347',
+    creator_id: '@inv_7x2k',
     status: 'Simulated',
     created_date: '2024-11-15',
     strategy_type: 'GenAI',
@@ -35,11 +35,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 60 days of real-market simulation with stable drawdown profile and consistent risk-adjusted returns.',
+    sectors: ['Broad Market', 'Technology', 'International'],
+    geo_focus: 'Global',
   },
   {
     id: '2',
-    name: 'Cedar Peak Balanced',
-    creator_name: 'Sarah Miller',
+    name: 'Pearl-142',
+    creator_id: '@alpha_99',
     status: 'Simulated',
     created_date: '2024-10-22',
     strategy_type: 'GenAI',
@@ -70,11 +72,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 75 days with excellent consistency score and low volatility metrics.',
+    sectors: ['Bonds', 'Broad Market', 'International'],
+    geo_focus: 'Global',
   },
   {
     id: '3',
-    name: 'Apex Tech Momentum',
-    creator_name: 'Marcus Johnson',
+    name: 'Sapphire-872',
+    creator_id: '@quant_trader',
     status: 'Simulated',
     created_date: '2024-12-01',
     strategy_type: 'Manual',
@@ -105,11 +109,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'simulated',
     validation_criteria_met: false,
     validation_summary: undefined,
+    sectors: ['Technology', 'Semiconductors', 'Innovation'],
+    geo_focus: 'US',
   },
   {
     id: '4',
-    name: 'Dividend Fortress',
-    creator_name: 'Patricia Wong',
+    name: 'Amber-108',
+    creator_id: '@div_hunter',
     status: 'Live (coming soon)',
     created_date: '2024-09-10',
     strategy_type: 'Manual',
@@ -140,11 +146,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 90 days with strong income consistency and low drawdown profile.',
+    sectors: ['Dividend', 'Income', 'REITs'],
+    geo_focus: 'US',
   },
   {
     id: '5',
-    name: 'Global Macro Edge',
-    creator_name: 'David Kim',
+    name: 'Opal-412',
+    creator_id: '@macro_edge',
     status: 'Simulated',
     created_date: '2024-11-28',
     strategy_type: 'GenAI',
@@ -175,11 +183,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 45 days with balanced risk metrics across global asset classes.',
+    sectors: ['International', 'Broad Market', 'Intl Bonds'],
+    geo_focus: 'Emerging Markets',
   },
   {
     id: '6',
-    name: 'Clean Energy Future',
-    creator_name: 'Emma Thompson',
+    name: 'Peridot-756',
+    creator_id: '@green_alpha',
     status: 'Simulated',
     created_date: '2024-10-05',
     strategy_type: 'GenAI',
@@ -210,11 +220,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'in_validation',
     validation_criteria_met: false,
     validation_summary: undefined,
+    sectors: ['Clean Energy', 'Solar', 'Batteries'],
+    geo_focus: 'Global',
   },
   {
     id: '7',
-    name: 'All-Weather Shield',
-    creator_name: 'Robert Martinez',
+    name: 'Diamond-127',
+    creator_id: '@steady_returns',
     status: 'Simulated',
     created_date: '2024-08-20',
     strategy_type: 'Manual',
@@ -245,11 +257,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 120 days with exceptional consistency score and minimal drawdown.',
+    sectors: ['Broad Market', 'Long Bonds', 'Commodities'],
+    geo_focus: 'US',
   },
   {
     id: '8',
-    name: 'Healthcare Innovation',
-    creator_name: 'Dr. Lisa Park',
+    name: 'Emerald-489',
+    creator_id: '@bio_investor',
     status: 'Live (coming soon)',
     created_date: '2024-09-28',
     strategy_type: 'GenAI',
@@ -280,11 +294,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 80 days with solid risk-adjusted returns in healthcare sector.',
+    sectors: ['Healthcare', 'Biotech', 'Genomics'],
+    geo_focus: 'US',
   },
   {
     id: '9',
-    name: 'Value Resurgence',
-    creator_name: 'James Wilson',
+    name: 'Diamond-385',
+    creator_id: '@value_seeker',
     status: 'Simulated',
     created_date: '2024-11-10',
     strategy_type: 'Manual',
@@ -315,11 +331,13 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'simulated',
     validation_criteria_met: false,
     validation_summary: undefined,
+    sectors: ['Value', 'Large Value', 'Small Value'],
+    geo_focus: 'International',
   },
   {
     id: '10',
-    name: 'Simple 60/40',
-    creator_name: 'Michael Brown',
+    name: 'Pearl-217',
+    creator_id: '@simple_60_40',
     status: 'Live (coming soon)',
     created_date: '2024-07-15',
     strategy_type: 'Manual',
@@ -347,6 +365,8 @@ export const mockPortfolios: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 150 days with proven track record and stable performance metrics.',
+    sectors: ['Broad Market', 'Bonds'],
+    geo_focus: 'US',
   },
 ];
 
@@ -361,7 +381,7 @@ export const creatorStats = {
   avgEarningsPerPortfolio: Math.round(
     mockPortfolios.reduce((acc, p) => acc + p.creator_est_monthly_earnings, 0) / mockPortfolios.length
   ),
-  totalCreators: new Set(mockPortfolios.map(p => p.creator_name)).size,
+  totalCreators: new Set(mockPortfolios.map(p => p.creator_id)).size,
   totalCreatorInvestment: mockPortfolios.reduce((acc, p) => acc + p.creator_investment, 0),
 };
 
@@ -417,32 +437,31 @@ export const generateChartData = (days: number, returnPct: number): ChartDataPoi
 export const mockComments: Comment[] = [
   {
     id: '1',
-    author: 'InvestorPro',
+    author: '@invest_pro',
     content: 'Great diversification! Been investing in this for 2 months now.',
     date: '2025-01-08',
     likes: 24,
   },
   {
     id: '2',
-    author: 'TechTrader99',
-    content: 'What\'s your rebalancing frequency?',
+    author: '@tech_trader_99',
+    content: 'The semiconductor weighting is aggressive but I like the conviction.',
     date: '2025-01-07',
-    likes: 12,
+    likes: 18,
   },
   {
     id: '3',
-    author: 'ValueHunter',
-    content: 'Solid risk management. The consistency score speaks for itself.',
+    author: '@long_term_investor',
+    content: 'How often does this portfolio rebalance?',
     date: '2025-01-05',
-    likes: 31,
+    likes: 7,
   },
 ];
 
 export const formatCurrency = (value: number): string => {
   if (value >= 1000000) {
     return `$${(value / 1000000).toFixed(1)}M`;
-  }
-  if (value >= 1000) {
+  } else if (value >= 1000) {
     return `$${(value / 1000).toFixed(0)}K`;
   }
   return `$${value.toFixed(0)}`;

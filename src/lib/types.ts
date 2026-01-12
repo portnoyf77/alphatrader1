@@ -3,6 +3,7 @@ export type StrategyType = 'GenAI' | 'Manual';
 export type Objective = 'Growth' | 'Income' | 'Low volatility' | 'Balanced';
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 export type ValidationStatus = 'simulated' | 'in_validation' | 'validated';
+export type GeoFocus = 'US' | 'Global' | 'Emerging Markets' | 'International';
 
 export interface Holding {
   ticker: string;
@@ -22,7 +23,7 @@ export interface PerformanceMetrics {
 export interface Portfolio {
   id: string;
   name: string;
-  creator_name: string;
+  creator_id: string; // Anonymous user ID (e.g., @inv_7x2k)
   creator_avatar?: string;
   status: PortfolioStatus;
   created_date: string;
@@ -43,6 +44,9 @@ export interface Portfolio {
   validation_status: ValidationStatus;
   validation_criteria_met: boolean;
   validation_summary?: string;
+  // Portfolio identity fields
+  sectors: string[]; // Top 3 sectors from holdings
+  geo_focus: GeoFocus;
 }
 
 export interface ChartDataPoint {

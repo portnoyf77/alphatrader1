@@ -25,7 +25,7 @@ export default function Explore() {
   const filteredPortfolios = useMemo(() => {
     return validatedPortfolios.filter(portfolio => {
       const matchesSearch = portfolio.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        portfolio.creator_name.toLowerCase().includes(searchQuery.toLowerCase());
+        portfolio.creator_id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesObjective = objectiveFilter === 'all' || portfolio.objective === objectiveFilter;
       const matchesRisk = riskFilter === 'all' || portfolio.risk_level === riskFilter;
       const matchesStrategy = strategyFilter === 'all' || portfolio.strategy_type === strategyFilter;
