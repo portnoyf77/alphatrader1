@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['Libre Baskerville', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -72,6 +76,15 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        // Stranger Things custom colors
+        neon: {
+          red: "hsl(var(--neon-red))",
+          pink: "hsl(var(--eleven-pink))",
+          blue: "hsl(var(--hawkins-blue))",
+        },
+        upside: {
+          down: "hsl(var(--upside-down))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -96,8 +109,22 @@ export default {
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(262 83% 58% / 0.4)" },
-          "50%": { boxShadow: "0 0 30px -5px hsl(262 83% 58% / 0.6)" },
+          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(350 100% 55% / 0.4)" },
+          "50%": { boxShadow: "0 0 40px -5px hsl(350 100% 55% / 0.7)" },
+        },
+        "flicker": {
+          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": { opacity: "1" },
+          "20%, 24%, 55%": { opacity: "0.7" },
+        },
+        "eerie-pulse": {
+          "0%, 100%": { 
+            boxShadow: "0 0 20px hsl(350 100% 55% / 0.3)",
+            transform: "scale(1)",
+          },
+          "50%": { 
+            boxShadow: "0 0 40px hsl(350 100% 55% / 0.6)",
+            transform: "scale(1.02)",
+          },
         },
       },
       animation: {
@@ -106,6 +133,8 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "flicker": "flicker 3s infinite",
+        "eerie-pulse": "eerie-pulse 3s ease-in-out infinite",
       },
     },
   },
