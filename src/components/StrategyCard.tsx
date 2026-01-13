@@ -3,6 +3,7 @@ import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
+import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
 
@@ -50,6 +51,12 @@ const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip:
   'High': { label: 'High Risk', className: 'bg-orange-500/10 text-orange-400 border-orange-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
 };
 
+const turnoverTooltips: Record<string, string> = {
+  'low': 'Trades rarely — lower fees, more tax-efficient',
+  'medium': 'Trades occasionally — moderate activity',
+  'high': 'Trades often — may have higher fees and tax impact',
+};
+
 interface StrategyCardProps {
   strategy: Strategy;
   rank?: number;
@@ -61,6 +68,10 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const geoInfo = geoLabels[strategy.geo_focus];
   const riskInfo = riskConfig[strategy.risk_level];
   const displaySectors = strategy.sectors.slice(0, 2);
+  
+  // Get gemstone for visual indicator
+  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
+  const gemstoneColors = getGemstoneColor(gemstone);
 
   return (
     <Link to={`/strategy/${strategy.id}`}>
@@ -80,12 +91,31 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
               </div>
             </div>
-            {isPaused && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-warning/10 text-warning text-xs border border-warning/20">
-                <Pause className="h-3 w-3" />
-                Paused
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {isPaused && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-warning/10 text-warning text-xs border border-warning/20">
+                  <Pause className="h-3 w-3" />
+                  Paused
+                </div>
+              )}
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-lg cursor-help",
+                      gemstoneColors.bg,
+                      gemstoneColors.border,
+                      "border"
+                    )}>
+                      <Gem className={cn("h-4 w-4", gemstoneColors.text)} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">
+                    {gemstone} — based on primary sector ({strategy.sectors[0] || 'Broad Market'})
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           <TooltipProvider delayDuration={200}>
@@ -159,7 +189,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground mb-1">30d Return</p>
+                    <p className="text-xs text-muted-foreground">30d Return</p>
                     <div className={cn(
                       "flex items-center gap-1 font-semibold",
                       isPositive ? "text-success" : "text-destructive"
@@ -180,7 +210,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground mb-1">Max Drawdown</p>
+                    <p className="text-xs text-muted-foreground">Max Drawdown</p>
                     <p className="font-semibold text-destructive">
                       {formatPercent(strategy.performance.max_drawdown, false)}
                     </p>
@@ -193,7 +223,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground mb-1">Followers</p>
+                    <p className="text-xs text-muted-foreground">Followers</p>
                     <div className="flex items-center gap-1 font-semibold">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       {strategy.followers_count.toLocaleString()}
@@ -207,23 +237,39 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             </div>
           </TooltipProvider>
 
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Total Allocated</span>
-              <span className="font-medium">{formatCurrency(strategy.allocated_amount_usd)}</span>
+          <TooltipProvider delayDuration={200}>
+            <div className="mt-4 pt-4 border-t border-border/50 space-y-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center justify-between text-sm cursor-help">
+                    <span className="text-muted-foreground">Total Allocated</span>
+                    <span className="font-medium">{formatCurrency(strategy.allocated_amount_usd)}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[220px]">
+                  Total money from all investors combined
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center justify-between text-sm cursor-help">
+                    <span className="text-muted-foreground">Turnover</span>
+                    <span className={cn(
+                      "font-medium capitalize",
+                      strategy.turnover_estimate === 'low' && "text-success",
+                      strategy.turnover_estimate === 'medium' && "text-warning",
+                      strategy.turnover_estimate === 'high' && "text-destructive"
+                    )}>
+                      {strategy.turnover_estimate}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[220px]">
+                  {turnoverTooltips[strategy.turnover_estimate] || 'How often the strategy trades'}
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <div className="flex items-center justify-between text-sm mt-1">
-              <span className="text-muted-foreground">Turnover</span>
-              <span className={cn(
-                "font-medium capitalize",
-                strategy.turnover_estimate === 'low' && "text-success",
-                strategy.turnover_estimate === 'medium' && "text-warning",
-                strategy.turnover_estimate === 'high' && "text-destructive"
-              )}>
-                {strategy.turnover_estimate}
-              </span>
-            </div>
-          </div>
+          </TooltipProvider>
         </CardContent>
       </Card>
     </Link>
