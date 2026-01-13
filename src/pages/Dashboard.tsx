@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Share2, Shield, Filter, Eye, EyeOff, Pause, GitBranch } from 'lucide-react';
+import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Shield, Filter, Pause, GitBranch, Info, BarChart3, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ValidationBadge } from '@/components/ValidationBadge';
 import { StrategyControls } from '@/components/StrategyControls';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { formatCurrency, formatPercent, mockStrategies, mockEarningsHistory, mockInvestorGrowth, getStrategiesWithPendingUpdates } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 const myStrategies = mockStrategies.slice(0, 4);
 const mockEarnings = { totalEarnings: 7580, last30Days: 2340, topStrategy: myStrategies[0] };
@@ -64,45 +65,97 @@ export default function Dashboard() {
         )}
 
         {/* Stats Overview */}
-        <div className="grid md:grid-cols-5 gap-4 mb-8">
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Total Strategies</p>
-              <p className="text-3xl font-bold">{myStrategies.length}</p>
-              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                <span className="text-success">{validatedCount} listed</span>
-                {privateCount > 0 && <span>• {privateCount} private</span>}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Total Followers</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold">{totalFollowers.toLocaleString()}</p>
-                <span className="text-xs text-success flex items-center"><ArrowUpRight className="h-3 w-3" />+{newFollowersThisMonth}</span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Total Allocated</p>
-              <p className="text-3xl font-bold">{formatCurrency(totalAllocated)}</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-card bg-primary/5 border-primary/30">
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Est. Monthly Earnings</p>
-              <p className="text-3xl font-bold text-primary">${mockEarnings.last30Days.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-1"><Trophy className="h-4 w-4 text-yellow-500" /><p className="text-sm text-muted-foreground">Creator Rank</p></div>
-              <p className="text-3xl font-bold">#{creatorRank} <span className="text-sm font-normal text-muted-foreground">of {totalCreators}</span></p>
-            </CardContent>
-          </Card>
-        </div>
+        <TooltipProvider delayDuration={200}>
+          <div className="grid md:grid-cols-5 gap-4 mb-8">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="glass-card cursor-help">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Total Strategies</p>
+                    </div>
+                    <p className="text-3xl font-bold">{myStrategies.length}</p>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <span className="text-success">{validatedCount} listed</span>
+                      {privateCount > 0 && <span>• {privateCount} private</span>}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                The number of strategies you've created — listed ones are publicly available
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="glass-card cursor-help">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Total Followers</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-bold">{totalFollowers.toLocaleString()}</p>
+                      <span className="text-xs text-success flex items-center"><ArrowUpRight className="h-3 w-3" />+{newFollowersThisMonth}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                People who have allocated money to your strategies
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="glass-card cursor-help">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Wallet className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Total Allocated</p>
+                    </div>
+                    <p className="text-3xl font-bold">{formatCurrency(totalAllocated)}</p>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                Total money from all investors across all your strategies
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="glass-card bg-primary/5 border-primary/30 cursor-help">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                      <p className="text-sm text-muted-foreground">Est. Monthly Earnings</p>
+                    </div>
+                    <p className="text-3xl font-bold text-primary">${mockEarnings.last30Days.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                Your projected earnings from strategy fees this month
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="glass-card cursor-help">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Trophy className="h-4 w-4 text-yellow-500" />
+                      <p className="text-sm text-muted-foreground">Creator Rank</p>
+                    </div>
+                    <p className="text-3xl font-bold">#{creatorRank} <span className="text-sm font-normal text-muted-foreground">of {totalCreators}</span></p>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                Your ranking among all creators based on total followers and performance
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
         {/* Skin in the Game */}
         <Card className="glass-card mb-8 bg-success/5 border-success/30">
@@ -129,7 +182,7 @@ export default function Dashboard() {
                     <defs><linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} /><stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} /></linearGradient></defs>
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
-                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Earnings']} />
+                    <RechartsTooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Earnings']} />
                     <Area type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#earningsGradient)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -144,7 +197,7 @@ export default function Dashboard() {
                   <LineChart data={mockInvestorGrowth}>
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [value.toLocaleString(), 'Followers']} />
+                    <RechartsTooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [value.toLocaleString(), 'Followers']} />
                     <Line type="monotone" dataKey="investors" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -170,7 +223,6 @@ export default function Dashboard() {
                   <TableHead>Strategy</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Version</TableHead>
-                  <TableHead>Visibility</TableHead>
                   <TableHead className="text-right">Followers</TableHead>
                   <TableHead className="text-right">Capacity</TableHead>
                   <TableHead className="text-right">Earnings/mo</TableHead>
@@ -193,11 +245,6 @@ export default function Dashboard() {
                       </span>
                     </TableCell>
                     <TableCell><span className="flex items-center gap-1 text-sm"><GitBranch className="h-3 w-3" />v{strategy.current_version}</span></TableCell>
-                    <TableCell>
-                      <span className={cn("inline-flex items-center gap-1 text-xs", strategy.visibility_mode === 'masked' ? "text-violet-400" : "text-cyan-400")}>
-                        {strategy.visibility_mode === 'masked' ? <><EyeOff className="h-3 w-3" />Masked</> : <><Eye className="h-3 w-3" />Transparent</>}
-                      </span>
-                    </TableCell>
                     <TableCell className="text-right">{strategy.followers_count.toLocaleString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
