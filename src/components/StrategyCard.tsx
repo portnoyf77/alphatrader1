@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2, Eye, EyeOff, Pause } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2, Pause } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './StatusBadge';
 import { ValidationBadge } from './ValidationBadge';
@@ -20,7 +20,6 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
   const isPositive = strategy.performance.return_30d >= 0;
   const isValidated = strategy.validation_status === 'validated' && strategy.validation_criteria_met;
   const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
-  const isMasked = strategy.visibility_mode === 'masked';
   const isPaused = strategy.new_allocations_paused;
 
   return (
@@ -97,24 +96,6 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className={cn(
-                    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs border cursor-help",
-                    isMasked 
-                      ? "bg-violet-500/10 text-violet-400 border-violet-500/20" 
-                      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                  )}>
-                    {isMasked ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                    {isMasked ? 'Masked' : 'Transparent'}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  {isMasked 
-                    ? 'Holdings are hidden to protect IP. You see exposure breakdown instead.' 
-                    : 'All holdings and weights are publicly visible.'}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20 cursor-help">
                     <Shield className="h-3 w-3" />
                     Creator invested
@@ -146,8 +127,8 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
                     </div>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">
-                  Strategy return over the last 30 days
+                <TooltipContent className="text-xs max-w-[220px]">
+                  How much this strategy gained or lost in the past 30 days
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -159,8 +140,8 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
                     </p>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Largest peak-to-trough decline - indicates potential loss during downturns
+                <TooltipContent className="text-xs max-w-[220px]">
+                  The biggest drop from a high point — shows how much you could lose in a bad stretch
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -173,8 +154,8 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
                     </div>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">
-                  Number of investors following this strategy
+                <TooltipContent className="text-xs max-w-[220px]">
+                  How many people have put money into this strategy
                 </TooltipContent>
               </Tooltip>
             </div>

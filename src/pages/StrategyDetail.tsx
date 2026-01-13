@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Eye, EyeOff, Lock, GitBranch } from 'lucide-react';
+import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -125,13 +125,6 @@ export default function StrategyDetail() {
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold">{strategy.strategy_name}</h1>
                 <ValidationBadge status={strategy.validation_status} />
-                <span className={cn(
-                  "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs border",
-                  isMasked ? "bg-violet-500/10 text-violet-400 border-violet-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                )}>
-                  {isMasked ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  {isMasked ? 'Masked' : 'Transparent'}
-                </span>
               </div>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="font-mono">{strategy.creator_id}</span>
@@ -199,7 +192,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Strategy return over the last 30 days</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">How much this strategy gained or lost in the past 30 days</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -213,7 +206,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Number of investors following this strategy</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">How many people have put money into this strategy</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -224,7 +217,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Creator's own capital invested ("skin in the game")</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">The creator's own money in this strategy — shows they believe in it</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -235,7 +228,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Total capital allocated by all followers</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">Total money from all investors combined</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -246,7 +239,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Score measuring stable performance over time</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">How steady the returns are — higher means fewer big swings</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
