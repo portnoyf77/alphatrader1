@@ -75,7 +75,7 @@ export default function Leaderboard() {
           <TabsContent value={activeTab} className="mt-0">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedStrategies.map((strategy, index) => (
-                <StrategyCard key={strategy.id} strategy={strategy} rank={index + 1} showValidationBadge />
+                <StrategyCard key={strategy.id} strategy={strategy} rank={index + 1} />
               ))}
             </div>
           </TabsContent>
