@@ -68,15 +68,15 @@ const geoTooltips: Record<GeoFocus, string> = {
 };
 
 const sizeClasses = {
-  sm: 'w-14 h-14',
-  md: 'w-20 h-20',
-  lg: 'w-24 h-24',
+  sm: 'w-16 h-16',
+  md: 'w-24 h-24',
+  lg: 'w-32 h-32',
 };
 
 const iconSizes = {
-  sm: 'h-3 w-3',
-  md: 'h-4 w-4',
-  lg: 'h-5 w-5',
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+  lg: 'h-6 w-6',
 };
 
 export function StrategyThumbnail({
@@ -109,7 +109,7 @@ export function StrategyThumbnail({
         )}
       >
         {/* Sector icons centered */}
-        <div className="flex-1 flex items-center justify-center gap-0.5 p-1.5">
+        <div className="flex-1 flex items-center justify-center gap-1.5 p-2">
           {displaySectors.slice(0, 2).map((sector, idx) => {
             const Icon = sectorIcons[sector] || BarChart3;
             return (
@@ -117,7 +117,7 @@ export function StrategyThumbnail({
                 <TooltipTrigger asChild>
                   <div
                     className={cn(
-                      'p-1 rounded backdrop-blur-sm cursor-help',
+                      'p-1.5 rounded-md backdrop-blur-sm cursor-help',
                       gemstoneColors.bg
                     )}
                   >
@@ -133,12 +133,12 @@ export function StrategyThumbnail({
         </div>
 
         {/* Bottom bar with geo and risk indicator */}
-        <div className="bg-background/90 backdrop-blur-sm px-1.5 py-0.5 flex items-center justify-between">
+        <div className="bg-background/90 backdrop-blur-sm px-2 py-1 flex items-center justify-between">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="flex items-center gap-0.5 text-[8px] cursor-help">
-                <span>{geoInfo.flag}</span>
-                <span className="text-muted-foreground">{geoInfo.label}</span>
+              <span className="flex items-center gap-1 text-[10px] cursor-help">
+                <span className="text-sm">{geoInfo.flag}</span>
+                <span className="text-muted-foreground font-medium">{geoInfo.label}</span>
               </span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
@@ -147,7 +147,7 @@ export function StrategyThumbnail({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className={cn('text-[8px] font-medium cursor-help', riskInfo.color)}>
+              <span className={cn('text-[10px] font-bold cursor-help', riskInfo.color)}>
                 {riskLevel[0]}
               </span>
             </TooltipTrigger>
