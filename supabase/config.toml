@@ -1,0 +1,4 @@
+project_id = "fmfknwrtozlgxqfhispt"
+
+[functions.parse-strategy-response]
+verify_jwt = false

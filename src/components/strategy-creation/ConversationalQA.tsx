@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, Check, SkipForward } from 'lucide-react';
+import { Sparkles, Check, SkipForward, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -12,12 +12,14 @@ import {
   questions,
   Question
 } from '@/lib/strategyProfile';
+import { parseWithAI, ParseResult } from '@/lib/aiStrategyParser';
 import { parseNaturalLanguageResponse, getFollowUpPrompt } from '@/lib/nlpParser';
 
 interface Message {
   id: string;
   role: 'assistant' | 'user';
   content: string;
+  isExplanation?: boolean;
 }
 
 interface ConversationalQAProps {
@@ -30,6 +32,7 @@ export function ConversationalQA({ onComplete, onCancel }: ConversationalQAProps
   const [profile, setProfile] = useState<StrategyProfile>(initialProfile);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [sliderValue, setSliderValue] = useState(20);
   const [multiSelectValues, setMultiSelectValues] = useState<string[]>([]);
   const [awaitingResponse, setAwaitingResponse] = useState(false);
@@ -41,7 +44,7 @@ export function ConversationalQA({ onComplete, onCancel }: ConversationalQAProps
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, isProcessing]);
 
   // Initial greeting
   useEffect(() => {
@@ -49,7 +52,9 @@ export function ConversationalQA({ onComplete, onCancel }: ConversationalQAProps
       addAssistantMessage(
         `Welcome! I'm your investment advisor. Let's build a personalized strategy together.
 
-I'll ask you a few questions about your goals, risk tolerance, and preferences. Feel free to type naturally or use the quick reply buttons.`
+I'll ask you a few questions about your goals, risk tolerance, and preferences. Feel free to **type naturally** — I understand conversational language — or use the quick reply buttons.
+
+You can also ask me questions like "What does volatility mean?" and I'll explain!`
       );
 
       // Show first question after greeting
@@ -61,7 +66,7 @@ I'll ask you a few questions about your goals, risk tolerance, and preferences. 
     return () => clearTimeout(timer);
   }, []);
 
-  const addAssistantMessage = (content: string) => {
+  const addAssistantMessage = (content: string, isExplanation = false) => {
     setIsTyping(true);
 
     // Simulate typing delay
@@ -69,7 +74,8 @@ I'll ask you a few questions about your goals, risk tolerance, and preferences. 
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'assistant',
-        content
+        content,
+        isExplanation
       }]);
       setIsTyping(false);
       setAwaitingResponse(true);
@@ -192,26 +198,110 @@ I'll ask you a few questions about your goals, risk tolerance, and preferences. 
     moveToNextQuestion(profile);
   };
 
-  const handleTextSubmit = (text: string) => {
-    if (!currentQuestion || isComplete) return;
-
-    addUserMessage(text);
-
-    // Try to parse natural language
-    const parseResult = parseNaturalLanguageResponse(text, currentQuestion.id);
-
-    if (parseResult) {
+  const handleAIParseResult = (result: ParseResult) => {
+    if (result.intent === 'answer' && result.value !== undefined) {
+      // AI successfully parsed the answer
       const updatedProfile = {
         ...profile,
-        [currentQuestion.id]: parseResult.value
+        [currentQuestion.id]: result.value
       } as StrategyProfile;
       setProfile(updatedProfile);
-      moveToNextQuestion(updatedProfile);
+      
+      // Show confirmation if AI provided explanation
+      if (result.explanation) {
+        addAssistantMessage(result.explanation);
+        setTimeout(() => moveToNextQuestion(updatedProfile), 1000);
+      } else {
+        moveToNextQuestion(updatedProfile);
+      }
+    } else if (result.intent === 'question') {
+      // User asked a question - show explanation without advancing
+      addAssistantMessage(result.explanation || "That's a great question! Let me explain...", true);
+    } else if (result.intent === 'correction') {
+      // User wants to change a previous answer
+      if (result.field && result.value !== undefined) {
+        const updatedProfile = {
+          ...profile,
+          [result.field]: result.value
+        } as StrategyProfile;
+        setProfile(updatedProfile);
+        addAssistantMessage(
+          result.explanation || `Got it! I've updated your ${result.field}. Now, back to the current question...`,
+          true
+        );
+      }
     } else {
-      // Couldn't parse - ask for clarification
-      setTimeout(() => {
-        addAssistantMessage(getFollowUpPrompt(currentQuestion.id));
-      }, 500);
+      // Intent unclear - show follow-up prompt
+      addAssistantMessage(
+        result.explanation || result.suggestedFollowUp || getFollowUpPrompt(currentQuestion.id)
+      );
+    }
+  };
+
+  const handleTextSubmit = async (text: string) => {
+    if (!currentQuestion || isComplete || isProcessing) return;
+
+    addUserMessage(text);
+    setIsProcessing(true);
+
+    try {
+      // Convert messages to conversation history format
+      const conversationHistory = messages.map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      // Try AI parsing first
+      const aiResult = await parseWithAI(
+        text,
+        currentQuestion,
+        conversationHistory,
+        profile
+      );
+
+      // If AI gave us high confidence, use it
+      if (aiResult.confidence > 0.5 || aiResult.intent === 'question') {
+        handleAIParseResult(aiResult);
+      } else {
+        // Fall back to local parser for low confidence
+        const localResult = parseNaturalLanguageResponse(text, currentQuestion.id);
+        
+        if (localResult) {
+          const updatedProfile = {
+            ...profile,
+            [currentQuestion.id]: localResult.value
+          } as StrategyProfile;
+          setProfile(updatedProfile);
+          moveToNextQuestion(updatedProfile);
+        } else if (aiResult.explanation) {
+          // Use AI's explanation even with low confidence
+          handleAIParseResult(aiResult);
+        } else {
+          // Neither could parse - ask for clarification
+          setTimeout(() => {
+            addAssistantMessage(getFollowUpPrompt(currentQuestion.id));
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error('Text parsing error:', error);
+      // Fall back to local parser
+      const localResult = parseNaturalLanguageResponse(text, currentQuestion.id);
+      
+      if (localResult) {
+        const updatedProfile = {
+          ...profile,
+          [currentQuestion.id]: localResult.value
+        } as StrategyProfile;
+        setProfile(updatedProfile);
+        moveToNextQuestion(updatedProfile);
+      } else {
+        setTimeout(() => {
+          addAssistantMessage(getFollowUpPrompt(currentQuestion.id));
+        }, 500);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -359,8 +449,15 @@ I'll ask you a few questions about your goals, risk tolerance, and preferences. 
             <ChatMessage role="assistant" content="" isTyping />
           )}
 
+          {isProcessing && !isTyping && (
+            <div className="flex items-center gap-2 pl-11 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Thinking...</span>
+            </div>
+          )}
+
           {/* Quick reply buttons appear after last assistant message */}
-          {!isTyping && renderQuestionInput()}
+          {!isTyping && !isProcessing && renderQuestionInput()}
 
           <div ref={messagesEndRef} />
         </div>
@@ -372,9 +469,11 @@ I'll ask you a few questions about your goals, risk tolerance, and preferences. 
             placeholder={
               isComplete
                 ? "Creating your strategy..."
-                : "Type your answer or use voice input..."
+                : isProcessing
+                ? "Processing your response..."
+                : "Type naturally or ask a question..."
             }
-            disabled={isComplete || isTyping}
+            disabled={isComplete || isTyping || isProcessing}
             autoFocus
           />
         </div>
