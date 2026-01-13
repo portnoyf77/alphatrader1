@@ -202,10 +202,10 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             <div className="grid grid-cols-3 gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help space-y-0.5">
+                  <div className="cursor-help flex flex-col justify-between h-10">
                     <p className="text-xs text-muted-foreground leading-none">30d Return</p>
                     <div className={cn(
-                      "flex items-center gap-1 font-semibold leading-tight",
+                      "flex items-center gap-1 font-semibold",
                       isPositive ? "text-success" : "text-destructive"
                     )}>
                       {isPositive ? (
@@ -223,9 +223,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help space-y-0.5">
+                  <div className="cursor-help flex flex-col justify-between h-10">
                     <p className="text-xs text-muted-foreground leading-none">Max Drawdown</p>
-                    <p className="font-semibold text-destructive leading-tight">
+                    <p className="font-semibold text-destructive">
                       {formatPercent(strategy.performance.max_drawdown, false)}
                     </p>
                   </div>
@@ -236,9 +236,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help space-y-0.5">
+                  <div className="cursor-help flex flex-col justify-between h-10">
                     <p className="text-xs text-muted-foreground leading-none">Followers</p>
-                    <div className="flex items-center gap-1 font-semibold leading-tight">
+                    <div className="flex items-center gap-1 font-semibold">
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       {strategy.followers_count.toLocaleString()}
                     </div>
