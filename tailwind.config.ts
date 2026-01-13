@@ -76,10 +76,10 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
-        // Stranger Things custom colors
+        // Custom neon colors
         neon: {
-          red: "hsl(var(--neon-red))",
-          pink: "hsl(var(--eleven-pink))",
+          purple: "hsl(var(--neon-purple))",
+          cyan: "hsl(var(--neon-cyan))",
           blue: "hsl(var(--hawkins-blue))",
         },
         upside: {
@@ -109,8 +109,8 @@ export default {
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(350 100% 55% / 0.4)" },
-          "50%": { boxShadow: "0 0 40px -5px hsl(350 100% 55% / 0.7)" },
+          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(270 91% 65% / 0.4)" },
+          "50%": { boxShadow: "0 0 40px -5px hsl(270 91% 65% / 0.7)" },
         },
         "flicker": {
           "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": { opacity: "1" },
@@ -118,11 +118,11 @@ export default {
         },
         "eerie-pulse": {
           "0%, 100%": { 
-            boxShadow: "0 0 20px hsl(350 100% 55% / 0.3)",
+            boxShadow: "0 0 20px hsl(270 91% 65% / 0.3)",
             transform: "scale(1)",
           },
           "50%": { 
-            boxShadow: "0 0 40px hsl(350 100% 55% / 0.6)",
+            boxShadow: "0 0 40px hsl(270 91% 65% / 0.6)",
             transform: "scale(1.02)",
           },
         },

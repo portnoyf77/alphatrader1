@@ -4,114 +4,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Stranger Things - Dark Cinematic Design System */
+/* Dark Cinematic Design System - Neon Purple Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 35 30% 92%;
+    --background: 260 20% 4%;
+    --foreground: 240 20% 92%;
 
-    --card: 0 10% 6%;
-    --card-foreground: 35 30% 92%;
+    --card: 260 15% 6%;
+    --card-foreground: 240 20% 92%;
 
-    --popover: 0 10% 6%;
-    --popover-foreground: 35 30% 92%;
+    --popover: 260 15% 6%;
+    --popover-foreground: 240 20% 92%;
 
-    --primary: 350 100% 55%;
+    --primary: 270 91% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 15% 12%;
-    --secondary-foreground: 35 30% 92%;
+    --secondary: 260 20% 12%;
+    --secondary-foreground: 240 20% 92%;
 
-    --muted: 0 10% 18%;
-    --muted-foreground: 25 10% 55%;
+    --muted: 260 15% 18%;
+    --muted-foreground: 250 10% 55%;
 
-    --accent: 190 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 100% 40%;
+    --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 100% 35%;
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 43 100% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 0 20% 15%;
-    --input: 0 20% 15%;
-    --ring: 350 100% 55%;
+    --border: 260 25% 18%;
+    --input: 260 20% 12%;
+    --ring: 270 91% 65%;
 
     --radius: 0.5rem;
 
-    --chart-1: 350 100% 55%;
-    --chart-2: 120 100% 35%;
-    --chart-3: 190 100% 50%;
+    --chart-1: 270 91% 65%;
+    --chart-2: 142 76% 45%;
+    --chart-3: 185 100% 50%;
     --chart-4: 43 100% 50%;
-    --chart-5: 0 100% 40%;
+    --chart-5: 320 80% 60%;
 
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 35 30% 92%;
-    --sidebar-primary: 350 100% 55%;
+    --sidebar-background: 260 20% 4%;
+    --sidebar-foreground: 240 20% 92%;
+    --sidebar-primary: 270 91% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 15% 12%;
-    --sidebar-accent-foreground: 35 30% 92%;
-    --sidebar-border: 0 20% 15%;
-    --sidebar-ring: 350 100% 55%;
+    --sidebar-accent: 260 20% 12%;
+    --sidebar-accent-foreground: 240 20% 92%;
+    --sidebar-border: 260 25% 18%;
+    --sidebar-ring: 270 91% 65%;
 
-    /* Stranger Things custom tokens */
-    --neon-red: 350 100% 55%;
-    --upside-down: 0 50% 5%;
-    --eleven-pink: 340 100% 65%;
-    --hawkins-blue: 200 80% 45%;
-    --demogorgon: 0 70% 25%;
+    /* Custom theme tokens */
+    --neon-purple: 270 91% 65%;
+    --neon-cyan: 185 100% 50%;
+    --hawkins-blue: 200 80% 50%;
+    --upside-down: 260 60% 5%;
+    --glow-purple: 270 91% 75%;
     
     --font-display: 'Libre Baskerville', serif;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 35 30% 92%;
+    --background: 260 20% 4%;
+    --foreground: 240 20% 92%;
 
-    --card: 0 10% 6%;
-    --card-foreground: 35 30% 92%;
+    --card: 260 15% 6%;
+    --card-foreground: 240 20% 92%;
 
-    --popover: 0 10% 6%;
-    --popover-foreground: 35 30% 92%;
+    --popover: 260 15% 6%;
+    --popover-foreground: 240 20% 92%;
 
-    --primary: 350 100% 55%;
+    --primary: 270 91% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 15% 12%;
-    --secondary-foreground: 35 30% 92%;
+    --secondary: 260 20% 12%;
+    --secondary-foreground: 240 20% 92%;
 
-    --muted: 0 10% 18%;
-    --muted-foreground: 25 10% 55%;
+    --muted: 260 15% 18%;
+    --muted-foreground: 250 10% 55%;
 
-    --accent: 190 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 100% 40%;
+    --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 100% 35%;
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 43 100% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 0 20% 15%;
-    --input: 0 20% 15%;
-    --ring: 350 100% 55%;
+    --border: 260 25% 18%;
+    --input: 260 20% 12%;
+    --ring: 270 91% 65%;
 
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 35 30% 92%;
-    --sidebar-primary: 350 100% 55%;
+    --sidebar-background: 260 20% 4%;
+    --sidebar-foreground: 240 20% 92%;
+    --sidebar-primary: 270 91% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 15% 12%;
-    --sidebar-accent-foreground: 35 30% 92%;
-    --sidebar-border: 0 20% 15%;
-    --sidebar-ring: 350 100% 55%;
+    --sidebar-accent: 260 20% 12%;
+    --sidebar-accent-foreground: 240 20% 92%;
+    --sidebar-border: 260 25% 18%;
+    --sidebar-ring: 270 91% 65%;
   }
 }
 
@@ -132,11 +132,11 @@
 
 @layer utilities {
   .gradient-primary {
-    @apply bg-gradient-to-r from-primary via-red-400 to-primary;
+    @apply bg-gradient-to-r from-primary via-purple-400 to-primary;
   }
 
   .gradient-text {
-    background: linear-gradient(180deg, hsl(350 100% 70%) 0%, hsl(350 100% 55%) 50%, hsl(0 70% 25%) 100%);
+    background: linear-gradient(180deg, hsl(270 91% 80%) 0%, hsl(270 91% 65%) 50%, hsl(270 50% 35%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -144,50 +144,50 @@
 
   .glass-card {
     background: linear-gradient(135deg, 
-      hsl(0 10% 6% / 0.95) 0%, 
-      hsl(0 50% 5% / 0.9) 100%
+      hsl(260 15% 6% / 0.95) 0%, 
+      hsl(260 30% 5% / 0.9) 100%
     );
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(350 100% 55% / 0.2);
+    border: 1px solid hsl(270 91% 65% / 0.2);
     box-shadow: 
-      0 0 30px hsl(350 100% 55% / 0.1),
+      0 0 30px hsl(270 91% 65% / 0.1),
       inset 0 0 30px hsl(0 0% 0% / 0.3);
   }
 
   .glass-card:hover {
-    border-color: hsl(350 100% 55% / 0.4);
+    border-color: hsl(270 91% 65% / 0.4);
     box-shadow: 
-      0 0 40px hsl(350 100% 55% / 0.2),
+      0 0 40px hsl(270 91% 65% / 0.2),
       inset 0 0 30px hsl(0 0% 0% / 0.3);
   }
 
   .glow-primary {
     box-shadow: 
-      0 0 5px hsl(350 100% 55% / 0.5),
-      0 0 20px hsl(350 100% 55% / 0.3),
-      0 0 40px hsl(350 100% 55% / 0.2);
+      0 0 5px hsl(270 91% 65% / 0.5),
+      0 0 20px hsl(270 91% 65% / 0.3),
+      0 0 40px hsl(270 91% 65% / 0.2);
   }
 
   .glow-neon {
     box-shadow: 
-      0 0 5px hsl(350 100% 55%),
-      0 0 10px hsl(350 100% 55%),
-      0 0 20px hsl(350 100% 55%),
-      0 0 40px hsl(350 100% 55%);
+      0 0 5px hsl(270 91% 65%),
+      0 0 10px hsl(270 91% 65%),
+      0 0 20px hsl(270 91% 65%),
+      0 0 40px hsl(270 91% 65%);
   }
 
   .text-glow {
     text-shadow: 
-      0 0 7px hsl(350 100% 55%),
-      0 0 10px hsl(350 100% 55%),
-      0 0 21px hsl(350 100% 55%);
+      0 0 7px hsl(270 91% 65%),
+      0 0 10px hsl(270 91% 65%),
+      0 0 21px hsl(270 91% 65%);
   }
 
   .text-glow-accent {
     text-shadow: 
-      0 0 7px hsl(190 100% 50%),
-      0 0 10px hsl(190 100% 50%),
-      0 0 21px hsl(190 100% 50%);
+      0 0 7px hsl(185 100% 50%),
+      0 0 10px hsl(185 100% 50%),
+      0 0 21px hsl(185 100% 50%);
   }
 }
 
@@ -195,9 +195,9 @@
 @keyframes flicker {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     box-shadow: 
-      0 0 5px hsl(350 100% 55%),
-      0 0 10px hsl(350 100% 55%),
-      0 0 20px hsl(350 100% 55%);
+      0 0 5px hsl(270 91% 65%),
+      0 0 10px hsl(270 91% 65%),
+      0 0 20px hsl(270 91% 65%);
     opacity: 1;
   }
   20%, 24%, 55% {
@@ -209,9 +209,9 @@
 @keyframes textFlicker {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     text-shadow: 
-      0 0 7px hsl(350 100% 55%),
-      0 0 10px hsl(350 100% 55%),
-      0 0 21px hsl(350 100% 55%);
+      0 0 7px hsl(270 91% 65%),
+      0 0 10px hsl(270 91% 65%),
+      0 0 21px hsl(270 91% 65%);
     opacity: 1;
   }
   20%, 24%, 55% {
@@ -255,11 +255,11 @@
 /* Eerie Pulse */
 @keyframes eeriePulse {
   0%, 100% { 
-    box-shadow: 0 0 20px hsl(350 100% 55% / 0.3);
+    box-shadow: 0 0 20px hsl(270 91% 65% / 0.3);
     transform: scale(1);
   }
   50% { 
-    box-shadow: 0 0 40px hsl(350 100% 55% / 0.6);
+    box-shadow: 0 0 40px hsl(270 91% 65% / 0.6);
     transform: scale(1.02);
   }
 }
