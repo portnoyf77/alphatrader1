@@ -1,11 +1,24 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
 import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
+
+// Map gemstones to unique icons
+const gemstoneIcons: Record<string, React.ElementType> = {
+  'Sapphire': Gem,
+  'Emerald': Hexagon,
+  'Peridot': Pentagon,
+  'Amber': Square,
+  'Pearl': Circle,
+  'Opal': Octagon,
+  'Diamond': Diamond,
+  'Topaz': Triangle,
+  'Quartz': Gem,
+};
 
 // Map sectors to icons
 const sectorIcons: Record<string, React.ElementType> = {
@@ -72,6 +85,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   // Get gemstone for visual indicator
   const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
   const gemstoneColors = getGemstoneColor(gemstone);
+  const GemIcon = gemstoneIcons[gemstone] || Gem;
 
   return (
     <Link to={`/strategy/${strategy.id}`}>
@@ -102,12 +116,12 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-lg cursor-help",
+                      "flex h-9 w-9 items-center justify-center rounded-lg cursor-help shrink-0",
                       gemstoneColors.bg,
                       gemstoneColors.border,
                       "border"
                     )}>
-                      <Gem className={cn("h-4 w-4", gemstoneColors.text)} />
+                      <GemIcon className={cn("h-5 w-5", gemstoneColors.text)} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
@@ -188,16 +202,16 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             <div className="grid grid-cols-3 gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground">30d Return</p>
+                  <div className="cursor-help space-y-0.5">
+                    <p className="text-xs text-muted-foreground leading-none">30d Return</p>
                     <div className={cn(
-                      "flex items-center gap-1 font-semibold",
+                      "flex items-center gap-1 font-semibold leading-tight",
                       isPositive ? "text-success" : "text-destructive"
                     )}>
                       {isPositive ? (
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendingUp className="h-4 w-4 shrink-0" />
                       ) : (
-                        <TrendingDown className="h-4 w-4" />
+                        <TrendingDown className="h-4 w-4 shrink-0" />
                       )}
                       {formatPercent(strategy.performance.return_30d)}
                     </div>
@@ -209,9 +223,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground">Max Drawdown</p>
-                    <p className="font-semibold text-destructive">
+                  <div className="cursor-help space-y-0.5">
+                    <p className="text-xs text-muted-foreground leading-none">Max Drawdown</p>
+                    <p className="font-semibold text-destructive leading-tight">
                       {formatPercent(strategy.performance.max_drawdown, false)}
                     </p>
                   </div>
@@ -222,10 +236,10 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground">Followers</p>
-                    <div className="flex items-center gap-1 font-semibold">
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                  <div className="cursor-help space-y-0.5">
+                    <p className="text-xs text-muted-foreground leading-none">Followers</p>
+                    <div className="flex items-center gap-1 font-semibold leading-tight">
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       {strategy.followers_count.toLocaleString()}
                     </div>
                   </div>
