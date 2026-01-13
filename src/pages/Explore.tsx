@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, CheckCircle2, Info, Eye, EyeOff } from 'lucide-react';
+import { Search, SlidersHorizontal, X, CheckCircle2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -189,7 +189,7 @@ export default function Explore() {
         {filteredStrategies.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStrategies.map((strategy) => (
-              <StrategyCard key={strategy.id} strategy={strategy} showValidationBadge />
+              <StrategyCard key={strategy.id} strategy={strategy} />
             ))}
           </div>
         ) : (

@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2, Pause } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { StatusBadge } from './StatusBadge';
-import { ValidationBadge } from './ValidationBadge';
 import { StrategyThumbnail } from './StrategyThumbnail';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
@@ -13,12 +11,10 @@ import type { Strategy } from '@/lib/types';
 interface StrategyCardProps {
   strategy: Strategy;
   rank?: number;
-  showValidationBadge?: boolean;
 }
 
-export function StrategyCard({ strategy, rank, showValidationBadge = false }: StrategyCardProps) {
+export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const isPositive = strategy.performance.return_30d >= 0;
-  const isValidated = strategy.validation_status === 'validated' && strategy.validation_criteria_met;
   const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
   const isPaused = strategy.new_allocations_paused;
 
@@ -47,22 +43,12 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
                 <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              {showValidationBadge && isValidated ? (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-success text-xs border border-success/20">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Validated
-                </div>
-              ) : (
-                <ValidationBadge status={strategy.validation_status} />
-              )}
-              {isPaused && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-warning/10 text-warning text-xs border border-warning/20">
-                  <Pause className="h-3 w-3" />
-                  Paused
-                </div>
-              )}
-            </div>
+            {isPaused && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-warning/10 text-warning text-xs border border-warning/20">
+                <Pause className="h-3 w-3" />
+                Paused
+              </div>
+            )}
           </div>
 
           <TooltipProvider delayDuration={200}>
@@ -92,17 +78,6 @@ export function StrategyCard({ strategy, rank, showValidationBadge = false }: St
                 </TooltipTrigger>
                 <TooltipContent className="text-xs">
                   Primary investment objective
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20 cursor-help">
-                    <Shield className="h-3 w-3" />
-                    Creator invested
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Creator has {formatCurrency(strategy.creator_investment)} of their own capital invested
                 </TooltipContent>
               </Tooltip>
             </div>
