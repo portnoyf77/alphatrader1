@@ -160,7 +160,7 @@ export default function Create() {
         { role: 'Stability Buffer', percentage: 15 },
         { role: 'Inflation Hedge', percentage: 10 },
       ],
-      rationale: `Based on your ${strategyProfile.primaryGoal} goal with a ${strategyProfile.timeline}-year timeline, this portfolio is structured around a core-satellite approach optimized for your ${strategyProfile.riskStatement === 'maximum-growth' ? 'aggressive' : strategyProfile.riskStatement === 'protect' ? 'conservative' : 'balanced'} risk profile.`,
+      rationale: `We built this portfolio to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline} years. ${strategyProfile.riskStatement === 'maximum-growth' ? 'You said you\'re okay with bigger ups and downs to aim for higher returns, so we picked investments with more growth potential.' : strategyProfile.riskStatement === 'protect' ? 'Since protecting your money is important to you, we focused on steadier investments that won\'t swing as wildly.' : 'We balanced growth opportunities with stability, so you get a mix of investments that can grow but won\'t keep you up at night.'}`,
       risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
     });
     
