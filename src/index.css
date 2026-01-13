@@ -1,117 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Cinematic Design System - Neon Purple Theme */
+/* MVP Investing - Dark Purple Fintech Design System */
 
 @layer base {
   :root {
-    --background: 260 20% 4%;
-    --foreground: 240 20% 92%;
+    --background: 240 10% 6%;
+    --foreground: 220 20% 95%;
 
-    --card: 260 15% 6%;
-    --card-foreground: 240 20% 92%;
+    --card: 240 10% 9%;
+    --card-foreground: 220 20% 95%;
 
-    --popover: 260 15% 6%;
-    --popover-foreground: 240 20% 92%;
+    --popover: 240 10% 9%;
+    --popover-foreground: 220 20% 95%;
 
-    --primary: 270 91% 65%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 20% 12%;
-    --secondary-foreground: 240 20% 92%;
+    --secondary: 240 10% 14%;
+    --secondary-foreground: 220 20% 95%;
 
-    --muted: 260 15% 18%;
-    --muted-foreground: 250 10% 55%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 185 100% 50%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 100% 50%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 45%;
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 43 100% 50%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 260 25% 18%;
-    --input: 260 20% 12%;
-    --ring: 270 91% 65%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --chart-1: 270 91% 65%;
-    --chart-2: 142 76% 45%;
-    --chart-3: 185 100% 50%;
-    --chart-4: 43 100% 50%;
-    --chart-5: 320 80% 60%;
+    --chart-1: 262 83% 58%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 220 70% 50%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 72% 51%;
 
-    --sidebar-background: 260 20% 4%;
-    --sidebar-foreground: 240 20% 92%;
-    --sidebar-primary: 270 91% 65%;
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 20% 12%;
-    --sidebar-accent-foreground: 240 20% 92%;
-    --sidebar-border: 260 25% 18%;
-    --sidebar-ring: 270 91% 65%;
-
-    /* Custom theme tokens */
-    --neon-purple: 270 91% 65%;
-    --neon-cyan: 185 100% 50%;
-    --hawkins-blue: 200 80% 50%;
-    --upside-down: 260 60% 5%;
-    --glow-purple: 270 91% 75%;
-    
-    --font-display: 'Libre Baskerville', serif;
+    --sidebar-accent: 240 10% 14%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 240 10% 18%;
+    --sidebar-ring: 262 83% 58%;
   }
 
   .dark {
-    --background: 260 20% 4%;
-    --foreground: 240 20% 92%;
+    --background: 240 10% 6%;
+    --foreground: 220 20% 95%;
 
-    --card: 260 15% 6%;
-    --card-foreground: 240 20% 92%;
+    --card: 240 10% 9%;
+    --card-foreground: 220 20% 95%;
 
-    --popover: 260 15% 6%;
-    --popover-foreground: 240 20% 92%;
+    --popover: 240 10% 9%;
+    --popover-foreground: 220 20% 95%;
 
-    --primary: 270 91% 65%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 20% 12%;
-    --secondary-foreground: 240 20% 92%;
+    --secondary: 240 10% 14%;
+    --secondary-foreground: 220 20% 95%;
 
-    --muted: 260 15% 18%;
-    --muted-foreground: 250 10% 55%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 185 100% 50%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 100% 50%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 45%;
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 43 100% 50%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 260 25% 18%;
-    --input: 260 20% 12%;
-    --ring: 270 91% 65%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 262 83% 58%;
 
-    --sidebar-background: 260 20% 4%;
-    --sidebar-foreground: 240 20% 92%;
-    --sidebar-primary: 270 91% 65%;
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 20% 12%;
-    --sidebar-accent-foreground: 240 20% 92%;
-    --sidebar-border: 260 25% 18%;
-    --sidebar-ring: 270 91% 65%;
+    --sidebar-accent: 240 10% 14%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 240 10% 18%;
+    --sidebar-ring: 262 83% 58%;
   }
 }
 
@@ -122,169 +111,219 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
   }
 }
 
 @layer utilities {
   .gradient-primary {
-    @apply bg-gradient-to-r from-primary via-purple-400 to-primary;
+    @apply bg-gradient-to-r from-primary to-purple-400;
   }
 
   .gradient-text {
-    background: linear-gradient(180deg, hsl(270 91% 80%) 0%, hsl(270 91% 65%) 50%, hsl(270 50% 35%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent;
   }
 
   .glass-card {
-    background: linear-gradient(135deg, 
-      hsl(260 15% 6% / 0.95) 0%, 
-      hsl(260 30% 5% / 0.9) 100%
-    );
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(270 91% 65% / 0.2);
-    box-shadow: 
-      0 0 30px hsl(270 91% 65% / 0.1),
-      inset 0 0 30px hsl(0 0% 0% / 0.3);
-  }
-
-  .glass-card:hover {
-    border-color: hsl(270 91% 65% / 0.4);
-    box-shadow: 
-      0 0 40px hsl(270 91% 65% / 0.2),
-      inset 0 0 30px hsl(0 0% 0% / 0.3);
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
   }
 
   .glow-primary {
-    box-shadow: 
-      0 0 5px hsl(270 91% 65% / 0.5),
-      0 0 20px hsl(270 91% 65% / 0.3),
-      0 0 40px hsl(270 91% 65% / 0.2);
-  }
-
-  .glow-neon {
-    box-shadow: 
-      0 0 5px hsl(270 91% 65%),
-      0 0 10px hsl(270 91% 65%),
-      0 0 20px hsl(270 91% 65%),
-      0 0 40px hsl(270 91% 65%);
-  }
-
-  .text-glow {
-    text-shadow: 
-      0 0 7px hsl(270 91% 65%),
-      0 0 10px hsl(270 91% 65%),
-      0 0 21px hsl(270 91% 65%);
-  }
-
-  .text-glow-accent {
-    text-shadow: 
-      0 0 7px hsl(185 100% 50%),
-      0 0 10px hsl(185 100% 50%),
-      0 0 21px hsl(185 100% 50%);
+    box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.5);
   }
 }
 
-/* Neon Flicker Animation */
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    box-shadow: 
-      0 0 5px hsl(270 91% 65%),
-      0 0 10px hsl(270 91% 65%),
-      0 0 20px hsl(270 91% 65%);
-    opacity: 1;
-  }
-  20%, 24%, 55% {
-    box-shadow: none;
-    opacity: 0.8;
-  }
+/* Gem Refinement Animation Styles */
+.gem-animation-container {
+  @apply relative min-h-[600px] flex flex-col items-center justify-center overflow-hidden;
 }
 
-@keyframes textFlicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    text-shadow: 
-      0 0 7px hsl(270 91% 65%),
-      0 0 10px hsl(270 91% 65%),
-      0 0 21px hsl(270 91% 65%);
-    opacity: 1;
-  }
-  20%, 24%, 55% {
-    text-shadow: none;
-    opacity: 0.8;
-  }
+.gem-animation-bg {
+  @apply absolute inset-0 pointer-events-none;
 }
 
-.glow-flicker {
-  animation: flicker 3s infinite;
+.bg-particles {
+  @apply absolute inset-0;
 }
 
-.text-flicker {
-  animation: textFlicker 4s infinite;
+.bg-particle {
+  @apply absolute w-1 h-1 rounded-full bg-primary/30;
+  animation: float-up 10s ease-in-out infinite;
 }
 
-/* Light Bulb Flicker */
-@keyframes lightFlicker {
-  0%, 100% { opacity: 1; }
-  41%, 43% { opacity: 0.8; }
-  42% { opacity: 0.2; }
-  50%, 52% { opacity: 0.9; }
-  51% { opacity: 0.3; }
+@keyframes float-up {
+  0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
 }
 
-.light-flicker {
-  animation: lightFlicker 2s infinite;
+.gem-workbench {
+  @apply relative flex items-center justify-center gap-8 py-12;
 }
 
-/* Upside Down Effects */
-@keyframes upsideDownDrift {
-  0% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
-  50% { opacity: 0.6; }
-  100% { transform: translateY(-30px) rotate(5deg); opacity: 0.3; }
+.gem-display {
+  @apply relative w-48 h-48 flex items-center justify-center;
 }
 
-.upside-down-particle {
-  animation: upsideDownDrift 4s ease-in-out infinite;
+.gem-container {
+  @apply relative w-full h-full flex items-center justify-center;
 }
 
-/* Eerie Pulse */
-@keyframes eeriePulse {
-  0%, 100% { 
-    box-shadow: 0 0 20px hsl(270 91% 65% / 0.3);
-    transform: scale(1);
-  }
-  50% { 
-    box-shadow: 0 0 40px hsl(270 91% 65% / 0.6);
-    transform: scale(1.02);
-  }
+.gem-svg {
+  @apply w-40 h-40 transition-all duration-500;
 }
 
-.eerie-pulse {
-  animation: eeriePulse 3s ease-in-out infinite;
+.gem-glow {
+  @apply absolute inset-0 rounded-full transition-opacity duration-1000;
 }
 
-/* Scanlines Overlay */
-.scanlines::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15),
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  pointer-events: none;
-  opacity: 0.3;
+/* Gem animation states */
+.gem-emerge {
+  animation: emerge 2s ease-out forwards;
 }
 
-/* Particle Crystallization Animations - Stranger Things Edition */
+@keyframes emerge {
+  0% { transform: translateY(50px) scale(0.5); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.gem-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.gem-present {
+  animation: present 1s ease-out forwards;
+}
+
+@keyframes present {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1.1); }
+}
+
+/* Gem cutting animation */
+.gem-cutting .gem-svg {
+  animation: gem-rotate 4s linear infinite;
+}
+
+@keyframes gem-rotate {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+/* Gem polishing glow */
+.gem-polishing .gem-svg {
+  animation: polish-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes polish-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 5px currentColor); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 20px currentColor); }
+}
+
+/* Worker styles */
+.gem-worker {
+  @apply relative w-24 h-36;
+}
+
+.worker-svg {
+  @apply w-full h-full;
+}
+
+.worker-left { transform: scaleX(-1); }
+
+/* Worker arm animations */
+.chisel-swing .worker-arm {
+  animation: chisel 0.3s ease-in-out infinite;
+}
+
+@keyframes chisel {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(15deg); }
+}
+
+.polish-motion .worker-arm {
+  animation: polish 0.5s ease-in-out infinite;
+}
+
+@keyframes polish {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+}
+
+/* Sparks */
+.sparks-container {
+  @apply absolute top-1/2 left-1/2;
+}
+
+.spark {
+  @apply absolute w-1 h-1 rounded-full bg-warning;
+  animation: spark-fly 0.5s ease-out infinite;
+}
+
+.spark-1 { --spark-x: 20px; --spark-y: -30px; animation-delay: 0s; }
+.spark-2 { --spark-x: -15px; --spark-y: -25px; animation-delay: 0.1s; }
+.spark-3 { --spark-x: 25px; --spark-y: -20px; animation-delay: 0.2s; }
+.spark-4 { --spark-x: -20px; --spark-y: -35px; animation-delay: 0.15s; }
+.spark-5 { --spark-x: 10px; --spark-y: -40px; animation-delay: 0.25s; }
+
+@keyframes spark-fly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) scale(0); }
+}
+
+/* Gem sparkles */
+.gem-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.sparkle-1 { animation-delay: 0s; }
+.sparkle-2 { animation-delay: 0.3s; }
+.sparkle-3 { animation-delay: 0.6s; }
+.sparkle-4 { animation-delay: 0.9s; }
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Progress info */
+.gem-progress-info {
+  @apply text-center mt-8;
+}
+
+.phase-dots {
+  @apply flex justify-center gap-2 mt-6;
+}
+
+.phase-dot {
+  @apply w-2 h-2 rounded-full bg-muted transition-all duration-300;
+}
+
+.phase-dot.active {
+  @apply bg-primary w-6;
+}
+
+.phase-dot.completed {
+  @apply bg-primary;
+}
+
+/* Scale in animation */
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+@keyframes scale-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Particle Crystallization Animations */
 @keyframes particle-gather {
   0% { 
     transform: translate(var(--start-x), var(--start-y));
@@ -356,70 +395,4 @@
 
 .animate-sparkle-burst {
   animation: sparkle-burst 1.5s ease-out infinite;
-}
-
-/* Scale in animation */
-.animate-scale-in {
-  animation: scale-in 0.5s ease-out forwards;
-}
-
-@keyframes scale-in {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* Portal/Vortex effect for gem reveal */
-@keyframes portalPulse {
-  0%, 100% {
-    box-shadow: 
-      0 0 20px hsl(350 100% 55% / 0.4),
-      0 0 40px hsl(350 100% 55% / 0.2),
-      inset 0 0 30px hsl(350 100% 55% / 0.1);
-  }
-  50% {
-    box-shadow: 
-      0 0 40px hsl(350 100% 55% / 0.6),
-      0 0 80px hsl(350 100% 55% / 0.3),
-      inset 0 0 50px hsl(350 100% 55% / 0.2);
-  }
-}
-
-.portal-glow {
-  animation: portalPulse 2s ease-in-out infinite;
-}
-
-/* Floating ash particles */
-@keyframes ashFloat {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 0;
-  }
-  10% { opacity: 0.6; }
-  90% { opacity: 0.6; }
-  100% {
-    transform: translateY(-100vh) translateX(50px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-.ash-particle {
-  animation: ashFloat 8s linear infinite;
-}
-
-/* Progress indicator styles */
-.phase-dots {
-  @apply flex justify-center gap-2 mt-6;
-}
-
-.phase-dot {
-  @apply w-2 h-2 rounded-full bg-muted transition-all duration-300;
-}
-
-.phase-dot.active {
-  @apply bg-primary w-6;
-  box-shadow: 0 0 10px hsl(350 100% 55% / 0.5);
-}
-
-.phase-dot.completed {
-  @apply bg-primary;
 }

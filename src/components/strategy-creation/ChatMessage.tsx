@@ -20,9 +20,9 @@ export function ChatMessage({ role, content, isTyping = false }: ChatMessageProp
       {/* Avatar */}
       <div
         className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-sm flex items-center justify-center transition-all duration-300',
+          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
           isAssistant 
-            ? 'bg-primary/20 text-primary shadow-[0_0_15px_hsl(350_100%_55%_/_0.3)]' 
+            ? 'bg-primary/20 text-primary' 
             : 'bg-secondary text-muted-foreground'
         )}
       >
@@ -36,17 +36,17 @@ export function ChatMessage({ role, content, isTyping = false }: ChatMessageProp
       {/* Message Bubble */}
       <div
         className={cn(
-          'max-w-[80%] rounded-sm px-4 py-3 transition-all duration-300',
+          'max-w-[80%] rounded-2xl px-4 py-3',
           isAssistant 
-            ? 'bg-secondary/80 text-foreground rounded-tl-none border border-primary/20 shadow-[0_0_20px_hsl(350_100%_55%_/_0.1)]' 
-            : 'bg-primary text-primary-foreground rounded-tr-none shadow-[0_0_15px_hsl(350_100%_55%_/_0.2)]'
+            ? 'bg-secondary text-foreground rounded-tl-sm' 
+            : 'bg-primary text-primary-foreground rounded-tr-sm'
         )}
       >
         {isTyping ? (
           <div className="flex gap-1 py-1">
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         ) : (
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
