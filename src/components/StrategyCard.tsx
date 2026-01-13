@@ -1,12 +1,54 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { StrategyThumbnail } from './StrategyThumbnail';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
-import type { Strategy } from '@/lib/types';
+import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
+
+// Map sectors to icons
+const sectorIcons: Record<string, React.ElementType> = {
+  'Technology': Laptop,
+  'Semiconductors': Laptop,
+  'Innovation': Laptop,
+  'Clean Tech': Laptop,
+  'Healthcare': Heart,
+  'Biotech': Heart,
+  'Genomics': Heart,
+  'Med Devices': Heart,
+  'Clean Energy': Leaf,
+  'Solar': Leaf,
+  'Batteries': Zap,
+  'Dividend': DollarSign,
+  'Income': DollarSign,
+  'REITs': DollarSign,
+  'Bonds': Shield,
+  'Long Bonds': Shield,
+  'Inflation Protected': Shield,
+  'Intl Bonds': Shield,
+  'International': Globe,
+  'Emerging Markets': Globe,
+  'Intl Value': Globe,
+  'Broad Market': BarChart3,
+  'Value': TrendingUp,
+  'Large Value': TrendingUp,
+  'Small Value': TrendingUp,
+  'Momentum': TrendingUp,
+  'Commodities': Gem,
+};
+
+const geoLabels: Record<GeoFocus, { label: string; flag: string; tooltip: string }> = {
+  'US': { label: 'US', flag: '🇺🇸', tooltip: 'Focused on United States markets' },
+  'Global': { label: 'Global', flag: '🌍', tooltip: 'Diversified across global markets' },
+  'Emerging Markets': { label: 'EM', flag: '🌏', tooltip: 'Focused on emerging market economies' },
+  'International': { label: 'Intl', flag: '🌐', tooltip: 'International developed markets excluding US' },
+};
+
+const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip: string }> = {
+  'Low': { label: 'Low Risk', className: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20', tooltip: 'Conservative strategy focused on preserving your money' },
+  'Medium': { label: 'Med Risk', className: 'bg-violet-500/10 text-violet-400 border-violet-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
+  'High': { label: 'High Risk', className: 'bg-orange-500/10 text-orange-400 border-orange-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
+};
 
 interface StrategyCardProps {
   strategy: Strategy;
@@ -15,8 +57,10 @@ interface StrategyCardProps {
 
 export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const isPositive = strategy.performance.return_30d >= 0;
-  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
   const isPaused = strategy.new_allocations_paused;
+  const geoInfo = geoLabels[strategy.geo_focus];
+  const riskInfo = riskConfig[strategy.risk_level];
+  const displaySectors = strategy.sectors.slice(0, 2);
 
   return (
     <Link to={`/strategy/${strategy.id}`}>
@@ -29,13 +73,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   #{rank}
                 </div>
               )}
-              <StrategyThumbnail
-                sectors={strategy.sectors}
-                geoFocus={strategy.geo_focus}
-                riskLevel={strategy.risk_level}
-                gemstone={gemstone}
-                size="sm"
-              />
               <div>
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {strategy.strategy_name}
@@ -53,6 +90,50 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
 
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {/* Sector icons */}
+              {displaySectors.map((sector, idx) => {
+                const Icon = sectorIcons[sector] || BarChart3;
+                return (
+                  <Tooltip key={idx}>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
+                        <Icon className="h-3.5 w-3.5" />
+                        {sector}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      Invests in {sector}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+              
+              {/* Geo focus */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
+                    <span>{geoInfo.flag}</span>
+                    {geoInfo.label}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  {geoInfo.tooltip}
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Risk level */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={cn("inline-flex items-center px-2 py-1 rounded-md text-xs border cursor-help", riskInfo.className)}>
+                    {riskInfo.label}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[200px]">
+                  {riskInfo.tooltip}
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Strategy type */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
@@ -66,18 +147,8 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 </TooltipTrigger>
                 <TooltipContent className="text-xs">
                   {strategy.strategy_type === 'GenAI' 
-                    ? 'Strategy created using AI-powered optimization' 
-                    : 'Strategy manually constructed by creator'}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
-                    {strategy.objective}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs">
-                  Primary investment objective
+                    ? 'Built with AI-powered optimization' 
+                    : 'Manually constructed by creator'}
                 </TooltipContent>
               </Tooltip>
             </div>
