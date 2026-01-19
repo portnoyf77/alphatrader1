@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -206,91 +206,98 @@ export default function PortfolioOwnerDetail() {
             )}
           </div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="holdings">
-            <TabsList className="bg-secondary mb-6">
-              <TabsTrigger value="holdings">Holdings</TabsTrigger>
-              <TabsTrigger value="performance">Performance</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              {isLive && <TabsTrigger value="controls">Controls</TabsTrigger>}
-            </TabsList>
+          {/* Performance Chart */}
+          <div className="mb-8">
+            <PerformanceChart 
+              return30d={portfolio.performance.return_30d} 
+              return90d={portfolio.performance.return_90d} 
+              portfolioName={portfolio.name} 
+            />
+          </div>
 
-            <TabsContent value="holdings">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>Full Asset Allocation</CardTitle>
+          {/* Holdings Table */}
+          <Card className="glass-card mb-8">
+            <CardHeader>
+              <CardTitle>Holdings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Ticker</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Sector</TableHead>
+                    <TableHead className="text-right">Weight</TableHead>
+                    {isLive && <TableHead className="text-right">Value</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {portfolio.holdings.map((holding) => (
+                    <TableRow key={holding.ticker}>
+                      <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
+                      <TableCell>{holding.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{holding.sector || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
+                            <div className="h-full bg-primary rounded-full" style={{ width: `${holding.weight}%` }} />
+                          </div>
+                          <span className="font-medium">{holding.weight}%</span>
+                        </div>
+                      </TableCell>
+                      {isLive && (
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(portfolio.creator_investment * (holding.weight / 100))}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {isLive && (
+                <div className="mt-6 p-4 rounded-lg bg-secondary/50">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Total Portfolio Value</span>
+                    <span className="text-xl font-bold">{formatCurrency(portfolio.creator_investment)}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Controls (Live only) */}
+          {isLive && (
+            <Card className="glass-card mb-8">
+              <CardHeader>
+                <CardTitle>Portfolio Controls</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StrategyControls strategy={portfolio} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Activity Log - Collapsible */}
+          <Collapsible>
+            <Card className="glass-card">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-secondary/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <History className="h-5 w-5" />
+                      Activity Log
+                    </CardTitle>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform [[data-state=open]_&]:rotate-180" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ticker</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Sector</TableHead>
-                        <TableHead className="text-right">Weight</TableHead>
-                        {isLive && <TableHead className="text-right">Value</TableHead>}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {portfolio.holdings.map((holding) => (
-                        <TableRow key={holding.ticker}>
-                          <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
-                          <TableCell>{holding.name}</TableCell>
-                          <TableCell className="text-muted-foreground">{holding.sector || '-'}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-primary rounded-full" style={{ width: `${holding.weight}%` }} />
-                              </div>
-                              <span className="font-medium">{holding.weight}%</span>
-                            </div>
-                          </TableCell>
-                          {isLive && (
-                            <TableCell className="text-right font-medium">
-                              {formatCurrency(portfolio.creator_investment * (holding.weight / 100))}
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {isLive && (
-                    <div className="mt-6 p-4 rounded-lg bg-secondary/50">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Portfolio Value</span>
-                        <span className="text-xl font-bold">{formatCurrency(portfolio.creator_investment)}</span>
-                      </div>
-                    </div>
-                  )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <StrategyActivityLog activityLog={portfolio.activity_log} />
                 </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="performance">
-              <PerformanceChart 
-                return30d={portfolio.performance.return_30d} 
-                return90d={portfolio.performance.return_90d} 
-                portfolioName={portfolio.name} 
-              />
-            </TabsContent>
-
-            <TabsContent value="activity">
-              <StrategyActivityLog activityLog={portfolio.activity_log} />
-            </TabsContent>
-
-            {isLive && (
-              <TabsContent value="controls">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Portfolio Controls</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <StrategyControls strategy={portfolio} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-          </Tabs>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Execute Modal */}
           <Dialog open={showExecuteModal} onOpenChange={setShowExecuteModal}>
