@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -18,11 +18,24 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+interface EditableHolding {
+  ticker: string;
+  name: string;
+  weight: number;
+  sector?: string;
+}
+
 export default function PortfolioOwnerDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showExecuteModal, setShowExecuteModal] = useState(false);
+  const [showTweakModal, setShowTweakModal] = useState(false);
+  const [tweakMode, setTweakMode] = useState<'choice' | 'manual'>('choice');
+  const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
+  const [newTicker, setNewTicker] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newWeight, setNewWeight] = useState('');
   const [investmentAmount, setInvestmentAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
 
@@ -74,6 +87,59 @@ export default function PortfolioOwnerDetail() {
     navigate('/dashboard');
   };
 
+  const openTweakModal = () => {
+    setEditableHoldings(portfolio.holdings.map(h => ({ ...h })));
+    setTweakMode('choice');
+    setShowTweakModal(true);
+  };
+
+  const closeTweakModal = () => {
+    setShowTweakModal(false);
+    setTweakMode('choice');
+    setNewTicker('');
+    setNewName('');
+    setNewWeight('');
+  };
+
+  const handleWeightChange = (ticker: string, newWeight: string) => {
+    const weight = parseFloat(newWeight) || 0;
+    setEditableHoldings(prev => 
+      prev.map(h => h.ticker === ticker ? { ...h, weight: Math.min(100, Math.max(0, weight)) } : h)
+    );
+  };
+
+  const handleRemoveHolding = (ticker: string) => {
+    setEditableHoldings(prev => prev.filter(h => h.ticker !== ticker));
+  };
+
+  const handleAddHolding = () => {
+    if (!newTicker.trim() || !newName.trim() || !newWeight.trim()) return;
+    const weight = parseFloat(newWeight) || 0;
+    if (weight <= 0 || weight > 100) return;
+    if (editableHoldings.some(h => h.ticker.toUpperCase() === newTicker.toUpperCase())) {
+      toast({ title: "Ticker already exists", variant: "destructive" });
+      return;
+    }
+    setEditableHoldings(prev => [...prev, { ticker: newTicker.toUpperCase(), name: newName, weight }]);
+    setNewTicker('');
+    setNewName('');
+    setNewWeight('');
+  };
+
+  const totalWeight = editableHoldings.reduce((sum, h) => sum + h.weight, 0);
+
+  const handleSaveManualChanges = () => {
+    if (Math.abs(totalWeight - 100) > 0.01) {
+      toast({ title: "Weights must sum to 100%", variant: "destructive" });
+      return;
+    }
+    toast({ 
+      title: "Portfolio updated (prototype)", 
+      description: "Your changes have been saved and a new simulation has started." 
+    });
+    closeTweakModal();
+  };
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
@@ -114,11 +180,9 @@ export default function PortfolioOwnerDetail() {
             <div className="flex gap-3">
               {isSimulating && (
                 <>
-                  <Button variant="outline" asChild>
-                    <Link to={`/invest?edit=${portfolio.id}`}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Tweak & Resimulate
-                    </Link>
+                  <Button variant="outline" onClick={openTweakModal}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Tweak & Resimulate
                   </Button>
                   <Button onClick={() => setShowExecuteModal(true)} className="glow-primary">
                     <Rocket className="h-4 w-4 mr-2" />
@@ -346,6 +410,166 @@ export default function PortfolioOwnerDetail() {
                   Go Live
                 </Button>
               </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Tweak Modal */}
+          <Dialog open={showTweakModal} onOpenChange={(open) => !open && closeTweakModal()}>
+            <DialogContent className="glass-card max-w-2xl max-h-[85vh] overflow-y-auto">
+              {tweakMode === 'choice' ? (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Tweak Your Portfolio</DialogTitle>
+                    <DialogDescription>
+                      Choose how you'd like to modify your portfolio allocation.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4 py-6">
+                    <button
+                      onClick={() => navigate(`/invest?edit=${portfolio.id}`)}
+                      className="flex flex-col items-center gap-3 p-6 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
+                    >
+                      <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <Sparkles className="h-8 w-8 text-primary" />
+                      </div>
+                      <span className="font-semibold text-lg">GenAI</span>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Describe changes in natural language and let AI optimize your allocation
+                      </p>
+                    </button>
+                    <button
+                      onClick={() => setTweakMode('manual')}
+                      className="flex flex-col items-center gap-3 p-6 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
+                    >
+                      <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <PenLine className="h-8 w-8 text-primary" />
+                      </div>
+                      <span className="font-semibold text-lg">Manual</span>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Edit weights, add or remove holdings yourself
+                      </p>
+                    </button>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={closeTweakModal}>Cancel</Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                <>
+                  <DialogHeader>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => setTweakMode('choice')} className="h-8 w-8">
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <div>
+                        <DialogTitle>Edit Allocation</DialogTitle>
+                        <DialogDescription>
+                          Adjust weights, remove holdings, or add new ones. Weights must sum to 100%.
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  
+                  <div className="py-4 space-y-4">
+                    {/* Holdings Table */}
+                    <div className="border rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Ticker</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead className="w-24 text-right">Weight %</TableHead>
+                            <TableHead className="w-12"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {editableHoldings.map((holding) => (
+                            <TableRow key={holding.ticker}>
+                              <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
+                              <TableCell className="text-muted-foreground">{holding.name}</TableCell>
+                              <TableCell className="text-right">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="0.1"
+                                  value={holding.weight}
+                                  onChange={(e) => handleWeightChange(holding.ticker, e.target.value)}
+                                  className="w-20 text-right h-8"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveHolding(holding.ticker)}
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Weight Summary */}
+                    <div className={cn(
+                      "flex justify-between items-center p-3 rounded-lg",
+                      Math.abs(totalWeight - 100) < 0.01 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                    )}>
+                      <span className="font-medium">Total Weight</span>
+                      <span className="font-bold">{totalWeight.toFixed(1)}%</span>
+                    </div>
+
+                    {/* Add New Holding */}
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <Label className="text-sm font-medium">Add New Holding</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ticker"
+                          value={newTicker}
+                          onChange={(e) => setNewTicker(e.target.value.toUpperCase())}
+                          className="w-24"
+                        />
+                        <Input
+                          placeholder="Name"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="%"
+                          value={newWeight}
+                          onChange={(e) => setNewWeight(e.target.value)}
+                          className="w-20"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={handleAddHolding}
+                          disabled={!newTicker || !newName || !newWeight}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={closeTweakModal}>Cancel</Button>
+                    <Button 
+                      onClick={handleSaveManualChanges}
+                      disabled={Math.abs(totalWeight - 100) > 0.01}
+                      className="glow-primary"
+                    >
+                      Save & Resimulate
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
