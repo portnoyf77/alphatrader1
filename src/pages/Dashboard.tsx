@@ -159,9 +159,9 @@ export default function Dashboard() {
                   </TableHeader>
                   <TableBody>
                     {filteredMyPortfolios.map((portfolio) => (
-                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/strategy/${portfolio.id}`)}>
+                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}>
                         <TableCell>
-                          <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-2">
                               {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
                               {portfolio.name}
