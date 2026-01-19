@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { ValidationBadge } from '@/components/ValidationBadge';
+
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyRiskProfile } from '@/components/StrategyRiskProfile';
@@ -120,10 +120,7 @@ export default function StrategyDetail() {
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="text-3xl font-bold">{strategy.strategy_name}</h1>
-                <ValidationBadge status={strategy.validation_status} />
-              </div>
+              <h1 className="text-3xl font-bold mb-2">{strategy.strategy_name}</h1>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="font-mono">{strategy.creator_id}</span>
                 <span className="flex items-center gap-1">
