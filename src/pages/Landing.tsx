@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, Lock, Activity } from 'lucide-react';
+import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, HelpCircle, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { StrategistSpotlight } from '@/components/StrategistSpotlight';
-import { HowStrategistsEarn } from '@/components/HowStrategistsEarn';
-import { StrategistEarningsCalculator } from '@/components/StrategistEarningsCalculator';
+import { AlphaSpotlight } from '@/components/AlphaSpotlight';
+import { HowAlphasEarn } from '@/components/HowAlphasEarn';
+import { AlphaEarningsCalculator } from '@/components/AlphaEarningsCalculator';
 import { mockStrategies, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -57,7 +57,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Stats Section - Enhanced with creator earnings */}
+      {/* Stats Section - Enhanced with Alpha earnings */}
       <section className="border-y border-border/50 bg-card/50">
         <div className="container mx-auto px-4 py-12">
           <TooltipProvider delayDuration={200}>
@@ -88,11 +88,15 @@ export default function Landing() {
                 <TooltipTrigger asChild>
                   <div className="text-center cursor-help">
                     <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
-                    <p className="text-muted-foreground mt-1">Strategist Earnings (30d)</p>
+                    <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                      Alpha Earnings (30d)
+                      <HelpCircle className="h-3 w-3" />
+                    </p>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Total earnings paid to strategists from management fees in the last 30 days
+                <TooltipContent className="text-xs max-w-[250px]">
+                  <strong>Alphas</strong> are portfolio managers who share their investment strategies. 
+                  When investors allocate capital to an Alpha's portfolio, the Alpha earns a share of the platform fees.
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -100,7 +104,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Value Props Section - Enhanced Creator Marketplace */}
+      {/* What is an Alpha? Explanation Banner */}
+      <section className="py-8 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center p-6 rounded-2xl bg-primary/5 border border-primary/20">
+            <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              What is an Alpha?
+            </h3>
+            <p className="text-muted-foreground">
+              An <span className="text-primary font-medium">Alpha</span> is a portfolio manager who designs investment strategies 
+              and makes them available for others to replicate. When investors allocate capital to follow an Alpha's portfolio, 
+              the Alpha earns passive income from management fees — turning expertise into earnings.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Props Section - Enhanced Alpha Marketplace */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -137,7 +158,7 @@ export default function Landing() {
               </p>
             </div>
 
-            {/* Strategist Marketplace - Enhanced */}
+            {/* Alpha Marketplace - Enhanced */}
             <div className="group p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden">
               <div className="absolute top-2 right-2">
                 <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
@@ -147,7 +168,7 @@ export default function Landing() {
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Strategist Marketplace</h3>
+              <h3 className="text-xl font-semibold mb-3">Alpha Marketplace</h3>
               <p className="text-muted-foreground mb-4">
                 Publish your portfolios and earn when others allocate. 
                 Build your reputation and generate passive income from your expertise.
@@ -155,7 +176,7 @@ export default function Landing() {
               <div className="flex items-center gap-2 text-sm">
                 <DollarSign className="h-4 w-4 text-primary" />
                 <span className="text-primary font-medium">
-                  Top strategist earning ~${creatorStats.topCreatorEarnings.toLocaleString()}/mo
+                  Top Alpha earning ~${creatorStats.topCreatorEarnings.toLocaleString()}/mo
                 </span>
               </div>
             </div>
@@ -163,11 +184,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Strategist Spotlight Section */}
-      <StrategistSpotlight strategies={validatedStrategies} />
+      {/* Alpha Spotlight Section */}
+      <AlphaSpotlight strategies={validatedStrategies} />
 
-      {/* How Strategists Earn Section */}
-      <HowStrategistsEarn />
+      {/* How Alphas Earn Section */}
+      <HowAlphasEarn />
 
       {/* Features Grid with Calculator */}
       <section className="py-24 bg-card/50">
@@ -216,7 +237,7 @@ export default function Landing() {
                     <DollarSign className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Strategist Revenue Share</h4>
+                    <h4 className="font-semibold mb-1">Alpha Revenue Share</h4>
                     <p className="text-muted-foreground">
                       Earn 20% of platform fees when investors allocate to your published portfolios.
                     </p>
@@ -226,7 +247,7 @@ export default function Landing() {
             </div>
             
             {/* Earnings Calculator */}
-            <StrategistEarningsCalculator />
+            <AlphaEarningsCalculator />
           </div>
         </div>
       </section>
@@ -239,7 +260,7 @@ export default function Landing() {
             <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
               <h3 className="text-2xl font-bold mb-3">Ready to invest smarter?</h3>
               <p className="text-muted-foreground mb-6">
-                Explore proven strategies from top creators.
+                Explore proven strategies from top Alphas.
               </p>
               <Button asChild size="lg" variant="outline" className="w-full">
                 <Link to="/explore">
@@ -249,7 +270,7 @@ export default function Landing() {
               </Button>
             </div>
 
-            {/* Strategist CTA */}
+            {/* Alpha CTA */}
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30">
               <h3 className="text-2xl font-bold mb-3">Ready to earn from your expertise?</h3>
               <p className="text-muted-foreground mb-6">
@@ -257,7 +278,7 @@ export default function Landing() {
               </p>
               <Button asChild size="lg" className="w-full glow-primary">
                 <Link to="/onboarding">
-                  Become a Strategist
+                  Become an Alpha
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

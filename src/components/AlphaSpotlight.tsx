@@ -7,13 +7,13 @@ import { formatCurrency } from '@/lib/mockData';
 import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { Strategy } from '@/lib/types';
 
-interface StrategistSpotlightProps {
+interface AlphaSpotlightProps {
   strategies: Strategy[];
 }
 
-export function StrategistSpotlight({ strategies }: StrategistSpotlightProps) {
+export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
   // Sort by earnings and take top 3
-  const topStrategists = [...strategies]
+  const topAlphas = [...strategies]
     .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
     .slice(0, 3);
 
@@ -23,19 +23,19 @@ export function StrategistSpotlight({ strategies }: StrategistSpotlightProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             <Crown className="h-4 w-4" />
-            Strategist Spotlight
+            Alpha Spotlight
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Top earning portfolio strategists
+            Top earning Alphas
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            These strategists have built trusted portfolios with proven track records. 
+            These portfolio managers have built trusted strategies with proven track records. 
             See how much they're earning from their expertise.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
-          {topStrategists.map((strategy, index) => {
+          {topAlphas.map((strategy, index) => {
             const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
             
             return (
@@ -68,7 +68,7 @@ export function StrategistSpotlight({ strategies }: StrategistSpotlightProps) {
                     </span>
                   </div>
 
-                  {/* Strategist & Portfolio */}
+                  {/* Alpha & Portfolio */}
                   <Link 
                     to={`/strategy/${strategy.id}`}
                     className="block group-hover:text-primary transition-colors"
@@ -116,7 +116,7 @@ export function StrategistSpotlight({ strategies }: StrategistSpotlightProps) {
         <div className="text-center">
           <Button asChild size="lg" className="glow-primary">
             <Link to="/onboarding">
-              Become a Strategist
+              Become an Alpha
               <TrendingUp className="ml-2 h-4 w-4" />
             </Link>
           </Button>
