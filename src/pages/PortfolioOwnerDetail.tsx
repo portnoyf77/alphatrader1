@@ -288,7 +288,7 @@ export default function PortfolioOwnerDetail() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="investment">Your Investment (Skin in the Game)</Label>
+                  <Label htmlFor="investment">Your Investment</Label>
                   <Input 
                     id="investment" 
                     type="number" 
