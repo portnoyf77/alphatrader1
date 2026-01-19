@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,7 @@ import { StrategyControls } from '@/components/StrategyControls';
 import { mockStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function PortfolioOwnerDetail() {
   const { id } = useParams();
@@ -182,20 +183,40 @@ export default function PortfolioOwnerDetail() {
               </>
             )}
             {isSimulating && (
-              <>
+              <TooltipProvider>
                 <Card className="glass-card">
                   <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground mb-1">Max Drawdown</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1 cursor-help">
+                          Worst Drop
+                          <Info className="h-3.5 w-3.5" />
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[200px]">
+                        <p>The biggest drop from peak to bottom during the simulation. Lower is better.</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <p className="text-2xl font-bold text-destructive">{formatPercent(portfolio.performance.max_drawdown)}</p>
                   </CardContent>
                 </Card>
                 <Card className="glass-card">
                   <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground mb-1">Volatility</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1 cursor-help">
+                          Risk Level
+                          <Info className="h-3.5 w-3.5" />
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[200px]">
+                        <p>How much returns swing up and down. Higher means more unpredictable performance.</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <p className="text-2xl font-bold">{portfolio.performance.volatility.toFixed(1)}%</p>
                   </CardContent>
                 </Card>
-              </>
+              </TooltipProvider>
             )}
           </div>
 
