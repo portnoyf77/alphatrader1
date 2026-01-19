@@ -47,7 +47,6 @@ export default function PortfolioOwnerDetail() {
   const createdDate = new Date(portfolio.created_date);
   const today = new Date();
   const simulationDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-  const validationProgress = Math.min((simulationDays / 60) * 100, 100); // 60 days to validate
 
   const handleExecute = () => {
     if (!investmentAmount || parseFloat(investmentAmount) <= 0) return;
@@ -111,33 +110,15 @@ export default function PortfolioOwnerDetail() {
 
           {/* Simulation Status Card */}
           {isSimulating && (
-            <Card className="mb-8 border-warning/50 bg-warning/5">
+            <Card className="mb-8 border-primary/50 bg-primary/5">
               <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-full bg-warning/20">
-                    <Clock className="h-6 w-6 text-warning" />
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-full bg-primary/20">
+                    <Clock className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">Simulation in Progress</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Your portfolio has been simulating for <span className="font-semibold text-foreground">{simulationDays} days</span>. 
-                      Portfolios typically need 60 days of simulation before going live.
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Validation progress</span>
-                        <span className="font-medium">{Math.round(validationProgress)}%</span>
-                      </div>
-                      <Progress value={validationProgress} className="h-2" />
-                    </div>
-                    {validationProgress >= 100 && (
-                      <div className="mt-4 p-3 rounded-lg bg-success/10 border border-success/30">
-                        <p className="text-sm text-success flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4" />
-                          Ready to go live! Your portfolio has met the minimum simulation period.
-                        </p>
-                      </div>
-                    )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Simulating for</p>
+                    <p className="text-2xl font-bold">{simulationDays} days</p>
                   </div>
                 </div>
               </CardContent>
@@ -242,7 +223,7 @@ export default function PortfolioOwnerDetail() {
                         <TableHead>Name</TableHead>
                         <TableHead>Sector</TableHead>
                         <TableHead className="text-right">Weight</TableHead>
-                        <TableHead className="text-right">Value</TableHead>
+                        {isLive && <TableHead className="text-right">Value</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -259,19 +240,23 @@ export default function PortfolioOwnerDetail() {
                               <span className="font-medium">{holding.weight}%</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatCurrency(portfolio.creator_investment * (holding.weight / 100))}
-                          </TableCell>
+                          {isLive && (
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(portfolio.creator_investment * (holding.weight / 100))}
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                  <div className="mt-6 p-4 rounded-lg bg-secondary/50">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Total Portfolio Value</span>
-                      <span className="text-xl font-bold">{formatCurrency(portfolio.creator_investment)}</span>
+                  {isLive && (
+                    <div className="mt-6 p-4 rounded-lg bg-secondary/50">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total Portfolio Value</span>
+                        <span className="text-xl font-bold">{formatCurrency(portfolio.creator_investment)}</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -312,14 +297,6 @@ export default function PortfolioOwnerDetail() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {validationProgress < 100 && (
-                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/30 flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
-                    <p className="text-sm text-warning">
-                      Your portfolio has only been simulating for {simulationDays} days. We recommend at least 60 days of simulation before going live.
-                    </p>
-                  </div>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="investment">Your Investment (Skin in the Game)</Label>
                   <Input 
