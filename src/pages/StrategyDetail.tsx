@@ -273,11 +273,6 @@ export default function StrategyDetail() {
                 </Card>
                 <StrategyRiskProfile strategy={strategy} />
               </div>
-              <Card className="border-muted bg-muted/5">
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">⚠️ Only validated portfolios are listed in the marketplace. This is a prototype. Not investment advice.</p>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="exposure">
