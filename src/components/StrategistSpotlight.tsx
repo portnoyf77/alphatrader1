@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { TrendingUp, Users, DollarSign, Crown, Shield } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Crown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StrategyThumbnail } from '@/components/StrategyThumbnail';
@@ -7,13 +7,13 @@ import { formatCurrency } from '@/lib/mockData';
 import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { Strategy } from '@/lib/types';
 
-interface CreatorSpotlightProps {
+interface StrategistSpotlightProps {
   strategies: Strategy[];
 }
 
-export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
+export function StrategistSpotlight({ strategies }: StrategistSpotlightProps) {
   // Sort by earnings and take top 3
-  const topCreators = [...strategies]
+  const topStrategists = [...strategies]
     .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
     .slice(0, 3);
 
@@ -23,19 +23,19 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             <Crown className="h-4 w-4" />
-            Creator Spotlight
+            Strategist Spotlight
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Top earning portfolio creators
+            Top earning portfolio strategists
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            These creators have built trusted portfolios with their own money invested. 
+            These strategists have built trusted portfolios with proven track records. 
             See how much they're earning from their expertise.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
-          {topCreators.map((strategy, index) => {
+          {topStrategists.map((strategy, index) => {
             const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
             
             return (
@@ -68,7 +68,7 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
                     </span>
                   </div>
 
-                  {/* Creator & Strategy */}
+                  {/* Strategist & Portfolio */}
                   <Link 
                     to={`/strategy/${strategy.id}`}
                     className="block group-hover:text-primary transition-colors"
@@ -77,18 +77,12 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
                     <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
                   </Link>
 
-                  {/* Skin in the game badge */}
-                  <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20">
-                    <Shield className="h-3 w-3" />
-                    {formatCurrency(strategy.creator_investment)} invested
-                  </div>
-
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div className="p-3 rounded-lg bg-secondary/50">
                       <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
                         <Users className="h-3 w-3" />
-                        Followers
+                        Investors
                       </div>
                       <p className="font-semibold">{strategy.followers_count.toLocaleString()}</p>
                     </div>
@@ -122,7 +116,7 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
         <div className="text-center">
           <Button asChild size="lg" className="glow-primary">
             <Link to="/onboarding">
-              Become a Creator
+              Become a Strategist
               <TrendingUp className="ml-2 h-4 w-4" />
             </Link>
           </Button>

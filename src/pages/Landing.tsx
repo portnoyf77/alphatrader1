@@ -3,9 +3,9 @@ import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, Dollar
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { CreatorSpotlight } from '@/components/CreatorSpotlight';
-import { HowCreatorsEarn } from '@/components/HowCreatorsEarn';
-import { CreatorEarningsCalculator } from '@/components/CreatorEarningsCalculator';
+import { StrategistSpotlight } from '@/components/StrategistSpotlight';
+import { HowStrategistsEarn } from '@/components/HowStrategistsEarn';
+import { StrategistEarningsCalculator } from '@/components/StrategistEarningsCalculator';
 import { mockStrategies, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -13,7 +13,7 @@ export default function Landing() {
   const validatedStrategies = mockStrategies.filter(s => s.status === 'validated_listed');
   const totalAllocated = validatedStrategies.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
   const totalFollowers = validatedStrategies.reduce((acc, s) => acc + s.followers_count, 0);
-  const totalCreatorInvestment = validatedStrategies.reduce((acc, s) => acc + s.creator_investment, 0);
+  
   return (
     <PageLayout showDisclaimer={false}>
       {/* Hero Section */}
@@ -87,23 +87,12 @@ export default function Landing() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-center cursor-help">
-                    <p className="text-3xl md:text-4xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
-                    <p className="text-muted-foreground mt-1">Creator Skin in Game</p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Total amount creators have invested in their own portfolios, aligning their interests with followers
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-center cursor-help">
                     <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
-                    <p className="text-muted-foreground mt-1">Creator Earnings (30d)</p>
+                    <p className="text-muted-foreground mt-1">Strategist Earnings (30d)</p>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[200px]">
-                  Total earnings paid to creators from management fees in the last 30 days
+                  Total earnings paid to strategists from management fees in the last 30 days
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -148,7 +137,7 @@ export default function Landing() {
               </p>
             </div>
 
-            {/* Creator Marketplace - Enhanced */}
+            {/* Strategist Marketplace - Enhanced */}
             <div className="group p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden">
               <div className="absolute top-2 right-2">
                 <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
@@ -158,15 +147,15 @@ export default function Landing() {
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Creator Marketplace</h3>
+              <h3 className="text-xl font-semibold mb-3">Strategist Marketplace</h3>
               <p className="text-muted-foreground mb-4">
-                Publish your strategies and earn when others allocate. 
+                Publish your portfolios and earn when others allocate. 
                 Build your reputation and generate passive income from your expertise.
               </p>
               <div className="flex items-center gap-2 text-sm">
                 <DollarSign className="h-4 w-4 text-primary" />
                 <span className="text-primary font-medium">
-                  Top creator earning ~${creatorStats.topCreatorEarnings.toLocaleString()}/mo
+                  Top strategist earning ~${creatorStats.topCreatorEarnings.toLocaleString()}/mo
                 </span>
               </div>
             </div>
@@ -174,11 +163,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Creator Spotlight Section */}
-      <CreatorSpotlight strategies={validatedStrategies} />
+      {/* Strategist Spotlight Section */}
+      <StrategistSpotlight strategies={validatedStrategies} />
 
-      {/* How Creators Earn Section */}
-      <HowCreatorsEarn />
+      {/* How Strategists Earn Section */}
+      <HowStrategistsEarn />
 
       {/* Features Grid with Calculator */}
       <section className="py-24 bg-card/50">
@@ -227,7 +216,7 @@ export default function Landing() {
                     <DollarSign className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Creator Revenue Share</h4>
+                    <h4 className="font-semibold mb-1">Strategist Revenue Share</h4>
                     <p className="text-muted-foreground">
                       Earn 20% of platform fees when investors allocate to your published portfolios.
                     </p>
@@ -237,7 +226,7 @@ export default function Landing() {
             </div>
             
             {/* Earnings Calculator */}
-            <CreatorEarningsCalculator />
+            <StrategistEarningsCalculator />
           </div>
         </div>
       </section>
@@ -260,15 +249,15 @@ export default function Landing() {
               </Button>
             </div>
 
-            {/* Creator CTA */}
+            {/* Strategist CTA */}
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30">
               <h3 className="text-2xl font-bold mb-3">Ready to earn from your expertise?</h3>
               <p className="text-muted-foreground mb-6">
-                Build and publish your first strategy today.
+                Build and publish your first portfolio today.
               </p>
               <Button asChild size="lg" className="w-full glow-primary">
                 <Link to="/onboarding">
-                  Become a Creator
+                  Become a Strategist
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
