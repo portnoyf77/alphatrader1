@@ -68,7 +68,7 @@ export function StrategyControls({
   if (isInactive) {
     return (
       <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-center">
-        <p className="text-sm text-destructive">This strategy has been liquidated and is no longer active.</p>
+        <p className="text-sm text-destructive">This portfolio has been liquidated and is no longer active.</p>
       </div>
     );
   }
@@ -157,7 +157,7 @@ export function StrategyControls({
               Propose Major Update
             </DialogTitle>
             <DialogDescription className="space-y-2">
-              <p>Major changes require follower opt-in and will create a new strategy version.</p>
+              <p>Major changes require follower opt-in and will create a new portfolio configuration.</p>
               <p className="text-warning">Followers who don't approve within {strategy.exit_window_days} days will be auto-exited.</p>
             </DialogDescription>
           </DialogHeader>
@@ -178,13 +178,13 @@ export function StrategyControls({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="h-5 w-5" />
-              Liquidate and deactivate this strategy?
+              Liquidate and deactivate this portfolio?
             </DialogTitle>
             <DialogDescription className="space-y-2">
               <p>This will:</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Exit all {strategy.followers_count.toLocaleString()} followers (prototype)</li>
-                <li>Remove the strategy from the marketplace</li>
+                <li>Remove the portfolio from the marketplace</li>
                 <li>Mark it as permanently inactive</li>
               </ul>
               <p className="text-destructive font-medium">This action cannot be undone.</p>
@@ -195,7 +195,7 @@ export function StrategyControls({
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleLiquidateConfirm}>
-              Liquidate Strategy
+              Liquidate Portfolio
             </Button>
           </DialogFooter>
         </DialogContent>

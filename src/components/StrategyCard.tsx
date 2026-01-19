@@ -218,7 +218,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[220px]">
-                  How much this strategy gained or lost in the past 30 days
+                  How much this portfolio gained or lost in the past 30 days
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -245,7 +245,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[220px]">
-                  How many people have put money into this strategy
+                  How many people have put money into this portfolio
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -279,7 +279,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[220px]">
-                  {turnoverTooltips[strategy.turnover_estimate] || 'How often the strategy trades'}
+                  {turnoverTooltips[strategy.turnover_estimate] || 'How often the portfolio trades'}
                 </TooltipContent>
               </Tooltip>
             </div>

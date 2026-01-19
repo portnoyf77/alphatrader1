@@ -32,7 +32,7 @@ export default function StrategyDetail() {
     return (
       <PageLayout>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Strategy not found</h1>
+          <h1 className="text-2xl font-bold mb-4">Portfolio not found</h1>
           <Button asChild>
             <Link to="/explore">Back to Marketplace</Link>
           </Button>
@@ -47,8 +47,8 @@ export default function StrategyDetail() {
       <PageLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">This strategy is not publicly listed</h1>
-          <p className="text-muted-foreground mb-6">Only validated strategies appear in the marketplace.</p>
+          <h1 className="text-2xl font-bold mb-2">This portfolio is not publicly listed</h1>
+          <p className="text-muted-foreground mb-6">Only validated portfolios appear in the marketplace.</p>
           <Button asChild>
             <Link to="/explore">Back to Marketplace</Link>
           </Button>
@@ -63,8 +63,8 @@ export default function StrategyDetail() {
       <PageLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">This strategy has been liquidated</h1>
-          <p className="text-muted-foreground mb-6">The creator has deactivated this strategy and all followers have been exited.</p>
+          <h1 className="text-2xl font-bold mb-2">This portfolio has been liquidated</h1>
+          <p className="text-muted-foreground mb-6">The creator has deactivated this portfolio and all followers have been exited.</p>
           <Button asChild>
             <Link to="/explore">Back to Marketplace</Link>
           </Button>
@@ -137,7 +137,7 @@ export default function StrategyDetail() {
               {isValidated && !isPaused ? (
                 <Button onClick={() => setShowAllocateModal(true)} className="glow-primary">
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Allocate to Strategy
+                  Allocate to Portfolio
                 </Button>
               ) : isPaused ? (
                 <TooltipProvider>
@@ -163,7 +163,7 @@ export default function StrategyDetail() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-xs">
-                      This strategy must complete validation before it can accept allocations.
+                      This portfolio must complete validation before it can accept allocations.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -186,7 +186,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How much this strategy gained or lost in the past 30 days</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">How much this portfolio gained or lost in the past 30 days</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -200,7 +200,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How many people have put money into this strategy</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">How many people have put money into this portfolio</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -211,7 +211,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">The creator's own money in this strategy — shows they believe in it</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">The creator's own money in this portfolio — shows they believe in it</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -251,7 +251,7 @@ export default function StrategyDetail() {
             <TabsContent value="overview" className="space-y-6">
               <div className="grid lg:grid-cols-2 gap-6">
                 <Card className="glass-card">
-                  <CardHeader><CardTitle>Strategy Summary</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Portfolio Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-3">
                       <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-sm">
@@ -262,7 +262,7 @@ export default function StrategyDetail() {
                       <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.risk_level} Risk</span>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Strategy Rationale</h4>
+                      <h4 className="font-medium mb-2">Portfolio Rationale</h4>
                       <p className="text-muted-foreground text-sm">{strategy.description_rationale}</p>
                     </div>
                     <div>
@@ -275,7 +275,7 @@ export default function StrategyDetail() {
               </div>
               <Card className="border-muted bg-muted/5">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">⚠️ Only validated strategies are listed in the marketplace. This is a prototype. Not investment advice.</p>
+                  <p className="text-sm text-muted-foreground">⚠️ Only validated portfolios are listed in the marketplace. This is a prototype. Not investment advice.</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -349,7 +349,7 @@ export default function StrategyDetail() {
                 <div className="flex items-start gap-2">
                   <Checkbox id="acknowledge" checked={acknowledgeTerms} onCheckedChange={(checked) => setAcknowledgeTerms(checked === true)} />
                   <Label htmlFor="acknowledge" className="text-sm text-muted-foreground leading-tight cursor-pointer">
-                    I understand strategy changes may occur and major changes require opt-in.
+                    I understand portfolio changes may occur and major changes require opt-in.
                   </Label>
                 </div>
               </div>
