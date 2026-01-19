@@ -1,9 +1,9 @@
-import { Strategy, ChartDataPoint, Comment } from './types';
+import { Portfolio, ChartDataPoint, Comment } from './types';
 
-export const mockStrategies: Strategy[] = [
+export const mockStrategies: Portfolio[] = [
   {
     id: '1',
-    strategy_name: 'Sapphire-347',
+    name: 'Sapphire-347',
     creator_id: '@inv_7x2k',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -19,7 +19,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 5000000,
+    capacity_limit_usd: 5000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 35, sector: 'Broad Market' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 25, sector: 'Technology' },
@@ -35,7 +35,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Diversified Growth', 'Tech Exposure'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'This strategy uses transparent holdings. All positions and weights are publicly visible.',
+    disclosure_text_public: 'This portfolio uses transparent holdings. All positions and weights are publicly visible.',
     performance: {
       return_30d: 4.2,
       return_90d: 12.8,
@@ -43,13 +43,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 15.2,
       consistency_score: 78,
     },
-    current_version: '1.2',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-11-15', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-12-01', change_type: 'minor_rebalance', change_summary: 'Reduced volatility by adjusting bond allocation' },
-      { version: '1.2', date: '2024-12-28', change_type: 'minor_rebalance', change_summary: 'Quarterly rebalance to maintain target weights' },
-    ],
     activity_log: [
       { date: '2024-12-28', event_type: 'rebalance', summary: 'Rebalanced to maintain target weights' },
       { date: '2024-12-15', event_type: 'risk_alert', summary: 'Volatility exceeded expected range temporarily' },
@@ -65,12 +58,12 @@ export const mockStrategies: Strategy[] = [
     auto_exit_on_liquidation: true,
     sectors: ['Broad Market', 'Technology', 'International'],
     geo_focus: 'Global',
-    description_rationale: 'This strategy combines broad market exposure with targeted growth sectors. The GenAI allocation engine identified optimal weights based on historical correlations and forward-looking momentum indicators.',
+    description_rationale: 'This portfolio combines broad market exposure with targeted growth sectors. The GenAI allocation engine identified optimal weights based on historical correlations and forward-looking momentum indicators.',
     risks: 'Higher exposure to technology and innovation sectors may result in increased volatility during market corrections. International holdings add currency risk.',
   },
   {
     id: '2',
-    strategy_name: 'Pearl-142',
+    name: 'Pearl-142',
     creator_id: '@alpha_99',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -86,7 +79,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'low',
-    strategy_capacity_limit_usd: 10000000,
+    capacity_limit_usd: 10000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 30, sector: 'Broad Market' },
       { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 30, sector: 'Bonds' },
@@ -101,7 +94,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Conservative Growth', 'Income Focus'],
     turnover_estimate: 'low',
-    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the strategy\'s behavior, risk profile, and track record.',
+    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the portfolio\'s behavior, risk profile, and track record.',
     performance: {
       return_30d: 1.8,
       return_90d: 5.4,
@@ -109,14 +102,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 8.1,
       consistency_score: 92,
     },
-    current_version: '1.3',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-10-22', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-11-10', change_type: 'minor_rebalance', change_summary: 'Increased bond allocation for stability' },
-      { version: '1.2', date: '2024-12-01', change_type: 'minor_rebalance', change_summary: 'Adjusted dividend exposure' },
-      { version: '1.3', date: '2024-12-20', change_type: 'minor_rebalance', change_summary: 'Year-end rebalance' },
-    ],
     activity_log: [
       { date: '2024-12-20', event_type: 'rebalance', summary: 'Year-end rebalance completed' },
     ],
@@ -132,11 +117,11 @@ export const mockStrategies: Strategy[] = [
     sectors: ['Bonds', 'Broad Market', 'International'],
     geo_focus: 'Global',
     description_rationale: 'A classic balanced approach designed for investors seeking steady returns with minimized downside risk. Bond allocation provides stability while dividend stocks add income.',
-    risks: 'Rising interest rates may negatively impact bond holdings. Lower growth potential compared to aggressive strategies.',
+    risks: 'Rising interest rates may negatively impact bond holdings. Lower growth potential compared to aggressive portfolios.',
   },
   {
     id: '3',
-    strategy_name: 'Sapphire-872',
+    name: 'Sapphire-872',
     creator_id: '@quant_trader',
     status: 'private',
     visibility_mode: 'transparent',
@@ -151,7 +136,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 50,
     max_turnover: 'high',
-    strategy_capacity_limit_usd: 2000000,
+    capacity_limit_usd: 2000000,
     holdings: [
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
       { ticker: 'SMH', name: 'VanEck Semiconductor ETF', weight: 25, sector: 'Semiconductors' },
@@ -166,7 +151,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Tech Concentration', 'AI/Semiconductors'],
     turnover_estimate: 'high',
-    disclosure_text_public: 'This strategy uses transparent holdings.',
+    disclosure_text_public: 'This portfolio uses transparent holdings.',
     performance: {
       return_30d: 8.7,
       return_90d: 22.4,
@@ -174,11 +159,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 28.5,
       consistency_score: 58,
     },
-    current_version: '1.0',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-12-01', change_type: 'initial', change_summary: 'Initial strategy creation' },
-    ],
     activity_log: [],
     followers_count: 0,
     allocated_amount_usd: 0,
@@ -191,12 +171,12 @@ export const mockStrategies: Strategy[] = [
     auto_exit_on_liquidation: true,
     sectors: ['Technology', 'Semiconductors', 'Innovation'],
     geo_focus: 'US',
-    description_rationale: 'Concentrated bet on technology leadership, particularly semiconductors and AI-adjacent companies. This strategy aims to capture the ongoing tech revolution.',
+    description_rationale: 'Concentrated bet on technology leadership, particularly semiconductors and AI-adjacent companies. This portfolio aims to capture the ongoing tech revolution.',
     risks: 'Extreme sector concentration. High correlation between holdings amplifies drawdowns. Not suitable for risk-averse investors.',
   },
   {
     id: '4',
-    strategy_name: 'Amber-108',
+    name: 'Amber-108',
     creator_id: '@div_hunter',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -212,7 +192,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'low',
-    strategy_capacity_limit_usd: 8000000,
+    capacity_limit_usd: 8000000,
     holdings: [
       { ticker: 'SCHD', name: 'Schwab US Dividend Equity ETF', weight: 30, sector: 'Dividend' },
       { ticker: 'VYM', name: 'Vanguard High Dividend Yield ETF', weight: 25, sector: 'Dividend' },
@@ -228,7 +208,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Income Generation', 'Dividend Growth'],
     turnover_estimate: 'low',
-    disclosure_text_public: 'This strategy uses transparent holdings.',
+    disclosure_text_public: 'This portfolio uses transparent holdings.',
     performance: {
       return_30d: 1.2,
       return_90d: 4.1,
@@ -236,12 +216,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 9.2,
       consistency_score: 88,
     },
-    current_version: '1.1',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-09-10', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-12-15', change_type: 'minor_rebalance', change_summary: 'Quarterly dividend rebalance' },
-    ],
     activity_log: [
       { date: '2024-12-15', event_type: 'rebalance', summary: 'Quarterly dividend rebalance' },
     ],
@@ -261,7 +235,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '5',
-    strategy_name: 'Opal-412',
+    name: 'Opal-412',
     creator_id: '@macro_edge',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -277,7 +251,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 15000000,
+    capacity_limit_usd: 15000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 25, sector: 'International' },
@@ -294,7 +268,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Global Macro', 'Diversification'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the strategy\'s behavior, risk profile, and track record.',
+    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the portfolio\'s behavior, risk profile, and track record.',
     performance: {
       return_30d: 2.9,
       return_90d: 8.6,
@@ -302,12 +276,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 12.8,
       consistency_score: 75,
     },
-    current_version: '1.1',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-11-28', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-12-22', change_type: 'minor_rebalance', change_summary: 'Adjusted emerging markets allocation' },
-    ],
     activity_log: [
       { date: '2024-12-22', event_type: 'rebalance', summary: 'Adjusted emerging markets allocation' },
     ],
@@ -327,7 +295,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '6',
-    strategy_name: 'Peridot-756',
+    name: 'Peridot-756',
     creator_id: '@green_alpha',
     status: 'private',
     visibility_mode: 'transparent',
@@ -342,7 +310,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 3000000,
+    capacity_limit_usd: 3000000,
     holdings: [
       { ticker: 'ICLN', name: 'iShares Global Clean Energy ETF', weight: 30, sector: 'Clean Energy' },
       { ticker: 'TAN', name: 'Invesco Solar ETF', weight: 20, sector: 'Solar' },
@@ -358,7 +326,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Clean Energy', 'Sustainability'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'This strategy uses transparent holdings.',
+    disclosure_text_public: 'This portfolio uses transparent holdings.',
     performance: {
       return_30d: -2.1,
       return_90d: 6.3,
@@ -366,11 +334,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 32.1,
       consistency_score: 45,
     },
-    current_version: '1.0',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-10-05', change_type: 'initial', change_summary: 'Initial strategy creation' },
-    ],
     activity_log: [],
     followers_count: 0,
     allocated_amount_usd: 0,
@@ -383,12 +346,12 @@ export const mockStrategies: Strategy[] = [
     auto_exit_on_liquidation: true,
     sectors: ['Clean Energy', 'Solar', 'Batteries'],
     geo_focus: 'Global',
-    description_rationale: 'Thematic strategy betting on the energy transition. Captures growth in solar, batteries, and clean technology sectors.',
+    description_rationale: 'Thematic portfolio betting on the energy transition. Captures growth in solar, batteries, and clean technology sectors.',
     risks: 'Highly volatile sector dependent on government policies and subsidies. Competition from traditional energy during transitions.',
   },
   {
     id: '7',
-    strategy_name: 'Diamond-127',
+    name: 'Diamond-127',
     creator_id: '@steady_returns',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -404,7 +367,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'low',
-    strategy_capacity_limit_usd: 20000000,
+    capacity_limit_usd: 20000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'TLT', name: 'iShares 20+ Year Treasury Bond ETF', weight: 25, sector: 'Long Bonds' },
@@ -420,7 +383,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['All-Weather', 'Capital Preservation'],
     turnover_estimate: 'low',
-    disclosure_text_public: 'This strategy uses transparent holdings.',
+    disclosure_text_public: 'This portfolio uses transparent holdings.',
     performance: {
       return_30d: 0.8,
       return_90d: 3.2,
@@ -428,11 +391,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 5.8,
       consistency_score: 95,
     },
-    current_version: '1.0',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-08-20', change_type: 'initial', change_summary: 'Initial strategy creation' },
-    ],
     activity_log: [
       { date: '2024-12-10', event_type: 'rebalance', summary: 'Quarterly rebalance completed' },
     ],
@@ -452,7 +410,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '8',
-    strategy_name: 'Emerald-489',
+    name: 'Emerald-489',
     creator_id: '@bio_investor',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -468,7 +426,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 6000000,
+    capacity_limit_usd: 6000000,
     holdings: [
       { ticker: 'XLV', name: 'Health Care Select Sector SPDR', weight: 30, sector: 'Healthcare' },
       { ticker: 'IBB', name: 'iShares Biotechnology ETF', weight: 25, sector: 'Biotech' },
@@ -483,7 +441,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Healthcare Innovation', 'Biotech'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the strategy\'s behavior, risk profile, and track record.',
+    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the portfolio\'s behavior, risk profile, and track record.',
     performance: {
       return_30d: 3.4,
       return_90d: 9.8,
@@ -491,15 +449,8 @@ export const mockStrategies: Strategy[] = [
       volatility: 18.4,
       consistency_score: 68,
     },
-    current_version: '2.0',
-    last_change_type: 'structural_change',
-    version_history: [
-      { version: '1.0', date: '2024-09-28', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-11-15', change_type: 'minor_rebalance', change_summary: 'Adjusted biotech exposure' },
-      { version: '2.0', date: '2024-12-25', change_type: 'structural_change', change_summary: 'Added genomics sector, changed risk profile' },
-    ],
     activity_log: [
-      { date: '2024-12-25', event_type: 'version_upgrade', summary: 'Strategy updated to v2.0 - added genomics exposure' },
+      { date: '2024-12-25', event_type: 'rebalance', summary: 'Added genomics exposure' },
       { date: '2024-11-15', event_type: 'rebalance', summary: 'Adjusted biotech allocation' },
     ],
     followers_count: 987,
@@ -511,7 +462,7 @@ export const mockStrategies: Strategy[] = [
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
     auto_exit_on_liquidation: true,
-    pending_version: '2.0',
+    pending_update: 'Added genomics sector',
     pending_change_summary: 'Added genomics sector exposure, increased risk profile to capture biotech innovation opportunities.',
     sectors: ['Healthcare', 'Biotech', 'Genomics'],
     geo_focus: 'US',
@@ -520,7 +471,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '9',
-    strategy_name: 'Citrine-385',
+    name: 'Citrine-385',
     creator_id: '@value_seeker',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -536,7 +487,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 7000000,
+    capacity_limit_usd: 7000000,
     holdings: [
       { ticker: 'VTV', name: 'Vanguard Value ETF', weight: 30, sector: 'Value' },
       { ticker: 'VOOV', name: 'Vanguard S&P 500 Value ETF', weight: 25, sector: 'Large Value' },
@@ -552,7 +503,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Value Investing', 'Factor Exposure'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the strategy\'s behavior, risk profile, and track record.',
+    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the portfolio\'s behavior, risk profile, and track record.',
     performance: {
       return_30d: 2.1,
       return_90d: 7.2,
@@ -560,14 +511,8 @@ export const mockStrategies: Strategy[] = [
       volatility: 13.5,
       consistency_score: 72,
     },
-    current_version: '2.0',
-    last_change_type: 'structural_change',
-    version_history: [
-      { version: '1.0', date: '2024-11-10', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '2.0', date: '2024-12-30', change_type: 'structural_change', change_summary: 'Added small-cap value exposure, restructured allocation' },
-    ],
     activity_log: [
-      { date: '2024-12-30', event_type: 'version_upgrade', summary: 'Strategy updated to v2.0 - added small-cap value' },
+      { date: '2024-12-30', event_type: 'rebalance', summary: 'Added small-cap value exposure' },
     ],
     followers_count: 543,
     allocated_amount_usd: 460000,
@@ -578,7 +523,7 @@ export const mockStrategies: Strategy[] = [
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
     auto_exit_on_liquidation: true,
-    pending_version: '2.0',
+    pending_update: 'Small-cap value added',
     pending_change_summary: 'Added small-cap value exposure for enhanced value factor tilt. Restructured allocation weights.',
     sectors: ['Value', 'Large Value', 'Small Value'],
     geo_focus: 'International',
@@ -587,7 +532,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '10',
-    strategy_name: 'Pearl-217',
+    name: 'Pearl-217',
     creator_id: '@simple_60_40',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -603,7 +548,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 60,
     max_turnover: 'low',
-    strategy_capacity_limit_usd: 50000000,
+    capacity_limit_usd: 50000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 60, sector: 'Broad Market' },
       { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 40, sector: 'Bonds' },
@@ -614,7 +559,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Classic 60/40', 'Simple & Proven'],
     turnover_estimate: 'low',
-    disclosure_text_public: 'This strategy uses transparent holdings.',
+    disclosure_text_public: 'This portfolio uses transparent holdings.',
     performance: {
       return_30d: 1.5,
       return_90d: 4.8,
@@ -622,11 +567,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 9.8,
       consistency_score: 85,
     },
-    current_version: '1.0',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-07-15', change_type: 'initial', change_summary: 'Initial strategy creation' },
-    ],
     activity_log: [
       { date: '2024-12-01', event_type: 'rebalance', summary: 'Quarterly rebalance to maintain 60/40 split' },
     ],
@@ -646,7 +586,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '11',
-    strategy_name: 'Ruby-891',
+    name: 'Ruby-891',
     creator_id: '@momentum_pro',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -662,7 +602,7 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 45,
     max_turnover: 'high',
-    strategy_capacity_limit_usd: 4500000,
+    capacity_limit_usd: 4500000,
     holdings: [
       { ticker: 'MTUM', name: 'iShares MSCI USA Momentum Factor ETF', weight: 35, sector: 'Momentum' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
@@ -677,7 +617,7 @@ export const mockStrategies: Strategy[] = [
     ],
     top_themes: ['Momentum', 'Growth Stocks'],
     turnover_estimate: 'high',
-    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the strategy\'s behavior, risk profile, and track record.',
+    disclosure_text_public: 'Exact holdings and weights are hidden. You are allocating to the portfolio\'s behavior, risk profile, and track record.',
     performance: {
       return_30d: 6.2,
       return_90d: 18.5,
@@ -685,12 +625,6 @@ export const mockStrategies: Strategy[] = [
       volatility: 24.2,
       consistency_score: 62,
     },
-    current_version: '1.1',
-    last_change_type: 'minor_rebalance',
-    version_history: [
-      { version: '1.0', date: '2024-10-01', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2025-01-05', change_type: 'minor_rebalance', change_summary: 'Momentum signal rebalance' },
-    ],
     activity_log: [
       { date: '2025-01-05', event_type: 'rebalance', summary: 'Momentum signal triggered rebalance' },
       { date: '2024-12-20', event_type: 'risk_alert', summary: 'Volatility spike detected, monitoring' },
@@ -711,7 +645,7 @@ export const mockStrategies: Strategy[] = [
   },
   {
     id: '12',
-    strategy_name: 'Obsidian-333',
+    name: 'Obsidian-333',
     creator_id: '@retired_fund_mgr',
     status: 'inactive',
     visibility_mode: 'transparent',
@@ -727,12 +661,12 @@ export const mockStrategies: Strategy[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    strategy_capacity_limit_usd: 5000000,
+    capacity_limit_usd: 5000000,
     holdings: [],
     exposure_breakdown: [],
     top_themes: ['Liquidated'],
     turnover_estimate: 'medium',
-    disclosure_text_public: 'This strategy has been liquidated and is no longer active.',
+    disclosure_text_public: 'This portfolio has been liquidated and is no longer active.',
     performance: {
       return_30d: 0,
       return_90d: 0,
@@ -740,15 +674,8 @@ export const mockStrategies: Strategy[] = [
       volatility: 14.2,
       consistency_score: 70,
     },
-    current_version: '1.2',
-    last_change_type: 'liquidation',
-    version_history: [
-      { version: '1.0', date: '2024-06-01', change_type: 'initial', change_summary: 'Initial strategy creation' },
-      { version: '1.1', date: '2024-08-15', change_type: 'minor_rebalance', change_summary: 'Summer rebalance' },
-      { version: '1.2', date: '2024-11-15', change_type: 'liquidation', change_summary: 'Strategy liquidated by creator' },
-    ],
     activity_log: [
-      { date: '2024-11-15', event_type: 'inactive', summary: 'Strategy liquidated - all followers auto-exited' },
+      { date: '2024-11-15', event_type: 'inactive', summary: 'Portfolio liquidated - all followers auto-exited' },
     ],
     followers_count: 0,
     allocated_amount_usd: 0,
@@ -761,12 +688,12 @@ export const mockStrategies: Strategy[] = [
     auto_exit_on_liquidation: true,
     sectors: [],
     geo_focus: 'Global',
-    description_rationale: 'This strategy has been liquidated by the creator.',
-    risks: 'N/A - Strategy is inactive.',
+    description_rationale: 'This portfolio has been liquidated by the creator.',
+    risks: 'N/A - Portfolio is inactive.',
   },
 ];
 
-// Get only validated and listed strategies for marketplace
+// Get only validated and listed portfolios for marketplace
 export const getValidatedStrategies = () => 
   mockStrategies.filter(s => 
     s.validation_status === 'validated' && 
@@ -774,9 +701,9 @@ export const getValidatedStrategies = () =>
     s.status === 'validated_listed'
   );
 
-// Get strategies with pending updates (for follower dashboard)
+// Get portfolios with pending updates (for follower dashboard)
 export const getStrategiesWithPendingUpdates = () =>
-  mockStrategies.filter(s => s.pending_version !== undefined);
+  mockStrategies.filter(s => s.pending_update !== undefined);
 
 // Aggregate creator stats
 export const creatorStats = {

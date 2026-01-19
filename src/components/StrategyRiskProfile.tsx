@@ -107,7 +107,7 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
                     Capacity
                   </div>
                   <p className="font-semibold">
-                    ${(strategy.strategy_capacity_limit_usd / 1000000).toFixed(0)}M
+                    ${(strategy.capacity_limit_usd / 1000000).toFixed(0)}M
                   </p>
                 </div>
               </TooltipTrigger>
@@ -122,20 +122,20 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="text-muted-foreground">Capacity Utilization</span>
               <span className="font-medium">
-                {Math.round((strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) * 100)}%
+                {Math.round((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100)}%
               </span>
             </div>
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div 
                 className={cn(
                   "h-full rounded-full transition-all",
-                  (strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) > 0.9 
+                  (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.9 
                     ? "bg-destructive" 
-                    : (strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) > 0.7
+                    : (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.7
                       ? "bg-warning"
                       : "bg-primary"
                 )}
-                style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) * 100, 100)}%` }}
+                style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100, 100)}%` }}
               />
             </div>
             {strategy.new_allocations_paused && (

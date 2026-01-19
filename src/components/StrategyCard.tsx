@@ -100,7 +100,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               )}
               <div>
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {strategy.strategy_name}
+                  {strategy.name}
                 </h3>
                 <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
               </div>

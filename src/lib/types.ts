@@ -1,12 +1,11 @@
-// Strategy status types
-export type StrategyStatus = 'private' | 'validated_listed' | 'inactive';
+// Portfolio status types
+export type PortfolioStatus = 'private' | 'validated_listed' | 'inactive';
 export type VisibilityMode = 'masked' | 'transparent';
-export type ChangeType = 'minor_rebalance' | 'structural_change' | 'liquidation';
 export type TurnoverLevel = 'low' | 'medium' | 'high';
-export type ActivityEventType = 'rebalance' | 'risk_alert' | 'version_upgrade' | 'paused_new_allocations' | 'unpaused' | 'inactive';
+export type ActivityEventType = 'rebalance' | 'risk_alert' | 'paused_new_allocations' | 'unpaused' | 'inactive';
 
 // Legacy types (keeping for backward compatibility in creator build experience)
-export type PortfolioStatus = 'Simulated' | 'Live' | 'Live (coming soon)';
+export type LegacyPortfolioStatus = 'Simulated' | 'Live' | 'Live (coming soon)';
 export type StrategyType = 'GenAI' | 'Manual';
 export type Objective = 'Growth' | 'Income' | 'Low volatility' | 'Balanced';
 export type RiskLevel = 'Low' | 'Medium' | 'High';
@@ -28,13 +27,6 @@ export interface PerformanceMetrics {
   consistency_score: number;
 }
 
-export interface VersionHistoryEntry {
-  version: string;
-  date: string;
-  change_type: ChangeType | 'initial';
-  change_summary: string;
-}
-
 export interface ActivityLogEntry {
   date: string;
   event_type: ActivityEventType;
@@ -46,15 +38,15 @@ export interface ExposureBreakdown {
   percent: number;
 }
 
-// Main Strategy interface (formerly Portfolio for public views)
-export interface Strategy {
+// Main Portfolio interface (for public views)
+export interface Portfolio {
   id: string;
-  strategy_name: string;
+  name: string;
   creator_id: string;
   creator_avatar?: string;
   
   // Status and visibility
-  status: StrategyStatus;
+  status: PortfolioStatus;
   visibility_mode: VisibilityMode;
   validation_status: ValidationStatus;
   validation_criteria_met: boolean;
@@ -64,7 +56,7 @@ export interface Strategy {
   created_date: string;
   last_rebalanced_date: string;
   
-  // Strategy characteristics
+  // Portfolio characteristics
   strategy_type: StrategyType;
   objective: Objective;
   risk_level: RiskLevel;
@@ -74,7 +66,7 @@ export interface Strategy {
   leverage_allowed: boolean;
   max_single_sector_exposure_pct: number;
   max_turnover: TurnoverLevel;
-  strategy_capacity_limit_usd: number;
+  capacity_limit_usd: number;
   
   // Holdings (only shown if visibility_mode = 'transparent')
   holdings: Holding[];
@@ -87,11 +79,6 @@ export interface Strategy {
   
   // Performance
   performance: PerformanceMetrics;
-  
-  // Versioning
-  current_version: string;
-  last_change_type: ChangeType;
-  version_history: VersionHistoryEntry[];
   
   // Activity log (public-safe)
   activity_log: ActivityLogEntry[];
@@ -110,7 +97,7 @@ export interface Strategy {
   auto_exit_on_liquidation: boolean;
   
   // Pending updates (for structural changes requiring opt-in)
-  pending_version?: string;
+  pending_update?: string;
   pending_change_summary?: string;
   
   // Portfolio identity fields
@@ -122,33 +109,8 @@ export interface Strategy {
   risks: string;
 }
 
-// Legacy Portfolio type alias (for creator build experience)
-export interface Portfolio {
-  id: string;
-  name: string;
-  creator_id: string;
-  creator_avatar?: string;
-  status: PortfolioStatus;
-  created_date: string;
-  strategy_type: StrategyType;
-  objective: Objective;
-  risk_level: RiskLevel;
-  holdings: Holding[];
-  performance: PerformanceMetrics;
-  investors_count: number;
-  allocated_amount: number;
-  creator_investment: number;
-  creator_fee_pct: number;
-  creator_est_monthly_earnings: number;
-  description_rationale: string;
-  risks: string;
-  last_rebalanced_date: string;
-  validation_status: ValidationStatus;
-  validation_criteria_met: boolean;
-  validation_summary?: string;
-  sectors: string[];
-  geo_focus: GeoFocus;
-}
+// Type alias for backward compatibility - Strategy uses same interface
+export type Strategy = Portfolio;
 
 export interface ChartDataPoint {
   date: string;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Shield, Filter, Pause, GitBranch, Info, BarChart3, Wallet } from 'lucide-react';
+import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Shield, Filter, Pause, Info, BarChart3, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -220,9 +220,8 @@ export default function Dashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Strategy</TableHead>
+                  <TableHead>Portfolio</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Version</TableHead>
                   <TableHead className="text-right">Followers</TableHead>
                   <TableHead className="text-right">Capacity</TableHead>
                   <TableHead className="text-right">Earnings/mo</TableHead>
@@ -235,7 +234,7 @@ export default function Dashboard() {
                       <Link to={`/strategy/${strategy.id}`} className="font-medium hover:text-primary transition-colors">
                         <div className="flex items-center gap-2">
                           {strategy.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
-                          {strategy.strategy_name}
+                          {strategy.name}
                         </div>
                       </Link>
                     </TableCell>
@@ -244,14 +243,13 @@ export default function Dashboard() {
                         {strategy.status === 'validated_listed' ? 'Listed' : strategy.status === 'inactive' ? 'Inactive' : 'Private'}
                       </span>
                     </TableCell>
-                    <TableCell><span className="flex items-center gap-1 text-sm"><GitBranch className="h-3 w-3" />v{strategy.current_version}</span></TableCell>
                     <TableCell className="text-right">{strategy.followers_count.toLocaleString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", (strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) * 100, 100)}%` }} />
+                          <div className={cn("h-full rounded-full", (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100, 100)}%` }} />
                         </div>
-                        <span className="text-xs text-muted-foreground">{Math.round((strategy.allocated_amount_usd / strategy.strategy_capacity_limit_usd) * 100)}%</span>
+                        <span className="text-xs text-muted-foreground">{Math.round((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100)}%</span>
                         {strategy.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
                       </div>
                     </TableCell>
@@ -263,10 +261,10 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Strategy Controls */}
+        {/* Portfolio Controls */}
         {selectedStrategy && selectedStrategy.status !== 'inactive' && (
           <Card className="glass-card">
-            <CardHeader><CardTitle>Strategy Controls: {selectedStrategy.strategy_name}</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Portfolio Controls: {selectedStrategy.name}</CardTitle></CardHeader>
             <CardContent><StrategyControls strategy={selectedStrategy} /></CardContent>
           </Card>
         )}

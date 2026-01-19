@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import type { Strategy } from '@/lib/types';
+import type { Portfolio } from '@/lib/types';
 
 interface PendingUpdatesPanelProps {
-  strategies: Strategy[];
+  strategies: Portfolio[];
   onAccept?: (strategyId: string) => void;
   onExit?: (strategyId: string) => void;
 }
@@ -15,23 +15,23 @@ interface PendingUpdatesPanelProps {
 export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpdatesPanelProps) {
   const { toast } = useToast();
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
+  const [selectedStrategy, setSelectedStrategy] = useState<Portfolio | null>(null);
 
-  const strategiesWithPending = strategies.filter(s => s.pending_version !== undefined);
+  const strategiesWithPending = strategies.filter(s => s.pending_update !== undefined);
 
   if (strategiesWithPending.length === 0) {
     return null;
   }
 
-  const handleAccept = (strategy: Strategy) => {
+  const handleAccept = (strategy: Portfolio) => {
     onAccept?.(strategy.id);
     toast({
       title: "Update accepted (prototype)",
-      description: `You've accepted ${strategy.strategy_name} v${strategy.pending_version}. Your allocation will continue under the new strategy version.`,
+      description: `You've accepted the update for ${strategy.name}. Your allocation will continue under the new portfolio configuration.`,
     });
   };
 
-  const handleExitClick = (strategy: Strategy) => {
+  const handleExitClick = (strategy: Portfolio) => {
     setSelectedStrategy(strategy);
     setExitDialogOpen(true);
   };
@@ -40,8 +40,8 @@ export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpd
     if (selectedStrategy) {
       onExit?.(selectedStrategy.id);
       toast({
-        title: "Exited strategy (prototype)",
-        description: `You've exited ${selectedStrategy.strategy_name}. In a live product, funds would return to your brokerage account.`,
+        title: "Exited portfolio (prototype)",
+        description: `You've exited ${selectedStrategy.name}. In a live product, funds would return to your brokerage account.`,
       });
     }
     setExitDialogOpen(false);
@@ -54,12 +54,12 @@ export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpd
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-warning">
             <AlertTriangle className="h-5 w-5" />
-            Pending Strategy Updates ({strategiesWithPending.length})
+            Pending Portfolio Updates ({strategiesWithPending.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            The following strategies have published major updates that require your approval to continue.
+            The following portfolios have published major updates that require your approval to continue.
           </p>
           
           {strategiesWithPending.map((strategy) => (
@@ -67,9 +67,9 @@ export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpd
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">{strategy.strategy_name}</span>
+                    <span className="font-semibold">{strategy.name}</span>
                     <span className="px-2 py-0.5 rounded bg-violet-500/20 text-violet-400 text-xs font-medium">
-                      v{strategy.pending_version}
+                      Update pending
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -109,9 +109,9 @@ export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpd
       <Dialog open={exitDialogOpen} onOpenChange={setExitDialogOpen}>
         <DialogContent className="glass-card">
           <DialogHeader>
-            <DialogTitle>Exit Strategy?</DialogTitle>
+            <DialogTitle>Exit Portfolio?</DialogTitle>
             <DialogDescription>
-              You are exiting <span className="font-medium text-foreground">{selectedStrategy?.strategy_name}</span>.
+              You are exiting <span className="font-medium text-foreground">{selectedStrategy?.name}</span>.
               In a live product, funds would return to your brokerage account.
             </DialogDescription>
           </DialogHeader>

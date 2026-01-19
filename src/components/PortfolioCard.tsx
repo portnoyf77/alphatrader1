@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Shield, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { StatusBadge } from './StatusBadge';
 import { ValidationBadge } from './ValidationBadge';
 import { PortfolioThumbnail } from './PortfolioThumbnail';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -46,13 +45,11 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
                 <p className="text-sm text-muted-foreground font-mono">{portfolio.creator_id}</p>
               </div>
             </div>
-            {showValidationBadge && isValidated ? (
+            {showValidationBadge && isValidated && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-success text-xs border border-success/20">
                 <CheckCircle2 className="h-3 w-3" />
                 Validated
               </div>
-            ) : (
-              <StatusBadge status={portfolio.status} />
             )}
           </div>
 
@@ -138,10 +135,10 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground mb-1">Investors</p>
+                    <p className="text-xs text-muted-foreground mb-1">Followers</p>
                     <div className="flex items-center gap-1 font-semibold">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      {portfolio.investors_count.toLocaleString()}
+                      {portfolio.followers_count.toLocaleString()}
                     </div>
                   </div>
                 </TooltipTrigger>
@@ -155,7 +152,7 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
           <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Total Allocated</span>
-              <span className="font-medium">{formatCurrency(portfolio.allocated_amount)}</span>
+              <span className="font-medium">{formatCurrency(portfolio.allocated_amount_usd)}</span>
             </div>
           </div>
         </CardContent>

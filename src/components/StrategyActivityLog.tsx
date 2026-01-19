@@ -1,4 +1,4 @@
-import { Activity, RefreshCw, AlertTriangle, ArrowUp, Pause, Play, XCircle } from 'lucide-react';
+import { Activity, RefreshCw, AlertTriangle, Pause, Play, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ActivityLogEntry, ActivityEventType } from '@/lib/types';
@@ -10,7 +10,6 @@ interface StrategyActivityLogProps {
 const eventConfig: Record<ActivityEventType, { icon: React.ElementType; color: string; label: string }> = {
   'rebalance': { icon: RefreshCw, color: 'text-primary', label: 'Rebalanced' },
   'risk_alert': { icon: AlertTriangle, color: 'text-warning', label: 'Risk Alert' },
-  'version_upgrade': { icon: ArrowUp, color: 'text-violet-400', label: 'Version Upgrade' },
   'paused_new_allocations': { icon: Pause, color: 'text-warning', label: 'Allocations Paused' },
   'unpaused': { icon: Play, color: 'text-success', label: 'Allocations Resumed' },
   'inactive': { icon: XCircle, color: 'text-destructive', label: 'Deactivated' },

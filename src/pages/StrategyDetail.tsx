@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, GitBranch } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -75,7 +75,7 @@ export default function StrategyDetail() {
 
   const isValidated = strategy.validation_status === 'validated' && strategy.validation_criteria_met;
   const isPaused = strategy.new_allocations_paused;
-  const hasPendingUpdate = strategy.pending_version !== undefined;
+  const hasPendingUpdate = strategy.pending_update !== undefined;
 
   const handleAllocate = () => {
     setShowAllocateModal(false);
@@ -108,7 +108,7 @@ export default function StrategyDetail() {
                   <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <p className="font-medium text-warning-foreground">
-                      Update pending: Strategy v{strategy.pending_version} requires your approval
+                      Update pending: {strategy.pending_update} requires your approval
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">{strategy.pending_change_summary}</p>
                   </div>
@@ -120,7 +120,7 @@ export default function StrategyDetail() {
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{strategy.strategy_name}</h1>
+              <h1 className="text-3xl font-bold mb-2">{strategy.name}</h1>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5 font-mono">
                   <User className="w-4 h-4" />
@@ -129,10 +129,6 @@ export default function StrategyDetail() {
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   Created {new Date(strategy.created_date).toLocaleDateString()}
-                </span>
-                <span className="flex items-center gap-1">
-                  <GitBranch className="h-4 w-4" />
-                  v{strategy.current_version}
                 </span>
               </div>
             </div>
@@ -297,7 +293,7 @@ export default function StrategyDetail() {
             </TabsContent>
 
             <TabsContent value="track-record">
-              <PerformanceChart return30d={strategy.performance.return_30d} return90d={strategy.performance.return_90d} portfolioName={strategy.strategy_name} />
+              <PerformanceChart return30d={strategy.performance.return_30d} return90d={strategy.performance.return_90d} portfolioName={strategy.name} />
             </TabsContent>
 
             <TabsContent value="activity">
@@ -332,8 +328,8 @@ export default function StrategyDetail() {
           <Dialog open={showAllocateModal} onOpenChange={setShowAllocateModal}>
             <DialogContent className="glass-card">
               <DialogHeader>
-                <DialogTitle>Allocate to {strategy.strategy_name}</DialogTitle>
-                <DialogDescription>You are allocating to a managed strategy (v{strategy.current_version}).</DialogDescription>
+                <DialogTitle>Allocate to {strategy.name}</DialogTitle>
+                <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
