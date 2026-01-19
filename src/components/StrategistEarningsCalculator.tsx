@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
-export function CreatorEarningsCalculator() {
+export function StrategistEarningsCalculator() {
   const [investors, setInvestors] = useState([500]);
   const [avgAllocation, setAvgAllocation] = useState([5000]);
 
-  // Platform fee: 1% annually, Creator gets 20% of that
+  // Platform fee: 1% annually, Strategist gets 20% of that
   const totalAllocated = investors[0] * avgAllocation[0];
   const platformFee = totalAllocated * 0.01; // 1% annual platform fee
-  const creatorShare = platformFee * 0.20; // 20% to creator
-  const monthlyEarnings = creatorShare / 12;
+  const strategistShare = platformFee * 0.20; // 20% to strategist
+  const monthlyEarnings = strategistShare / 12;
 
   return (
     <Card className="glass-card overflow-hidden">
@@ -86,7 +86,7 @@ export function CreatorEarningsCalculator() {
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Your share (20%)</span>
-              <span>${creatorShare.toLocaleString()}/year</span>
+              <span>${strategistShare.toLocaleString()}/year</span>
             </div>
           </div>
         </div>
@@ -101,12 +101,12 @@ export function CreatorEarningsCalculator() {
           </p>
           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
             <ArrowRight className="h-3 w-3" />
-            That's ${Math.round(creatorShare).toLocaleString()} per year
+            That's ${Math.round(strategistShare).toLocaleString()} per year
           </p>
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Based on 1% annual platform fee with 20% creator share. 
+          Based on 1% annual platform fee with 20% strategist share. 
           Actual earnings depend on allocation and retention.
         </p>
       </CardContent>

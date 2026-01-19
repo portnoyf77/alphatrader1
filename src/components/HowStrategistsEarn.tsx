@@ -14,7 +14,7 @@ const steps = [
   {
     icon: Upload,
     title: 'Publish & Share',
-    description: 'Make it public so others can discover and follow you.',
+    description: 'Make it public so others can discover and invest.',
   },
   {
     icon: DollarSign,
@@ -23,13 +23,13 @@ const steps = [
   },
 ];
 
-export function HowCreatorsEarn() {
+export function HowStrategistsEarn() {
   return (
     <section className="py-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            How creators earn
+            How strategists earn
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Turn your investing knowledge into a revenue stream in 4 simple steps.
