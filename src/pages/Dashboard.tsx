@@ -1,60 +1,48 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Play, DollarSign, TrendingUp, Users, Sparkles, Wrench, Trophy, ArrowUpRight, Shield, Filter, Pause, Info, BarChart3, Wallet } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { DollarSign, TrendingUp, TrendingDown, Users, Sparkles, Wrench, Shield, Filter, Pause, BarChart3, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { ValidationBadge } from '@/components/ValidationBadge';
 import { StrategyControls } from '@/components/StrategyControls';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
-import { formatCurrency, formatPercent, mockStrategies, mockEarningsHistory, mockInvestorGrowth, getStrategiesWithPendingUpdates } from '@/lib/mockData';
+import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
-const myStrategies = mockStrategies.slice(0, 4);
-const mockEarnings = { totalEarnings: 7580, last30Days: 2340, topStrategy: myStrategies[0] };
-const creatorRank = 3;
-const totalCreators = 47;
+// My portfolios (ones I created)
+const myPortfolios = mockStrategies.slice(0, 4);
+// Portfolios I've invested in (mock data - different portfolios)
+const investedPortfolios = mockStrategies.slice(4, 7).map(p => ({
+  ...p,
+  myAllocation: Math.round(Math.random() * 50000) + 5000,
+  myReturn: (Math.random() - 0.3) * 20,
+}));
 
 export default function Dashboard() {
   const [showOnlyValidated, setShowOnlyValidated] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState(myStrategies[0]);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(myPortfolios[0]);
 
-  const filteredStrategies = showOnlyValidated 
-    ? myStrategies.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
-    : myStrategies;
+  const filteredMyPortfolios = showOnlyValidated 
+    ? myPortfolios.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
+    : myPortfolios;
 
-  const totalFollowers = myStrategies.reduce((acc, s) => acc + s.followers_count, 0);
-  const totalAllocated = myStrategies.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
-  const totalCreatorInvestment = myStrategies.reduce((acc, s) => acc + s.creator_investment, 0);
-  const newFollowersThisMonth = 574;
-
-  const lastMonthEarnings = mockEarningsHistory[mockEarningsHistory.length - 2]?.earnings || 0;
-  const currentEarnings = mockEarningsHistory[mockEarningsHistory.length - 1]?.earnings || 0;
-  const growthRate = lastMonthEarnings > 0 ? ((currentEarnings - lastMonthEarnings) / lastMonthEarnings) : 0;
-  const projectedNextMonth = Math.round(currentEarnings * (1 + growthRate * 0.5));
-
-  const validatedCount = myStrategies.filter(s => s.status === 'validated_listed').length;
-  const privateCount = myStrategies.filter(s => s.status === 'private').length;
+  const validatedCount = myPortfolios.filter(s => s.status === 'validated_listed').length;
+  const simulatingCount = myPortfolios.filter(s => s.status === 'private').length;
+  const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
+  const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
 
   const strategiesWithPending = getStrategiesWithPendingUpdates();
 
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Creator Dashboard</h1>
-            <p className="text-muted-foreground">Manage your portfolios and track your earnings.</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" asChild><Link to="/simulation/new"><Play className="h-4 w-4 mr-2" />Run Simulation</Link></Button>
-            <Button asChild className="glow-primary"><Link to="/create"><Plus className="h-4 w-4 mr-2" />Create New</Link></Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Overview of your portfolios and investments.</p>
         </div>
 
         {/* Pending Updates Panel */}
@@ -66,44 +54,25 @@ export default function Dashboard() {
 
         {/* Stats Overview */}
         <TooltipProvider delayDuration={200}>
-          <div className="grid md:grid-cols-5 gap-4 mb-8">
+          <div className="grid md:grid-cols-4 gap-4 mb-8">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Card className="glass-card cursor-help">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Total Portfolios</p>
+                      <p className="text-sm text-muted-foreground">My Portfolios</p>
                     </div>
-                    <p className="text-3xl font-bold">{myStrategies.length}</p>
+                    <p className="text-3xl font-bold">{myPortfolios.length}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                      <span className="text-success">{validatedCount} listed</span>
-                      {privateCount > 0 && <span>• {privateCount} private</span>}
+                      <span className="text-success">{validatedCount} live</span>
+                      {simulatingCount > 0 && <span>• {simulatingCount} simulating</span>}
                     </div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                The number of portfolios you've created — listed ones are publicly available
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Total Followers</p>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-3xl font-bold">{totalFollowers.toLocaleString()}</p>
-                      <span className="text-xs text-success flex items-center"><ArrowUpRight className="h-3 w-3" />+{newFollowersThisMonth}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                People who have allocated money to your portfolios
+                Portfolios you've created — live ones are accepting investments
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -112,30 +81,32 @@ export default function Dashboard() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Total Allocated</p>
+                      <p className="text-sm text-muted-foreground">Invested in Others</p>
                     </div>
-                    <p className="text-3xl font-bold">{formatCurrency(totalAllocated)}</p>
+                    <p className="text-3xl font-bold">{investedPortfolios.length}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{formatCurrency(totalInvestedInOthers)} allocated</p>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                Total money from all investors across all your portfolios
+                Portfolios created by others that you've invested in
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card bg-primary/5 border-primary/30 cursor-help">
+                <Card className="glass-card bg-success/5 border-success/30 cursor-help">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <p className="text-sm text-muted-foreground">Est. Monthly Earnings</p>
+                      <Shield className="h-4 w-4 text-success" />
+                      <p className="text-sm text-muted-foreground">My Investment</p>
                     </div>
-                    <p className="text-3xl font-bold text-primary">${mockEarnings.last30Days.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-success">{formatCurrency(totalMyInvestment)}</p>
+                    <p className="text-xs text-muted-foreground mt-2">In my own portfolios</p>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                Your projected earnings from portfolio fees this month
+                Your own capital invested in portfolios you created
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -143,128 +114,137 @@ export default function Dashboard() {
                 <Card className="glass-card cursor-help">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      <p className="text-sm text-muted-foreground">Creator Rank</p>
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Total Value</p>
                     </div>
-                    <p className="text-3xl font-bold">#{creatorRank} <span className="text-sm font-normal text-muted-foreground">of {totalCreators}</span></p>
+                    <p className="text-3xl font-bold">{formatCurrency(totalMyInvestment + totalInvestedInOthers)}</p>
+                    <p className="text-xs text-muted-foreground mt-2">All investments</p>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                Your ranking among all creators based on total followers and performance
+                Combined value of all your investments
               </TooltipContent>
             </Tooltip>
           </div>
         </TooltipProvider>
 
-        {/* Skin in the Game */}
-        <Card className="glass-card mb-8 bg-success/5 border-success/30">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-success" />
-              <div>
-                <p className="text-sm text-muted-foreground">Your Total Investment (Skin in the Game)</p>
-                <p className="text-2xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground max-w-xs text-right">Every portfolio you publish has your own capital invested, building trust with followers.</p>
-          </CardContent>
-        </Card>
+        {/* Tabbed Portfolio Lists */}
+        <Tabs defaultValue="my-portfolios" className="mb-8">
+          <TabsList className="bg-secondary mb-6">
+            <TabsTrigger value="my-portfolios">My Portfolios</TabsTrigger>
+            <TabsTrigger value="invested">Invested In</TabsTrigger>
+          </TabsList>
 
-        {/* Charts */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
-          <Card className="glass-card">
-            <CardHeader className="pb-2"><CardTitle className="text-lg flex items-center gap-2"><DollarSign className="h-5 w-5 text-primary" />Earnings Trend</CardTitle></CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={mockEarningsHistory}>
-                    <defs><linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} /><stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} /></linearGradient></defs>
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
-                    <RechartsTooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Earnings']} />
-                    <Area type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#earningsGradient)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardHeader className="pb-2"><CardTitle className="text-lg flex items-center gap-2"><Users className="h-5 w-5 text-primary" />Follower Growth</CardTitle></CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockInvestorGrowth}>
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                    <RechartsTooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => [value.toLocaleString(), 'Followers']} />
-                    <Line type="monotone" dataKey="investors" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="my-portfolios">
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Portfolios I Created</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Switch id="validated-filter" checked={showOnlyValidated} onCheckedChange={setShowOnlyValidated} />
+                  <Label htmlFor="validated-filter" className="text-sm text-muted-foreground cursor-pointer">Live only</Label>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Portfolio</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">My Investment</TableHead>
+                      <TableHead className="text-right">30d Return</TableHead>
+                      <TableHead className="text-right">Capacity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredMyPortfolios.map((portfolio) => (
+                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => setSelectedPortfolio(portfolio)}>
+                        <TableCell>
+                          <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                            <div className="flex items-center gap-2">
+                              {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
+                              {portfolio.name}
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
+                            {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                            {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.performance.return_30d)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
+                              <div className={cn("h-full rounded-full", (portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100, 100)}%` }} />
+                            </div>
+                            <span className="text-xs text-muted-foreground">{Math.round((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100)}%</span>
+                            {portfolio.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <Card className="glass-card mb-8">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>My Portfolios</CardTitle>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Switch id="validated-filter" checked={showOnlyValidated} onCheckedChange={setShowOnlyValidated} />
-              <Label htmlFor="validated-filter" className="text-sm text-muted-foreground cursor-pointer">Listed only</Label>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Portfolio</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Followers</TableHead>
-                  <TableHead className="text-right">Capacity</TableHead>
-                  <TableHead className="text-right">Earnings/mo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStrategies.map((strategy) => (
-                  <TableRow key={strategy.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => setSelectedStrategy(strategy)}>
-                    <TableCell>
-                      <Link to={`/strategy/${strategy.id}`} className="font-medium hover:text-primary transition-colors">
-                        <div className="flex items-center gap-2">
-                          {strategy.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
-                          {strategy.name}
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <span className={cn("px-2 py-1 rounded text-xs", strategy.status === 'validated_listed' ? "bg-success/20 text-success" : strategy.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-muted text-muted-foreground")}>
-                        {strategy.status === 'validated_listed' ? 'Listed' : strategy.status === 'inactive' ? 'Inactive' : 'Private'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">{strategy.followers_count.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100, 100)}%` }} />
-                        </div>
-                        <span className="text-xs text-muted-foreground">{Math.round((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100)}%</span>
-                        {strategy.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right text-primary font-medium">${strategy.creator_est_monthly_earnings_usd.toLocaleString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          <TabsContent value="invested">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Portfolios I've Invested In</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Portfolio</TableHead>
+                      <TableHead>Creator</TableHead>
+                      <TableHead className="text-right">My Allocation</TableHead>
+                      <TableHead className="text-right">My Return</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {investedPortfolios.map((portfolio) => (
+                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
+                        <TableCell>
+                          <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                            <div className="flex items-center gap-2">
+                              {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
+                              {portfolio.name}
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", portfolio.myReturn >= 0 ? "text-success" : "text-destructive")}>
+                            {portfolio.myReturn >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.myReturn)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Portfolio Controls */}
-        {selectedStrategy && selectedStrategy.status !== 'inactive' && (
+        {selectedPortfolio && selectedPortfolio.status !== 'inactive' && (
           <Card className="glass-card">
-            <CardHeader><CardTitle>Portfolio Controls: {selectedStrategy.name}</CardTitle></CardHeader>
-            <CardContent><StrategyControls strategy={selectedStrategy} /></CardContent>
+            <CardHeader><CardTitle>Portfolio Controls: {selectedPortfolio.name}</CardTitle></CardHeader>
+            <CardContent><StrategyControls strategy={selectedPortfolio} /></CardContent>
           </Card>
         )}
       </div>
