@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, CheckCircle2, Info } from 'lucide-react';
+import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
 import { getValidatedStrategies } from '@/lib/mockData';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
+import { Link } from 'react-router-dom';
 
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
@@ -24,6 +27,20 @@ export default function Explore() {
   const [turnoverFilter, setTurnoverFilter] = useState<TurnoverFilter>('all');
 
   const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
+
+  // Top 5 strategies by risk-adjusted returns for the leaderboard chart
+  const leaderboardData = useMemo(() => {
+    return [...validatedStrategies]
+      .sort((a, b) => (b.performance.return_90d / b.performance.volatility) - (a.performance.return_90d / a.performance.volatility))
+      .slice(0, 5)
+      .map((strategy, index) => ({
+        name: strategy.strategy_name,
+        id: strategy.id,
+        return30d: strategy.performance.return_30d,
+        riskAdjusted: (strategy.performance.return_90d / strategy.performance.volatility).toFixed(2),
+        rank: index + 1,
+      }));
+  }, [validatedStrategies]);
 
   const filteredStrategies = useMemo(() => {
     return validatedStrategies.filter(strategy => {
@@ -48,6 +65,8 @@ export default function Explore() {
     setVisibilityFilter('all');
     setTurnoverFilter('all');
   };
+
+  const barColors = ['hsl(var(--primary))', 'hsl(var(--primary) / 0.8)', 'hsl(var(--primary) / 0.6)', 'hsl(var(--primary) / 0.4)', 'hsl(var(--primary) / 0.3)'];
 
   const FilterContent = () => (
     <div className="space-y-4">
@@ -116,6 +135,19 @@ export default function Explore() {
     </div>
   );
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+          <p className="font-medium text-sm">{payload[0].payload.name}</p>
+          <p className="text-xs text-muted-foreground">30d Return: <span className="text-success font-medium">{payload[0].value.toFixed(1)}%</span></p>
+          <p className="text-xs text-muted-foreground">Risk-Adjusted: <span className="text-primary font-medium">{payload[0].payload.riskAdjusted}</span></p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
@@ -138,6 +170,66 @@ export default function Explore() {
             </TooltipProvider>
           </div>
         </div>
+
+        {/* Leaderboard Bar Chart */}
+        <Card className="mb-8 bg-card/50 border-border/50">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Top Performers</CardTitle>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs">
+                    <p className="text-sm">Ranked by risk-adjusted returns (return divided by volatility). Higher is better.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-sm text-muted-foreground">Top 5 strategies by risk-adjusted performance</p>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={leaderboardData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    width={120} 
+                    stroke="hsl(var(--muted-foreground))" 
+                    fontSize={12}
+                    tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
+                  />
+                  <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
+                  <Bar dataKey="return30d" radius={[0, 4, 4, 0]}>
+                    {leaderboardData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={barColors[index]} className="cursor-pointer" />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-4">
+              {leaderboardData.map((strategy, index) => (
+                <Link 
+                  key={strategy.id}
+                  to={`/strategy/${strategy.id}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
+                >
+                  <span className="font-bold text-primary">#{index + 1}</span>
+                  <span className="text-foreground">{strategy.name}</span>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
@@ -185,6 +277,8 @@ export default function Explore() {
             </Sheet>
           </div>
         </div>
+
+        <h2 className="text-xl font-semibold mb-4">All Portfolios</h2>
 
         {filteredStrategies.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
