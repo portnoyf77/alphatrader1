@@ -49,7 +49,7 @@ export default function Onboarding() {
           </div>
 
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-3">Welcome to MVP Investing</h1>
+            <h1 className="text-3xl font-bold mb-3">Welcome to ACME Trader</h1>
             <p className="text-muted-foreground">
               Let's personalize your experience in just a few steps.
             </p>

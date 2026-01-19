@@ -22,7 +22,7 @@ export function Navbar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
               <TrendingUp className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-lg font-bold">MVP Investing</span>
+            <span className="text-lg font-bold">ACME Trader</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
