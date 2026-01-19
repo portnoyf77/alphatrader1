@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -38,6 +38,8 @@ export default function PortfolioOwnerDetail() {
   const [newWeight, setNewWeight] = useState('');
   const [investmentAmount, setInvestmentAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
+  const [showMakePublicModal, setShowMakePublicModal] = useState(false);
+  const [isPublic, setIsPublic] = useState(false); // Mock state for public status
 
   const formatNumberWithCommas = (value: string) => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -70,6 +72,7 @@ export default function PortfolioOwnerDetail() {
 
   const isSimulating = portfolio.status === 'private';
   const isLive = portfolio.status === 'validated_listed';
+  const isPublicInMarketplace = isLive && isPublic; // Only show investors if public
   
   // Calculate simulation duration (mock - days since created)
   const createdDate = new Date(portfolio.created_date);
@@ -156,9 +159,20 @@ export default function PortfolioOwnerDetail() {
     }
     toast({ 
       title: "Portfolio updated (prototype)", 
-      description: "Your changes have been saved and a new simulation has started." 
+      description: isLive 
+        ? "Your changes have been saved. Holdings will be rebalanced."
+        : "Your changes have been saved and a new simulation has started."
     });
     closeTweakModal();
+  };
+
+  const handleMakePublic = () => {
+    setIsPublic(true);
+    setShowMakePublicModal(false);
+    toast({
+      title: "Portfolio is now public",
+      description: "Your portfolio is visible in the marketplace. Investors can now allocate to it.",
+    });
   };
 
   return (
@@ -198,18 +212,28 @@ export default function PortfolioOwnerDetail() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
+              <Button variant="outline" onClick={openTweakModal}>
+                <Settings className="h-4 w-4 mr-2" />
+                {isSimulating ? 'Tweak & Resimulate' : 'Tweak Allocation'}
+              </Button>
               {isSimulating && (
-                <>
-                  <Button variant="outline" onClick={openTweakModal}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Tweak & Resimulate
-                  </Button>
-                  <Button onClick={() => setShowExecuteModal(true)} className="glow-primary">
-                    <Rocket className="h-4 w-4 mr-2" />
-                    Execute & Go Live
-                  </Button>
-                </>
+                <Button onClick={() => setShowExecuteModal(true)} className="glow-primary">
+                  <Rocket className="h-4 w-4 mr-2" />
+                  Execute & Go Live
+                </Button>
+              )}
+              {isLive && !isPublic && (
+                <Button onClick={() => setShowMakePublicModal(true)} className="glow-primary">
+                  <Globe className="h-4 w-4 mr-2" />
+                  Make Public
+                </Button>
+              )}
+              {isPublicInMarketplace && (
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-success/10 text-success text-sm font-medium">
+                  <Globe className="h-4 w-4" />
+                  Listed in Marketplace
+                </span>
               )}
             </div>
           </div>
@@ -234,7 +258,7 @@ export default function PortfolioOwnerDetail() {
                 </p>
               </CardContent>
             </Card>
-            {isLive && (
+            {isPublicInMarketplace && (
               <>
                 <Card className="glass-card">
                   <CardContent className="p-4">
@@ -429,6 +453,36 @@ export default function PortfolioOwnerDetail() {
                 >
                   <Rocket className="h-4 w-4 mr-2" />
                   Go Live
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Make Public Modal */}
+          <Dialog open={showMakePublicModal} onOpenChange={setShowMakePublicModal}>
+            <DialogContent className="glass-card">
+              <DialogHeader>
+                <DialogTitle>Make Portfolio Public</DialogTitle>
+                <DialogDescription>
+                  Your portfolio will be visible in the marketplace. Other investors can discover and allocate to it.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <div className="p-4 rounded-lg bg-secondary/50">
+                  <h4 className="font-medium mb-2">What happens when you go public:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Your portfolio appears in the Explore marketplace</li>
+                    <li>• Investors can view your performance and allocate capital</li>
+                    <li>• You earn fees from investor allocations</li>
+                    <li>• Your holdings remain protected (exposure-only view)</li>
+                  </ul>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowMakePublicModal(false)}>Cancel</Button>
+                <Button onClick={handleMakePublic} className="glow-primary">
+                  <Globe className="h-4 w-4 mr-2" />
+                  Make Public
                 </Button>
               </DialogFooter>
             </DialogContent>
