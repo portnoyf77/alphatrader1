@@ -41,21 +41,9 @@ export default function StrategyDetail() {
     );
   }
 
-  // Non-listed strategy gating
-  if (strategy.status === 'private') {
-    return (
-      <PageLayout>
-        <div className="container mx-auto px-4 py-16 text-center">
-          <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">This portfolio is not publicly listed</h1>
-          <p className="text-muted-foreground mb-6">Only validated portfolios appear in the marketplace.</p>
-          <Button asChild>
-            <Link to="/explore">Back to Marketplace</Link>
-          </Button>
-        </div>
-      </PageLayout>
-    );
-  }
+  // Note: In a real app, we'd check if the current user is the owner
+  // For the prototype, we allow viewing private portfolios (simulating status)
+  const isPrivate = strategy.status === 'private';
 
   // Inactive/liquidated strategy
   if (strategy.status === 'inactive') {
