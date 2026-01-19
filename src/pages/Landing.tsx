@@ -61,44 +61,46 @@ export default function Landing() {
       <section className="border-y border-border/50 bg-card/50">
         <div className="container mx-auto px-4 py-12">
           <TooltipProvider delayDuration={200}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-center cursor-help">
-                    <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
-                    <p className="text-muted-foreground mt-1">Capital Allocated</p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Total capital allocated by investors across all portfolios on the platform
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-center cursor-help">
-                    <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
-                    <p className="text-muted-foreground mt-1">Active Followers</p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  Number of unique investors currently following portfolios
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-center cursor-help">
-                    <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalCreatorEarnings30d.toLocaleString()}</p>
-                    <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                      Alpha Earnings (30d)
-                      <HelpCircle className="h-3 w-3" />
-                    </p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[250px]">
-                  <strong>Alphas</strong> are portfolio managers who share their investment strategies. 
-                  When investors allocate capital to an Alpha's portfolio, the Alpha earns a share of the platform fees.
-                </TooltipContent>
-              </Tooltip>
+            <div className="flex justify-center">
+              <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-center cursor-help">
+                      <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
+                      <p className="text-muted-foreground mt-1">Capital Allocated</p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[200px]">
+                    Total capital allocated by investors across all portfolios on the platform
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-center cursor-help">
+                      <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1">Active Followers</p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[200px]">
+                    Number of unique investors currently following portfolios
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-center cursor-help">
+                      <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalAlphaEarnings.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                        Alpha Earnings
+                        <HelpCircle className="h-3 w-3" />
+                      </p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">
+                    <strong>Alphas</strong> are portfolio managers who share their investment strategies. 
+                    When investors allocate capital to an Alpha's portfolio, the Alpha earns a share of the platform fees.
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </TooltipProvider>
         </div>

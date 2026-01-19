@@ -705,9 +705,11 @@ export const getValidatedStrategies = () =>
 export const getStrategiesWithPendingUpdates = () =>
   mockStrategies.filter(s => s.pending_update !== undefined);
 
-// Aggregate creator stats
+// Aggregate Alpha stats
 export const creatorStats = {
   totalCreatorEarnings30d: mockStrategies.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0),
+  // Total Alpha earnings to date (simulated as ~6 months of cumulative earnings)
+  totalAlphaEarnings: mockStrategies.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) * 6,
   topCreatorEarnings: Math.max(...mockStrategies.map(s => s.creator_est_monthly_earnings_usd)),
   avgEarningsPerStrategy: Math.round(
     mockStrategies.filter(s => s.status === 'validated_listed').reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) / 
