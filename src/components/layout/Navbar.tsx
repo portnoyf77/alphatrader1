@@ -5,10 +5,9 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/explore', label: 'Marketplace' },
   { href: '/invest', label: 'Invest' },
-  { href: '/leaderboard', label: 'Leaderboard' },
-  { href: '/dashboard', label: 'Dashboard' },
 ];
 
 export function Navbar() {

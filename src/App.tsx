@@ -9,7 +9,6 @@ import Invest from "./pages/Invest";
 import Simulation from "./pages/Simulation";
 import StrategyDetail from "./pages/StrategyDetail";
 import Explore from "./pages/Explore";
-import Leaderboard from "./pages/Leaderboard";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -29,7 +28,6 @@ const App = () => (
           <Route path="/strategy/:id" element={<StrategyDetail />} />
           <Route path="/portfolio/:id" element={<StrategyDetail />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
