@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/explore', label: 'Marketplace' },
-  { href: '/create', label: 'Create' },
+  { href: '/invest', label: 'Invest' },
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/dashboard', label: 'Dashboard' },
 ];
@@ -45,7 +45,7 @@ export function Navbar() {
 
           <div className="hidden md:block">
             <Button asChild className="glow-primary">
-              <Link to="/create">Create Strategy</Link>
+              <Link to="/invest">Start Investing</Link>
             </Button>
           </div>
 
@@ -76,7 +76,7 @@ export function Navbar() {
                 </Link>
               ))}
               <Button asChild className="mt-2">
-                <Link to="/create" onClick={() => setMobileMenuOpen(false)}>Create Strategy</Link>
+                <Link to="/invest" onClick={() => setMobileMenuOpen(false)}>Start Investing</Link>
               </Button>
             </div>
           </div>
