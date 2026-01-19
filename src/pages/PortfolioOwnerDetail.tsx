@@ -289,13 +289,17 @@ export default function PortfolioOwnerDetail() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="investment">Your Investment</Label>
-                  <Input 
-                    id="investment" 
-                    type="number" 
-                    placeholder="10000" 
-                    value={investmentAmount} 
-                    onChange={(e) => setInvestmentAmount(e.target.value)} 
-                  />
+                  <div className="relative w-48">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                    <Input 
+                      id="investment" 
+                      type="number" 
+                      placeholder="10,000" 
+                      value={investmentAmount} 
+                      onChange={(e) => setInvestmentAmount(e.target.value)}
+                      className="pl-7"
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Investing your own money shows others you believe in this portfolio.
                   </p>
