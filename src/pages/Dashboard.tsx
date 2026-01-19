@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DollarSign, TrendingUp, TrendingDown, Users, Sparkles, Wrench, Shield, Filter, Pause, BarChart3, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -23,8 +23,8 @@ const investedPortfolios = mockStrategies.slice(4, 7).map(p => ({
 }));
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [showOnlyValidated, setShowOnlyValidated] = useState(false);
-  const [selectedPortfolio, setSelectedPortfolio] = useState(myPortfolios[0]);
 
   const filteredMyPortfolios = showOnlyValidated 
     ? myPortfolios.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
@@ -159,7 +159,7 @@ export default function Dashboard() {
                   </TableHeader>
                   <TableBody>
                     {filteredMyPortfolios.map((portfolio) => (
-                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => setSelectedPortfolio(portfolio)}>
+                      <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/strategy/${portfolio.id}`)}>
                         <TableCell>
                           <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
                             <div className="flex items-center gap-2">
@@ -239,14 +239,6 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Portfolio Controls */}
-        {selectedPortfolio && selectedPortfolio.status !== 'inactive' && (
-          <Card className="glass-card">
-            <CardHeader><CardTitle>Portfolio Controls: {selectedPortfolio.name}</CardTitle></CardHeader>
-            <CardContent><StrategyControls strategy={selectedPortfolio} /></CardContent>
-          </Card>
-        )}
       </div>
     </PageLayout>
   );
