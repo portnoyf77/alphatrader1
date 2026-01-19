@@ -1,8 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Menu, X } from 'lucide-react';
+import { TrendingUp, Menu, X, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useMockAuth } from '@/contexts/MockAuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -13,6 +21,11 @@ const navLinks = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useMockAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -42,6 +55,33 @@ export function Navbar() {
             ))}
           </div>
 
+          <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-mono text-xs">{user.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="px-2 py-1.5">
+                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                    <p className="text-sm font-medium truncate">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild size="sm">
+                <Link to="/login">Sign In</Link>
+              </Button>
+            )}
+          </div>
 
           <button
             className="md:hidden p-2 rounded-lg hover:bg-secondary"
@@ -69,6 +109,32 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              
+              {isAuthenticated && user ? (
+                <>
+                  <div className="px-4 py-3 border-t border-border/50 mt-2">
+                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                    <p className="text-sm font-mono">{user.username}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 text-left"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center mt-2"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         )}
