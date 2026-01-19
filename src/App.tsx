@@ -8,6 +8,7 @@ import Onboarding from "./pages/Onboarding";
 import Invest from "./pages/Invest";
 import Simulation from "./pages/Simulation";
 import StrategyDetail from "./pages/StrategyDetail";
+import PortfolioOwnerDetail from "./pages/PortfolioOwnerDetail";
 import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/simulation/:id" element={<Simulation />} />
           <Route path="/strategy/:id" element={<StrategyDetail />} />
           <Route path="/portfolio/:id" element={<StrategyDetail />} />
+          <Route path="/dashboard/portfolio/:id" element={<PortfolioOwnerDetail />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
