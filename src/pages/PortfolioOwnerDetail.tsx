@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Sparkles, Wrench, TrendingUp, TrendingDown, DollarSign, Play, Settings, Clock, Rocket, Users, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -83,10 +83,6 @@ export default function PortfolioOwnerDetail() {
                 </span>
               </div>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1.5">
-                  {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4" />}
-                  {portfolio.strategy_type}
-                </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   Created {new Date(portfolio.created_date).toLocaleDateString()}

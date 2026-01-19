@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Users, Sparkles, Wrench, Shield, Filter, Pause, BarChart3, Wallet } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
@@ -162,10 +162,7 @@ export default function Dashboard() {
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}>
                         <TableCell>
                           <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-2">
-                              {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
-                              {portfolio.name}
-                            </div>
+                            {portfolio.name}
                           </Link>
                         </TableCell>
                         <TableCell>
@@ -217,10 +214,7 @@ export default function Dashboard() {
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
                         <TableCell>
                           <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
-                            <div className="flex items-center gap-2">
-                              {portfolio.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4 text-muted-foreground" />}
-                              {portfolio.name}
-                            </div>
+                            {portfolio.name}
                           </Link>
                         </TableCell>
                         <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
