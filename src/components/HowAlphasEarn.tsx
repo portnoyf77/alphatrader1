@@ -1,4 +1,4 @@
-import { Sparkles, LineChart, Upload, DollarSign, ArrowRight } from 'lucide-react';
+import { Sparkles, LineChart, Upload, DollarSign, ArrowRight, Crown } from 'lucide-react';
 
 const steps = [
   {
@@ -23,13 +23,17 @@ const steps = [
   },
 ];
 
-export function HowStrategistsEarn() {
+export function HowAlphasEarn() {
   return (
     <section className="py-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+            <Crown className="h-4 w-4" />
+            For Alphas
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            How strategists earn
+            How Alphas earn
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Turn your investing knowledge into a revenue stream in 4 simple steps.
@@ -74,7 +78,7 @@ export function HowStrategistsEarn() {
           <p className="text-lg">
             Platform charges a <span className="font-bold text-primary">1% annual fee</span> on allocated capital.
             <br />
-            You receive <span className="font-bold text-primary">20% of that fee</span> — automatically, every month.
+            As an Alpha, you receive <span className="font-bold text-primary">20% of that fee</span> — automatically, every month.
           </p>
         </div>
       </div>
