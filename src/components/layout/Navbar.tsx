@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Menu, X, LogOut, User } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -33,9 +33,9 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
-              <TrendingUp className="h-5 w-5 text-primary" />
+              <Crown className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-lg font-bold">ACME Trader</span>
+            <span className="text-lg font-bold">Alpha Trader</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
