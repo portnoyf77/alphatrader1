@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, GitBranch } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -122,7 +122,10 @@ export default function StrategyDetail() {
             <div>
               <h1 className="text-3xl font-bold mb-2">{strategy.strategy_name}</h1>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
-                <span className="font-mono">{strategy.creator_id}</span>
+                <span className="flex items-center gap-1.5 font-mono">
+                  <User className="w-4 h-4" />
+                  {strategy.creator_id}
+                </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   Created {new Date(strategy.created_date).toLocaleDateString()}
