@@ -153,15 +153,6 @@ export default function PortfolioOwnerDetail() {
                 </CardContent>
               </Card>
             )}
-            {isSimulating && (
-              <Card className="glass-card">
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Simulated Value</p>
-                  <p className="text-2xl font-bold text-muted-foreground">$100K</p>
-                  <p className="text-xs text-muted-foreground mt-1">Paper trading</p>
-                </CardContent>
-              </Card>
-            )}
             <Card className="glass-card">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground mb-1">30d Return</p>
