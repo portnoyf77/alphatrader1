@@ -22,7 +22,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
-            <span className="font-semibold">MVP Investing</span>
+            <span className="font-semibold">ACME Trader</span>
           </div>
           
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -38,7 +38,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
           </div>
           
           <p className="text-sm text-muted-foreground">
-            © 2025 MVP Investing. Prototype Demo.
+            © 2025 ACME Trader. Prototype Demo.
           </p>
         </div>
       </div>
