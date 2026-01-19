@@ -73,7 +73,7 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
                     to={`/strategy/${strategy.id}`}
                     className="block group-hover:text-primary transition-colors"
                   >
-                    <h3 className="font-semibold text-lg mb-1">{strategy.strategy_name}</h3>
+                    <h3 className="font-semibold text-lg mb-1">{strategy.name}</h3>
                     <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
                   </Link>
 

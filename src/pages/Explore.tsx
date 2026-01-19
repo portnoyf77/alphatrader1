@@ -34,7 +34,7 @@ export default function Explore() {
       .sort((a, b) => (b.performance.return_90d / b.performance.volatility) - (a.performance.return_90d / a.performance.volatility))
       .slice(0, 5)
       .map((strategy, index) => ({
-        name: strategy.strategy_name,
+        name: strategy.name,
         id: strategy.id,
         return30d: strategy.performance.return_30d,
         riskAdjusted: (strategy.performance.return_90d / strategy.performance.volatility).toFixed(2),
@@ -44,7 +44,7 @@ export default function Explore() {
 
   const filteredStrategies = useMemo(() => {
     return validatedStrategies.filter(strategy => {
-      const matchesSearch = strategy.strategy_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = strategy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         strategy.creator_id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesObjective = objectiveFilter === 'all' || strategy.objective === objectiveFilter;
       const matchesRisk = riskFilter === 'all' || strategy.risk_level === riskFilter;

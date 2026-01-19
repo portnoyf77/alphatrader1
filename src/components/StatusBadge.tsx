@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils';
-import type { PortfolioStatus } from '@/lib/types';
+import type { LegacyPortfolioStatus } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StatusBadgeProps {
-  status: PortfolioStatus;
+  status: LegacyPortfolioStatus;
   className?: string;
 }
 
-const statusTooltips: Record<PortfolioStatus, string> = {
+const statusTooltips: Record<LegacyPortfolioStatus, string> = {
   'Simulated': 'This portfolio is running in simulation mode with paper trading',
   'Live': 'This portfolio is live and actively trading with real capital',
   'Live (coming soon)': 'Live trading will be available soon for this portfolio',
