@@ -11,6 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -20,11 +30,23 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [signupDialogOpen, setSignupDialogOpen] = useState(false);
   const location = useLocation();
-  const { user, logout, isAuthenticated } = useMockAuth();
+  const { user, login, signup, logout, isAuthenticated } = useMockAuth();
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleQuickLogin = () => {
+    login('demo@alphatrader.com', 'demo123');
+    setLoginDialogOpen(false);
+  };
+
+  const handleQuickSignup = () => {
+    signup('newuser@alphatrader.com', 'demo123');
+    setSignupDialogOpen(false);
   };
 
   return (
@@ -38,22 +60,25 @@ export function Navbar() {
             <span className="text-lg font-bold">Alpha Trader</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                  location.pathname === link.href
-                    ? "bg-primary/20 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          {/* Only show nav links if authenticated */}
+          {isAuthenticated && (
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                    location.pathname === link.href
+                      ? "bg-primary/20 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
@@ -77,9 +102,91 @@ export function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild size="sm">
-                <Link to="/login">Sign In</Link>
-              </Button>
+              <>
+                {/* Sign In Dialog */}
+                <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm">Sign In</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Welcome back</DialogTitle>
+                      <DialogDescription>
+                        This is a demo — click Sign In to continue with mock credentials.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="login-email">Email</Label>
+                        <Input 
+                          id="login-email" 
+                          defaultValue="demo@alphatrader.com" 
+                          readOnly 
+                          className="bg-muted"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="login-password">Password</Label>
+                        <Input 
+                          id="login-password" 
+                          type="password" 
+                          defaultValue="demo123" 
+                          readOnly 
+                          className="bg-muted"
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center p-2 rounded-lg bg-primary/5 border border-primary/20">
+                        🎭 Demo mode: credentials are pre-filled
+                      </div>
+                      <Button onClick={handleQuickLogin} className="w-full">
+                        Sign In
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Sign Up Dialog */}
+                <Dialog open={signupDialogOpen} onOpenChange={setSignupDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">Sign Up</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Create your account</DialogTitle>
+                      <DialogDescription>
+                        This is a demo — click Sign Up to create a mock account with an anonymous ID.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">Email</Label>
+                        <Input 
+                          id="signup-email" 
+                          defaultValue="newuser@alphatrader.com" 
+                          readOnly 
+                          className="bg-muted"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Password</Label>
+                        <Input 
+                          id="signup-password" 
+                          type="password" 
+                          defaultValue="demo123" 
+                          readOnly 
+                          className="bg-muted"
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center p-2 rounded-lg bg-primary/5 border border-primary/20">
+                        🎭 Demo mode: you'll receive a random anonymous ID like <span className="font-mono">@inv_3k9m</span>
+                      </div>
+                      <Button onClick={handleQuickSignup} className="w-full">
+                        Sign Up
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
           </div>
 
@@ -94,7 +201,8 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {/* Only show nav links if authenticated */}
+              {isAuthenticated && navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
@@ -127,13 +235,26 @@ export function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center mt-2"
-                >
-                  Sign In
-                </Link>
+                <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border/50">
+                  <button
+                    onClick={() => {
+                      handleQuickLogin();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-center border border-border"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleQuickSignup();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center"
+                  >
+                    Sign Up
+                  </button>
+                </div>
               )}
             </div>
           </div>
