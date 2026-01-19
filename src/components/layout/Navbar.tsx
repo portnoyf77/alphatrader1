@@ -42,11 +42,6 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:block">
-            <Button asChild className="glow-primary">
-              <Link to="/invest">Start Investing</Link>
-            </Button>
-          </div>
 
           <button
             className="md:hidden p-2 rounded-lg hover:bg-secondary"
@@ -74,9 +69,6 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Button asChild className="mt-2">
-                <Link to="/invest" onClick={() => setMobileMenuOpen(false)}>Start Investing</Link>
-              </Button>
             </div>
           </div>
         )}
