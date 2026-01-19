@@ -49,7 +49,7 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Creator Dashboard</h1>
-            <p className="text-muted-foreground">Manage your strategies and track your earnings.</p>
+            <p className="text-muted-foreground">Manage your portfolios and track your earnings.</p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" asChild><Link to="/simulation/new"><Play className="h-4 w-4 mr-2" />Run Simulation</Link></Button>
@@ -73,7 +73,7 @@ export default function Dashboard() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Total Strategies</p>
+                      <p className="text-sm text-muted-foreground">Total Portfolios</p>
                     </div>
                     <p className="text-3xl font-bold">{myStrategies.length}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
@@ -84,7 +84,7 @@ export default function Dashboard() {
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                The number of strategies you've created — listed ones are publicly available
+                The number of portfolios you've created — listed ones are publicly available
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -103,7 +103,7 @@ export default function Dashboard() {
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                People who have allocated money to your strategies
+                People who have allocated money to your portfolios
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -119,7 +119,7 @@ export default function Dashboard() {
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                Total money from all investors across all your strategies
+                Total money from all investors across all your portfolios
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -135,7 +135,7 @@ export default function Dashboard() {
                 </Card>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[220px]">
-                Your projected earnings from strategy fees this month
+                Your projected earnings from portfolio fees this month
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -167,7 +167,7 @@ export default function Dashboard() {
                 <p className="text-2xl font-bold text-success">{formatCurrency(totalCreatorInvestment)}</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground max-w-xs text-right">Every strategy you publish has your own capital invested, building trust with followers.</p>
+            <p className="text-xs text-muted-foreground max-w-xs text-right">Every portfolio you publish has your own capital invested, building trust with followers.</p>
           </CardContent>
         </Card>
 
@@ -206,10 +206,9 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* My Strategies Table */}
         <Card className="glass-card mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>My Strategies</CardTitle>
+            <CardTitle>My Portfolios</CardTitle>
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Switch id="validated-filter" checked={showOnlyValidated} onCheckedChange={setShowOnlyValidated} />

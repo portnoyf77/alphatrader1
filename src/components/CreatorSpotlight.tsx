@@ -26,10 +26,10 @@ export function CreatorSpotlight({ strategies }: CreatorSpotlightProps) {
             Creator Spotlight
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Top earning strategy creators
+            Top earning portfolio creators
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            These creators have built trusted strategies with their own money invested. 
+            These creators have built trusted portfolios with their own money invested. 
             See how much they're earning from their expertise.
           </p>
         </div>

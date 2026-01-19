@@ -156,7 +156,7 @@ export default function Explore() {
           <div className="flex items-start gap-2">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
               <CheckCircle2 className="h-4 w-4" />
-              All strategies here are validated and eligible to accept allocations.
+              All portfolios here are validated and eligible to accept allocations.
             </div>
             <TooltipProvider>
               <Tooltip>
@@ -164,7 +164,7 @@ export default function Explore() {
                   <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors"><Info className="h-4 w-4 text-muted-foreground" /></button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs">
-                  <p className="text-sm">Only validated strategies appear here. Strategies must complete a validation period demonstrating consistent performance before being publicly listed.</p>
+                  <p className="text-sm">Only validated portfolios appear here. Portfolios must complete a validation period demonstrating consistent performance before being publicly listed.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -192,7 +192,7 @@ export default function Explore() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <p className="text-sm text-muted-foreground">Top 5 strategies by risk-adjusted performance</p>
+            <p className="text-sm text-muted-foreground">Top 5 portfolios by risk-adjusted performance</p>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -234,7 +234,7 @@ export default function Explore() {
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search strategies or creators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-secondary" />
+            <Input placeholder="Search portfolios or creators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-secondary" />
           </div>
           <div className="hidden lg:flex gap-3">
             <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
@@ -288,7 +288,7 @@ export default function Explore() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-muted-foreground mb-4">No strategies match your filters.</p>
+            <p className="text-muted-foreground mb-4">No portfolios match your filters.</p>
             <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
         )}
