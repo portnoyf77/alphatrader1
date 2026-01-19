@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Users, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -75,7 +74,6 @@ export default function StrategyDetail() {
   }
 
   const isValidated = strategy.validation_status === 'validated' && strategy.validation_criteria_met;
-  const isMasked = strategy.visibility_mode === 'masked';
   const isPaused = strategy.new_allocations_paused;
   const hasPendingUpdate = strategy.pending_version !== undefined;
 
@@ -248,7 +246,7 @@ export default function StrategyDetail() {
           <Tabs defaultValue="overview">
             <TabsList className="bg-secondary mb-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="exposure">{isMasked ? 'Exposure' : 'Holdings'}</TabsTrigger>
+              <TabsTrigger value="exposure">Exposure</TabsTrigger>
               <TabsTrigger value="track-record">Track Record</TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="discussion">Discussion</TabsTrigger>
@@ -287,36 +285,15 @@ export default function StrategyDetail() {
             </TabsContent>
 
             <TabsContent value="exposure">
-              {isMasked ? (
-                <ExposureBreakdown exposure={strategy.exposure_breakdown} topThemes={strategy.top_themes} disclosureText={strategy.disclosure_text_public} isMasked={true} />
-              ) : (
-                <Card className="glass-card">
-                  <CardHeader><CardTitle>Current Holdings</CardTitle></CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Ticker</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Sector</TableHead>
-                          <TableHead className="text-right">Weight</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {strategy.holdings.map((holding) => (
-                          <TableRow key={holding.ticker}>
-                            <TableCell className="font-medium">{holding.ticker}</TableCell>
-                            <TableCell className="text-muted-foreground">{holding.name}</TableCell>
-                            <TableCell className="text-muted-foreground">{holding.sector}</TableCell>
-                            <TableCell className="text-right">{holding.weight}%</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    <p className="text-xs text-muted-foreground mt-4">Last rebalanced: {new Date(strategy.last_rebalanced_date).toLocaleDateString()}</p>
-                  </CardContent>
-                </Card>
-              )}
+              <ExposureBreakdown 
+                exposure={strategy.exposure_breakdown} 
+                topThemes={strategy.top_themes} 
+                disclosureText={strategy.disclosure_text_public}
+                sectors={strategy.sectors}
+                geoFocus={strategy.geo_focus}
+                allowedAssets={strategy.allowed_assets}
+                lastRebalanced={strategy.last_rebalanced_date}
+              />
             </TabsContent>
 
             <TabsContent value="track-record">
