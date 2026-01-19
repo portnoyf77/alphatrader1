@@ -127,11 +127,22 @@ export default function PortfolioOwnerDetail() {
   };
 
   const totalWeight = editableHoldings.reduce((sum, h) => sum + h.weight, 0);
+  const weightDiff = Math.abs(totalWeight - 100);
+  const isBalanced = weightDiff < 0.1;
+  const isCloseEnough = weightDiff < 5; // Within 5% - show warning instead of error
+
+  const handleBalanceWeights = () => {
+    if (totalWeight === 0 || editableHoldings.length === 0) return;
+    const factor = 100 / totalWeight;
+    setEditableHoldings(prev => 
+      prev.map(h => ({ ...h, weight: Math.round(h.weight * factor * 10) / 10 }))
+    );
+  };
 
   const handleSaveManualChanges = () => {
-    if (Math.abs(totalWeight - 100) > 0.01) {
-      toast({ title: "Weights must sum to 100%", variant: "destructive" });
-      return;
+    // Auto-balance if close enough
+    if (!isBalanced && isCloseEnough) {
+      handleBalanceWeights();
     }
     toast({ 
       title: "Portfolio updated (prototype)", 
@@ -517,9 +528,25 @@ export default function PortfolioOwnerDetail() {
                     {/* Weight Summary */}
                     <div className={cn(
                       "flex justify-between items-center p-3 rounded-lg",
-                      Math.abs(totalWeight - 100) < 0.01 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                      isBalanced 
+                        ? "bg-success/10 text-success" 
+                        : isCloseEnough 
+                          ? "bg-warning/10 text-warning"
+                          : "bg-destructive/10 text-destructive"
                     )}>
-                      <span className="font-medium">Total Weight</span>
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium">Total Weight</span>
+                        {!isBalanced && editableHoldings.length > 0 && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleBalanceWeights}
+                            className="h-7 text-xs"
+                          >
+                            Balance to 100%
+                          </Button>
+                        )}
+                      </div>
                       <span className="font-bold">{totalWeight.toFixed(1)}%</span>
                     </div>
 
@@ -562,10 +589,10 @@ export default function PortfolioOwnerDetail() {
                     <Button variant="outline" onClick={closeTweakModal}>Cancel</Button>
                     <Button 
                       onClick={handleSaveManualChanges}
-                      disabled={Math.abs(totalWeight - 100) > 0.01}
+                      disabled={!isCloseEnough || editableHoldings.length === 0}
                       className="glow-primary"
                     >
-                      Save & Resimulate
+                      {isBalanced ? 'Save & Resimulate' : 'Balance & Save'}
                     </Button>
                   </DialogFooter>
                 </>
