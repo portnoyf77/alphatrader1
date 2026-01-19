@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -102,9 +102,19 @@ export default function PortfolioOwnerDetail() {
   };
 
   const handleWeightChange = (ticker: string, newWeight: string) => {
-    const weight = parseFloat(newWeight) || 0;
+    const numericValue = newWeight.replace(/[^0-9.]/g, '');
+    const weight = parseFloat(numericValue) || 0;
     setEditableHoldings(prev => 
       prev.map(h => h.ticker === ticker ? { ...h, weight: Math.min(100, Math.max(0, weight)) } : h)
+    );
+  };
+
+  const handleWeightStep = (ticker: string, delta: number) => {
+    setEditableHoldings(prev => 
+      prev.map(h => h.ticker === ticker 
+        ? { ...h, weight: Math.min(100, Math.max(0, Math.round((h.weight + delta) * 10) / 10)) } 
+        : h
+      )
     );
   };
 
@@ -499,15 +509,33 @@ export default function PortfolioOwnerDetail() {
                               <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
                               <TableCell className="text-muted-foreground">{holding.name}</TableCell>
                               <TableCell className="text-right">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="0.1"
-                                  value={holding.weight}
-                                  onChange={(e) => handleWeightChange(holding.ticker, e.target.value)}
-                                  className="w-20 text-right h-8"
-                                />
+                                <div className="flex items-center justify-end gap-1">
+                                  <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={holding.weight}
+                                    onChange={(e) => handleWeightChange(holding.ticker, e.target.value)}
+                                    className="w-16 text-right h-8"
+                                  />
+                                  <div className="flex flex-col">
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => handleWeightStep(holding.ticker, 1)}
+                                      className="h-4 w-6 rounded-b-none border-b-0"
+                                    >
+                                      <ChevronUp className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => handleWeightStep(holding.ticker, -1)}
+                                      className="h-4 w-6 rounded-t-none"
+                                    >
+                                      <ChevronDown className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
                               </TableCell>
                               <TableCell>
                                 <Button
