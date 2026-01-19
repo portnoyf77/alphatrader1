@@ -24,6 +24,21 @@ export default function PortfolioOwnerDetail() {
   const { toast } = useToast();
   const [showExecuteModal, setShowExecuteModal] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState('');
+  const [displayAmount, setDisplayAmount] = useState('');
+
+  const formatNumberWithCommas = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, '');
+    if (!numericValue) return '';
+    return parseInt(numericValue, 10).toLocaleString('en-US');
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    if (rawValue === '' || /^\d+$/.test(rawValue)) {
+      setInvestmentAmount(rawValue);
+      setDisplayAmount(formatNumberWithCommas(rawValue));
+    }
+  };
 
   const portfolio = mockStrategies.find(s => s.id === id);
 
@@ -293,10 +308,11 @@ export default function PortfolioOwnerDetail() {
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                     <Input 
                       id="investment" 
-                      type="number" 
+                      type="text"
+                      inputMode="numeric"
                       placeholder="10,000" 
-                      value={investmentAmount} 
-                      onChange={(e) => setInvestmentAmount(e.target.value)}
+                      value={displayAmount} 
+                      onChange={handleAmountChange}
                       className="pl-7"
                     />
                   </div>
