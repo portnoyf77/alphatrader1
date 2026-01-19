@@ -87,6 +87,12 @@ export default function PortfolioOwnerDetail() {
                   <Calendar className="h-4 w-4" />
                   Created {new Date(portfolio.created_date).toLocaleDateString()}
                 </span>
+                {isSimulating && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    Simulating for {simulationDays} days
+                  </span>
+                )}
               </div>
             </div>
 
@@ -108,22 +114,6 @@ export default function PortfolioOwnerDetail() {
             </div>
           </div>
 
-          {/* Simulation Status Card */}
-          {isSimulating && (
-            <Card className="mb-8 border-primary/50 bg-primary/5">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-primary/20">
-                    <Clock className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Simulating for</p>
-                    <p className="text-2xl font-bold">{simulationDays} days</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
