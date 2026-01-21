@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { TrendingUp, Users, DollarSign, Crown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StrategyThumbnail } from '@/components/StrategyThumbnail';
+import { PortfolioThumbnail } from '@/components/PortfolioThumbnail';
 import { formatCurrency } from '@/lib/mockData';
 import { getGemstoneForSector } from '@/lib/portfolioNaming';
 import { Strategy } from '@/lib/types';
@@ -55,7 +55,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
                       `}>
                         #{index + 1}
                       </div>
-                      <StrategyThumbnail
+                      <PortfolioThumbnail
                         sectors={strategy.sectors}
                         geoFocus={strategy.geo_focus}
                         riskLevel={strategy.risk_level}
