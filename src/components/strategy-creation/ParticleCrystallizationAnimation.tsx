@@ -62,7 +62,7 @@ export function ParticleCrystallizationAnimation({
 
   // Phase progression
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     let elapsed = 0;
     
     // Gathering -> Condensing

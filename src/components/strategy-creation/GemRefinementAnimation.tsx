@@ -52,7 +52,7 @@ export function GemRefinementAnimation({ profile, onComplete }: GemRefinementAni
       }
     };
 
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     
     phaseTimings.forEach((p, i) => {
       if (i > 0) {
