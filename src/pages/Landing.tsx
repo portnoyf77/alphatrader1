@@ -31,7 +31,7 @@ export default function Landing() {
               AI-Powered Portfolio Builder
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in leading-tight">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in leading-tight tracking-tight">
               Build, simulate, and{' '}
               <span className="gradient-text">earn from your portfolios</span>
             </h1>
