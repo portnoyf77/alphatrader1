@@ -524,11 +524,11 @@ export default function StrategyDetail() {
                   <Input id="amount" type="number" placeholder="10000" value={allocateAmount} onChange={(e) => setAllocateAmount(e.target.value)} />
                 </div>
                 {allocateAmount && parseFloat(allocateAmount) > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/50 text-sm">
-                    <p>Est. annual fee (0.50%): <span className="font-medium">${totalFee.toFixed(2)}</span></p>
-                    <p className="text-muted-foreground">Alpha receives: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
-                    <p className="text-muted-foreground">Platform fee: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
-                  </div>
+                   <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
+                     <p className="text-muted-foreground">Alpha fee: ${alphaShare.toFixed(2)} ({(alphaFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="text-muted-foreground">Platform fee: ${platformFee.toFixed(2)} ({(platformFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="font-medium">Total: ${totalFee.toFixed(2)} ({(totalFeePct * 100).toFixed(2)}% annually)</p>
+                   </div>
                 )}
                 <div className="flex items-start gap-2">
                   <Checkbox id="acknowledge" checked={acknowledgeTerms} onCheckedChange={(checked) => setAcknowledgeTerms(checked === true)} />
