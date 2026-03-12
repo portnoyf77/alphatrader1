@@ -23,8 +23,15 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 
 export default function StrategyDetail() {
   const { id } = useParams();
+  const location = useLocation();
   const { toast } = useToast();
   const { userPlan, selectPlan, user } = useMockAuth();
+
+  // Contextual breadcrumb
+  const cameFromDashboard = useMemo(() => {
+    const state = location.state as { from?: string } | null;
+    return state?.from === 'dashboard';
+  }, [location.state]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isProUser = userPlan === 'pro';
   const [showAllocateModal, setShowAllocateModal] = useState(false);
