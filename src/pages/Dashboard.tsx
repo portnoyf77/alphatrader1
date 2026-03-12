@@ -74,7 +74,10 @@ const mockNews = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showOnlyValidated, setShowOnlyValidated] = useState(false);
-  const [rebalancingMode, setRebalancingMode] = useState<'auto' | 'manual'>('auto');
+  const [rebalancingMode, setRebalancingMode] = useState<'auto' | 'manual'>(() => {
+    const saved = localStorage.getItem('rebalancingMode');
+    return saved === 'manual' ? 'manual' : 'auto';
+  });
   const [rebalancingModalOpen, setRebalancingModalOpen] = useState(false);
   const [benchmarkTimeframe, setBenchmarkTimeframe] = useState('30D');
 
@@ -113,7 +116,7 @@ export default function Dashboard() {
                 <TooltipContent className="text-xs">Rebalancing settings</TooltipContent>
               </Tooltip>
             </div>
-            <PendingUpdatesPanel strategies={strategiesWithPending} />
+            <PendingUpdatesPanel strategies={strategiesWithPending} rebalancingMode={rebalancingMode} />
           </div>
         )}
 
@@ -465,7 +468,11 @@ export default function Dashboard() {
               Choose how portfolio updates from Alphas you follow are handled.
             </DialogDescription>
           </DialogHeader>
-          <RadioGroup value={rebalancingMode} onValueChange={(v) => setRebalancingMode(v as 'auto' | 'manual')} className="space-y-3 py-4">
+          <RadioGroup value={rebalancingMode} onValueChange={(v) => {
+            const mode = v as 'auto' | 'manual';
+            setRebalancingMode(mode);
+            localStorage.setItem('rebalancingMode', mode);
+          }} className="space-y-3 py-4">
             <div className={cn("flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer", rebalancingMode === 'auto' ? "border-primary bg-primary/5" : "border-border")}>
               <RadioGroupItem value="auto" id="auto" className="mt-0.5" />
               <Label htmlFor="auto" className="cursor-pointer">

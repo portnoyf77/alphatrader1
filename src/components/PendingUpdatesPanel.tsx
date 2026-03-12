@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, X, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle, X, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,11 +8,12 @@ import type { Portfolio } from '@/lib/types';
 
 interface PendingUpdatesPanelProps {
   strategies: Portfolio[];
+  rebalancingMode?: 'auto' | 'manual';
   onAccept?: (strategyId: string) => void;
   onExit?: (strategyId: string) => void;
 }
 
-export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpdatesPanelProps) {
+export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAccept, onExit }: PendingUpdatesPanelProps) {
   const { toast } = useToast();
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<Portfolio | null>(null);
@@ -76,30 +77,44 @@ export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpd
                     {strategy.pending_change_summary}
                   </p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleExitClick(strategy)}
-                    className="text-destructive border-destructive/50 hover:bg-destructive/10"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Exit
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAccept(strategy)}
-                    className="bg-success hover:bg-success/90"
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    Accept
-                  </Button>
-                </div>
+                {rebalancingMode === 'auto' ? (
+                  <div className="flex items-center gap-2 shrink-0 text-success">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="text-sm font-medium">Auto-applied</span>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExitClick(strategy)}
+                      className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Exit
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAccept(strategy)}
+                      className="bg-success hover:bg-success/90"
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Accept
+                    </Button>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                <ArrowRight className="h-3 w-3" />
-                If you don't respond within {strategy.exit_window_days} days, you'll be auto-exited
-              </p>
+              {rebalancingMode === 'auto' ? (
+                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  Auto-applied — you have been notified.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                  <ArrowRight className="h-3 w-3" />
+                  If you don't respond within {strategy.exit_window_days} days, you'll be auto-exited
+                </p>
+              )}
             </div>
           ))}
         </CardContent>
