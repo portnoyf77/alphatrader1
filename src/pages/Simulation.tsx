@@ -170,8 +170,8 @@ export default function Simulation() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className={cn(
-                  "w-3 h-3 rounded-full",
-                  simulationState === 'running' ? "bg-success animate-pulse" : "bg-warning"
+                  "w-[10px] h-[10px] rounded-full",
+                  simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
                 )} />
                 <div>
                   <p className="font-semibold">
