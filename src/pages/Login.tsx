@@ -18,24 +18,10 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || '/dashboard';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please enter both email and password.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const doLogin = async (loginEmail?: string, loginPassword?: string) => {
     setIsLoading(true);
     try {
-      await login(email, password);
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
-      });
+      await login(loginEmail || email || 'guest@alphatrader.io', loginPassword || password || 'guest');
       navigate(from, { replace: true });
     } catch (error) {
       toast({
@@ -46,6 +32,16 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Auto-login immediately on mount
+  React.useEffect(() => {
+    doLogin('guest@alphatrader.io', 'guest');
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    doLogin();
   };
 
   return (
