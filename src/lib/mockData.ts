@@ -301,7 +301,7 @@ export const mockStrategies: Portfolio[] = [
     visibility_mode: 'transparent',
     validation_status: 'in_validation',
     validation_criteria_met: false,
-    created_date: '2024-10-05',
+    created_date: '2025-12-15',
     last_rebalanced_date: '2024-12-18',
     strategy_type: 'GenAI',
     objective: 'Growth',
