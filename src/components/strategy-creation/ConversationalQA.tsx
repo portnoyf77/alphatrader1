@@ -468,7 +468,7 @@ You can also ask me questions like "What does volatility mean?" and I'll explain
             onSubmit={handleTextSubmit}
             placeholder={
               isComplete
-                ? "Creating your strategy..."
+                ? "Creating your portfolio..."
                 : isProcessing
                 ? "Processing your response..."
                 : "Type naturally or ask a question..."

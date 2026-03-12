@@ -112,7 +112,7 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[200px]">
-                Maximum total capital this strategy can manage before new allocations are paused
+                Maximum total capital this portfolio can manage before new allocations are paused
               </TooltipContent>
             </Tooltip>
           </div>

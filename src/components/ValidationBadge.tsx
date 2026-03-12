@@ -32,7 +32,7 @@ const statusConfig: Record<ValidationStatus, {
     label: 'Validated',
     icon: <CheckCircle2 className="h-3 w-3" />,
     className: 'bg-success/20 text-success border-success/30',
-    tooltip: 'This strategy has completed validation and meets performance stability criteria.',
+    tooltip: 'This portfolio has completed validation and meets performance stability criteria.',
   },
 };
 

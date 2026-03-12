@@ -56,7 +56,7 @@ serve(async (req) => {
     const systemPrompt = `You are an investment portfolio advisor assistant helping users build personalized portfolios through natural conversation.
 
 Your responsibilities:
-1. Parse user responses to strategy questions and extract structured data
+1. Parse user responses to portfolio questions and extract structured data
 2. Answer questions about investment concepts clearly and simply
 3. Handle corrections to previous answers
 4. Detect unclear responses and ask clarifying questions
