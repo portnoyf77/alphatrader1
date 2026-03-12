@@ -80,8 +80,13 @@ export default function StrategyDetail() {
     });
   };
 
-  const totalFee = parseFloat(allocateAmount || '0') * 0.005; // 0.50% total (0.25% Alpha + 0.25% platform)
-  const creatorShare = totalFee / 2; // 0.25% to Alpha
+  const alphaFeePct = strategy.creator_fee_pct; // 0.25% from portfolio data
+  const platformFeePct = 0.0025; // 0.25% platform fee
+  const totalFeePct = alphaFeePct + platformFeePct;
+  const amount = parseFloat(allocateAmount || '0');
+  const totalFee = amount * totalFeePct;
+  const alphaShare = amount * alphaFeePct;
+  const platformFee = amount * platformFeePct;
 
   return (
     <PageLayout>
@@ -519,11 +524,11 @@ export default function StrategyDetail() {
                   <Input id="amount" type="number" placeholder="10000" value={allocateAmount} onChange={(e) => setAllocateAmount(e.target.value)} />
                 </div>
                 {allocateAmount && parseFloat(allocateAmount) > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/50 text-sm">
-                    <p>Est. annual fee (0.50%): <span className="font-medium">${totalFee.toFixed(2)}</span></p>
-                    <p className="text-muted-foreground">Alpha receives: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
-                    <p className="text-muted-foreground">Platform fee: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
-                  </div>
+                   <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
+                     <p className="text-muted-foreground">Alpha fee: ${alphaShare.toFixed(2)} ({(alphaFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="text-muted-foreground">Platform fee: ${platformFee.toFixed(2)} ({(platformFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="font-medium">Total: ${totalFee.toFixed(2)} ({(totalFeePct * 100).toFixed(2)}% annually)</p>
+                   </div>
                 )}
                 <div className="flex items-start gap-2">
                   <Checkbox id="acknowledge" checked={acknowledgeTerms} onCheckedChange={(checked) => setAcknowledgeTerms(checked === true)} />
