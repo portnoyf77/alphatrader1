@@ -15,7 +15,7 @@ export default function Landing() {
   const totalFollowers = validatedStrategies.reduce((acc, s) => acc + s.followers_count, 0);
   
   return (
-    <PageLayout showDisclaimer={false}>
+    <PageLayout showDisclaimer={true}>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background gradient */}
