@@ -328,9 +328,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
           </TooltipProvider>
 
           {/* Liquidation Warning */}
-          <div className="mt-3 p-2 rounded-md bg-warning/5 border border-warning/20">
-            <p className="text-[11px] text-warning/80 flex items-start gap-1.5">
-              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+          <div className="mt-3 p-2 flex items-start gap-1.5" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderLeft: '3px solid #EF4444', borderRadius: '8px' }}>
+            <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-destructive" />
+            <p className="text-[11px]" style={{ color: 'rgba(245, 158, 11, 0.8)' }}>
               If this Alpha exits their position, your allocation will automatically follow.
             </p>
           </div>
