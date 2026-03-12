@@ -23,6 +23,9 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 export default function StrategyDetail() {
   const { id } = useParams();
   const { toast } = useToast();
+  const { userPlan, selectPlan } = useMockAuth();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const isProUser = userPlan === 'pro';
   const [showAllocateModal, setShowAllocateModal] = useState(false);
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
