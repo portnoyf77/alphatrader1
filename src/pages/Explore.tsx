@@ -203,7 +203,7 @@ export default function Explore() {
 
         {/* Main Tabs: All Portfolios | Leaderboard */}
         <Tabs defaultValue="all-portfolios" className="mb-8">
-          <TabsList className="bg-secondary mb-6">
+          <TabsList className="mb-6">
             <TabsTrigger value="all-portfolios">All Portfolios</TabsTrigger>
             <TabsTrigger value="leaderboard">
               <Trophy className="h-4 w-4 mr-1.5" />

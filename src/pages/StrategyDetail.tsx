@@ -293,7 +293,7 @@ export default function StrategyDetail() {
 
           {/* Tabs */}
           <Tabs defaultValue="overview">
-            <TabsList className="bg-secondary mb-6 flex-wrap">
+            <TabsList className="mb-6 flex-wrap">
               <TabsTrigger value="overview" className="flex items-center gap-1.5">
                 <Eye className="h-3.5 w-3.5" />
                 Overview

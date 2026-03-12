@@ -43,7 +43,7 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Performance vs Benchmark</CardTitle>
         <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as TimeframeKey)}>
-          <TabsList className="bg-secondary">
+          <TabsList>
             <TabsTrigger value="30">30D</TabsTrigger>
             <TabsTrigger value="90">90D</TabsTrigger>
             <TabsTrigger value="ytd">YTD</TabsTrigger>
@@ -58,12 +58,12 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
             <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="perfPortfolioFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(262 83% 58%)" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="hsl(262 83% 58%)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#7C3AED" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="perfBenchmarkFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
-                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.06} />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 10% 18%)" />
@@ -106,30 +106,30 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
                 type="monotone"
                 dataKey="portfolio"
                 name={portfolioName}
-                stroke="hsl(262 83% 58%)"
+                stroke="#7C3AED"
                 strokeWidth={2.5}
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(262 83% 58%)' }}
+                activeDot={{ r: 4, fill: '#7C3AED' }}
               />
               <Line
                 type="monotone"
                 dataKey="benchmark"
                 name="S&P 500"
-                stroke="hsl(var(--success))"
+                stroke="#10B981"
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(var(--success))' }}
+                activeDot={{ r: 4, fill: '#10B981' }}
               />
               <Line
                 type="monotone"
                 dataKey="dowJones"
                 name="Dow Jones"
-                stroke="hsl(var(--muted-foreground))"
+                stroke="rgba(255,255,255,0.3)"
                 strokeWidth={1.5}
                 strokeDasharray="2 2"
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(var(--muted-foreground))' }}
+                activeDot={{ r: 4, fill: 'rgba(255,255,255,0.3)' }}
               />
             </LineChart>
           </ResponsiveContainer>
