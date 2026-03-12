@@ -248,6 +248,10 @@ export default function StrategyDetail() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="exposure">Exposure</TabsTrigger>
               <TabsTrigger value="track-record">Track Record</TabsTrigger>
+              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
+                Advanced Analytics
+                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+              </TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="discussion">Discussion</TabsTrigger>
             </TabsList>
