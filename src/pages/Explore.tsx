@@ -395,8 +395,6 @@ export default function Explore() {
                             {alpha.reputationScore}
                           </span>
                         </TableCell>
-                          </span>
-                        </TableCell>
                         <TableCell className="text-right font-medium">{alpha.followers_count.toLocaleString()}</TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(alpha.allocated_amount_usd)}</TableCell>
                         <TableCell className="text-right font-medium text-primary">${alpha.creator_est_monthly_earnings_usd.toLocaleString()}</TableCell>
