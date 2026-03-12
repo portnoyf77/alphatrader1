@@ -29,7 +29,7 @@ const PROGRESS_MESSAGES = [
   'Analyzing your investment profile...',
   'Matching optimal asset allocations...',
   'Calculating risk-adjusted portfolios...',
-  'Crystallizing your strategy...',
+  'Crystallizing your portfolio...',
 ];
 
 const PARTICLE_COUNT = 120;
@@ -244,7 +244,7 @@ export function ParticleCrystallizationAnimation({
           {strategyName}
         </h2>
         <p className="text-muted-foreground mb-3">
-          Your personalized {riskLevel.toLowerCase()}-risk investment strategy
+          Your personalized {riskLevel.toLowerCase()}-risk investment portfolio
         </p>
         <p className="text-sm italic max-w-md mx-auto" style={{ color: colors.glow }}>
           "{gemstoneDescriptions[gemstoneType]?.[riskLevel] || `${gemstoneType} reflects your unique investment profile.`}"

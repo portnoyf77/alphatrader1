@@ -101,6 +101,16 @@ export default function Alpha() {
       met: false,
       description: 'Your portfolio must contain at least 5 different holdings for adequate diversification.',
     },
+    {
+      label: 'Risk disclosure acknowledged',
+      met: false,
+      description: 'You must acknowledge that followers rely on your portfolio decisions and accept the responsibility.',
+    },
+    {
+      label: 'Email verified',
+      met: true,
+      description: 'Your email address must be verified before publishing to the marketplace.',
+    },
   ];
 
   return (
