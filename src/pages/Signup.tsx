@@ -88,7 +88,8 @@ export default function Signup() {
     setIsLoading(true);
     try {
       await signup(email.trim(), password);
-      toast({ title: 'Account created!', description: 'Welcome to Alpha Trader. Your unique ID has been assigned.' });
+      if (selectedPlan) setUserPlan(selectedPlan);
+      toast({ title: 'Account created!', description: 'Welcome to Alpha Trader. Your 7-day free trial has started.' });
       navigate('/dashboard', { replace: true });
     } catch {
       toast({ title: 'Signup failed', description: 'Please try again.', variant: 'destructive' });
