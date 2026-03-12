@@ -250,28 +250,28 @@ export default function Simulation() {
           <MetricCard
             label="Sim. Return"
             value={formatPercent(liveReturn)}
-            icon={liveReturn >= 0 ? TrendingUp : TrendingDown}
+            icon={liveReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             trend={liveReturn >= 0 ? 'up' : 'down'}
             tooltip="Simulated portfolio return since start"
           />
           <MetricCard
             label="vs S&P 500"
             value={`${(liveReturn - sp500Return) >= 0 ? '+' : ''}${(liveReturn - sp500Return).toFixed(2)}%`}
-            icon={BarChart3}
+            icon={<BarChart3 className="h-4 w-4" />}
             trend={(liveReturn - sp500Return) >= 0 ? 'up' : 'down'}
             tooltip="Your simulated return compared to S&P 500"
           />
           <MetricCard
             label="Worst Drop"
             value={formatPercent(liveDrawdown, false)}
-            icon={AlertTriangle}
+            icon={<AlertTriangle className="h-4 w-4" />}
             trend="down"
             tooltip="Largest peak-to-trough decline during simulation"
           />
           <MetricCard
             label="Portfolio Value"
             value={`$${currentPortfolioValue.toLocaleString()}`}
-            icon={DollarSign}
+            icon={<DollarSign className="h-4 w-4" />}
             tooltip="Current simulated portfolio value"
           />
         </div>
