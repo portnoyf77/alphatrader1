@@ -387,9 +387,14 @@ export default function Explore() {
                           </Link>
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-semibold">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-sm font-semibold"
+                            style={{ backgroundColor: `${getGemHex(alpha.name).glow}`, color: getGemHex(alpha.name).color }}
+                          >
                             <Crown className="h-3 w-3" />
                             {alpha.reputationScore}
+                          </span>
+                        </TableCell>
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-medium">{alpha.followers_count.toLocaleString()}</TableCell>
