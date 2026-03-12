@@ -155,8 +155,7 @@ export default function Landing() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Simulation First</h3>
               <p className="text-muted-foreground">
-                See risk and drawdowns before you invest. Test your strategy against 
-                historical data and understand potential outcomes.
+                 Test your strategy with live market data in real time before committing real capital.
               </p>
             </div>
 
