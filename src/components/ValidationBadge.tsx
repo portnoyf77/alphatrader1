@@ -20,19 +20,19 @@ const statusConfig: Record<ValidationStatus, {
     label: 'Simulated',
     icon: <FlaskConical className="h-3 w-3" />,
     className: 'bg-muted text-muted-foreground border-muted-foreground/30',
-    tooltip: 'This strategy has only paper-trading history and is not publicly listed.',
+    tooltip: 'This portfolio has only paper-trading history and is not publicly listed.',
   },
   in_validation: {
     label: 'In Validation',
     icon: <Clock className="h-3 w-3" />,
     className: 'bg-warning/20 text-warning border-warning/30',
-    tooltip: 'This strategy is being validated for consistency, drawdown, and volatility.',
+    tooltip: 'This portfolio is being validated for consistency, drawdown, and volatility.',
   },
   validated: {
     label: 'Validated',
     icon: <CheckCircle2 className="h-3 w-3" />,
     className: 'bg-success/20 text-success border-success/30',
-    tooltip: 'This strategy has completed validation and meets performance stability criteria.',
+    tooltip: 'This portfolio has completed validation and meets performance stability criteria.',
   },
 };
 

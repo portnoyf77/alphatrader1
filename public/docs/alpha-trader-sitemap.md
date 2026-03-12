@@ -1,7 +1,7 @@
 # Alpha Trader — Full Site Map & Command Reference
 
 > Generated: March 2026  
-> Version: Prototype / MVP
+> Version: Prototype / MVP (Updated)
 
 ---
 
@@ -14,17 +14,14 @@
    - [Home `/`](#1-home-)
    - [Login `/login`](#2-login-login)
    - [Signup `/signup`](#3-signup-signup)
-   - [Docs `/docs`](#4-docs-docs)
-   - [Explore `/explore`](#5-explore-explore)
-   - [Alpha `/alpha`](#6-become-an-alpha-alpha)
-   - [Onboarding `/onboarding`](#7-onboarding-onboarding)
-   - [Invest `/invest`](#8-invest-create-strategy-invest)
-   - [Simulation `/simulation/:id`](#9-simulation-simulationid)
-   - [Strategy Detail `/strategy/:id`](#10-strategy-detail-strategyid)
-   - [Portfolio Alias `/portfolio/:id`](#11-portfolio-alias-portfolioid)
-   - [Portfolio Owner Detail `/dashboard/portfolio/:id`](#12-portfolio-owner-detail-dashboardportfolioid)
-   - [Dashboard `/dashboard`](#13-dashboard-dashboard)
-   - [404 Not Found `/*`](#14-not-found-)
+   - [Explore `/explore`](#4-explore-marketplace-explore)
+   - [Alpha `/alpha`](#5-become-an-alpha-alpha)
+   - [Invest `/invest`](#6-create-portfolio-invest)
+   - [Simulation `/simulation/:id`](#7-simulation-simulationid)
+   - [Portfolio Detail `/portfolio/:id`](#8-portfolio-detail-portfolioid)
+   - [Portfolio Owner Detail `/dashboard/portfolio/:id`](#9-portfolio-owner-detail-dashboardportfolioid)
+   - [Dashboard `/dashboard`](#10-dashboard-dashboard)
+   - [404 Not Found `/*`](#11-not-found-)
 5. [Access Level Legend](#access-level-legend)
 
 ---
@@ -34,14 +31,12 @@
 ```
 Landing (/) ─── guest ──┬── /login
                         ├── /signup
-                        ├── /explore
-                        └── /docs
+                        └── /explore
 
 Dashboard (/) ── auth ──┬── /dashboard
                         ├── /explore
                         ├── /invest
-                        ├── /alpha
-                        └── /onboarding
+                        └── /alpha
 
 /login ──────────────────┬── /signup
                          └── / (on success)
@@ -49,564 +44,351 @@ Dashboard (/) ── auth ──┬── /dashboard
 /signup ─────────────────┬── /login
                          └── /dashboard (on success)
 
-/onboarding ─────────────┬── /invest (creator)
-                         └── /explore (investor)
+/invest ─────────────────┬── /simulation/:id (Run Simulation)
+                         └── (Invest Now — toast only)
 
-/invest ─────────────────── /simulation/:id (on simulate)
+/simulation/:id ─────────┬── /dashboard (Publish / Keep Private)
+                          └── (Invest Now — toast only)
 
-/simulation/:id ─────────┬── /strategy/:id (on publish)
-                         └── /dashboard (on invest now)
+/explore ────────────────── /portfolio/:id (click card)
 
-/explore ────────────────── /strategy/:id (on card click)
+/dashboard ──────────────┬── /dashboard/portfolio/:id (click owned row)
+                         ├── /portfolio/:id (click invested row)
+                         └── /invest (Create new)
 
-/dashboard ──────────────┬── /strategy/:id (invested row click)
-                         ├── /dashboard/portfolio/:id (my portfolio row click)
-                         └── /simulation/:id (simulating row click)
+/portfolio/:id ──────────── /explore (Back to Marketplace)
+                          or /dashboard (Back to Dashboard)
 
-/dashboard/portfolio/:id ── /strategy/:id (view public page)
+/dashboard/portfolio/:id ── /dashboard (Back to Dashboard)
+                          ── /invest?edit=:id (GenAI Tweak)
 
-/strategy/:id ───────────── /alpha (upgrade CTA)
+/strategy/:id ───────────── /portfolio/:id (redirect)
 ```
 
 ---
 
 ## Global Components
 
-### Navbar (all pages)
+### Navbar (Authenticated)
+| Item | Route | Notes |
+|------|-------|-------|
+| Logo (Crown icon) | `/` | Left-aligned |
+| Dashboard | `/dashboard` | |
+| Marketplace | `/explore` | |
+| Create | `/invest` | Renamed from "Invest" |
+| Become an Alpha | `/alpha` | |
+| User dropdown | — | Sign Out, Plan badge |
 
-| Condition | Element | Action |
-|-----------|---------|--------|
-| Guest | Logo | Navigate to `/` |
-| Guest | "Sign In" button | Navigate to `/login` |
-| Guest | "Sign Up" button | Navigate to `/signup` |
-| Authenticated | Logo | Navigate to `/` |
-| Authenticated | Dashboard link | Navigate to `/dashboard` |
-| Authenticated | Marketplace link | Navigate to `/explore` |
-| Authenticated | Invest link | Navigate to `/invest` |
-| Authenticated | Become an Alpha link | Navigate to `/alpha` |
-| Authenticated | Username badge | Displays username + plan tier |
-| Authenticated | "Sign Out" button | Logs out, redirects to `/` |
-| Mobile | Hamburger menu | Toggles mobile nav drawer |
+### Navbar (Guest)
+| Item | Route | Notes |
+|------|-------|-------|
+| Logo (Crown icon) | `/` | Left-aligned |
+| Sign In | `/login` | Right-aligned |
+| Sign Up | `/signup` | Right-aligned, primary button |
 
-### Footer (via PageLayout)
-- Static informational footer on pages using PageLayout
+### Footer
+| Element | Details |
+|---------|---------|
+| Logo | Crown icon + "Alpha Trader" |
+| Nav links | Dashboard, Marketplace, Create, Become an Alpha |
+| Disclaimer bar | ⚠️ Not a registered investment adviser... |
+| Copyright | © 2026 Alpha Trader |
 
 ---
 
 ## Route Map
 
-| Route | Component | Access Level |
-|-------|-----------|-------------|
-| `/` | Home (Landing or Dashboard) | Public |
+| Route | Page | Access |
+|-------|------|--------|
+| `/` | Landing (guest) or Dashboard (auth) | Public |
 | `/login` | Login | Public |
-| `/signup` | Signup | Public |
-| `/docs` | Docs | Public |
-| `/explore` | Explore | Public |
-| `/alpha` | Alpha | Protected + Allow Expired Trial |
-| `/onboarding` | Onboarding | Protected |
-| `/invest` | Invest | Protected |
+| `/signup` | Signup (credentials → plan selection) | Public |
+| `/explore` | Marketplace | Public |
+| `/alpha` | Become an Alpha | Protected + Allow Expired Trial |
+| `/invest` | Create Portfolio (AI-Assisted + Manual tabs) | Protected |
 | `/simulation/:id` | Simulation | Protected |
-| `/strategy/:id` | StrategyDetail | Protected + Allow Expired Trial |
-| `/portfolio/:id` | StrategyDetail | Protected + Allow Expired Trial |
-| `/dashboard/portfolio/:id` | PortfolioOwnerDetail | Protected |
+| `/portfolio/:id` | Portfolio Detail (visitor view) | Protected + Allow Expired Trial |
 | `/dashboard` | Dashboard | Protected |
-| `/*` | NotFound | Public |
+| `/dashboard/portfolio/:id` | Portfolio Owner Detail | Protected |
+| `/strategy/:id` | Redirect → `/portfolio/:id` | Public (redirect) |
+| `/*` | 404 Not Found | Public |
+
+### Deleted Routes
+| Route | Reason |
+|-------|--------|
+| `/docs` | Internal developer tooling — removed from user access |
+| `/onboarding` | Unnecessary friction — users go directly to Dashboard after signup |
 
 ---
 
 ## Page Details
 
----
-
 ### 1. Home `/`
 
-**Access:** Public  
-**Conditional rendering:** Shows Landing page for guests, Dashboard for authenticated users.
+**Conditional routing:**
+- **Guest** → Landing page
+- **Authenticated** → Dashboard
 
-#### Guest View (Landing Page)
+#### Landing Page (Guest View)
 
-| Element | Type | Action |
-|---------|------|--------|
-| "Start Investing" button | CTA | Navigate to `/signup` |
-| "Explore Portfolios" button | CTA | Navigate to `/explore` |
-| "Become an Alpha" button | CTA | Navigate to `/alpha` |
-| Alpha Spotlight section | Display | Shows top Alpha performers |
-| How Alphas Earn section | Display | Explains earning model |
-| Alpha Earnings Calculator | Interactive | Slider-based AUM calculator |
-| Features Grid | Display | Platform feature cards |
-
-#### Authenticated View
-- Redirects to Dashboard component (same as `/dashboard`)
+| Section | Actions / Commands |
+|---------|-------------------|
+| Hero | "Start Investing" → `/signup`, "Explore Portfolios" → `/explore` |
+| Free Trial Banner | "Start Free Trial" → `/signup` |
+| Stats | Capital Allocated, Active Followers, Alpha Earnings (with tooltips) |
+| How It Works | Three steps: Tell AI your goals, Simulate with live data, Invest or earn |
+| What is an Alpha? | Explainer banner |
+| Feature Cards | Platform features with icons |
+| Alpha Spotlight | Top performing portfolio showcase |
+| How Alphas Earn | Fee model explanation (0.25% Alpha + 0.25% Platform) |
+| Earnings Calculator | Sliders for followers + avg allocation |
+| CTA Section | "Explore Portfolios" → `/explore`, "Become an Alpha" → `/alpha` |
+| Disclaimer | Global disclaimer bar visible |
 
 ---
 
 ### 2. Login `/login`
 
-**Access:** Public
-
-| Element | Type | Action |
-|---------|------|--------|
-| Email input | Form field | Text input |
-| Password input | Form field | Password input |
-| "Sign In" button | Submit | Authenticates user, redirects to previous page or `/` |
-| "Sign up" link | Navigation | Navigate to `/signup` |
-| Demo mode hint | Display | Shows available demo credentials |
-
-**Validation:** Email and password required. Toast on success/error.
+| Element | Action |
+|---------|--------|
+| Email input | Text field |
+| Password input | Password field |
+| "Sign In" button | Authenticates and redirects to `/` |
+| "Sign Up" link | → `/signup` |
+| Logo | Crown icon (consistent with rest of app) |
 
 ---
 
 ### 3. Signup `/signup`
 
-**Access:** Public  
-**Multi-step flow:** Step 1 → Credentials, Step 2 → Plan Selection
+**Step 1: Credentials**
 
-#### Step 1: Credentials
+| Element | Action |
+|---------|--------|
+| Email input | Text field |
+| Password input | Min 6 chars |
+| Confirm password | Must match |
+| "Continue" button | → Step 2 |
 
-| Element | Type | Action |
-|---------|------|--------|
-| Email input | Form field | Text input |
-| Password input | Form field | Password input |
-| "Continue" button | Submit | Validates fields, advances to Step 2 |
-| "Sign in" link | Navigation | Navigate to `/login` |
+**Step 2: Plan Selection**
 
-#### Step 2: Plan Selection
+| Element | Action |
+|---------|--------|
+| Basic plan card | $19.99/mo — select |
+| Pro plan card | $49.99/mo — select (with "Popular" badge) |
+| 7-day free trial label | Shown on both plans |
+| Disclaimer checkbox | Required: "I understand this platform is for informational and educational purposes only..." |
+| "Start Free Trial" button | Creates account → `/dashboard` |
 
-| Element | Type | Action |
-|---------|------|--------|
-| Basic plan card | Selectable | Select Basic plan ($0/mo) |
-| Pro plan card | Selectable | Select Pro plan ($29/mo) |
-| Disclaimer checkbox | Toggle | Must accept to proceed |
-| "Create Account" button | Submit | Creates account, navigates to `/dashboard` |
-| "Back" button | Navigation | Returns to Step 1 |
+**Basic Plan features:** Unlimited AI portfolio creation, live simulations, marketplace access, auto-rebalancing with notifications
 
-**Plans:**
-- **Basic** ($0/mo): 3 portfolios, basic analytics, community access
-- **Pro** ($29/mo): Unlimited portfolios, advanced analytics, priority support, Alpha features
+**Pro Plan features:** Everything in Basic + advanced risk analytics, priority marketplace access, downloadable tax reports
 
 ---
 
-### 4. Docs `/docs`
+### 4. Explore (Marketplace) `/explore`
 
-**Access:** Public
+| Element | Action |
+|---------|--------|
+| Validation banner | "All portfolios here are validated and eligible to accept allocations" |
+| Search bar | Filter by portfolio name or creator |
+| Risk filter | All Risk Levels / Low / Medium / High |
+| Visibility filter | All Visibility / Masked / Transparent |
+| Turnover filter | All Turnover / Low / Medium / High |
+| Portfolio Type filter | All Types / GenAI / Manual |
+| Clear Filters button | Resets all filters |
+| Mobile filters | Sheet/drawer with all filter options |
 
-| Element | Type | Action |
-|---------|------|--------|
-| "Download Markdown" button | Action | Downloads `alpha-trader-internal-docs.md` |
-| "Copy Link" button | Action | Copies document URL to clipboard |
-| "Open in New Tab" button | Action | Opens markdown file in new browser tab |
-| Document contents list | Display | Shows table of contents preview |
-| PDF conversion tip | Display | Links to markdowntopdf.com |
-
----
-
-### 5. Explore `/explore`
-
-**Access:** Public
-
-#### Tabs
+**Tabs:**
 
 | Tab | Content |
 |-----|---------|
-| All Portfolios | Filterable grid of strategy cards |
-| Leaderboard | Ranked table of top Alphas |
+| All Portfolios | Top Performers bar chart + portfolio grid cards |
+| Leaderboard | Alpha leaderboard table with rank, score, followers, allocated, earnings, track record |
 
-#### All Portfolios Tab
+**Portfolio Cards show:**
+- Portfolio name + Alpha reputation badge (⭐ score)
+- Creator ID
+- Sector icons, geo focus, risk level, portfolio type
+- 30d Return, Worst Drop, Followers
+- Alpha's Own Investment, Total Allocated, Turnover
+- Liquidation warning
 
-| Element | Type | Action |
-|---------|------|--------|
-| Search input | Form field | Filters strategies by name/keyword |
-| Objective filter | Dropdown | Filter by: Growth, Income, Balanced, Speculation |
-| Risk filter | Dropdown | Filter by: Conservative, Moderate, Aggressive |
-| Strategy filter | Dropdown | Filter by: Sector, Thematic, Quantitative, Macro |
-| Visibility filter | Dropdown | Filter by: Public, Private |
-| Turnover filter | Dropdown | Filter by: Low, Medium, High |
-| "Clear Filters" button | Action | Resets all filters |
-| Top Performers bar chart | Display | Shows risk-adjusted returns (recharts) |
-| Strategy cards | Clickable | Navigate to `/strategy/:id` |
-| Mobile filter sheet | Sheet | Opens filter panel on small screens |
-
-#### Leaderboard Tab
-
-| Element | Type | Action |
-|---------|------|--------|
-| Leaderboard table | Display | Ranked by composite Alpha score |
-| Row click | Navigation | Navigate to `/strategy/:id` |
-
-**Columns:** Rank, Name, Composite Score, Followers, Allocated, Earnings, Track Record
+**Leaderboard columns:** Rank, Alpha, Score (reputation), Followers, Total Allocated, Monthly Earnings, Track Record
 
 ---
 
-### 6. Become an Alpha `/alpha`
+### 5. Become an Alpha `/alpha`
 
-**Access:** Protected + Allow Expired Trial
-
-| Element | Type | Action |
-|---------|------|--------|
-| "Start Building" button | CTA | Navigate to `/invest` |
-| "See Requirements" button | CTA | Scrolls to requirements section |
-| Followers slider | Slider | Adjusts follower count (1–500) |
-| Avg Allocation slider | Slider | Adjusts average allocation ($1K–$100K) |
-| Earnings display | Computed | Shows Total AUM, Monthly & Annual earnings |
-| Requirements checklist | Display | Shows met/unmet publishing criteria |
-| "Publish Your Portfolio" button | CTA (conditional) | Enabled only when all requirements met |
-| "Start Building" button (alt) | CTA | Navigate to `/invest` (if requirements unmet) |
-| Alpha testimonials | Display | Mock testimonial cards |
-| Disclaimer section | Display | Legal/risk disclaimers |
-
-**Publishing Requirements:**
-- Minimum 30-day simulation track record
-- Maximum drawdown < 20%
-- Minimum 5 unique holdings
-- Complete risk disclosure
-- Email verification
+| Element | Action |
+|---------|--------|
+| Hero section | "Turn your investing expertise into passive income" |
+| "Create Your Portfolio" CTA | → `/invest` |
+| "See Your Earnings Potential" | Scrolls to calculator |
+| Earnings Calculator | Followers slider (0-5000) + Avg Allocation slider ($1K-$100K) |
+| Calculator output | Total AUM, Alpha's Share, Platform Fee, Monthly Earnings |
+| Requirements checklist | Live portfolio, 30+ days, personal investment, 5+ holdings, drawdown < 20% |
+| "Publish Your Portfolio" (if met) | → `/dashboard` |
+| "Start Building Your Portfolio" (if not met) | → `/invest` |
+| Testimonial cards | Mock Alpha portfolios with earnings |
 
 ---
 
-### 7. Onboarding `/onboarding`
+### 6. Create Portfolio `/invest`
 
-**Access:** Protected
-
-| Element | Type | Action |
-|---------|------|--------|
-| Investor role card | Selectable | Select investor path |
-| Creator role card | Selectable | Select Alpha/creator path |
-| Investment objective select | Dropdown | Growth / Income / Preservation / Speculation |
-| Risk tolerance slider | Slider | 1 (Conservative) to 5 (Aggressive) |
-| Time horizon select | Dropdown | Short / Medium / Long term |
-| "Continue" button | Submit | Navigate to `/invest` (creator) or `/explore` (investor) |
-
-**Conditional:** Creator selection shows additional Alpha-specific feature highlights.
-
----
-
-### 8. Invest (Create Strategy) `/invest`
-
-**Access:** Protected
-
-#### Tabs
-
-| Tab | Content |
-|-----|---------|
-| AI-Assisted | Conversational questionnaire → Animation → Results |
-| Manual | Form-based portfolio builder |
+**Tabs: AI-Assisted | Manual**
 
 #### AI-Assisted Tab
 
-**Step 1: Questionnaire (ConversationalQA)**
+| Step | Elements |
+|------|----------|
+| Questionnaire | Conversational Q&A with quick replies, sliders, text input |
+| Animation | Particle crystallization → gemstone reveal |
+| Results | Generated portfolio with holdings, allocation breakdown, rationale, risks |
 
-| Element | Type | Action |
-|---------|------|--------|
-| Chat messages | Display | AI-guided conversation |
-| Chat input | Form field | Free-text responses |
-| Quick reply buttons | Buttons | Pre-defined answer options |
-| Voice input button | Button | Voice-to-text input |
-| Risk slider | Slider | Interactive risk preference |
-| Investment amount input | Form field | Dollar amount input |
-| Profile summary | Display | Shows compiled preferences |
+**Results Actions:**
 
-**Step 2: Animation (ParticleCrystallizationAnimation)**
-
-| Element | Type | Action |
-|---------|------|--------|
-| Particle animation | Display | Visual strategy generation effect |
-| Progress indicator | Display | Shows generation progress |
-
-**Step 3: Results**
-
-| Element | Type | Action |
-|---------|------|--------|
-| Generated portfolio name | Display | AI-generated creative name |
-| Holdings table | Display | Ticker, weight, role, rationale |
-| Role badges | Display | Color-coded holding roles |
-| Excluded holdings | Display | Filtered-out tickers with reasons |
-| Strategy rationale | Display | AI-generated explanation |
-| Key risks | Display | Risk factors list |
-| "Run Simulation" button | CTA | Navigate to `/simulation/:id` |
-| "Start Over" button | Action | Resets to questionnaire |
+| Button | Action |
+|--------|--------|
+| Run Simulation | → `/simulation/:id` |
+| Save as Draft | Toast notification |
+| Invest Now | Toast notification (with recommendation to simulate first) |
+| Start Over | Resets to questionnaire |
 
 #### Manual Tab
 
-| Element | Type | Action |
-|---------|------|--------|
-| Portfolio name input | Form field | Custom name |
-| Objective select | Dropdown | Investment objective |
-| Risk level select | Dropdown | Risk tolerance |
-| Holdings table | Editable table | Add/edit/remove holdings |
-| "Add Holding" button | Action | Adds row to holdings table |
-| Remove holding button | Action | Removes row (per holding) |
-| Weight total indicator | Display | Shows total % with validation |
-| "Save as Draft" button | Action | Saves portfolio draft |
-| "Run Simulation" button | CTA | Navigate to `/simulation/:id` |
+| Element | Action |
+|---------|--------|
+| Objective dropdown | Growth / Income / Balanced / Low Volatility |
+| Risk Level dropdown | Low / Medium / High |
+| Holdings table | Ticker, Name, Weight with add/remove |
+| Weight validation | Shows total %, must equal 100% |
+| Run Simulation | → `/simulation/:id` |
+| Save as Draft | Toast notification |
 
 ---
 
-### 9. Simulation `/simulation/:id`
+### 7. Simulation `/simulation/:id`
 
-**Access:** Protected
-
-| Element | Type | Action |
-|---------|------|--------|
-| Live performance chart | Display | Real-time line chart (recharts) |
-| Elapsed time counter | Display | Time since simulation start |
-| Trial countdown | Display | Remaining trial time |
-| Portfolio value metric | Display | Current simulated value |
-| Total return metric | Display | Percentage return |
-| Max drawdown metric | Display | Worst peak-to-trough |
-| Sharpe ratio metric | Display | Risk-adjusted return |
-| "Stop Simulation" button | Action | Pauses simulation |
-| "Resume Simulation" button | Action | Resumes paused simulation |
-| "Invest Now" button | CTA | Navigate to `/dashboard` |
-| "Submit for Validation" button | Action | Changes validation state |
-| "Publish to Marketplace" button | Action | Opens publish modal |
-| "Keep Private" button | Action | Keeps portfolio private |
-| Publish confirmation modal | Dialog | Confirms public listing |
-
-**Validation States:** Not submitted → Pending → Validated / Rejected
+| Element | Action |
+|---------|--------|
+| Portfolio name + "Simulated" badge | Header |
+| Live/Paused indicator | Green dot (running) or yellow (paused) |
+| Start time display | Date + time |
+| Elapsed timer | Real-time counter |
+| Free trial countdown | Days/hours remaining |
+| Stop button | Pauses simulation |
+| Resume button | Resumes simulation |
+| Invest Now button | Toast (prototype) |
+| Live performance chart | Portfolio vs S&P 500 vs Dow Jones |
+| Metrics cards | Sim. Return, vs S&P 500, Worst Drop, Portfolio Value |
+| Submit for Validation | Appears for marketplace publishing |
+| Publish to Marketplace | After validation passes |
+| Keep Private | Save privately → `/dashboard` |
 
 ---
 
-### 10. Strategy Detail `/strategy/:id`
+### 8. Portfolio Detail `/portfolio/:id`
 
-**Access:** Protected + Allow Expired Trial  
-**Conditional views:** Owner vs. Visitor, Basic vs. Pro
+**Contextual breadcrumb:** "Back to Marketplace" or "Back to Dashboard" depending on origin
 
-#### Header Section
+| Element | Action |
+|---------|--------|
+| Portfolio name + creator info | Header |
+| Allocate to Portfolio button | Opens allocate modal (if validated) |
+| Capacity Reached button | Disabled (if paused) |
+| In Validation button | Disabled (if not validated) |
+| Stats row | 30d Return, Followers, Creator Invested, Allocated, Consistency |
+| Liquidation warning | Red box — always visible |
 
-| Element | Type | Action |
-|---------|------|--------|
-| Strategy name | Display | Title with gemstone icon |
-| Creator name | Display | Alpha username |
-| Creation date | Display | Formatted date |
-| 30d Return metric | Display | Percentage |
-| Followers count | Display | Number |
-| Total allocated | Display | Dollar amount |
-| Pending update banner | Display (conditional) | Shows if update pending |
-| Paused banner | Display (conditional) | Shows if allocations paused |
-| "Allocate to Portfolio" button | CTA | Opens allocate modal |
-
-#### Tabs
-
-| Tab | Content | Access |
-|-----|---------|--------|
-| Overview | Rationale, key risks, risk profile | All |
-| Holdings | Holdings table (masked for non-owners) | All |
-| Exposure | ExposureBreakdown component | All |
-| Track Record | PerformanceChart | All |
-| Advanced Analytics | Stress testing, volatility, tax reports | Pro only |
-| Activity | StrategyActivityLog | All |
-| Discussion | Comments and replies | All |
-
-#### Allocate Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| Allocation amount input | Form field | Dollar amount |
-| Fee breakdown | Display | Platform fee + Alpha fee |
-| Terms checkbox | Toggle | Must accept to proceed |
-| "Confirm Allocation" button | Submit | Confirms allocation (prototype) |
-| "Cancel" button | Action | Closes modal |
-
-#### Upgrade to Pro Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| Pro plan features list | Display | Feature comparison |
-| Pricing | Display | $29/month |
-| "Upgrade" button | CTA | Triggers plan upgrade |
-| "Cancel" button | Action | Closes modal |
-
----
-
-### 11. Portfolio Alias `/portfolio/:id`
-
-**Access:** Protected + Allow Expired Trial  
-**Component:** Same as StrategyDetail  
-**Purpose:** Alternate URL path for the same strategy detail view.
-
----
-
-### 12. Portfolio Owner Detail `/dashboard/portfolio/:id`
-
-**Access:** Protected  
-**View:** Owner-only management interface
-
-#### Header & Stats
-
-| Element | Type | Action |
-|---------|------|--------|
-| Portfolio name | Display | Editable title area |
-| Status badge | Display | Simulating / Live / Public |
-| Portfolio value | Display | Current total value |
-| Total return | Display | Percentage return |
-| Followers count | Display | Number of followers |
-| Allocated capital | Display | Total AUM |
-
-#### Performance & Holdings
-
-| Element | Type | Action |
-|---------|------|--------|
-| Performance chart | Display | Historical line chart |
-| Holdings table | Display | Full transparent view |
-| "Tweak Allocations" button | Action | Opens tweak modal |
-
-#### Strategy Controls (live portfolios only)
-
-| Element | Type | Action |
-|---------|------|--------|
-| "Rebalance" button | Action | Triggers minor rebalance (auto-applied) |
-| "Propose Major Update" button | Action | Opens major update dialog |
-| "Pause/Resume Allocations" button | Toggle | Pauses or resumes new allocations |
-| "Liquidate" button | Action | Opens liquidation dialog |
-
-#### Action Buttons (conditional)
-
-| Element | Condition | Action |
-|---------|-----------|--------|
-| "Execute and Go Live" button | Simulating | Opens execute modal |
-| "Make Public" button | Live but private | Opens public modal |
-| "View Public Page" link | Public | Navigate to `/strategy/:id` |
-
-#### Tweak Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| AI tab | Tab | AI-driven allocation suggestions |
-| Manual tab | Tab | Direct weight editing |
-| AI prompt input | Form field | Describe desired changes |
-| "Ask AI" button | Submit | Generates AI suggestions |
-| Holdings weight inputs | Form fields | Per-holding weight % |
-| "Add Holding" button | Action | Adds new holding row |
-| "Auto-Balance" button | Action | Normalizes weights to 100% |
-| "Save Changes" button | Submit | Applies new allocations |
-| "Cancel" button | Action | Closes modal |
-
-#### Execute Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| Investment amount input | Form field | Initial investment amount |
-| Confirmation text | Display | Execution details |
-| "Execute" button | Submit | Transitions to live (prototype) |
-
-#### Make Public Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| Confirmation text | Display | Publishing details |
-| "Make Public" button | Submit | Lists on marketplace (prototype) |
-
-#### Major Update Dialog
-
-| Element | Type | Action |
-|---------|------|--------|
-| Warning text | Display | Explains follower opt-in requirement |
-| Exit window info | Display | Days for follower response |
-| "Propose Update" button | Submit | Initiates update (prototype) |
-| "Cancel" button | Action | Closes dialog |
-
-#### Liquidation Dialog
-
-| Element | Type | Action |
-|---------|------|--------|
-| Warning text | Display | Irreversible action warning |
-| Impact list | Display | Follower exit, marketplace removal |
-| "Liquidate Portfolio" button | Submit (destructive) | Deactivates strategy (prototype) |
-| "Cancel" button | Action | Closes dialog |
-
----
-
-### 13. Dashboard `/dashboard`
-
-**Access:** Protected
-
-#### Stats Overview
-
-| Element | Type | Action |
-|---------|------|--------|
-| My Portfolios count | Metric card | Display |
-| Invested in Others count | Metric card | Display |
-| My Investment total | Metric card | Display |
-| Total Value | Metric card | Display |
-| vs S&P 500 | Metric card | Performance comparison |
-
-#### Benchmark Chart
-
-| Element | Type | Action |
-|---------|------|--------|
-| Performance line chart | Display | Portfolio vs benchmarks |
-| 1M timeframe button | Toggle | 1-month view |
-| 3M timeframe button | Toggle | 3-month view |
-| 6M timeframe button | Toggle | 6-month view |
-| 1Y timeframe button | Toggle | 1-year view |
-| ALL timeframe button | Toggle | All-time view |
-
-#### Pending Updates Panel
-
-| Element | Type | Action |
-|---------|------|--------|
-| Update cards | Display | Pending strategy updates |
-| Approve button | Action | Accepts update |
-| Reject button | Action | Rejects update |
-
-#### Tabs
+**Tabs:**
 
 | Tab | Content |
 |-----|---------|
-| My Portfolios | Portfolios created by user |
-| Invested In | Portfolios user has allocated to |
-| Simulating | Portfolios in simulation mode |
+| Overview | Portfolio summary (type, objective, risk), rationale, key risks, risk profile |
+| Holdings | Owner: full tickers. Non-owner: sector allocations with IP protection notice |
+| Exposure | IP-Protected Portfolio breakdown, asset allocation, portfolio characteristics |
+| Track Record | Performance vs benchmark chart (30D, 90D, YTD, 1Y, All) |
+| Advanced Analytics | Pro only: stress testing, volatility, Sharpe/Sortino, tax reports. Basic: upgrade prompt |
+| Activity | Activity log with rebalance/alert events |
+| Discussion | Comment thread (prototype) |
 
-#### My Portfolios Tab
+**Allocate Modal:**
 
-| Element | Type | Action |
-|---------|------|--------|
-| "Validated only" toggle | Switch | Filters to validated portfolios |
-| Portfolio rows | Clickable | Navigate to `/dashboard/portfolio/:id` |
-| Status badges | Display | Shows portfolio status |
-| "Configure Rebalancing" button | Action | Opens rebalancing modal |
-
-#### Invested In Tab
-
-| Element | Type | Action |
-|---------|------|--------|
-| Portfolio rows | Clickable | Navigate to `/strategy/:id` |
-| Allocation amount | Display | User's allocation per strategy |
-| Return percentage | Display | Performance since allocation |
-
-#### Simulating Tab
-
-| Element | Type | Action |
-|---------|------|--------|
-| Portfolio rows | Clickable | Navigate to `/simulation/:id` |
-| Simulation progress | Display | Days elapsed |
-
-#### Rebalancing Settings Modal
-
-| Element | Type | Action |
-|---------|------|--------|
-| Auto rebalance option | Radio | Automatic rebalancing |
-| Manual rebalance option | Radio | Manual approval required |
-| Frequency setting | Select | Rebalancing frequency |
-| "Save" button | Submit | Saves preferences |
-
-#### Financial News Feed
-
-| Element | Type | Action |
-|---------|------|--------|
-| News cards | Display | Market news articles |
-| Article links | Clickable | External news links |
+| Element | Details |
+|---------|---------|
+| Amount input | USD |
+| Fee breakdown | Alpha fee: 0.25% AUM, Platform fee: 0.25% AUM, Total: 0.50% annually |
+| Estimated cost | Dollar amount based on allocation |
+| Terms checkbox | "I understand portfolio changes may occur and major changes require opt-in" |
+| Confirm / Cancel | Buttons |
 
 ---
 
-### 14. Not Found `/*`
+### 9. Portfolio Owner Detail `/dashboard/portfolio/:id`
 
-**Access:** Public
+| Element | Action |
+|---------|--------|
+| "Back to Dashboard" breadcrumb | → `/dashboard` |
+| Portfolio name + Live/Simulating badge | Header |
+| Tweak Allocation button | Opens tweak modal |
+| Execute & Go Live button | Opens execute modal (simulating only) |
+| Make Public button | Opens make public modal (live only) |
+| Stats cards | My Investment, 30d Return, Worst Drop, Risk Level, Investors, Total Allocated |
+| Performance chart | With benchmark comparison |
+| Holdings table | Full tickers with weights (+ values if live) |
+| Portfolio Controls (live) | Rebalance, Propose Major Update, Pause/Resume Allocations, Liquidate |
+| Activity Log | Collapsible with event history |
 
-| Element | Type | Action |
-|---------|------|--------|
-| 404 message | Display | "Page not found" |
-| "Back to Home" link | Navigation | Navigate to `/` |
+**Tweak Modal:**
+
+| Option | Details |
+|--------|---------|
+| GenAI | → `/invest?edit=:id` for AI-assisted tweaking |
+| Manual | Edit weights, add/remove holdings, balance to 100% |
+
+**Execute Modal:** Investment amount input, summary, "Go Live" button
+
+**Make Public Modal:** Marketplace listing details, "Make Public" button
+
+**Liquidate Dialog:** Warning: "This action is irreversible. All followers will be automatically exited." Confirm/Cancel
+
+---
+
+### 10. Dashboard `/dashboard`
+
+| Element | Action |
+|---------|--------|
+| Stats tiles (5) | My Portfolios, Invested In, My Investment, Total Value, vs S&P 500 |
+| Pending Updates Panel | Auto-applied or Accept/Reject based on rebalancing mode |
+| Settings gear icon | Opens rebalancing mode modal |
+| Benchmark chart | My Portfolio vs S&P 500 vs Dow Jones with 30D/90D/YTD/1Y toggles |
+
+**Tabs:**
+
+| Tab | Content |
+|-----|---------|
+| My Portfolios | Table with name, status, investment, return, capacity. Click → owner detail |
+| Invested In | Table with portfolio, creator, allocation, return + ⚠️ liquidation tooltip |
+| Simulating | Table with portfolio, sim duration, return, worst drop, risk level. Click → owner detail |
+
+**Rebalancing Settings Modal:**
+- Auto-apply and notify me (default)
+- Require my approval
+- Disclaimer: "By selecting Auto-apply, you authorize Alpha Trader to rebalance your portfolio automatically."
+
+**Market News:** Headline links with sector relevance tags
+
+---
+
+### 11. Not Found `/*`
+
+| Element | Action |
+|---------|--------|
+| Navbar | Guest version (Sign In / Sign Up) |
+| Crown logo | Alpha Trader branding |
+| 404 message | "Oops! Page not found" |
+| "Return to Home" button | → `/` |
 
 ---
 
@@ -614,30 +396,19 @@ Dashboard (/) ── auth ──┬── /dashboard
 
 | Level | Description |
 |-------|-------------|
-| **Public** | Accessible without authentication |
-| **Protected** | Requires authentication; redirects to `/login` if not logged in |
-| **Protected + Allow Expired Trial** | Requires auth but accessible even with expired trial (shows trial expired modal on other protected pages) |
+| Public | No authentication required |
+| Protected | Must be authenticated with active subscription |
+| Protected + Allow Expired Trial | Authenticated users can view even with expired trial |
 
 ---
 
-## Toast Notifications
+## Fee Model
 
-The following actions trigger toast notifications throughout the app:
-
-| Action | Toast Type | Message |
-|--------|-----------|---------|
-| Login success | Success | "Logged in successfully" |
-| Login failure | Error | "Invalid credentials" |
-| Signup success | Success | "Account created" |
-| Rebalance triggered | Info | "Rebalance initiated (prototype)" |
-| Major update proposed | Info | "Major update proposed (prototype)" |
-| Allocations paused/resumed | Info | Status change confirmation |
-| Portfolio liquidated | Destructive | "Strategy liquidated (prototype)" |
-| Allocation confirmed | Success | "Allocation confirmed (prototype)" |
-| Plan selected | Success | "Plan activated" |
-| Doc downloaded | Success | "Documentation downloaded" |
-| Link copied | Success | "Link copied to clipboard" |
-
----
-
-*This document is auto-generated from the Alpha Trader prototype codebase. All features marked "(prototype)" use mock data and simulated behavior.*
+| Fee | Rate | Applied To |
+|-----|------|-----------|
+| Alpha fee | 0.25% AUM annually | Paid to portfolio creator |
+| Platform fee | 0.25% AUM annually | Paid to Alpha Trader |
+| Total cost to follower | 0.50% AUM annually | Combined |
+| Basic plan | $19.99/month | Subscription |
+| Pro plan | $49.99/month | Subscription |
+| Free trial | 7 days | No credit card required |

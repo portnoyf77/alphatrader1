@@ -94,8 +94,8 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[200px]">
                 {strategy.leverage_allowed 
-                  ? 'This strategy may use leverage to amplify returns (and losses)'
-                  : 'This strategy does not use leverage, limiting downside risk'}
+                  ? 'This portfolio may use leverage to amplify returns (and losses)'
+                  : 'This portfolio does not use leverage, limiting downside risk'}
               </TooltipContent>
             </Tooltip>
 
@@ -112,7 +112,7 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[200px]">
-                Maximum total capital this strategy can manage before new allocations are paused
+                Maximum total capital this portfolio can manage before new allocations are paused
               </TooltipContent>
             </Tooltip>
           </div>

@@ -50,7 +50,7 @@ export function ConversationalQA({ onComplete, onCancel }: ConversationalQAProps
   useEffect(() => {
     const timer = setTimeout(() => {
       addAssistantMessage(
-        `Welcome! I'm your investment advisor. Let's build a personalized strategy together.
+        `Welcome! I'm your investment advisor. Let's build a personalized portfolio together.
 
 I'll ask you a few questions about your goals, risk tolerance, and preferences. Feel free to **type naturally** — I understand conversational language — or use the quick reply buttons.
 
@@ -116,7 +116,7 @@ You can also ask me questions like "What does volatility mean?" and I'll explain
       setCurrentQuestionIndex(nextIndex);
       setTimeout(() => {
         addAssistantMessage(
-          `Excellent! I have all the information I need to create your personalized strategy. Let me analyze your preferences and build something perfect for you.`
+          `Excellent! I have all the information I need to create your personalized portfolio. Let me analyze your preferences and build something perfect for you.`
         );
 
         // Complete after showing final message
@@ -468,7 +468,7 @@ You can also ask me questions like "What does volatility mean?" and I'll explain
             onSubmit={handleTextSubmit}
             placeholder={
               isComplete
-                ? "Creating your strategy..."
+                ? "Creating your portfolio..."
                 : isProcessing
                 ? "Processing your response..."
                 : "Type naturally or ask a question..."
