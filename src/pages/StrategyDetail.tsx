@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,7 +24,7 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 export default function StrategyDetail() {
   const { id } = useParams();
   const { toast } = useToast();
-  const { userPlan, selectPlan } = useMockAuth();
+  const { userPlan, selectPlan, user } = useMockAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isProUser = userPlan === 'pro';
   const [showAllocateModal, setShowAllocateModal] = useState(false);
@@ -45,8 +46,9 @@ export default function StrategyDetail() {
     );
   }
 
-  // Note: In a real app, we'd check if the current user is the owner
-  // For the prototype, we allow viewing private portfolios (simulating status)
+  // Check if viewing user is the portfolio owner
+  // In the mock system, we compare the user's username to the creator_id
+  const isOwner = user?.username === strategy.creator_id;
   const isPrivate = strategy.status === 'private';
 
   // Inactive/liquidated strategy
@@ -244,8 +246,9 @@ export default function StrategyDetail() {
 
           {/* Tabs */}
           <Tabs defaultValue="overview">
-            <TabsList className="bg-secondary mb-6">
+            <TabsList className="bg-secondary mb-6 flex-wrap">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="holdings">Holdings</TabsTrigger>
               <TabsTrigger value="exposure">Exposure</TabsTrigger>
               <TabsTrigger value="track-record">Track Record</TabsTrigger>
               <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
@@ -281,6 +284,100 @@ export default function StrategyDetail() {
                 </Card>
                 <StrategyRiskProfile strategy={strategy} />
               </div>
+            </TabsContent>
+
+            <TabsContent value="holdings">
+              <Card className="glass-card">
+                {!isOwner && (
+                  <div className="mx-6 mt-6 p-4 rounded-xl bg-violet-500/5 border border-violet-500/30">
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="h-5 w-5 text-violet-400 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="font-medium text-violet-400">Protected Holdings</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Individual holdings are hidden to protect the Alpha's strategy. You can see sector allocations only.
+                        </p>
+                      </div>
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground shrink-0 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs max-w-[240px]">
+                            Alphas' exact tickers and fund names are masked to protect their intellectual property. Sector-level allocations are shown instead.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle>{isOwner ? 'Holdings' : 'Sector Allocation'}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {isOwner ? (
+                          <>
+                            <TableHead>Ticker</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Sector</TableHead>
+                            <TableHead className="text-right">Weight</TableHead>
+                          </>
+                        ) : (
+                          <>
+                            <TableHead>Sector</TableHead>
+                            <TableHead className="text-right">Weight</TableHead>
+                          </>
+                        )}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isOwner ? (
+                        strategy.holdings.map((holding) => (
+                          <TableRow key={holding.ticker}>
+                            <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
+                            <TableCell>{holding.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{holding.sector || '-'}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary rounded-full" style={{ width: `${holding.weight}%` }} />
+                                </div>
+                                <span className="font-medium">{holding.weight}%</span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        // Group holdings by sector and sum weights for non-owners
+                        Object.entries(
+                          strategy.holdings.reduce<Record<string, number>>((acc, h) => {
+                            const sector = h.sector || 'Other';
+                            acc[sector] = (acc[sector] || 0) + h.weight;
+                            return acc;
+                          }, {})
+                        )
+                          .sort(([, a], [, b]) => b - a)
+                          .map(([sector, weight]) => (
+                            <TableRow key={sector}>
+                              <TableCell className="font-medium">{sector}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
+                                    <div className="h-full bg-primary rounded-full" style={{ width: `${weight}%` }} />
+                                  </div>
+                                  <span className="font-medium">{Math.round(weight)}%</span>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="exposure">
