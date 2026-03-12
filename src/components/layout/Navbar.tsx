@@ -157,24 +157,20 @@ export function Navbar() {
                 </>
               ) : (
                 <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border/50">
-                  <button
-                    onClick={() => {
-                      handleQuickLogin();
-                      setMobileMenuOpen(false);
-                    }}
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
                     className="px-4 py-3 rounded-lg text-sm font-medium text-center border border-border"
                   >
                     Sign In
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleQuickSignup();
-                      setMobileMenuOpen(false);
-                    }}
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
                     className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center"
                   >
                     Sign Up
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
