@@ -92,6 +92,13 @@ export default function Dashboard() {
   const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
 
+  // Count-up animations for stat tiles
+  const animPortfolioCount = useCountUp(myPortfolios.length, 800);
+  const animInvestedCount = useCountUp(investedPortfolios.length, 800);
+  const animMyInvestment = useCountUp(totalMyInvestment, 800);
+  const animTotalValue = useCountUp(totalMyInvestment + totalInvestedInOthers, 800);
+  const animVsSP500 = useCountUp(vsSP500, 800, 1);
+
   const strategiesWithPending = getStrategiesWithPendingUpdates();
 
   return (
@@ -133,7 +140,7 @@ export default function Dashboard() {
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">My Portfolios</p>
                     </div>
-                    <p className="text-3xl font-bold">{myPortfolios.length}</p>
+                    <p className="text-3xl font-bold">{animPortfolioCount}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                       <span className="text-success">{validatedCount} live</span>
                       {simulatingCount > 0 && <span>• {simulatingCount} simulating</span>}
@@ -153,7 +160,7 @@ export default function Dashboard() {
                       <Wallet className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Invested in Others</p>
                     </div>
-                    <p className="text-3xl font-bold">{investedPortfolios.length}</p>
+                    <p className="text-3xl font-bold">{animInvestedCount}</p>
                     <p className="text-xs text-muted-foreground mt-2">{formatCurrency(totalInvestedInOthers)} allocated</p>
                   </CardContent>
                 </Card>
@@ -170,7 +177,7 @@ export default function Dashboard() {
                       <Shield className="h-4 w-4 text-success" />
                       <p className="text-sm text-muted-foreground">My Investment</p>
                     </div>
-                    <p className="text-3xl font-bold text-success">{formatCurrency(totalMyInvestment)}</p>
+                    <p className="text-3xl font-bold text-success">{formatCurrency(animMyInvestment)}</p>
                     <p className="text-xs text-muted-foreground mt-2">In my own portfolios</p>
                   </CardContent>
                 </Card>
@@ -187,7 +194,7 @@ export default function Dashboard() {
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Total Value</p>
                     </div>
-                    <p className="text-3xl font-bold">{formatCurrency(totalMyInvestment + totalInvestedInOthers)}</p>
+                    <p className="text-3xl font-bold">{formatCurrency(animTotalValue)}</p>
                     <p className="text-xs text-muted-foreground mt-2">All investments</p>
                   </CardContent>
                 </Card>
@@ -206,7 +213,7 @@ export default function Dashboard() {
                       <p className="text-sm text-muted-foreground">vs S&P 500</p>
                     </div>
                     <p className={cn("text-3xl font-bold", vsSP500 >= 0 ? "text-success" : "text-destructive")}>
-                      {vsSP500 >= 0 ? '+' : ''}{vsSP500.toFixed(1)}%
+                      {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
                       You: {formatPercent(userTotalReturn)} • S&P: {formatPercent(sp500Return)}

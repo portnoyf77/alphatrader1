@@ -170,8 +170,8 @@ export default function Simulation() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className={cn(
-                  "w-3 h-3 rounded-full",
-                  simulationState === 'running' ? "bg-success animate-pulse" : "bg-warning"
+                  "w-[10px] h-[10px] rounded-full",
+                  simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
                 )} />
                 <div>
                   <p className="font-semibold">
@@ -253,7 +253,7 @@ export default function Simulation() {
                   <Legend />
                   <Area type="monotone" dataKey="Portfolio" fill="url(#simPortfolioFill)" stroke="none" isAnimationActive={false} />
                   <Area type="monotone" dataKey="S&P 500" fill="url(#simSP500Fill)" stroke="none" isAnimationActive={false} />
-                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={false} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
                   <Line type="monotone" dataKey="S&P 500" stroke="#10B981" strokeWidth={1.5} dot={false} strokeDasharray="4 4" isAnimationActive={false} />
                   <Line type="monotone" dataKey="Dow Jones" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} dot={false} strokeDasharray="2 2" isAnimationActive={false} />
                 </LineChart>
