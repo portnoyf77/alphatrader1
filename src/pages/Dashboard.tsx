@@ -198,7 +198,7 @@ export default function Dashboard() {
             {/* vs S&P 500 tile */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className={cn("glass-card cursor-help", vsSP500 >= 0 ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
+                <Card className={cn("glass-card cursor-help accent-bar-green relative overflow-hidden", vsSP500 >= 0 ? "" : "")}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       {vsSP500 >= 0 ? <TrendingUp className="h-4 w-4 text-success" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
