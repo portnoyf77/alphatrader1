@@ -58,12 +58,12 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
             <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="perfPortfolioFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(262 83% 58%)" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="hsl(262 83% 58%)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#7C3AED" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="perfBenchmarkFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
-                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.06} />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 10% 18%)" />
