@@ -92,6 +92,13 @@ export default function Dashboard() {
   const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
 
+  // Count-up animations for stat tiles
+  const animPortfolioCount = useCountUp(myPortfolios.length, 800);
+  const animInvestedCount = useCountUp(investedPortfolios.length, 800);
+  const animMyInvestment = useCountUp(totalMyInvestment, 800);
+  const animTotalValue = useCountUp(totalMyInvestment + totalInvestedInOthers, 800);
+  const animVsSP500 = useCountUp(vsSP500, 800, 1);
+
   const strategiesWithPending = getStrategiesWithPendingUpdates();
 
   return (
