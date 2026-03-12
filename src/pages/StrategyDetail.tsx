@@ -429,7 +429,7 @@ export default function StrategyDetail() {
                           { label: 'Sharpe Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility, 1) * 3.46).toFixed(2) },
                           { label: 'Sortino Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility * 0.7, 1) * 3.46).toFixed(2) },
                           { label: 'Beta vs S&P 500', value: (0.6 + Math.random() * 0.8).toFixed(2) },
-                          { label: 'Max Drawdown Duration', value: `${Math.floor(Math.random() * 30) + 5} days` },
+                          { label: 'Worst Drop Duration', value: `${Math.floor(Math.random() * 30) + 5} days` },
                         ].map((metric) => (
                           <div key={metric.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                             <span className="text-sm text-muted-foreground">{metric.label}</span>
