@@ -26,7 +26,7 @@ const statusConfig: Record<ValidationStatus, {
     label: 'In Validation',
     icon: <Clock className="h-3 w-3" />,
     className: 'bg-warning/20 text-warning border-warning/30',
-    tooltip: 'This strategy is being validated for consistency, drawdown, and volatility.',
+    tooltip: 'This portfolio is being validated for consistency, drawdown, and volatility.',
   },
   validated: {
     label: 'Validated',
