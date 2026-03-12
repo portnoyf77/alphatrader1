@@ -54,9 +54,9 @@ const geoLabels: Record<GeoFocus, { label: string; flag: string }> = {
 
 // Risk config with tooltips
 const riskConfig: Record<RiskLevel, { color: string; tooltip: string }> = {
-  'Low': { color: 'text-cyan-400', tooltip: 'Low Risk - Conservative strategy with focus on capital preservation' },
+  'Low': { color: 'text-cyan-400', tooltip: 'Low Risk - Conservative portfolio with focus on capital preservation' },
   'Medium': { color: 'text-violet-400', tooltip: 'Medium Risk - Balanced approach between growth and stability' },
-  'High': { color: 'text-orange-400', tooltip: 'High Risk - Aggressive growth strategy with higher volatility' },
+  'High': { color: 'text-orange-400', tooltip: 'High Risk - Aggressive growth portfolio with higher volatility' },
 };
 
 // Geo tooltips

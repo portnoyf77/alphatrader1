@@ -27,7 +27,7 @@ export function ChatMessage({ role, content, isTyping = false }: ChatMessageProp
         )}
       >
         {isAssistant ? (
-          <Bot className="w-4 h-4" />
+          <Crown className="w-4 h-4" />
         ) : (
           <User className="w-4 h-4" />
         )}

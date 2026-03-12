@@ -223,6 +223,24 @@ export default function Create() {
                   </span>
                 </div>
               </CardTitle>
+              {/* Gemstone explanation */}
+              {(() => {
+                const gemName = generatedPortfolio.name.split('-')[0];
+                const explanations: Record<string, string> = {
+                  'Ruby': 'Ruby reflects your high-risk, high-growth approach',
+                  'Sapphire': 'Sapphire represents your balanced, growth-oriented outlook',
+                  'Emerald': 'Emerald signals your focus on sustainable, green investments',
+                  'Pearl': 'Pearl embodies your conservative, stability-first philosophy',
+                  'Amber': 'Amber captures your income-focused, dividend-driven style',
+                  'Diamond': 'Diamond represents your diversified, all-weather approach',
+                  'Opal': 'Opal reflects your unique, multi-faceted investment blend',
+                  'Topaz': 'Topaz signals your momentum-driven, trend-following style',
+                };
+                const explanation = explanations[gemName] || `${gemName} reflects your personalized investment approach`;
+                return (
+                  <p className="text-sm text-muted-foreground mt-1 italic">{explanation}</p>
+                );
+              })()}
             </CardHeader>
             <CardContent>
               {/* Strategy Breakdown */}
