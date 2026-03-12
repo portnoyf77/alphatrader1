@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle, DollarSign, Play, Square, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import type { ValidationStatus } from '@/lib/types';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 // Mock simulation data
 const simulatedPortfolio = {
@@ -50,23 +51,27 @@ function formatCountdown(seconds: number): string {
 export default function Simulation() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trialStartDate } = useMockAuth();
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [validationState, setValidationState] = useState<ValidationState>('pending');
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [chartData, setChartData] = useState<Array<{ time: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }>>([]);
 
-  const startTime = useState(() => new Date())[0];
+  // Compute elapsed from trialStartDate (real time elapsed since signup)
+  const [now, setNow] = useState(Date.now());
+  const effectiveTrialStart = trialStartDate ?? Date.now();
+  const elapsedSeconds = Math.floor((now - effectiveTrialStart) / 1000);
   const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedSeconds;
 
-  // Elapsed timer
+  // Tick clock every second for elapsed/countdown
   useEffect(() => {
-    if (simulationState !== 'running') return;
     const interval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(interval);
-  }, [simulationState]);
+  }, []);
+
+  const startTime = useMemo(() => new Date(effectiveTrialStart), [effectiveTrialStart]);
 
   // Live chart data generation
   useEffect(() => {

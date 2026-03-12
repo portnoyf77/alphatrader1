@@ -13,9 +13,15 @@ interface MockAuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  trialStartDate: number | null;
+  userPlan: string | null;
+  isTrialExpired: boolean;
+  selectPlan: (plan: string) => void;
 }
 
 const MockAuthContext = createContext<MockAuthContextType | undefined>(undefined);
+
+const FREE_TRIAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Generate a random user ID like @inv_7x2k
 const generateUserId = () => {
@@ -30,21 +36,30 @@ const generateUserId = () => {
 export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<MockUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [trialStartDate, setTrialStartDate] = useState<number | null>(null);
+  const [userPlan, setUserPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for existing session in localStorage
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    const storedTrial = localStorage.getItem('trialStartDate');
+    if (storedTrial) {
+      setTrialStartDate(parseInt(storedTrial, 10));
+    }
+    const storedPlan = localStorage.getItem('userPlan');
+    if (storedPlan) {
+      setUserPlan(storedPlan);
+    }
     setIsLoading(false);
   }, []);
 
+  const isTrialExpired = trialStartDate !== null && !userPlan && (Date.now() - trialStartDate > FREE_TRIAL_MS);
+
   const login = async (email: string, password: string) => {
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Create mock user
     const mockUser: MockUser = {
       id: crypto.randomUUID(),
       username: generateUserId(),
@@ -53,11 +68,22 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     
     setUser(mockUser);
     localStorage.setItem('mockUser', JSON.stringify(mockUser));
+
+    // Set trial start if not already set
+    if (!localStorage.getItem('trialStartDate')) {
+      const now = Date.now();
+      setTrialStartDate(now);
+      localStorage.setItem('trialStartDate', now.toString());
+    }
   };
 
   const signup = async (email: string, password: string) => {
-    // Same as login for mock purposes
     await login(email, password);
+  };
+
+  const selectPlan = (plan: string) => {
+    setUserPlan(plan);
+    localStorage.setItem('userPlan', plan);
   };
 
   const logout = () => {
@@ -72,7 +98,11 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login, 
       signup, 
-      logout 
+      logout,
+      trialStartDate,
+      userPlan,
+      isTrialExpired,
+      selectPlan,
     }}>
       {children}
     </MockAuthContext.Provider>

@@ -36,7 +36,7 @@ const App = () => (
             <Route path="/docs" element={<Docs />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/alpha" element={
-              <ProtectedRoute><Alpha /></ProtectedRoute>
+              <ProtectedRoute allowExpiredTrial><Alpha /></ProtectedRoute>
             } />
             
             {/* Protected routes */}
@@ -50,10 +50,10 @@ const App = () => (
               <ProtectedRoute><Simulation /></ProtectedRoute>
             } />
             <Route path="/strategy/:id" element={
-              <ProtectedRoute><StrategyDetail /></ProtectedRoute>
+              <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
             } />
             <Route path="/portfolio/:id" element={
-              <ProtectedRoute><StrategyDetail /></ProtectedRoute>
+              <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
             } />
             <Route path="/dashboard/portfolio/:id" element={
               <ProtectedRoute><PortfolioOwnerDetail /></ProtectedRoute>
