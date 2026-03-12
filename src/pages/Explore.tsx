@@ -287,7 +287,7 @@ export default function Explore() {
                 <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
                   <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Visibility</SelectItem>
                     <SelectItem value="masked">Masked</SelectItem>
                     <SelectItem value="transparent">Transparent</SelectItem>
                   </SelectContent>
