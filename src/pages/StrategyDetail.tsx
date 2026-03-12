@@ -20,6 +20,19 @@ import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/l
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+
+const gemstoneIcons: Record<string, React.ElementType> = {
+  'Sapphire': Gem,
+  'Emerald': Hexagon,
+  'Peridot': Pentagon,
+  'Amber': SquareIcon,
+  'Pearl': Circle,
+  'Opal': Octagon,
+  'Diamond': Diamond,
+  'Topaz': Triangle,
+  'Quartz': Gem,
+};
 
 export default function StrategyDetail() {
   const { id } = useParams();
