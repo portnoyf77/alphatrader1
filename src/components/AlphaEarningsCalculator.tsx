@@ -8,10 +8,10 @@ export function AlphaEarningsCalculator() {
   const [investors, setInvestors] = useState([500]);
   const [avgAllocation, setAvgAllocation] = useState([5000]);
 
-  // Platform fee: 1% annually, Alpha gets 20% of that
+  // Alpha earns 0.25% of follower AUM annually, platform takes 0.25%
   const totalAllocated = investors[0] * avgAllocation[0];
-  const platformFee = totalAllocated * 0.01; // 1% annual platform fee
-  const alphaShare = platformFee * 0.20; // 20% to Alpha
+  const alphaShare = totalAllocated * 0.0025; // 0.25% AUM annually to Alpha
+  const platformFee = totalAllocated * 0.0025; // 0.25% AUM annually to platform
   const monthlyEarnings = alphaShare / 12;
 
   return (
