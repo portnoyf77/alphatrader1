@@ -178,13 +178,42 @@ export function getGemstoneColor(gemstone: string): { bg: string; text: string; 
     'Peridot': { bg: 'bg-lime-500/10', text: 'text-lime-400', border: 'border-lime-500/30' },
     'Amber': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
     'Pearl': { bg: 'bg-slate-300/10', text: 'text-slate-300', border: 'border-slate-300/30' },
-    'Opal': { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
-    'Diamond': { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
-    'Topaz': { bg: 'bg-yellow-500/10', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+    'Opal': { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-500/30' },
+    'Diamond': { bg: 'bg-violet-400/10', text: 'text-violet-400', border: 'border-violet-400/30' },
+    'Topaz': { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
     'Quartz': { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30' },
+    'Ruby': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30' },
+    'Citrine': { bg: 'bg-yellow-500/10', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+    'Amethyst': { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
   };
   
   return colors[gemstone] || colors['Quartz'];
+}
+
+/**
+ * Gemstone hex colors for inline styling (dots, borders, glows, chart bars)
+ */
+export const gemHexColors: Record<string, { color: string; glow: string }> = {
+  'Ruby':     { color: '#E11D48', glow: 'rgba(225, 29, 72, 0.15)' },
+  'Sapphire': { color: '#3B82F6', glow: 'rgba(59, 130, 246, 0.15)' },
+  'Emerald':  { color: '#10B981', glow: 'rgba(16, 185, 129, 0.15)' },
+  'Opal':     { color: '#EC4899', glow: 'rgba(236, 72, 153, 0.15)' },
+  'Pearl':    { color: '#E2E8F0', glow: 'rgba(226, 232, 240, 0.1)' },
+  'Diamond':  { color: '#A78BFA', glow: 'rgba(167, 139, 250, 0.15)' },
+  'Citrine':  { color: '#F59E0B', glow: 'rgba(245, 158, 11, 0.15)' },
+  'Amber':    { color: '#D97706', glow: 'rgba(217, 119, 6, 0.15)' },
+  'Amethyst': { color: '#8B5CF6', glow: 'rgba(139, 92, 246, 0.15)' },
+  'Topaz':    { color: '#06B6D4', glow: 'rgba(6, 182, 212, 0.15)' },
+  'Peridot':  { color: '#84CC16', glow: 'rgba(132, 204, 22, 0.15)' },
+  'Quartz':   { color: '#9CA3AF', glow: 'rgba(156, 163, 175, 0.15)' },
+};
+
+/**
+ * Extract gem type from portfolio name and return hex colors
+ */
+export function getGemHex(name: string): { color: string; glow: string } {
+  const prefix = name.split('-')[0];
+  return gemHexColors[prefix] || { color: '#7C3AED', glow: 'rgba(124, 58, 237, 0.15)' };
 }
 
 /**
