@@ -50,8 +50,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 1247,
     allocated_amount_usd: 1850000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 3080,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 385,
     creator_investment: 25000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -108,8 +108,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 2389,
     allocated_amount_usd: 2450000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 4080,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 510,
     creator_investment: 50000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -163,7 +163,7 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 0,
     allocated_amount_usd: 0,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
+    creator_fee_pct: 0.25,
     creator_est_monthly_earnings_usd: 0,
     creator_investment: 15000,
     requires_opt_in_for_structural_changes: true,
@@ -222,8 +222,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 1823,
     allocated_amount_usd: 1680000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 2800,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 350,
     creator_investment: 40000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -282,8 +282,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 654,
     allocated_amount_usd: 580000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 967,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 121,
     creator_investment: 20000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -338,7 +338,7 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 0,
     allocated_amount_usd: 0,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
+    creator_fee_pct: 0.25,
     creator_est_monthly_earnings_usd: 0,
     creator_investment: 10000,
     requires_opt_in_for_structural_changes: true,
@@ -397,8 +397,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 1567,
     allocated_amount_usd: 1920000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 3200,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 400,
     creator_investment: 35000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -456,8 +456,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 987,
     allocated_amount_usd: 820000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 1367,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 171,
     creator_investment: 30000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -517,8 +517,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 543,
     allocated_amount_usd: 460000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 767,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 96,
     creator_investment: 18000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -573,8 +573,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 2156,
     allocated_amount_usd: 2100000,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 3500,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 438,
     creator_investment: 75000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -632,8 +632,8 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 756,
     allocated_amount_usd: 4200000,
     new_allocations_paused: true,
-    creator_fee_pct: 20,
-    creator_est_monthly_earnings_usd: 7000,
+    creator_fee_pct: 0.25,
+    creator_est_monthly_earnings_usd: 875,
     creator_investment: 45000,
     requires_opt_in_for_structural_changes: true,
     exit_window_days: 7,
@@ -680,7 +680,7 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 0,
     allocated_amount_usd: 0,
     new_allocations_paused: true,
-    creator_fee_pct: 20,
+    creator_fee_pct: 0.25,
     creator_est_monthly_earnings_usd: 0,
     creator_investment: 0,
     requires_opt_in_for_structural_changes: true,
@@ -739,16 +739,18 @@ export const mockInvestorGrowth = [
   { month: 'Jan', investors: 4754 },
 ];
 
-export const generateChartData = (days: number, returnPct: number): ChartDataPoint[] => {
-  const data: ChartDataPoint[] = [];
+export const generateChartData = (days: number, returnPct: number): (ChartDataPoint & { dowJones: number })[] => {
+  const data: (ChartDataPoint & { dowJones: number })[] = [];
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
   
   let portfolioValue = 100;
   let benchmarkValue = 100;
+  let dowValue = 100;
   
   const dailyReturn = Math.pow(1 + returnPct / 100, 1 / days) - 1;
   const benchmarkDailyReturn = Math.pow(1.08, 1 / 365) - 1;
+  const dowDailyReturn = Math.pow(1.065, 1 / 365) - 1;
   
   for (let i = 0; i <= days; i++) {
     const date = new Date(startDate);
@@ -757,11 +759,13 @@ export const generateChartData = (days: number, returnPct: number): ChartDataPoi
     const noise = (Math.random() - 0.5) * 2;
     portfolioValue *= (1 + dailyReturn + noise / 100);
     benchmarkValue *= (1 + benchmarkDailyReturn + (Math.random() - 0.5) / 100);
+    dowValue *= (1 + dowDailyReturn + (Math.random() - 0.5) / 100);
     
     data.push({
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       portfolio: parseFloat(portfolioValue.toFixed(2)),
       benchmark: parseFloat(benchmarkValue.toFixed(2)),
+      dowJones: parseFloat(dowValue.toFixed(2)),
     });
   }
   

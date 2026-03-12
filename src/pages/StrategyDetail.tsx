@@ -74,8 +74,8 @@ export default function StrategyDetail() {
     });
   };
 
-  const estimatedFee = parseFloat(allocateAmount || '0') * 0.01;
-  const creatorShare = estimatedFee * (strategy.creator_fee_pct / 100);
+  const totalFee = parseFloat(allocateAmount || '0') * 0.005; // 0.50% total (0.25% Alpha + 0.25% platform)
+  const creatorShare = totalFee / 2; // 0.25% to Alpha
 
   return (
     <PageLayout>
@@ -325,8 +325,9 @@ export default function StrategyDetail() {
                 </div>
                 {allocateAmount && parseFloat(allocateAmount) > 0 && (
                   <div className="p-3 rounded-lg bg-secondary/50 text-sm">
-                    <p>Est. annual fee (1%): <span className="font-medium">${estimatedFee.toFixed(2)}</span></p>
-                    <p className="text-muted-foreground">Creator receives: ${creatorShare.toFixed(2)} ({strategy.creator_fee_pct}%)</p>
+                    <p>Est. annual fee (0.50%): <span className="font-medium">${totalFee.toFixed(2)}</span></p>
+                    <p className="text-muted-foreground">Alpha receives: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
+                    <p className="text-muted-foreground">Platform fee: ${creatorShare.toFixed(2)} (0.25% AUM)</p>
                   </div>
                 )}
                 <div className="flex items-start gap-2">

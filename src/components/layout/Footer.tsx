@@ -12,7 +12,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
         {showDisclaimer && (
           <div className="mb-8 p-4 rounded-lg bg-muted/50 border border-border/50">
             <p className="text-xs text-muted-foreground text-center">
-              ⚠️ This is a prototype. Not investment advice. Simulated results do not guarantee future performance.
+              ⚠️ Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
             </p>
           </div>
         )}
@@ -26,14 +26,17 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
           </div>
           
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/dashboard" className="hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
             <Link to="/explore" className="hover:text-foreground transition-colors">
-              Explore
+              Marketplace
             </Link>
-            <Link to="/leaderboard" className="hover:text-foreground transition-colors">
-              Leaderboard
+            <Link to="/invest" className="hover:text-foreground transition-colors">
+              Invest
             </Link>
-            <Link to="/create" className="hover:text-foreground transition-colors">
-              Create
+            <Link to="/alpha" className="hover:text-foreground transition-colors">
+              Become an Alpha
             </Link>
           </div>
           

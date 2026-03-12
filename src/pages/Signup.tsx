@@ -311,7 +311,7 @@ export default function Signup() {
                     className="mt-0.5"
                   />
                   <Label htmlFor="disclaimer" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    I understand this platform is for informational purposes only and does not constitute investment advice. Past performance does not guarantee future results.
+                    I understand that Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
                   </Label>
                 </div>
               </div>
