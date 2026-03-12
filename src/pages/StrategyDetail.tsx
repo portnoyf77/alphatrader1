@@ -74,8 +74,8 @@ export default function StrategyDetail() {
     });
   };
 
-  const estimatedFee = parseFloat(allocateAmount || '0') * 0.01;
-  const creatorShare = estimatedFee * (strategy.creator_fee_pct / 100);
+  const totalFee = parseFloat(allocateAmount || '0') * 0.005; // 0.50% total (0.25% Alpha + 0.25% platform)
+  const creatorShare = totalFee / 2; // 0.25% to Alpha
 
   return (
     <PageLayout>
