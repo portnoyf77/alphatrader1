@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import type { ValidationStatus } from '@/lib/types';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 // Mock simulation data
 const simulatedPortfolio = {
