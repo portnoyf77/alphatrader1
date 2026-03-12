@@ -83,8 +83,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
-                      <p className="text-muted-foreground mt-1">Capital Allocated</p>
+                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{formatCurrency(totalAllocated)}</p>
+                      <p className="text-muted-foreground mt-1 text-sm">Capital Allocated</p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
