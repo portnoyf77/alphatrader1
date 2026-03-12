@@ -264,6 +264,7 @@ export default function Explore() {
                       to={`/portfolio/${strategy.id}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
                     >
+                      <GemDot name={strategy.name} size={6} />
                       <span className="font-bold text-primary">#{index + 1}</span>
                       <span className="text-foreground">{strategy.name}</span>
                     </Link>
