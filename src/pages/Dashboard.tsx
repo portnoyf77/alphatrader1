@@ -318,9 +318,12 @@ export default function Dashboard() {
                   <TableBody>
                     {filteredMyPortfolios.map((portfolio) => (
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}>
-                        <TableCell>
-                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                         <TableCell>
+                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <GemDot name={portfolio.name} />
                             {portfolio.name}
+                          </Link>
+                        </TableCell>
                           </Link>
                         </TableCell>
                         <TableCell>
