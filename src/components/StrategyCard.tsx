@@ -87,6 +87,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const gemstoneColors = getGemstoneColor(gemstone);
   const GemIcon = gemstoneIcons[gemstone] || Gem;
 
+  // Mock reputation score based on consistency + followers + track record
+  const reputationScore = Math.min(5.0, (strategy.performance.consistency_score * 4 + (strategy.followers_count > 500 ? 0.5 : 0) + 0.3)).toFixed(1);
+
   return (
     <Link to={`/strategy/${strategy.id}`}>
       <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
