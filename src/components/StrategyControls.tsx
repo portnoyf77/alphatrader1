@@ -142,7 +142,7 @@ export function StrategyControls({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs max-w-[200px]">
-              Permanently deactivate this strategy and exit all followers
+              Permanently deactivate this portfolio and exit all followers
             </TooltipContent>
           </Tooltip>
         </div>
