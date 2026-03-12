@@ -96,91 +96,14 @@ export function Navbar() {
                 </Button>
               </div>
             ) : (
-              <>
-                {/* Sign In Dialog */}
-                <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm">Sign In</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Welcome back</DialogTitle>
-                      <DialogDescription>
-                        This is a demo — click Sign In to continue with mock credentials.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="login-email">Email</Label>
-                        <Input 
-                          id="login-email" 
-                          defaultValue="demo@alphatrader.com" 
-                          readOnly 
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="login-password">Password</Label>
-                        <Input 
-                          id="login-password" 
-                          type="password" 
-                          defaultValue="demo123" 
-                          readOnly 
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="text-xs text-muted-foreground text-center p-2 rounded-lg bg-primary/5 border border-primary/20">
-                        🎭 Demo mode: credentials are pre-filled
-                      </div>
-                      <Button onClick={handleQuickLogin} className="w-full">
-                        Sign In
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Sign Up Dialog */}
-                <Dialog open={signupDialogOpen} onOpenChange={setSignupDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm">Sign Up</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Create your account</DialogTitle>
-                      <DialogDescription>
-                        This is a demo — click Sign Up to create a mock account with an anonymous ID.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-email">Email</Label>
-                        <Input 
-                          id="signup-email" 
-                          defaultValue="newuser@alphatrader.com" 
-                          readOnly 
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-password">Password</Label>
-                        <Input 
-                          id="signup-password" 
-                          type="password" 
-                          defaultValue="demo123" 
-                          readOnly 
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="text-xs text-muted-foreground text-center p-2 rounded-lg bg-primary/5 border border-primary/20">
-                        🎭 Demo mode: you'll receive a random anonymous ID like <span className="font-mono">@inv_3k9m</span>
-                      </div>
-                      <Button onClick={handleQuickSignup} className="w-full">
-                        Sign Up
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </>
+              <div className="flex items-center gap-2">
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">Sign In</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button size="sm">Sign Up</Button>
+                </Link>
+              </div>
             )}
           </div>
 
