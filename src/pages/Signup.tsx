@@ -77,7 +77,7 @@ export default function Signup() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Create your account</h1>
             <p className="text-muted-foreground">
-              Join ACME Trader and start building your portfolio
+              Join Alpha Trader and start building your portfolio
             </p>
           </div>
 
