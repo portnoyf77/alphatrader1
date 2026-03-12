@@ -219,9 +219,7 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Followers</p>
+                   <Card className="glass-card glass-tile cursor-help">
                       <p className="text-2xl font-bold flex items-center gap-2">
                         <Users className="h-5 w-5 text-muted-foreground" />
                         {strategy.followers_count.toLocaleString()}
