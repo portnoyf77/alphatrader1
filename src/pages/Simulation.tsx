@@ -51,13 +51,16 @@ function formatCountdown(seconds: number): string {
 export default function Simulation() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trialStartDate } = useMockAuth();
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [validationState, setValidationState] = useState<ValidationState>('pending');
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [chartData, setChartData] = useState<Array<{ time: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }>>([]);
 
-  const startTime = useState(() => new Date())[0];
+  // Compute elapsed from trialStartDate (real time elapsed since signup)
+  const [now, setNow] = useState(Date.now());
+  const effectiveTrialStart = trialStartDate ?? Date.now();
+  const elapsedSeconds = Math.floor((now - effectiveTrialStart) / 1000);
   const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedSeconds;
 
   // Elapsed timer
