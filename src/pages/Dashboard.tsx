@@ -162,7 +162,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card bg-success/5 border-success/30 cursor-help">
+                <Card className="glass-card bg-success/5 border-success/30 cursor-help accent-bar-green">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield className="h-4 w-4 text-success" />
