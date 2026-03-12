@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
+import { GemDot } from '@/components/GemDot';
 import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
@@ -317,8 +318,9 @@ export default function Dashboard() {
                   <TableBody>
                     {filteredMyPortfolios.map((portfolio) => (
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}>
-                        <TableCell>
-                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                         <TableCell>
+                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <GemDot name={portfolio.name} />
                             {portfolio.name}
                           </Link>
                         </TableCell>
@@ -371,7 +373,8 @@ export default function Dashboard() {
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Link to={`/portfolio/${portfolio.id}`} state={{ from: 'dashboard' }} className="font-medium hover:text-primary transition-colors">
+                             <Link to={`/portfolio/${portfolio.id}`} state={{ from: 'dashboard' }} className="font-medium hover:text-primary transition-colors flex items-center gap-2">
+                              <GemDot name={portfolio.name} />
                               {portfolio.name}
                             </Link>
                             <TooltipProvider delayDuration={200}>
@@ -428,7 +431,8 @@ export default function Dashboard() {
                       {simulatingPortfolios.map((portfolio) => (
                         <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/simulation/${portfolio.id}`)}>
                           <TableCell>
-                            <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                            <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <GemDot name={portfolio.name} />
                               {portfolio.name}
                             </Link>
                           </TableCell>

@@ -3,7 +3,8 @@ import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { GemDot } from '@/components/GemDot';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
 
@@ -94,9 +95,14 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const followerBonus = Math.min(strategy.followers_count / 1000, 1) * 0.5;
   const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus).toFixed(1);
 
+  const gemHex = getGemHex(strategy.name);
+
   return (
     <Link to={`/portfolio/${strategy.id}`}>
-      <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+      <Card
+        className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+        style={{ borderLeft: `3px solid ${gemHex.color}` }}
+      >
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-start gap-3">
@@ -107,6 +113,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               )}
               <div>
               <div className="flex items-center gap-2">
+                <GemDot name={strategy.name} />
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {strategy.name}
                 </h3>

@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
+import { GemDot } from '@/components/GemDot';
 import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
+import { getGemHex } from '@/lib/portfolioNaming';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -92,22 +94,8 @@ export default function Explore() {
     setTurnoverFilter('all');
   };
 
-  // Gemstone-themed bar colors for top performers
-  const gemstoneBarColors: Record<string, string> = {
-    'Sapphire': 'hsl(217 91% 60%)',
-    'Pearl': 'hsl(240 5% 80%)',
-    'Emerald': 'hsl(160 84% 39%)',
-    'Amber': 'hsl(38 92% 50%)',
-    'Opal': 'hsl(300 60% 70%)',
-    'Diamond': 'hsl(262 83% 58%)',
-    'Peridot': 'hsl(120 40% 55%)',
-    'Topaz': 'hsl(40 80% 55%)',
-    'Quartz': 'hsl(0 0% 70%)',
-  };
-
   const getBarColor = (name: string) => {
-    const gemName = name.split('-')[0];
-    return gemstoneBarColors[gemName] || 'hsl(262 83% 58%)';
+    return getGemHex(name).color;
   };
 
   const FilterContent = () => (
@@ -276,6 +264,7 @@ export default function Explore() {
                       to={`/portfolio/${strategy.id}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
                     >
+                      <GemDot name={strategy.name} size={6} />
                       <span className="font-bold text-primary">#{index + 1}</span>
                       <span className="text-foreground">{strategy.name}</span>
                     </Link>
@@ -393,12 +382,15 @@ export default function Explore() {
                         </TableCell>
                         <TableCell>
                           <Link to={`/portfolio/${alpha.id}`} className="hover:text-primary transition-colors">
-                            <p className="font-medium">{alpha.name}</p>
+                            <p className="font-medium flex items-center gap-2"><GemDot name={alpha.name} />{alpha.name}</p>
                             <p className="text-xs text-muted-foreground font-mono">{alpha.creator_id}</p>
                           </Link>
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-semibold">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-sm font-semibold"
+                            style={{ backgroundColor: `${getGemHex(alpha.name).glow}`, color: getGemHex(alpha.name).color }}
+                          >
                             <Crown className="h-3 w-3" />
                             {alpha.reputationScore}
                           </span>

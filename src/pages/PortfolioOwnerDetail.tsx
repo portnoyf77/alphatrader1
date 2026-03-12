@@ -13,6 +13,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyControls } from '@/components/StrategyControls';
+import { GemDot } from '@/components/GemDot';
+import { getGemHex } from '@/lib/portfolioNaming';
 import { mockStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -190,7 +192,8 @@ export default function PortfolioOwnerDetail() {
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{portfolio.name}</h1>
+                <GemDot name={portfolio.name} size={10} />
+                <h1 className="text-3xl font-bold" style={{ color: getGemHex(portfolio.name).color, textShadow: `0 0 24px ${getGemHex(portfolio.name).glow}` }}>{portfolio.name}</h1>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-sm font-medium",
                   isLive ? "bg-success/20 text-success" : "bg-warning/20 text-warning"

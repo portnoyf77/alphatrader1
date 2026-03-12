@@ -20,7 +20,8 @@ import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/l
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { GemDot } from '@/components/GemDot';
 
 const gemstoneIcons: Record<string, React.ElementType> = {
   'Sapphire': Gem,
@@ -150,7 +151,7 @@ export default function StrategyDetail() {
                     </div>
                   );
                 })()}
-                <h1 className="text-3xl font-bold">{strategy.name}</h1>
+                <h1 className="text-3xl font-bold" style={{ color: getGemHex(strategy.name).color, textShadow: `0 0 24px ${getGemHex(strategy.name).glow}` }}>{strategy.name}</h1>
               </div>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5 font-mono">
