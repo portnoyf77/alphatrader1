@@ -62,6 +62,16 @@ export function Navbar() {
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span className="font-mono text-xs">{user.username}</span>
+                  {userPlan && (
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                      userPlan === 'pro' 
+                        ? "bg-primary/20 text-primary border border-primary/30" 
+                        : "bg-secondary text-muted-foreground border border-border"
+                    )}>
+                      {userPlan}
+                    </span>
+                  )}
                 </div>
                 <Button 
                   variant="ghost" 

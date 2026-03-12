@@ -443,6 +443,45 @@ export default function StrategyDetail() {
           </Dialog>
         </div>
       </div>
+
+      {/* Upgrade to Pro Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="glass-card sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upgrade to Pro</DialogTitle>
+            <DialogDescription>
+              Get access to advanced risk analytics, stress testing, and downloadable tax reports.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-baseline justify-between mb-3">
+                <h3 className="font-semibold text-lg">Pro Plan</h3>
+                <div>
+                  <span className="text-2xl font-bold">$49.99</span>
+                  <span className="text-sm text-muted-foreground">/month</span>
+                </div>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">✓ Everything in Basic</li>
+                <li className="flex items-center gap-2">✓ Advanced risk analytics (volatility, stress testing, correlation)</li>
+                <li className="flex items-center gap-2">✓ Priority marketplace access</li>
+                <li className="flex items-center gap-2">✓ Downloadable tax reports</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>Cancel</Button>
+            <Button onClick={() => {
+              selectPlan('pro');
+              setShowUpgradeModal(false);
+              toast({ title: 'Upgraded to Pro!', description: 'You now have access to all Pro features.' });
+            }}>
+              Upgrade Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
