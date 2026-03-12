@@ -257,7 +257,7 @@ export default function Explore() {
                   {leaderboardData.map((strategy, index) => (
                     <Link 
                       key={strategy.id}
-                      to={`/strategy/${strategy.id}`}
+                      to={`/portfolio/${strategy.id}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
                     >
                       <span className="font-bold text-primary">#{index + 1}</span>
