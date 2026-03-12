@@ -22,7 +22,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(15,15,26,0.8)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.04)]">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -42,10 +42,11 @@ export function Navbar() {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center gap-2 px-4 py-2 rounded-lg text-[0.875rem] font-medium transition-all",
+                      "font-[var(--font-heading)]",
                       location.pathname === link.href
-                        ? "bg-primary/20 text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -115,10 +116,11 @@ export function Navbar() {
                     to={link.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium transition-all",
+                      "font-[var(--font-heading)]",
                       location.pathname === link.href
-                        ? "bg-primary/20 text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
                     )}
                   >
                     <Icon className="h-4 w-4" />
