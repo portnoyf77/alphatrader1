@@ -50,7 +50,7 @@ export default function Signup() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signup } = useMockAuth();
+  const { signup, selectPlan: setUserPlan } = useMockAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
