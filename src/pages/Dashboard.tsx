@@ -133,7 +133,7 @@ export default function Dashboard() {
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">My Portfolios</p>
                     </div>
-                    <p className="text-3xl font-bold">{myPortfolios.length}</p>
+                    <p className="text-3xl font-bold">{useCountUp(myPortfolios.length, 800)}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                       <span className="text-success">{validatedCount} live</span>
                       {simulatingCount > 0 && <span>• {simulatingCount} simulating</span>}
