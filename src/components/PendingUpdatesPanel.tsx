@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, X, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle, X, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +8,7 @@ import type { Portfolio } from '@/lib/types';
 
 interface PendingUpdatesPanelProps {
   strategies: Portfolio[];
+  rebalancingMode?: 'auto' | 'manual';
   onAccept?: (strategyId: string) => void;
   onExit?: (strategyId: string) => void;
 }
