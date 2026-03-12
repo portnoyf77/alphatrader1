@@ -18,10 +18,14 @@ import { ExposureBreakdown } from '@/components/ExposureBreakdown';
 import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 export default function StrategyDetail() {
   const { id } = useParams();
   const { toast } = useToast();
+  const { userPlan, selectPlan } = useMockAuth();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const isProUser = userPlan === 'pro';
   const [showAllocateModal, setShowAllocateModal] = useState(false);
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
@@ -244,6 +248,10 @@ export default function StrategyDetail() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="exposure">Exposure</TabsTrigger>
               <TabsTrigger value="track-record">Track Record</TabsTrigger>
+              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
+                Advanced Analytics
+                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+              </TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="discussion">Discussion</TabsTrigger>
             </TabsList>
@@ -289,6 +297,84 @@ export default function StrategyDetail() {
 
             <TabsContent value="track-record">
               <PerformanceChart return30d={strategy.performance.return_30d} return90d={strategy.performance.return_90d} portfolioName={strategy.name} />
+            </TabsContent>
+
+            <TabsContent value="advanced-analytics">
+              {isProUser ? (
+                <div className="space-y-6">
+                  <Card className="glass-card">
+                    <CardHeader><CardTitle>Stress Testing</CardTitle></CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">Simulated performance under historical crisis scenarios.</p>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        {[
+                          { scenario: '2008 Financial Crisis', impact: '-32.4%', recovery: '14 months' },
+                          { scenario: 'COVID-19 Crash (2020)', impact: '-18.7%', recovery: '5 months' },
+                          { scenario: 'Rate Hike Cycle (2022)', impact: '-12.1%', recovery: '8 months' },
+                        ].map((test) => (
+                          <Card key={test.scenario} className="bg-secondary/50">
+                            <CardContent className="p-4">
+                              <p className="text-sm font-medium mb-2">{test.scenario}</p>
+                              <p className="text-2xl font-bold text-destructive">{test.impact}</p>
+                              <p className="text-xs text-muted-foreground mt-1">Est. recovery: {test.recovery}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="glass-card">
+                    <CardHeader><CardTitle>Volatility Breakdown</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Annualized Volatility', value: `${strategy.performance.volatility.toFixed(1)}%` },
+                          { label: 'Sharpe Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility, 1) * 3.46).toFixed(2) },
+                          { label: 'Sortino Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility * 0.7, 1) * 3.46).toFixed(2) },
+                          { label: 'Beta vs S&P 500', value: (0.6 + Math.random() * 0.8).toFixed(2) },
+                          { label: 'Max Drawdown Duration', value: `${Math.floor(Math.random() * 30) + 5} days` },
+                        ].map((metric) => (
+                          <div key={metric.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                            <span className="text-sm text-muted-foreground">{metric.label}</span>
+                            <span className="font-medium">{metric.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Tax Reports</CardTitle>
+                        <Button size="sm" variant="outline" onClick={() => toast({ title: 'Download started (prototype)', description: 'Tax report PDF would download here.' })}>
+                          Download Tax Report
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">Generate and download tax-ready reports for your portfolio holdings, including realized/unrealized gains and dividend income.</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <Card className="glass-card">
+                  <CardContent className="py-16 text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
+                      <Lock className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-4">
+                      Pro
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Advanced Analytics & Tax Reports</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                      Unlock stress testing, volatility breakdowns, Sharpe/Sortino ratios, and downloadable tax reports with a Pro subscription.
+                    </p>
+                    <Button onClick={() => setShowUpgradeModal(true)} className="glow-primary">
+                      Upgrade to Pro — $49.99/mo
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="activity">
@@ -357,6 +443,45 @@ export default function StrategyDetail() {
           </Dialog>
         </div>
       </div>
+
+      {/* Upgrade to Pro Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="glass-card sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upgrade to Pro</DialogTitle>
+            <DialogDescription>
+              Get access to advanced risk analytics, stress testing, and downloadable tax reports.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-baseline justify-between mb-3">
+                <h3 className="font-semibold text-lg">Pro Plan</h3>
+                <div>
+                  <span className="text-2xl font-bold">$49.99</span>
+                  <span className="text-sm text-muted-foreground">/month</span>
+                </div>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">✓ Everything in Basic</li>
+                <li className="flex items-center gap-2">✓ Advanced risk analytics (volatility, stress testing, correlation)</li>
+                <li className="flex items-center gap-2">✓ Priority marketplace access</li>
+                <li className="flex items-center gap-2">✓ Downloadable tax reports</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>Cancel</Button>
+            <Button onClick={() => {
+              selectPlan('pro');
+              setShowUpgradeModal(false);
+              toast({ title: 'Upgraded to Pro!', description: 'You now have access to all Pro features.' });
+            }}>
+              Upgrade Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
