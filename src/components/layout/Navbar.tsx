@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, PenTool, LucideIcon } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, Gem, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
