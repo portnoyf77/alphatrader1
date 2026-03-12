@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Gauge, Eye, List, PieChart, BarChart3, History, MessageCircle, Gem, Hexagon, Diamond, Pentagon, Octagon, Circle, Triangle, Square as SquareIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +20,19 @@ import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/l
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+
+const gemstoneIcons: Record<string, React.ElementType> = {
+  'Sapphire': Gem,
+  'Emerald': Hexagon,
+  'Peridot': Pentagon,
+  'Amber': SquareIcon,
+  'Pearl': Circle,
+  'Opal': Octagon,
+  'Diamond': Diamond,
+  'Topaz': Triangle,
+  'Quartz': Gem,
+};
 
 export default function StrategyDetail() {
   const { id } = useParams();
@@ -126,7 +139,19 @@ export default function StrategyDetail() {
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{strategy.name}</h1>
+              <div className="flex items-center gap-3 mb-2">
+                {(() => {
+                  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
+                  const gemColors = getGemstoneColor(gemstone);
+                  const GemIcon = gemstoneIcons[gemstone] || Gem;
+                  return (
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border", gemColors.bg, gemColors.border)}>
+                      <GemIcon className={cn("h-6 w-6", gemColors.text)} />
+                    </div>
+                  );
+                })()}
+                <h1 className="text-3xl font-bold">{strategy.name}</h1>
+              </div>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5 font-mono">
                   <User className="w-4 h-4" />
@@ -182,7 +207,7 @@ export default function StrategyDetail() {
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
+                   <Card className="glass-card glass-tile cursor-help">
                     <CardContent className="p-4">
                       <p className="text-sm text-muted-foreground mb-1">30d Return</p>
                       <p className={cn("text-2xl font-bold flex items-center gap-1", strategy.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
@@ -196,7 +221,7 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
+                   <Card className="glass-card glass-tile cursor-help">
                     <CardContent className="p-4">
                       <p className="text-sm text-muted-foreground mb-1">Followers</p>
                       <p className="text-2xl font-bold flex items-center gap-2">
@@ -210,9 +235,12 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card bg-success/5 border-success/30 cursor-help">
+                   <Card className="glass-card glass-tile bg-success/5 border-success/30 cursor-help">
                     <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Creator Invested</p>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                        <Wallet className="h-3.5 w-3.5" />
+                        Creator Invested
+                      </p>
                       <p className="text-2xl font-bold text-success">{formatCurrency(strategy.creator_investment)}</p>
                     </CardContent>
                   </Card>
@@ -221,9 +249,12 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
+                   <Card className="glass-card glass-tile cursor-help">
                     <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Allocated</p>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        Allocated
+                      </p>
                       <p className="text-2xl font-bold">{formatCurrency(strategy.allocated_amount_usd)}</p>
                     </CardContent>
                   </Card>
@@ -232,9 +263,12 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
+                   <Card className="glass-card glass-tile cursor-help">
                     <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Consistency</p>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                        <Gauge className="h-3.5 w-3.5" />
+                        Consistency
+                      </p>
                       <p className="text-2xl font-bold">{strategy.performance.consistency_score}/100</p>
                     </CardContent>
                   </Card>
@@ -259,16 +293,35 @@ export default function StrategyDetail() {
           {/* Tabs */}
           <Tabs defaultValue="overview">
             <TabsList className="bg-secondary mb-6 flex-wrap">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="holdings">Holdings</TabsTrigger>
-              <TabsTrigger value="exposure">Exposure</TabsTrigger>
-              <TabsTrigger value="track-record">Track Record</TabsTrigger>
-              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
-                Advanced Analytics
-                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+              <TabsTrigger value="overview" className="flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5" />
+                Overview
               </TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="discussion">Discussion</TabsTrigger>
+              <TabsTrigger value="holdings" className="flex items-center gap-1.5">
+                <List className="h-3.5 w-3.5" />
+                Holdings
+              </TabsTrigger>
+              <TabsTrigger value="exposure" className="flex items-center gap-1.5">
+                <PieChart className="h-3.5 w-3.5" />
+                Exposure
+              </TabsTrigger>
+              <TabsTrigger value="track-record" className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Track Record
+              </TabsTrigger>
+              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
+                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+                <BarChart3 className="h-3.5 w-3.5" />
+                Advanced Analytics
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="flex items-center gap-1.5">
+                <History className="h-3.5 w-3.5" />
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="discussion" className="flex items-center gap-1.5">
+                <MessageCircle className="h-3.5 w-3.5" />
+                Discussion
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle, Briefcase, Handshake, FlaskConical } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
@@ -125,7 +125,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help">
+                <Card className="glass-card cursor-help accent-bar-purple">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -145,7 +145,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help">
+                <Card className="glass-card cursor-help accent-bar-purple">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -162,7 +162,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card bg-success/5 border-success/30 cursor-help">
+                <Card className="glass-card bg-success/5 border-success/30 cursor-help accent-bar-green">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield className="h-4 w-4 text-success" />
@@ -179,7 +179,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help">
+                <Card className="glass-card cursor-help accent-bar-purple">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -263,12 +263,19 @@ export default function Dashboard() {
         {/* Tabbed Portfolio Lists — 3 tabs */}
         <Tabs defaultValue="my-portfolios" className="mb-8">
           <TabsList className="bg-secondary mb-6">
-            <TabsTrigger value="my-portfolios">My Portfolios</TabsTrigger>
-            <TabsTrigger value="invested">Invested In</TabsTrigger>
-            <TabsTrigger value="simulating">
+            <TabsTrigger value="my-portfolios" className="flex items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5" />
+              My Portfolios
+            </TabsTrigger>
+            <TabsTrigger value="invested" className="flex items-center gap-1.5">
+              <Handshake className="h-3.5 w-3.5" />
+              Invested In
+            </TabsTrigger>
+            <TabsTrigger value="simulating" className="flex items-center gap-1.5">
+              <FlaskConical className="h-3.5 w-3.5" />
               Simulating
               {simulatingCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-warning/20 text-warning text-xs font-medium">{simulatingCount}</span>
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning/20 text-warning text-xs font-medium">{simulatingCount}</span>
               )}
             </TabsTrigger>
           </TabsList>

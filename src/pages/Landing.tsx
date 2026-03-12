@@ -18,10 +18,11 @@ export default function Landing() {
     <PageLayout showDisclaimer={true}>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background gradient */}
+        {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
+        <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '4s' }} />
         
         <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -30,7 +31,7 @@ export default function Landing() {
               AI-Powered Portfolio Builder
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in leading-tight">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in leading-tight tracking-tight">
               Build, simulate, and{' '}
               <span className="gradient-text">earn from your portfolios</span>
             </h1>
@@ -82,8 +83,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text">{formatCurrency(totalAllocated)}</p>
-                      <p className="text-muted-foreground mt-1">Capital Allocated</p>
+                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{formatCurrency(totalAllocated)}</p>
+                      <p className="text-muted-foreground mt-1 text-sm">Capital Allocated</p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
@@ -93,8 +94,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
-                      <p className="text-muted-foreground mt-1">Active Followers</p>
+                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{totalFollowers.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1 text-sm">Active Followers</p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
@@ -131,34 +132,28 @@ export default function Landing() {
               Get started in three simple steps.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <MessageSquare className="h-7 w-7 text-primary" />
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
+            {/* Connecting line behind steps */}
+            <div className="hidden md:block absolute top-[3.5rem] left-[16.7%] right-[16.7%] h-0.5 bg-gradient-to-r from-primary/30 via-primary/50 to-primary/30" />
+            
+            {[
+              { num: '1', icon: MessageSquare, title: 'Tell the AI your goals', desc: 'Answer a few questions and get a personalized portfolio in minutes.' },
+              { num: '2', icon: BarChart3, title: 'Simulate with live data', desc: 'Test your portfolio with real market data before committing capital.' },
+              { num: '3', icon: DollarSign, title: 'Invest or earn as an Alpha', desc: 'Go live with your portfolio, or publish it to the marketplace and earn when others follow.' },
+            ].map((step) => (
+              <div key={step.num} className="text-center p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all group relative">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                    {step.num}
+                  </div>
+                  <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <step.icon className="h-7 w-7 text-primary" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground">{step.desc}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Tell the AI your goals</h3>
-              <p className="text-muted-foreground">
-                Answer a few questions and get a personalized portfolio in minutes.
-              </p>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <BarChart3 className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Simulate with live data</h3>
-              <p className="text-muted-foreground">
-                Test your portfolio with real market data before committing capital.
-              </p>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <DollarSign className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Invest or earn as an Alpha</h3>
-              <p className="text-muted-foreground">
-                Go live with your portfolio, or publish it to the marketplace and earn when others follow.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
