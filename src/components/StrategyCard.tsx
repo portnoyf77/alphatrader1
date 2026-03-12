@@ -102,10 +102,27 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 </div>
               )}
               <div>
+              <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {strategy.name}
                 </h3>
-                <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
+                {/* Alpha Reputation Badge */}
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-xs cursor-help shrink-0">
+                        <Crown className="h-3 w-3 text-primary" />
+                        <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        <span className="font-semibold text-primary">{reputationScore}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs max-w-[200px]">
+                      Alpha reputation score based on track record, consistency, and follower count
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
