@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Bot, User } from 'lucide-react';
+import { Crown, User } from 'lucide-react';
 
 interface ChatMessageProps {
   role: 'assistant' | 'user';
@@ -27,7 +27,7 @@ export function ChatMessage({ role, content, isTyping = false }: ChatMessageProp
         )}
       >
         {isAssistant ? (
-          <Bot className="w-4 h-4" />
+          <Crown className="w-4 h-4" />
         ) : (
           <User className="w-4 h-4" />
         )}

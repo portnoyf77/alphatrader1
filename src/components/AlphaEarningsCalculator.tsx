@@ -96,7 +96,7 @@ export function AlphaEarningsCalculator() {
           <p className="text-sm text-muted-foreground mb-1">
             Your estimated monthly earnings
           </p>
-          <p className="text-3xl font-bold gradient-text">
+          <p className="text-3xl font-bold gradient-text" style={{ textShadow: '0 0 20px hsl(var(--success) / 0.4)' }}>
             ${Math.round(monthlyEarnings).toLocaleString()}
           </p>
           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
