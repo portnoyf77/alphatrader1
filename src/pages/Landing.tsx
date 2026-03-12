@@ -132,34 +132,28 @@ export default function Landing() {
               Get started in three simple steps.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <MessageSquare className="h-7 w-7 text-primary" />
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
+            {/* Connecting line behind steps */}
+            <div className="hidden md:block absolute top-[3.5rem] left-[16.7%] right-[16.7%] h-0.5 bg-gradient-to-r from-primary/30 via-primary/50 to-primary/30" />
+            
+            {[
+              { num: '1', icon: MessageSquare, title: 'Tell the AI your goals', desc: 'Answer a few questions and get a personalized portfolio in minutes.' },
+              { num: '2', icon: BarChart3, title: 'Simulate with live data', desc: 'Test your portfolio with real market data before committing capital.' },
+              { num: '3', icon: DollarSign, title: 'Invest or earn as an Alpha', desc: 'Go live with your portfolio, or publish it to the marketplace and earn when others follow.' },
+            ].map((step) => (
+              <div key={step.num} className="text-center p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all group relative">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                    {step.num}
+                  </div>
+                  <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <step.icon className="h-7 w-7 text-primary" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground">{step.desc}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Tell the AI your goals</h3>
-              <p className="text-muted-foreground">
-                Answer a few questions and get a personalized portfolio in minutes.
-              </p>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <BarChart3 className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Simulate with live data</h3>
-              <p className="text-muted-foreground">
-                Test your portfolio with real market data before committing capital.
-              </p>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
-              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                <DollarSign className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Invest or earn as an Alpha</h3>
-              <p className="text-muted-foreground">
-                Go live with your portfolio, or publish it to the marketplace and earn when others follow.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
