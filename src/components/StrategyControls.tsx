@@ -124,8 +124,8 @@ export function StrategyControls({
             </TooltipTrigger>
             <TooltipContent className="text-xs max-w-[200px]">
               {isPaused 
-                ? "Allow new investors to allocate to this strategy"
-                : "Temporarily stop accepting new allocations"}
+               ? "Allow new investors to allocate to this portfolio"
+                 : "Temporarily stop accepting new allocations"}
             </TooltipContent>
           </Tooltip>
 
