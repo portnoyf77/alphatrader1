@@ -50,10 +50,10 @@ const App = () => (
               <ProtectedRoute><Simulation /></ProtectedRoute>
             } />
             <Route path="/strategy/:id" element={
-              <ProtectedRoute><StrategyDetail /></ProtectedRoute>
+              <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
             } />
             <Route path="/portfolio/:id" element={
-              <ProtectedRoute><StrategyDetail /></ProtectedRoute>
+              <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
             } />
             <Route path="/dashboard/portfolio/:id" element={
               <ProtectedRoute><PortfolioOwnerDetail /></ProtectedRoute>

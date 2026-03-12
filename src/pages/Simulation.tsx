@@ -63,14 +63,15 @@ export default function Simulation() {
   const elapsedSeconds = Math.floor((now - effectiveTrialStart) / 1000);
   const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedSeconds;
 
-  // Elapsed timer
+  // Tick clock every second for elapsed/countdown
   useEffect(() => {
-    if (simulationState !== 'running') return;
     const interval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(interval);
-  }, [simulationState]);
+  }, []);
+
+  const startTime = useMemo(() => new Date(effectiveTrialStart), [effectiveTrialStart]);
 
   // Live chart data generation
   useEffect(() => {
