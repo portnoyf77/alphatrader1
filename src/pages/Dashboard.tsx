@@ -126,7 +126,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple">
+                <Card className="glass-card cursor-help accent-bar-purple relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -146,7 +146,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple">
+                <Card className="glass-card cursor-help accent-bar-blue relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -163,7 +163,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card bg-success/5 border-success/30 cursor-help accent-bar-green">
+                <Card className="glass-card cursor-help accent-bar-green relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield className="h-4 w-4 text-success" />
@@ -180,7 +180,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple">
+                <Card className="glass-card cursor-help accent-bar-amber relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -198,7 +198,7 @@ export default function Dashboard() {
             {/* vs S&P 500 tile */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className={cn("glass-card cursor-help", vsSP500 >= 0 ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
+                <Card className={cn("glass-card cursor-help accent-bar-green relative overflow-hidden", vsSP500 >= 0 ? "" : "")}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       {vsSP500 >= 0 ? <TrendingUp className="h-4 w-4 text-success" /> : <TrendingDown className="h-4 w-4 text-destructive" />}

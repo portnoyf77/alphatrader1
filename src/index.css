@@ -192,18 +192,32 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
-    box-shadow: 0 0 20px -8px hsl(262 83% 58% / 0.05);
+    background: rgba(22, 22, 40, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
 
   .glass-card:hover {
-    box-shadow: 0 0 30px -8px hsl(262 83% 58% / 0.1);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-elevated {
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .glass-tile {
-    background: hsl(240 10% 9% / 0.6);
+    background: rgba(22, 22, 40, 0.6);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(220 20% 95% / 0.06);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .glow-primary {
@@ -220,13 +234,17 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Accent bar for stat tiles */
+  /* Accent bars for stat tiles */
   .accent-bar-green {
-    border-top: 3px solid hsl(var(--success));
+    border-top: 3px solid hsl(160 84% 39%);
   }
 
   .accent-bar-purple {
-    border-top: 3px solid hsl(var(--primary));
+    border-top: 3px solid hsl(262 83% 58%);
+  }
+
+  .accent-bar-blue {
+    border-top: 3px solid #3B82F6;
   }
 
   .accent-bar-red {
@@ -234,7 +252,7 @@
   }
 
   .accent-bar-amber {
-    border-top: 3px solid hsl(var(--warning));
+    border-top: 3px solid hsl(38 92% 50%);
   }
 }
 
@@ -561,3 +579,9 @@ table tbody tr:hover {
 .animate-sparkle-burst {
   animation: sparkle-burst 1.5s ease-out infinite;
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
