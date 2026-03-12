@@ -246,8 +246,9 @@ export default function StrategyDetail() {
 
           {/* Tabs */}
           <Tabs defaultValue="overview">
-            <TabsList className="bg-secondary mb-6">
+            <TabsList className="bg-secondary mb-6 flex-wrap">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="holdings">Holdings</TabsTrigger>
               <TabsTrigger value="exposure">Exposure</TabsTrigger>
               <TabsTrigger value="track-record">Track Record</TabsTrigger>
               <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
