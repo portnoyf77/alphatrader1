@@ -80,8 +80,13 @@ export default function StrategyDetail() {
     });
   };
 
-  const totalFee = parseFloat(allocateAmount || '0') * 0.005; // 0.50% total (0.25% Alpha + 0.25% platform)
-  const creatorShare = totalFee / 2; // 0.25% to Alpha
+  const alphaFeePct = strategy.creator_fee_pct; // 0.25% from portfolio data
+  const platformFeePct = 0.0025; // 0.25% platform fee
+  const totalFeePct = alphaFeePct + platformFeePct;
+  const amount = parseFloat(allocateAmount || '0');
+  const totalFee = amount * totalFeePct;
+  const alphaShare = amount * alphaFeePct;
+  const platformFee = amount * platformFeePct;
 
   return (
     <PageLayout>
