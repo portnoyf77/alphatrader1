@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,8 +23,15 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 
 export default function StrategyDetail() {
   const { id } = useParams();
+  const location = useLocation();
   const { toast } = useToast();
   const { userPlan, selectPlan, user } = useMockAuth();
+
+  // Contextual breadcrumb
+  const cameFromDashboard = useMemo(() => {
+    const state = location.state as { from?: string } | null;
+    return state?.from === 'dashboard';
+  }, [location.state]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isProUser = userPlan === 'pro';
   const [showAllocateModal, setShowAllocateModal] = useState(false);
@@ -93,9 +100,9 @@ export default function StrategyDetail() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/explore">
+            <Link to={cameFromDashboard ? "/dashboard" : "/explore"}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Marketplace
+              {cameFromDashboard ? "Back to Dashboard" : "Back to Marketplace"}
             </Link>
           </Button>
 

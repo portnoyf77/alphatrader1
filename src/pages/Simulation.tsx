@@ -251,20 +251,19 @@ export default function Simulation() {
         </Card>
 
         {/* Live Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <MetricCard
-            label="Sim. Return"
+            label="Portfolio Value"
+            value={`$${currentPortfolioValue.toLocaleString()}`}
+            icon={<DollarSign className="h-4 w-4" />}
+            tooltip="Current simulated portfolio value"
+          />
+          <MetricCard
+            label="Total Return"
             value={formatPercent(liveReturn)}
             icon={liveReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             trend={liveReturn >= 0 ? 'up' : 'down'}
             tooltip="Simulated portfolio return since start"
-          />
-          <MetricCard
-            label="vs S&P 500"
-            value={`${(liveReturn - sp500Return) >= 0 ? '+' : ''}${(liveReturn - sp500Return).toFixed(2)}%`}
-            icon={<BarChart3 className="h-4 w-4" />}
-            trend={(liveReturn - sp500Return) >= 0 ? 'up' : 'down'}
-            tooltip="Your simulated return compared to S&P 500"
           />
           <MetricCard
             label="Worst Drop"
@@ -274,10 +273,17 @@ export default function Simulation() {
             tooltip="Largest peak-to-trough decline during simulation"
           />
           <MetricCard
-            label="Portfolio Value"
-            value={`$${currentPortfolioValue.toLocaleString()}`}
-            icon={<DollarSign className="h-4 w-4" />}
-            tooltip="Current simulated portfolio value"
+            label="Sharpe Ratio"
+            value={(liveReturn / Math.max(Math.abs(liveDrawdown) * 2 || 1, 0.01)).toFixed(2)}
+            icon={<BarChart3 className="h-4 w-4" />}
+            tooltip="Risk-adjusted return — higher is better (return divided by volatility)"
+          />
+          <MetricCard
+            label="vs S&P 500"
+            value={`${(liveReturn - sp500Return) >= 0 ? '+' : ''}${(liveReturn - sp500Return).toFixed(2)}%`}
+            icon={<BarChart3 className="h-4 w-4" />}
+            trend={(liveReturn - sp500Return) >= 0 ? 'up' : 'down'}
+            tooltip="Your simulated return compared to S&P 500"
           />
         </div>
 
