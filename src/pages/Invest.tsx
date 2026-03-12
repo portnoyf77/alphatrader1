@@ -229,7 +229,7 @@ export default function Create() {
               <div className="mb-6">
                 <h4 className="font-medium mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
-                  Allocation Strategy
+                  Allocation Breakdown
                 </h4>
                 <div className="flex gap-1 h-8 rounded-lg overflow-hidden mb-3">
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
