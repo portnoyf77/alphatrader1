@@ -263,7 +263,7 @@ export default function Explore() {
                       <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
                       <Bar dataKey="return30d" radius={[0, 4, 4, 0]}>
                         {leaderboardData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={barColors[index]} className="cursor-pointer" />
+                          <Cell key={`cell-${index}`} fill={getBarColor(entry.name)} className="cursor-pointer" />
                         ))}
                       </Bar>
                     </BarChart>
