@@ -151,7 +151,7 @@ export default function StrategyDetail() {
                     </div>
                   );
                 })()}
-                <h1 className="text-3xl font-bold">{strategy.name}</h1>
+                <h1 className="text-3xl font-bold" style={{ color: getGemHex(strategy.name).color, textShadow: `0 0 24px ${getGemHex(strategy.name).glow}` }}>{strategy.name}</h1>
               </div>
               <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5 font-mono">
