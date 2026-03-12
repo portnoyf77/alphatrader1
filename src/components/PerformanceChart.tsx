@@ -106,30 +106,30 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
                 type="monotone"
                 dataKey="portfolio"
                 name={portfolioName}
-                stroke="hsl(262 83% 58%)"
+                stroke="#7C3AED"
                 strokeWidth={2.5}
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(262 83% 58%)' }}
+                activeDot={{ r: 4, fill: '#7C3AED' }}
               />
               <Line
                 type="monotone"
                 dataKey="benchmark"
                 name="S&P 500"
-                stroke="hsl(var(--success))"
+                stroke="#10B981"
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(var(--success))' }}
+                activeDot={{ r: 4, fill: '#10B981' }}
               />
               <Line
                 type="monotone"
                 dataKey="dowJones"
                 name="Dow Jones"
-                stroke="hsl(var(--muted-foreground))"
+                stroke="rgba(255,255,255,0.3)"
                 strokeWidth={1.5}
                 strokeDasharray="2 2"
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(var(--muted-foreground))' }}
+                activeDot={{ r: 4, fill: 'rgba(255,255,255,0.3)' }}
               />
             </LineChart>
           </ResponsiveContainer>
