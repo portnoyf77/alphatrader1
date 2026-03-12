@@ -4,16 +4,6 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,23 +14,11 @@ const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const [signupDialogOpen, setSignupDialogOpen] = useState(false);
   const location = useLocation();
-  const { user, login, signup, logout, isAuthenticated } = useMockAuth();
+  const { user, logout, isAuthenticated } = useMockAuth();
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handleQuickLogin = () => {
-    login('demo@alphatrader.com', 'demo123');
-    setLoginDialogOpen(false);
-  };
-
-  const handleQuickSignup = () => {
-    signup('newuser@alphatrader.com', 'demo123');
-    setSignupDialogOpen(false);
   };
 
   return (
