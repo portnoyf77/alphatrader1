@@ -116,7 +116,7 @@ export default function Dashboard() {
                 <TooltipContent className="text-xs">Rebalancing settings</TooltipContent>
               </Tooltip>
             </div>
-            <PendingUpdatesPanel strategies={strategiesWithPending} />
+            <PendingUpdatesPanel strategies={strategiesWithPending} rebalancingMode={rebalancingMode} />
           </div>
         )}
 
