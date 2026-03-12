@@ -324,8 +324,6 @@ export default function Dashboard() {
                             {portfolio.name}
                           </Link>
                         </TableCell>
-                          </Link>
-                        </TableCell>
                         <TableCell>
                           <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
                             {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
