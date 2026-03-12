@@ -13,7 +13,7 @@ interface PendingUpdatesPanelProps {
   onExit?: (strategyId: string) => void;
 }
 
-export function PendingUpdatesPanel({ strategies, onAccept, onExit }: PendingUpdatesPanelProps) {
+export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAccept, onExit }: PendingUpdatesPanelProps) {
   const { toast } = useToast();
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<Portfolio | null>(null);
