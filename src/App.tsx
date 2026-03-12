@@ -16,6 +16,7 @@ import StrategyDetail from "./pages/StrategyDetail";
 import PortfolioOwnerDetail from "./pages/PortfolioOwnerDetail";
 import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
+import Alpha from "./pages/Alpha";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,9 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/alpha" element={
+              <ProtectedRoute><Alpha /></ProtectedRoute>
+            } />
             
             {/* Protected routes */}
             <Route path="/onboarding" element={
