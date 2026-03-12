@@ -177,7 +177,7 @@ export default function Dashboard() {
                       <Shield className="h-4 w-4 text-success" />
                       <p className="text-sm text-muted-foreground">My Investment</p>
                     </div>
-                    <p className="text-3xl font-bold text-success">{formatCurrency(useCountUp(totalMyInvestment, 800))}</p>
+                    <p className="text-3xl font-bold text-success">{formatCurrency(animMyInvestment)}</p>
                     <p className="text-xs text-muted-foreground mt-2">In my own portfolios</p>
                   </CardContent>
                 </Card>
