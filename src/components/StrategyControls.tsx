@@ -50,7 +50,7 @@ export function StrategyControls({
     toast({
       title: isPaused ? "Allocations resumed (prototype)" : "Allocations paused (prototype)",
       description: isPaused 
-        ? "New investors can now allocate to this strategy."
+        ? "New investors can now allocate to this portfolio."
         : "New allocations are temporarily paused. Existing followers are unaffected.",
     });
   };
