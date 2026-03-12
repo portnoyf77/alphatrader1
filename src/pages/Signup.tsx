@@ -249,15 +249,16 @@ export default function Signup() {
                     <Card
                       key={plan.id}
                       className={cn(
-                        "cursor-pointer transition-all duration-200 relative overflow-hidden",
+                        "cursor-pointer transition-all duration-200 relative overflow-hidden glass-card",
                         isSelected
-                          ? "border-primary shadow-lg shadow-primary/10"
-                          : "border-border/50 hover:border-primary/40"
+                          ? "shadow-lg"
+                          : "hover:border-primary/40"
                       )}
+                      style={isSelected ? { border: '2px solid #7C3AED', boxShadow: '0 0 20px rgba(124, 58, 237, 0.1)' } : undefined}
                       onClick={() => setSelectedPlan(plan.id)}
                     >
                       {'popular' in plan && plan.popular && (
-                        <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-bl-lg">
+                        <div className="absolute top-0 right-0 px-3 py-1 text-primary-foreground text-xs font-medium rounded-bl-lg" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
                           Most Popular
                         </div>
                       )}
