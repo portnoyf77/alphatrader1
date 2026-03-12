@@ -3,7 +3,8 @@ import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { GemDot } from '@/components/GemDot';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
 
