@@ -46,8 +46,9 @@ export default function StrategyDetail() {
     );
   }
 
-  // Note: In a real app, we'd check if the current user is the owner
-  // For the prototype, we allow viewing private portfolios (simulating status)
+  // Check if viewing user is the portfolio owner
+  // In the mock system, we compare the user's username to the creator_id
+  const isOwner = user?.username === strategy.creator_id;
   const isPrivate = strategy.status === 'private';
 
   // Inactive/liquidated strategy
