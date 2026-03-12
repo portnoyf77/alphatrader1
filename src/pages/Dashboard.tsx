@@ -378,6 +378,7 @@ export default function Dashboard() {
                              <Link to={`/portfolio/${portfolio.id}`} state={{ from: 'dashboard' }} className="font-medium hover:text-primary transition-colors flex items-center gap-2">
                               <GemDot name={portfolio.name} />
                               {portfolio.name}
+                            </Link>
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
