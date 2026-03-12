@@ -226,6 +226,18 @@ export default function StrategyDetail() {
             </TooltipProvider>
           </div>
 
+          {/* Liquidation Warning */}
+          <Card className="mb-6 border-destructive/40 bg-destructive/5">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-destructive">Important:</span> If this Alpha exits their position, your allocation will automatically mirror that exit. You may receive less than your initial investment. This does not constitute investment advice.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Tabs */}
           <Tabs defaultValue="overview">
             <TabsList className="bg-secondary mb-6">

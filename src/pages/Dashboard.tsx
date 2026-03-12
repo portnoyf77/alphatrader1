@@ -350,9 +350,21 @@ export default function Dashboard() {
                     {investedPortfolios.map((portfolio) => (
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
                         <TableCell>
-                          <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
-                            {portfolio.name}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                              {portfolio.name}
+                            </Link>
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertTriangle className="h-3.5 w-3.5 text-destructive/70 shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-[220px]">
+                                  If this Alpha liquidates, your position will automatically follow.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
