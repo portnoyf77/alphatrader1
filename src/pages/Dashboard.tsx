@@ -468,7 +468,11 @@ export default function Dashboard() {
               Choose how portfolio updates from Alphas you follow are handled.
             </DialogDescription>
           </DialogHeader>
-          <RadioGroup value={rebalancingMode} onValueChange={(v) => setRebalancingMode(v as 'auto' | 'manual')} className="space-y-3 py-4">
+          <RadioGroup value={rebalancingMode} onValueChange={(v) => {
+            const mode = v as 'auto' | 'manual';
+            setRebalancingMode(mode);
+            localStorage.setItem('rebalancingMode', mode);
+          }} className="space-y-3 py-4">
             <div className={cn("flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer", rebalancingMode === 'auto' ? "border-primary bg-primary/5" : "border-border")}>
               <RadioGroupItem value="auto" id="auto" className="mt-0.5" />
               <Label htmlFor="auto" className="cursor-pointer">

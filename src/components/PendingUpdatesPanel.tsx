@@ -104,10 +104,17 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
                   </div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                <ArrowRight className="h-3 w-3" />
-                If you don't respond within {strategy.exit_window_days} days, you'll be auto-exited
-              </p>
+              {rebalancingMode === 'auto' ? (
+                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  Auto-applied — you have been notified.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                  <ArrowRight className="h-3 w-3" />
+                  If you don't respond within {strategy.exit_window_days} days, you'll be auto-exited
+                </p>
+              )}
             </div>
           ))}
         </CardContent>
