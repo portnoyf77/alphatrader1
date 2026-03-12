@@ -274,7 +274,7 @@ export default function Signup() {
                             <div className="flex items-baseline justify-between mb-1">
                               <h3 className="font-semibold text-lg">{plan.name}</h3>
                               <div className="text-right">
-                                <span className="text-2xl font-bold">{plan.price}</span>
+                                <span className="text-2xl font-bold font-mono tabular-nums">{plan.price}</span>
                                 <span className="text-sm text-muted-foreground">{plan.period}</span>
                               </div>
                             </div>
