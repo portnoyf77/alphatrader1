@@ -347,7 +347,7 @@ export default function Explore() {
           </TabsContent>
 
           <TabsContent value="leaderboard">
-            <Card className="glass-card">
+            <Card className="glass-card leaderboard-striped">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-primary" />

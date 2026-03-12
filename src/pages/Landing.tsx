@@ -94,8 +94,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text">{totalFollowers.toLocaleString()}</p>
-                      <p className="text-muted-foreground mt-1">Active Followers</p>
+                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{totalFollowers.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1 text-sm">Active Followers</p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
