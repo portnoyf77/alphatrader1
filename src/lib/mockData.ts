@@ -183,7 +183,7 @@ export const mockStrategies: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 90 days with strong income consistency and low drawdown profile.',
-    created_date: '2024-09-10',
+    created_date: '2025-04-10',
     last_rebalanced_date: '2024-12-15',
     strategy_type: 'Manual',
     objective: 'Income',
