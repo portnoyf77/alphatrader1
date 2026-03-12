@@ -281,19 +281,23 @@ export const sectorGemstoneMap: Record<string, string> = {
   'International': 'Opal',
 };
 
-// Derive gemstone from profile
+// Derive gemstone from profile — uses sector, then risk level for color warmth
 export function deriveGemstone(profile: StrategyProfile): string {
   if (profile.sectorEmphasis.length > 0) {
     const primarySector = profile.sectorEmphasis[0];
     return sectorGemstoneMap[primarySector] || 'Diamond';
   }
   
-  // If no sector preference, use geographic or default
+  // If no sector preference, use geographic
   if (profile.geographicPreference === 'emerging' || profile.geographicPreference === 'international') {
     return 'Opal';
   }
   
-  return 'Diamond';
+  // Fall back to risk-based gemstone: warm for high risk, cool for low
+  const riskLevel = deriveRiskLevel(profile);
+  if (riskLevel === 'High') return 'Ruby';
+  if (riskLevel === 'Low') return 'Sapphire';
+  return 'Emerald'; // Medium risk
 }
 
 // Generate strategy number based on risk level and unique ID
