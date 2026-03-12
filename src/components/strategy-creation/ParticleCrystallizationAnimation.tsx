@@ -6,6 +6,7 @@ import {
   deriveGemstone,
   generateStrategyNumber,
   gemstoneColors,
+  gemstoneDescriptions,
 } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
 
