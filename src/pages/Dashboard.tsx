@@ -206,7 +206,7 @@ export default function Dashboard() {
                       <p className="text-sm text-muted-foreground">vs S&P 500</p>
                     </div>
                     <p className={cn("text-3xl font-bold", vsSP500 >= 0 ? "text-success" : "text-destructive")}>
-                      {vsSP500 >= 0 ? '+' : ''}{vsSP500.toFixed(1)}%
+                      {vsSP500 >= 0 ? '+' : ''}{useCountUp(vsSP500, 800, 1)}%
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
                       You: {formatPercent(userTotalReturn)} • S&P: {formatPercent(sp500Return)}
