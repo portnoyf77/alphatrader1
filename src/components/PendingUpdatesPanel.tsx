@@ -121,7 +121,8 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
                 </p>
               )}
             </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 

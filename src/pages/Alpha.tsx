@@ -245,15 +245,15 @@ export default function Alpha() {
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Total AUM</p>
-                  <p className="text-xl font-bold">${totalAUM.toLocaleString()}</p>
+                  <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Monthly Earnings</p>
-                  <p className="text-xl font-bold text-success">${Math.round(monthlyEarnings).toLocaleString()}</p>
+                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Annual Earnings</p>
-                  <p className="text-xl font-bold text-primary">${Math.round(annualEarnings).toLocaleString()}</p>
+                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
                 </div>
               </div>
 

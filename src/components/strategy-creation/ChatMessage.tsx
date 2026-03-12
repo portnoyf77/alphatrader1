@@ -38,9 +38,10 @@ export function ChatMessage({ role, content, isTyping = false }: ChatMessageProp
         className={cn(
           'max-w-[80%] rounded-2xl px-4 py-3',
           isAssistant 
-            ? 'bg-secondary text-foreground rounded-tl-sm' 
-            : 'bg-primary text-primary-foreground rounded-tr-sm'
+            ? 'glass-card rounded-tl-sm' 
+            : 'rounded-tr-sm'
         )}
+        style={!isAssistant ? { background: 'rgba(255, 255, 255, 0.06)' } : undefined}
       >
         {isTyping ? (
           <div className="flex gap-1 py-1">

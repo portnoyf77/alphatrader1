@@ -566,7 +566,7 @@ export default function StrategyDetail() {
 
           {/* Allocate Modal */}
           <Dialog open={showAllocateModal} onOpenChange={setShowAllocateModal}>
-            <DialogContent className="glass-card">
+            <DialogContent className="glass-elevated">
               <DialogHeader>
                 <DialogTitle>Allocate to {strategy.name}</DialogTitle>
                 <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
@@ -578,13 +578,16 @@ export default function StrategyDetail() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="amount">Allocation Amount (USD)</Label>
-                  <Input id="amount" type="number" placeholder="10000" value={allocateAmount} onChange={(e) => setAllocateAmount(e.target.value)} />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-mono text-xl font-bold">$</span>
+                    <Input id="amount" type="number" placeholder="10000" value={allocateAmount} onChange={(e) => setAllocateAmount(e.target.value)} className="pl-10 font-mono text-2xl h-14" />
+                  </div>
                 </div>
                 {allocateAmount && parseFloat(allocateAmount) > 0 && (
-                   <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
-                     <p className="text-muted-foreground">Alpha fee: ${alphaShare.toFixed(2)} ({(alphaFeePct * 100).toFixed(2)}% AUM)</p>
-                     <p className="text-muted-foreground">Platform fee: ${platformFee.toFixed(2)} ({(platformFeePct * 100).toFixed(2)}% AUM)</p>
-                     <p className="font-medium">Total: ${totalFee.toFixed(2)} ({(totalFeePct * 100).toFixed(2)}% annually)</p>
+                   <div className="p-3 rounded-lg text-sm space-y-1" style={{ background: 'rgba(124, 58, 237, 0.04)', borderRadius: '8px', padding: '12px' }}>
+                     <p className="text-muted-foreground">Alpha fee: <span className="font-mono">${alphaShare.toFixed(2)}</span> ({(alphaFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="text-muted-foreground">Platform fee: <span className="font-mono">${platformFee.toFixed(2)}</span> ({(platformFeePct * 100).toFixed(2)}% AUM)</p>
+                     <p className="font-medium">Total: <span className="font-mono">${totalFee.toFixed(2)}</span> ({(totalFeePct * 100).toFixed(2)}% annually)</p>
                    </div>
                 )}
                 <div className="flex items-start gap-2">
@@ -596,7 +599,7 @@ export default function StrategyDetail() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAllocateModal(false)}>Cancel</Button>
-                <Button onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms}>Confirm Allocation</Button>
+                <Button variant="success" onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms}>Confirm Allocation</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

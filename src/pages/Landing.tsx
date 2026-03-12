@@ -305,7 +305,8 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Investor CTA */}
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
+            <div className="text-center p-8 rounded-2xl bg-card relative overflow-hidden" style={{ border: '1px solid transparent', backgroundClip: 'padding-box' }}>
+              <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(124, 58, 237, 0.3))', margin: '-1px', borderRadius: '16px', zIndex: -1 }} />
               <h3 className="text-2xl font-bold mb-3">Ready to invest smarter?</h3>
               <p className="text-muted-foreground mb-6">
                 Explore proven portfolios from top Alphas.
@@ -319,7 +320,7 @@ export default function Landing() {
             </div>
 
             {/* Alpha CTA */}
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30">
+            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30" style={{ boxShadow: '0 0 40px rgba(124, 58, 237, 0.1)' }}>
               <h3 className="text-2xl font-bold mb-3">Ready to earn from your expertise?</h3>
               <p className="text-muted-foreground mb-6">
                 Build and publish your first portfolio today.
