@@ -116,10 +116,11 @@ export function Navbar() {
                     to={link.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium transition-all",
+                      "font-[var(--font-heading)]",
                       location.pathname === link.href
-                        ? "bg-primary/20 text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
                     )}
                   >
                     <Icon className="h-4 w-4" />
