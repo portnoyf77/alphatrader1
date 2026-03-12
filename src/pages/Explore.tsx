@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
-import { getValidatedStrategies } from '@/lib/mockData';
+import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
