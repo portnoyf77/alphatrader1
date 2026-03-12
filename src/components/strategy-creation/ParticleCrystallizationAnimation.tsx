@@ -29,7 +29,7 @@ const PROGRESS_MESSAGES = [
   'Analyzing your investment profile...',
   'Matching optimal asset allocations...',
   'Calculating risk-adjusted portfolios...',
-  'Crystallizing your strategy...',
+  'Crystallizing your portfolio...',
 ];
 
 const PARTICLE_COUNT = 120;
