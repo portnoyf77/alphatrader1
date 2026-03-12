@@ -478,7 +478,7 @@ export const mockStrategies: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 55 days with solid value-factor performance.',
-    created_date: '2024-11-10',
+    created_date: '2025-11-20',
     last_rebalanced_date: '2024-12-30',
     strategy_type: 'Manual',
     objective: 'Balanced',
