@@ -276,9 +276,9 @@ export default function Explore() {
               </div>
               <div className="hidden lg:flex gap-3">
                 <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
-                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Risk</SelectItem>
+                    <SelectItem value="all">All Risk Levels</SelectItem>
                     <SelectItem value="Low">Low</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="High">High</SelectItem>
