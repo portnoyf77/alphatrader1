@@ -376,7 +376,7 @@ export default function Explore() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Link to={`/strategy/${alpha.id}`} className="hover:text-primary transition-colors">
+                          <Link to={`/portfolio/${alpha.id}`} className="hover:text-primary transition-colors">
                             <p className="font-medium">{alpha.name}</p>
                             <p className="text-xs text-muted-foreground font-mono">{alpha.creator_id}</p>
                           </Link>
