@@ -276,6 +276,17 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center justify-between text-sm cursor-help">
+                    <span className="text-muted-foreground">Alpha's Own Investment</span>
+                    <span className="font-medium text-success">{formatCurrency(strategy.creator_investment)}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[220px]">
+                  How much the Alpha has personally invested in this portfolio — skin in the game
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center justify-between text-sm cursor-help">
                     <span className="text-muted-foreground">Total Allocated</span>
                     <span className="font-medium">{formatCurrency(strategy.allocated_amount_usd)}</span>
                   </div>
@@ -304,6 +315,14 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
             </div>
           </TooltipProvider>
+
+          {/* Liquidation Warning */}
+          <div className="mt-3 p-2 rounded-md bg-warning/5 border border-warning/20">
+            <p className="text-[11px] text-warning/80 flex items-start gap-1.5">
+              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+              If this Alpha exits their position, your allocation will automatically follow.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </Link>
