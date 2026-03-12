@@ -18,6 +18,7 @@ import { ExposureBreakdown } from '@/components/ExposureBreakdown';
 import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 export default function StrategyDetail() {
   const { id } = useParams();
