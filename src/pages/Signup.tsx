@@ -154,7 +154,7 @@ export default function Signup() {
                 </p>
               </div>
 
-              <div className="bg-card border border-border rounded-2xl p-8">
+              <div className="glass-card p-8">
                 <form onSubmit={handleCredentialsSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -249,15 +249,16 @@ export default function Signup() {
                     <Card
                       key={plan.id}
                       className={cn(
-                        "cursor-pointer transition-all duration-200 relative overflow-hidden",
+                        "cursor-pointer transition-all duration-200 relative overflow-hidden glass-card",
                         isSelected
-                          ? "border-primary shadow-lg shadow-primary/10"
-                          : "border-border/50 hover:border-primary/40"
+                          ? "shadow-lg"
+                          : "hover:border-primary/40"
                       )}
+                      style={isSelected ? { border: '2px solid #7C3AED', boxShadow: '0 0 20px rgba(124, 58, 237, 0.1)' } : undefined}
                       onClick={() => setSelectedPlan(plan.id)}
                     >
                       {'popular' in plan && plan.popular && (
-                        <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-bl-lg">
+                        <div className="absolute top-0 right-0 px-3 py-1 text-primary-foreground text-xs font-medium rounded-bl-lg" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
                           Most Popular
                         </div>
                       )}
@@ -273,7 +274,7 @@ export default function Signup() {
                             <div className="flex items-baseline justify-between mb-1">
                               <h3 className="font-semibold text-lg">{plan.name}</h3>
                               <div className="text-right">
-                                <span className="text-2xl font-bold">{plan.price}</span>
+                                <span className="text-2xl font-bold font-mono tabular-nums">{plan.price}</span>
                                 <span className="text-sm text-muted-foreground">{plan.period}</span>
                               </div>
                             </div>
@@ -283,7 +284,7 @@ export default function Signup() {
                             <ul className="space-y-2">
                               {plan.features.map((feature) => (
                                 <li key={feature} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                  <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
                                   {feature}
                                 </li>
                               ))}

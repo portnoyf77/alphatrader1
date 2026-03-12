@@ -82,9 +82,10 @@ export default function Landing() {
               <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{formatCurrency(totalAllocated)}</p>
+                    <div className="text-center cursor-help relative">
+                      <p className="text-3xl md:text-4xl font-bold gradient-text font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>{formatCurrency(totalAllocated)}</p>
                       <p className="text-muted-foreground mt-1 text-sm">Capital Allocated</p>
+                      <div className="absolute bottom-[-4px] left-[20%] w-[60%] h-[2px] opacity-50" style={{ background: 'linear-gradient(90deg, transparent, #7C3AED, transparent)' }} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
@@ -93,9 +94,10 @@ export default function Landing() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text tabular-nums">{totalFollowers.toLocaleString()}</p>
+                    <div className="text-center cursor-help relative">
+                      <p className="text-3xl md:text-4xl font-bold gradient-text font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>{totalFollowers.toLocaleString()}</p>
                       <p className="text-muted-foreground mt-1 text-sm">Active Followers</p>
+                      <div className="absolute bottom-[-4px] left-[20%] w-[60%] h-[2px] opacity-50" style={{ background: 'linear-gradient(90deg, transparent, #7C3AED, transparent)' }} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
@@ -104,12 +106,13 @@ export default function Landing() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="text-center cursor-help">
-                      <p className="text-3xl md:text-4xl font-bold text-primary">${creatorStats.totalAlphaEarnings.toLocaleString()}</p>
+                    <div className="text-center cursor-help relative">
+                      <p className="text-3xl md:text-4xl font-bold text-primary font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${creatorStats.totalAlphaEarnings.toLocaleString()}</p>
                       <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1">
                         Alpha Earnings
                         <HelpCircle className="h-3 w-3" />
                       </p>
+                      <div className="absolute bottom-[-4px] left-[20%] w-[60%] h-[2px] opacity-50" style={{ background: 'linear-gradient(90deg, transparent, #7C3AED, transparent)' }} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[250px]">
@@ -302,7 +305,8 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Investor CTA */}
-            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
+            <div className="text-center p-8 rounded-2xl bg-card relative overflow-hidden" style={{ border: '1px solid transparent', backgroundClip: 'padding-box' }}>
+              <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(124, 58, 237, 0.3))', margin: '-1px', borderRadius: '16px', zIndex: -1 }} />
               <h3 className="text-2xl font-bold mb-3">Ready to invest smarter?</h3>
               <p className="text-muted-foreground mb-6">
                 Explore proven portfolios from top Alphas.
@@ -316,7 +320,7 @@ export default function Landing() {
             </div>
 
             {/* Alpha CTA */}
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30">
+            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30" style={{ boxShadow: '0 0 40px rgba(124, 58, 237, 0.1)' }}>
               <h3 className="text-2xl font-bold mb-3">Ready to earn from your expertise?</h3>
               <p className="text-muted-foreground mb-6">
                 Build and publish your first portfolio today.

@@ -78,15 +78,15 @@ export function AlphaEarningsCalculator() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Total AUM</span>
-              <span>${totalAllocated.toLocaleString()}</span>
+              <span className="font-mono tabular-nums">${totalAllocated.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Your share (0.25% AUM)</span>
-              <span>${alphaShare.toLocaleString()}/year</span>
+              <span className="font-mono tabular-nums">${alphaShare.toLocaleString()}/year</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Platform fee (0.25% AUM)</span>
-              <span>${platformFee.toLocaleString()}/year</span>
+              <span className="font-mono tabular-nums">${platformFee.toLocaleString()}/year</span>
             </div>
           </div>
         </div>
@@ -96,12 +96,12 @@ export function AlphaEarningsCalculator() {
           <p className="text-sm text-muted-foreground mb-1">
             Your estimated monthly earnings
           </p>
-          <p className="text-3xl font-bold gradient-text" style={{ textShadow: '0 0 20px hsl(var(--success) / 0.4)' }}>
+          <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>
             ${Math.round(monthlyEarnings).toLocaleString()}
           </p>
           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
             <ArrowRight className="h-3 w-3" />
-            That's ${Math.round(alphaShare).toLocaleString()} per year
+            That's <span className="font-mono">${Math.round(alphaShare).toLocaleString()}</span> per year
           </p>
         </div>
 

@@ -64,13 +64,17 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
             The following portfolios have published major updates that require your approval to continue.
           </p>
           
-          {strategiesWithPending.map((strategy) => (
-            <div key={strategy.id} className="p-4 rounded-lg bg-background border border-border">
+          {strategiesWithPending.map((strategy) => {
+            const gemPrefix = strategy.name.split('-')[0];
+            const gemColorMap: Record<string, string> = { 'Emerald': '#10B981', 'Citrine': '#F59E0B', 'Ruby': '#E11D48', 'Sapphire': '#3B82F6', 'Opal': '#EC4899', 'Diamond': '#A78BFA', 'Amber': '#D97706', 'Amethyst': '#8B5CF6', 'Topaz': '#06B6D4', 'Pearl': '#E2E8F0' };
+            const leftBorderColor = gemColorMap[gemPrefix] || '#7C3AED';
+            return (
+            <div key={strategy.id} className="p-4 rounded-lg bg-background border border-border" style={{ borderLeft: `3px solid ${leftBorderColor}` }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-semibold flex items-center gap-2"><GemDot name={strategy.name} />{strategy.name}</span>
-                    <span className="px-2 py-0.5 rounded bg-violet-500/20 text-violet-400 text-xs font-medium">
+                    <span className="text-xs font-medium" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B', borderRadius: '6px', padding: '2px 8px', fontSize: '0.75rem' }}>
                       Update pending
                     </span>
                   </div>
@@ -117,7 +121,8 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
                 </p>
               )}
             </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 

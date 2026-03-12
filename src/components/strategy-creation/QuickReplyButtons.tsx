@@ -35,7 +35,7 @@ export function QuickReplyButtons({
             disabled={disabled}
             onClick={() => onSelect(option.value)}
             className={cn(
-              'rounded-full transition-all duration-200 text-sm',
+              'rounded-full transition-all duration-200 text-sm hover:scale-[1.02]',
               isSelected && 'bg-primary text-primary-foreground border-primary hover:bg-primary/90',
               !isSelected && 'hover:bg-secondary hover:border-primary/50'
             )}

@@ -10,8 +10,8 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
     <footer className="border-t border-border/50 bg-card/50">
       <div className="container mx-auto px-4 py-8">
         {showDisclaimer && (
-          <div className="mb-8 p-4 rounded-lg bg-muted/50 border border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
+          <div className="mb-8 rounded-[10px]" style={{ background: 'rgba(245, 158, 11, 0.04)', border: '1px solid rgba(245, 158, 11, 0.08)', padding: '12px 20px', fontSize: '0.8125rem', color: 'rgba(255, 255, 255, 0.55)' }}>
+            <p className="text-center">
               ⚠️ Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
             </p>
           </div>

@@ -51,7 +51,7 @@ export function ChatInput({
   return (
     <form 
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 p-3 bg-secondary/50 rounded-xl border border-border/50"
+      className="flex items-center gap-2 p-3 glass-card rounded-xl"
     >
       <VoiceInputButton 
         onTranscript={handleTranscript}
