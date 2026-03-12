@@ -56,19 +56,7 @@ export default function Signup() {
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      toast({ title: 'Missing fields', description: 'Please fill in all fields.', variant: 'destructive' });
-      return;
-    }
-    if (email.trim().length > 255) {
-      toast({ title: 'Invalid email', description: 'Email is too long.', variant: 'destructive' });
-      return;
-    }
-    if (password.length < 6 || password.length > 128) {
-      toast({ title: 'Invalid password', description: 'Password must be 6–128 characters.', variant: 'destructive' });
-      return;
-    }
-    if (password !== confirmPassword) {
+    if (password && password !== confirmPassword) {
       toast({ title: "Passwords don't match", description: 'Please make sure your passwords match.', variant: 'destructive' });
       return;
     }
