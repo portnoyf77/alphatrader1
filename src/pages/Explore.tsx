@@ -194,126 +194,208 @@ export default function Explore() {
           </div>
         </div>
 
-        {/* Leaderboard Bar Chart */}
-        <Card className="mb-8 bg-card/50 border-border/50">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Top Performers</CardTitle>
+        {/* Main Tabs: All Portfolios | Leaderboard */}
+        <Tabs defaultValue="all-portfolios" className="mb-8">
+          <TabsList className="bg-secondary mb-6">
+            <TabsTrigger value="all-portfolios">All Portfolios</TabsTrigger>
+            <TabsTrigger value="leaderboard">
+              <Trophy className="h-4 w-4 mr-1.5" />
+              Leaderboard
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all-portfolios">
+            {/* Top Performers Bar Chart */}
+            <Card className="mb-8 bg-card/50 border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Top Performers</CardTitle>
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="max-w-xs">
+                        <p className="text-sm">Ranked by risk-adjusted returns (return divided by volatility). Higher is better.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-muted-foreground">Top 5 portfolios by risk-adjusted performance</p>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={leaderboardData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        width={120} 
+                        stroke="hsl(var(--muted-foreground))" 
+                        fontSize={12}
+                        tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
+                      />
+                      <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
+                      <Bar dataKey="return30d" radius={[0, 4, 4, 0]}>
+                        {leaderboardData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={barColors[index]} className="cursor-pointer" />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {leaderboardData.map((strategy, index) => (
+                    <Link 
+                      key={strategy.id}
+                      to={`/strategy/${strategy.id}`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
+                    >
+                      <span className="font-bold text-primary">#{index + 1}</span>
+                      <span className="text-foreground">{strategy.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search portfolios or creators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-secondary" />
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left" className="max-w-xs">
-                    <p className="text-sm">Ranked by risk-adjusted returns (return divided by volatility). Higher is better.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div className="hidden lg:flex gap-3">
+                <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
+                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Risk</SelectItem>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
+                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="masked">Masked</SelectItem>
+                    <SelectItem value="transparent">Transparent</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
+                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                {hasActiveFilters && <Button variant="ghost" onClick={clearFilters} size="icon"><X className="h-4 w-4" /></Button>}
+              </div>
+              <div className="lg:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full md:w-auto">
+                      <SlidersHorizontal className="h-4 w-4 mr-2" />Filters
+                      {hasActiveFilters && <span className="ml-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">!</span>}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent><SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader><div className="mt-6"><FilterContent /></div></SheetContent>
+                </Sheet>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">Top 5 portfolios by risk-adjusted performance</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={leaderboardData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    width={120} 
-                    stroke="hsl(var(--muted-foreground))" 
-                    fontSize={12}
-                    tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
-                  />
-                  <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
-                  <Bar dataKey="return30d" radius={[0, 4, 4, 0]}>
-                    {leaderboardData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={barColors[index]} className="cursor-pointer" />
+
+            {filteredStrategies.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredStrategies.map((strategy) => (
+                  <StrategyCard key={strategy.id} strategy={strategy} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground mb-4">No portfolios match your filters.</p>
+                <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="leaderboard">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  Alpha Leaderboard
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Ranked by composite score: follower count, total allocated, monthly earnings, and track record length.</p>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>Alpha</TableHead>
+                      <TableHead className="text-center">
+                        <span className="flex items-center gap-1 justify-center"><Star className="h-3 w-3" /> Score</span>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <span className="flex items-center gap-1 justify-end"><Users className="h-3 w-3" /> Followers</span>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <span className="flex items-center gap-1 justify-end"><DollarSign className="h-3 w-3" /> Total Allocated</span>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <span className="flex items-center gap-1 justify-end"><DollarSign className="h-3 w-3" /> Monthly Earnings</span>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <span className="flex items-center gap-1 justify-end"><Clock className="h-3 w-3" /> Track Record</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {alphaLeaderboard.map((alpha, index) => (
+                      <TableRow key={alpha.id} className="cursor-pointer hover:bg-secondary/50">
+                        <TableCell>
+                          <span className={cn(
+                            "font-bold",
+                            index === 0 && "text-yellow-400",
+                            index === 1 && "text-gray-400",
+                            index === 2 && "text-amber-600"
+                          )}>
+                            {index + 1}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Link to={`/strategy/${alpha.id}`} className="hover:text-primary transition-colors">
+                            <p className="font-medium">{alpha.name}</p>
+                            <p className="text-xs text-muted-foreground font-mono">{alpha.creator_id}</p>
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-semibold">
+                            <Crown className="h-3 w-3" />
+                            {alpha.reputationScore}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">{alpha.followers_count.toLocaleString()}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(alpha.allocated_amount_usd)}</TableCell>
+                        <TableCell className="text-right font-medium text-primary">${alpha.creator_est_monthly_earnings_usd.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{alpha.trackRecordDays}d</TableCell>
+                      </TableRow>
                     ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {leaderboardData.map((strategy, index) => (
-                <Link 
-                  key={strategy.id}
-                  to={`/strategy/${strategy.id}`}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
-                >
-                  <span className="font-bold text-primary">#{index + 1}</span>
-                  <span className="text-foreground">{strategy.name}</span>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search portfolios or creators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-secondary" />
-          </div>
-          <div className="hidden lg:flex gap-3">
-            <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
-              <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Risk</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="High">High</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-              <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="masked">Masked</SelectItem>
-                <SelectItem value="transparent">Transparent</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
-              <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
-            {hasActiveFilters && <Button variant="ghost" onClick={clearFilters} size="icon"><X className="h-4 w-4" /></Button>}
-          </div>
-          <div className="lg:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto">
-                  <SlidersHorizontal className="h-4 w-4 mr-2" />Filters
-                  {hasActiveFilters && <span className="ml-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">!</span>}
-                </Button>
-              </SheetTrigger>
-              <SheetContent><SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader><div className="mt-6"><FilterContent /></div></SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <h2 className="text-xl font-semibold mb-4">All Portfolios</h2>
-
-        {filteredStrategies.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStrategies.map((strategy) => (
-              <StrategyCard key={strategy.id} strategy={strategy} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground mb-4">No portfolios match your filters.</p>
-            <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
-          </div>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
         )}
       </div>
     </PageLayout>
