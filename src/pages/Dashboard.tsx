@@ -351,7 +351,7 @@ export default function Dashboard() {
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                            <Link to={`/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
                               {portfolio.name}
                             </Link>
                             <TooltipProvider delayDuration={200}>

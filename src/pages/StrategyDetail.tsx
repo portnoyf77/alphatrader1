@@ -309,7 +309,7 @@ export default function StrategyDetail() {
                             <Info className="h-4 w-4 text-muted-foreground shrink-0 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent className="text-xs max-w-[240px]">
-                            Alphas' exact tickers and fund names are masked to protect their intellectual property. Sector-level allocations are shown instead.
+                            Individual holdings are hidden to protect the creator's intellectual property. Sector-level allocations are shown instead.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

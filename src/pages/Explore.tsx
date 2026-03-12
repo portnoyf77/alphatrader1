@@ -293,9 +293,9 @@ export default function Explore() {
                   </SelectContent>
                 </Select>
                 <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
-                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Turnover</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>

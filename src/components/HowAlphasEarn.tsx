@@ -4,7 +4,7 @@ const steps = [
   {
     icon: Sparkles,
     title: 'Build Your Portfolio',
-    description: 'Use GenAI or create manually with your own strategy.',
+    description: 'Use GenAI or create manually with your own approach.',
   },
   {
     icon: LineChart,

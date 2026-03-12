@@ -363,10 +363,10 @@ export default function Create() {
             </Card>
           )}
 
-          {/* Overall Strategy Rationale */}
+          {/* Overall Portfolio Rationale */}
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-lg">Strategy Rationale</CardTitle>
+              <CardTitle className="text-lg">Portfolio Rationale</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p>

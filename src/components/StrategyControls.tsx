@@ -158,7 +158,7 @@ export function StrategyControls({
             </DialogTitle>
             <DialogDescription className="space-y-2">
               <p>Major changes require follower opt-in and will create a new portfolio configuration.</p>
-              <p className="text-warning">Followers who don't approve within {strategy.exit_window_days} days will be auto-exited.</p>
+              <p className="text-warning">Followers who don&apos;t approve within {strategy.exit_window_days} days will be auto-exited.</p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
