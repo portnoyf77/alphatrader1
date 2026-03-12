@@ -100,9 +100,9 @@ export default function StrategyDetail() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/explore">
+            <Link to={cameFromDashboard ? "/dashboard" : "/explore"}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Marketplace
+              {cameFromDashboard ? "Back to Dashboard" : "Back to Marketplace"}
             </Link>
           </Button>
 
