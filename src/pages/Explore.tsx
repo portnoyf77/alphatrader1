@@ -50,7 +50,10 @@ export default function Explore() {
     return [...validatedStrategies]
       .map((s) => {
         const trackRecordDays = Math.floor((Date.now() - new Date(s.created_date).getTime()) / (1000 * 60 * 60 * 24));
-        const reputationScore = Math.min(5.0, s.performance.consistency_score * 4 + (s.followers_count > 500 ? 0.5 : 0) + 0.3);
+        const baseScore = s.performance.consistency_score * 2.5;
+        const trackRecord = Math.min(trackRecordDays / 365, 1) * 1.0;
+        const followerBonus = Math.min(s.followers_count / 1000, 1) * 0.5;
+        const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus);
         return {
           ...s,
           trackRecordDays,
