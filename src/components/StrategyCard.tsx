@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square, Crown, Star, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
