@@ -245,9 +245,12 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
+                   <Card className="glass-card glass-tile cursor-help">
                     <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Allocated</p>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        Allocated
+                      </p>
                       <p className="text-2xl font-bold">{formatCurrency(strategy.allocated_amount_usd)}</p>
                     </CardContent>
                   </Card>
