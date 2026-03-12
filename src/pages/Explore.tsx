@@ -145,7 +145,7 @@ export default function Explore() {
         </Select>
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Strategy Type</label>
+        <label className="text-sm font-medium">Portfolio Type</label>
         <Select value={strategyFilter} onValueChange={(v) => setStrategyFilter(v as StrategyFilter)}>
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
