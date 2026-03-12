@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
