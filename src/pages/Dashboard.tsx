@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
@@ -350,9 +350,21 @@ export default function Dashboard() {
                     {investedPortfolios.map((portfolio) => (
                       <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50">
                         <TableCell>
-                          <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
-                            {portfolio.name}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link to={`/strategy/${portfolio.id}`} className="font-medium hover:text-primary transition-colors">
+                              {portfolio.name}
+                            </Link>
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertTriangle className="h-3.5 w-3.5 text-destructive/70 shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-[220px]">
+                                  If this Alpha liquidates, your position will automatically follow.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
