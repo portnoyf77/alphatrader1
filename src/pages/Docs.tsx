@@ -6,30 +6,70 @@ import { Navbar } from '@/components/layout/Navbar';
 import { toast } from 'sonner';
 
 const DOC_PATH = '/docs/alpha-trader-internal-docs.md';
+const SITEMAP_PATH = '/docs/alpha-trader-sitemap.md';
+
+interface DocFile {
+  path: string;
+  filename: string;
+  title: string;
+  description: string;
+  contents: string[];
+}
+
+const docs: DocFile[] = [
+  {
+    path: DOC_PATH,
+    filename: 'alpha-trader-internal-docs.md',
+    title: 'Internal Documentation',
+    description: 'Comprehensive internal product document covering platform overview, data models, fee structure, and technical architecture.',
+    contents: [
+      'Executive Summary & Value Proposition',
+      'Core Concepts & Terminology',
+      'Portfolio Lifecycle & Validation',
+      'Data Models & Fee Structure',
+      'Technical Architecture',
+      'Route Structure & UI Guidelines',
+    ],
+  },
+  {
+    path: SITEMAP_PATH,
+    filename: 'alpha-trader-sitemap.md',
+    title: 'Full Site Map & Command Reference',
+    description: 'Complete site map with every route, page element, available commands, modals, navigation paths, and access levels.',
+    contents: [
+      'Navigation Graph',
+      'Global Components (Navbar)',
+      'All 13+ Routes with Access Levels',
+      'Per-Page Command Tables',
+      'Modals & Dialog Inventory',
+      'Toast Notification Reference',
+    ],
+  },
+];
 
 export default function Docs() {
-  const [copied, setCopied] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
-  const handleDownload = () => {
+  const handleDownload = (doc: DocFile) => {
     const link = document.createElement('a');
-    link.href = DOC_PATH;
-    link.download = 'alpha-trader-internal-docs.md';
+    link.href = doc.path;
+    link.download = doc.filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     toast.success('Documentation downloaded');
   };
 
-  const handleCopyLink = async () => {
-    const fullUrl = `${window.location.origin}${DOC_PATH}`;
+  const handleCopyLink = async (doc: DocFile, idx: number) => {
+    const fullUrl = `${window.location.origin}${doc.path}`;
     await navigator.clipboard.writeText(fullUrl);
-    setCopied(true);
+    setCopiedIdx(idx);
     toast.success('Link copied to clipboard');
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopiedIdx(null), 2000);
   };
 
-  const handleOpenInNewTab = () => {
-    window.open(DOC_PATH, '_blank');
+  const handleOpenInNewTab = (doc: DocFile) => {
+    window.open(doc.path, '_blank');
   };
 
   return (
@@ -41,77 +81,75 @@ export default function Docs() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/20 mb-4">
               <FileText className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">Internal Documentation</h1>
+            <h1 className="text-3xl font-bold mb-2">Documentation</h1>
             <p className="text-muted-foreground">
               Alpha Trader product documentation for stakeholders
             </p>
           </div>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                alpha-trader-internal-docs.md
-              </CardTitle>
-              <CardDescription>
-                Comprehensive internal product document covering platform overview, 
-                data models, fee structure, and technical architecture.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button onClick={handleDownload} className="flex-1 gap-2">
-                  <FileDown className="h-4 w-4" />
-                  Download Markdown
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleCopyLink} 
-                  className="flex-1 gap-2"
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  {copied ? 'Copied!' : 'Copy Link'}
-                </Button>
-              </div>
-              
-              <Button 
-                variant="ghost" 
-                onClick={handleOpenInNewTab}
-                className="w-full gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Open in New Tab
-              </Button>
+          <div className="space-y-6">
+            {docs.map((doc, idx) => (
+              <Card key={doc.path} className="border-border/50 bg-card/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    {doc.filename}
+                  </CardTitle>
+                  <CardDescription>{doc.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button onClick={() => handleDownload(doc)} className="flex-1 gap-2">
+                      <FileDown className="h-4 w-4" />
+                      Download Markdown
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCopyLink(doc, idx)}
+                      className="flex-1 gap-2"
+                    >
+                      {copiedIdx === idx ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedIdx === idx ? 'Copied!' : 'Copy Link'}
+                    </Button>
+                  </div>
 
-              <div className="pt-4 border-t border-border/50">
-                <h4 className="text-sm font-medium mb-2">Document Contents</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Executive Summary & Value Proposition</li>
-                  <li>• Core Concepts & Terminology</li>
-                  <li>• Portfolio Lifecycle & Validation</li>
-                  <li>• Data Models & Fee Structure</li>
-                  <li>• Technical Architecture</li>
-                  <li>• Route Structure & UI Guidelines</li>
-                </ul>
-              </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleOpenInNewTab(doc)}
+                    className="w-full gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open in New Tab
+                  </Button>
 
-              <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
-                💡 <strong>Tip:</strong> Convert to PDF using VS Code, Notion, or{' '}
-                <a 
-                  href="https://markdowntopdf.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  markdowntopdf.com
-                </a>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="pt-4 border-t border-border/50">
+                    <h4 className="text-sm font-medium mb-2">Document Contents</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {doc.contents.map((item) => (
+                        <li key={item}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 mt-6">
+            💡 <strong>Tip:</strong> Convert to PDF using VS Code, Notion, or{' '}
+            <a
+              href="https://markdowntopdf.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              markdowntopdf.com
+            </a>
+          </div>
         </div>
       </main>
     </div>
