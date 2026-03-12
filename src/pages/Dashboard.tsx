@@ -160,7 +160,7 @@ export default function Dashboard() {
                       <Wallet className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Invested in Others</p>
                     </div>
-                    <p className="text-3xl font-bold">{useCountUp(investedPortfolios.length, 800)}</p>
+                    <p className="text-3xl font-bold">{animInvestedCount}</p>
                     <p className="text-xs text-muted-foreground mt-2">{formatCurrency(totalInvestedInOthers)} allocated</p>
                   </CardContent>
                 </Card>
