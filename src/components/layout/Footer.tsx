@@ -38,7 +38,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
           </div>
           
           <p className="text-sm text-muted-foreground">
-            © 2025 ACME Trader. Prototype Demo.
+            © 2025 Alpha Trader. All rights reserved. Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
           </p>
         </div>
       </div>

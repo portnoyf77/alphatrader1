@@ -41,7 +41,7 @@ export default function Signup() {
       await signup(email, password);
       toast({
         title: 'Account created!',
-        description: 'Welcome to ACME Trader. Your unique ID has been assigned.',
+        description: 'Welcome to Alpha Trader. Your unique ID has been assigned.',
       });
       navigate('/dashboard', { replace: true });
     } catch (error) {

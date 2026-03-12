@@ -106,7 +106,7 @@ export function AlphaEarningsCalculator() {
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Based on 1% annual platform fee with 20% Alpha share. 
+          Based on 0.25% annual Alpha share of follower AUM. 
           Actual earnings depend on allocation and retention.
         </p>
       </CardContent>
