@@ -87,8 +87,12 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const gemstoneColors = getGemstoneColor(gemstone);
   const GemIcon = gemstoneIcons[gemstone] || Gem;
 
-  // Mock reputation score based on consistency + followers + track record
-  const reputationScore = Math.min(5.0, (strategy.performance.consistency_score * 4 + (strategy.followers_count > 500 ? 0.5 : 0) + 0.3)).toFixed(1);
+  // Reputation score: consistency (0-2.5) + track record (0-1.0) + follower bonus (0-0.5)
+  const daysActive = Math.floor((Date.now() - new Date(strategy.created_date).getTime()) / (1000 * 60 * 60 * 24));
+  const baseScore = strategy.performance.consistency_score * 2.5;
+  const trackRecord = Math.min(daysActive / 365, 1) * 1.0;
+  const followerBonus = Math.min(strategy.followers_count / 1000, 1) * 0.5;
+  const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus).toFixed(1);
 
   return (
     <Link to={`/strategy/${strategy.id}`}>
