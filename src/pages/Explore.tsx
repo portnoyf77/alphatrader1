@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy } from 'lucide-react';
+import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy, Crown, Star, Users, DollarSign, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
