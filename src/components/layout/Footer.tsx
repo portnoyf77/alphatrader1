@@ -12,7 +12,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
         {showDisclaimer && (
           <div className="mb-8 p-4 rounded-lg bg-muted/50 border border-border/50">
             <p className="text-xs text-muted-foreground text-center">
-              ⚠️ This is a prototype. Not investment advice. Simulated results do not guarantee future performance.
+              ⚠️ Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
             </p>
           </div>
         )}
