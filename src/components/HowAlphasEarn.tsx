@@ -19,7 +19,7 @@ const steps = [
   {
     icon: DollarSign,
     title: 'Earn Passively',
-    description: 'Get 20% of platform fees from every investor who allocates.',
+    description: 'Earn 0.25% of follower AUM annually, paid monthly.',
   },
 ];
 
