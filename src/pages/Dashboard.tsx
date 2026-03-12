@@ -225,14 +225,16 @@ export default function Dashboard() {
         <Card className="glass-card mb-8">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg">Performance vs Benchmarks</CardTitle>
-            <div className="flex gap-1">
+            <div className="flex gap-1 bg-[rgba(255,255,255,0.03)] p-1 rounded-xl">
               {(['30D', '90D', 'YTD', '1Y'] as const).map((tf) => (
                 <button
                   key={tf}
                   onClick={() => setBenchmarkTimeframe(tf)}
                   className={cn(
-                    "px-3 py-1 rounded-md text-xs font-medium transition-colors",
-                    benchmarkTimeframe === tf ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
+                    "px-3.5 py-1.5 rounded-lg text-[0.8125rem] font-semibold font-heading transition-all duration-150 border",
+                    benchmarkTimeframe === tf
+                      ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-white border-primary/30 shadow-[0_2px_8px_rgba(124,58,237,0.25)]"
+                      : "text-[rgba(255,255,255,0.55)] border-transparent hover:bg-[rgba(255,255,255,0.04)] hover:text-[rgba(255,255,255,0.92)]"
                   )}
                 >
                   {tf}
