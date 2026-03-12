@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square, Crown, Star, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
@@ -87,6 +87,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const gemstoneColors = getGemstoneColor(gemstone);
   const GemIcon = gemstoneIcons[gemstone] || Gem;
 
+  // Mock reputation score based on consistency + followers + track record
+  const reputationScore = Math.min(5.0, (strategy.performance.consistency_score * 4 + (strategy.followers_count > 500 ? 0.5 : 0) + 0.3)).toFixed(1);
+
   return (
     <Link to={`/strategy/${strategy.id}`}>
       <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
@@ -99,10 +102,27 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 </div>
               )}
               <div>
+              <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {strategy.name}
                 </h3>
-                <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
+                {/* Alpha Reputation Badge */}
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-xs cursor-help shrink-0">
+                        <Crown className="h-3 w-3 text-primary" />
+                        <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        <span className="font-semibold text-primary">{reputationScore}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs max-w-[200px]">
+                      Alpha reputation score based on track record, consistency, and follower count
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -256,6 +276,17 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center justify-between text-sm cursor-help">
+                    <span className="text-muted-foreground">Alpha's Own Investment</span>
+                    <span className="font-medium text-success">{formatCurrency(strategy.creator_investment)}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs max-w-[220px]">
+                  How much the Alpha has personally invested in this portfolio — skin in the game
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center justify-between text-sm cursor-help">
                     <span className="text-muted-foreground">Total Allocated</span>
                     <span className="font-medium">{formatCurrency(strategy.allocated_amount_usd)}</span>
                   </div>
@@ -284,6 +315,14 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
             </div>
           </TooltipProvider>
+
+          {/* Liquidation Warning */}
+          <div className="mt-3 p-2 rounded-md bg-warning/5 border border-warning/20">
+            <p className="text-[11px] text-warning/80 flex items-start gap-1.5">
+              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+              If this Alpha exits their position, your allocation will automatically follow.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </Link>
