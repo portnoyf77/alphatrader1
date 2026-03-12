@@ -593,7 +593,7 @@ export const mockStrategies: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 60 days with strong momentum factor exposure.',
-    created_date: '2024-10-01',
+    created_date: '2025-09-01',
     last_rebalanced_date: '2025-01-05',
     strategy_type: 'GenAI',
     objective: 'Growth',
