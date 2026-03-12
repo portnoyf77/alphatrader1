@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { toast } from 'sonner';
 
 const DOC_PATH = '/docs/alpha-trader-internal-docs.md';
+const SITEMAP_PATH = '/docs/alpha-trader-sitemap.md';
 
 export default function Docs() {
   const [copied, setCopied] = useState(false);
