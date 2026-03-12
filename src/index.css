@@ -111,11 +111,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    background: linear-gradient(180deg, hsl(240 12% 5%) 0%, hsl(240 8% 7%) 50%, hsl(235 10% 8%) 100%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
   }
 }
 
@@ -130,11 +133,108 @@
 
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    box-shadow: 0 0 20px -8px hsl(262 83% 58% / 0.05);
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 0 30px -8px hsl(262 83% 58% / 0.1);
+  }
+
+  .glass-tile {
+    background: hsl(240 10% 9% / 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsl(220 20% 95% / 0.06);
   }
 
   .glow-primary {
     box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.5);
+    background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(262 70% 50%) 100%);
   }
+
+  .glow-primary:hover {
+    box-shadow: 0 0 50px -8px hsl(var(--primary) / 0.6);
+    filter: brightness(1.1);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Accent bar for stat tiles */
+  .accent-bar-green {
+    border-top: 3px solid hsl(var(--success));
+  }
+
+  .accent-bar-purple {
+    border-top: 3px solid hsl(var(--primary));
+  }
+
+  .accent-bar-red {
+    border-top: 3px solid hsl(var(--destructive));
+  }
+
+  .accent-bar-amber {
+    border-top: 3px solid hsl(var(--warning));
+  }
+}
+
+/* Page transition */
+main > * {
+  animation: page-enter 0.3s ease-out;
+}
+
+@keyframes page-enter {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover scale */
+.group.glass-card {
+  transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.group.glass-card:hover {
+  transform: scale(1.01);
+}
+
+/* Table row hover with purple left border */
+table tbody tr {
+  transition: background-color 0.15s ease, border-left-color 0.15s ease;
+  border-left: 3px solid transparent;
+}
+
+table tbody tr:hover {
+  border-left-color: hsl(var(--primary));
+}
+
+/* Leaderboard row striping */
+.leaderboard-striped tbody tr:nth-child(even) {
+  background: hsl(240 10% 9% / 0.5);
+}
+
+/* Pulsing live dot */
+.live-pulse {
+  animation: live-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--success) / 0.5); }
+  50% { box-shadow: 0 0 0 6px hsl(var(--success) / 0); }
+}
+
+/* Tab crossfade */
+[role="tabpanel"] {
+  animation: tab-fade-in 0.2s ease-out;
+}
+
+@keyframes tab-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Number count-up glow for earnings */
+.earnings-glow {
+  text-shadow: 0 0 20px hsl(var(--success) / 0.4);
 }
 
 /* Gem Refinement Animation Styles */
