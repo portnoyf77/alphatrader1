@@ -242,7 +242,7 @@ export const mockStrategies: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 45 days with balanced risk metrics across global asset classes.',
-    created_date: '2024-11-28',
+    created_date: '2025-10-01',
     last_rebalanced_date: '2024-12-22',
     strategy_type: 'GenAI',
     objective: 'Growth',
