@@ -127,7 +127,7 @@ export const mockStrategies: Portfolio[] = [
     visibility_mode: 'transparent',
     validation_status: 'simulated',
     validation_criteria_met: false,
-    created_date: '2024-12-01',
+    created_date: '2026-02-26',
     last_rebalanced_date: '2025-01-05',
     strategy_type: 'Manual',
     objective: 'Growth',
