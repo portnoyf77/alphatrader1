@@ -300,7 +300,7 @@ export default function StrategyDetail() {
                       <div className="flex-1">
                         <p className="font-medium text-violet-400">Protected Holdings</p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Individual holdings are hidden to protect the Alpha's strategy. You can see sector allocations only.
+                          Individual holdings are hidden to protect the Alpha's intellectual property. You can see sector allocations only.
                         </p>
                       </div>
                       <TooltipProvider delayDuration={200}>
