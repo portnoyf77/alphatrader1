@@ -338,7 +338,7 @@ export const mockStrategies: Portfolio[] = [
     followers_count: 0,
     allocated_amount_usd: 0,
     new_allocations_paused: false,
-    creator_fee_pct: 20,
+    creator_fee_pct: 0.25,
     creator_est_monthly_earnings_usd: 0,
     creator_investment: 10000,
     requires_opt_in_for_structural_changes: true,
