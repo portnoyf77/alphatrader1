@@ -161,11 +161,6 @@ export default function Landing() {
 
             {/* Alpha Marketplace - Enhanced */}
             <div className="group p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden">
-              <div className="absolute top-2 right-2">
-                <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                  Earn 20%
-                </span>
-              </div>
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users className="h-7 w-7 text-primary" />
               </div>
