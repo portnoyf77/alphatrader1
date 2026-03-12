@@ -126,7 +126,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple">
+                <Card className="glass-card cursor-help accent-bar-purple relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
