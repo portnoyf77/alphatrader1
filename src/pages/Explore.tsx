@@ -45,6 +45,26 @@ export default function Explore() {
       }));
   }, [validatedStrategies]);
 
+  // Alpha leaderboard ranking by composite score
+  const alphaLeaderboard = useMemo(() => {
+    return [...validatedStrategies]
+      .map((s) => {
+        const trackRecordDays = Math.floor((Date.now() - new Date(s.created_date).getTime()) / (1000 * 60 * 60 * 24));
+        const reputationScore = Math.min(5.0, s.performance.consistency_score * 4 + (s.followers_count > 500 ? 0.5 : 0) + 0.3);
+        return {
+          ...s,
+          trackRecordDays,
+          reputationScore: Number(reputationScore.toFixed(1)),
+        };
+      })
+      .sort((a, b) => {
+        // Composite: followers weight + allocated weight + earnings weight + track record weight
+        const scoreA = a.followers_count * 0.3 + a.allocated_amount_usd * 0.0001 + a.creator_est_monthly_earnings_usd * 0.5 + a.trackRecordDays * 0.01;
+        const scoreB = b.followers_count * 0.3 + b.allocated_amount_usd * 0.0001 + b.creator_est_monthly_earnings_usd * 0.5 + b.trackRecordDays * 0.01;
+        return scoreB - scoreA;
+      });
+  }, [validatedStrategies]);
+
   const filteredStrategies = useMemo(() => {
     return validatedStrategies.filter(strategy => {
       const matchesSearch = strategy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
