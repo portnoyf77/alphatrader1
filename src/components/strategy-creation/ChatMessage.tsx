@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Bot, User } from 'lucide-react';
+import { Crown, User } from 'lucide-react';
 
 interface ChatMessageProps {
   role: 'assistant' | 'user';
