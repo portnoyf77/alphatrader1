@@ -231,9 +231,12 @@ export default function StrategyDetail() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card bg-success/5 border-success/30 cursor-help">
+                   <Card className="glass-card glass-tile bg-success/5 border-success/30 cursor-help">
                     <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Creator Invested</p>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                        <Wallet className="h-3.5 w-3.5" />
+                        Creator Invested
+                      </p>
                       <p className="text-2xl font-bold text-success">{formatCurrency(strategy.creator_investment)}</p>
                     </CardContent>
                   </Card>
