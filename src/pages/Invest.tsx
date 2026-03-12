@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -386,7 +386,7 @@ export default function Create() {
             </CardContent>
           </Card>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <Button variant="outline" onClick={handleSave} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
               Save Draft
@@ -395,10 +395,23 @@ export default function Create() {
               Run Simulation
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                toast({
+                  title: "Invest Now (prototype)",
+                  description: "In a live product, this would take you directly to fund your portfolio.",
+                });
+              }} 
+              className="flex-1 border-success/50 text-success hover:bg-success/10"
+            >
+              <DollarSign className="h-4 w-4 mr-2" />
+              Invest Now
+            </Button>
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            💡 Recommended: Simulation helps you understand risk before allocating real money.
+            💡 We recommend simulating first to understand risk before allocating real capital.
           </p>
         </>
       )}

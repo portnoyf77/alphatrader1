@@ -322,6 +322,60 @@ export const gemstoneColors: Record<string, { primary: string; secondary: string
   Opal: { primary: '#8b5cf6', secondary: '#a78bfa', glow: '#c4b5fd' },
 };
 
+// Gemstone descriptions based on risk profile
+export const gemstoneDescriptions: Record<string, Record<string, string>> = {
+  Sapphire: {
+    Low: 'Sapphire reflects your steady, long-term vision — clarity and calm in your approach.',
+    Medium: 'Sapphire mirrors your balanced tech-forward strategy — precision with purpose.',
+    High: 'Sapphire captures your bold bet on innovation — deep conviction in technology.',
+  },
+  Emerald: {
+    Low: 'Emerald represents your patient approach to healthcare — steady growth with purpose.',
+    Medium: 'Emerald reflects your balanced healthcare thesis — resilience meets opportunity.',
+    High: 'Emerald embodies your ambitious healthcare conviction — high growth potential.',
+  },
+  Ruby: {
+    Low: 'Ruby reflects measured ambition — warmth without recklessness.',
+    Medium: 'Ruby captures your appetite for growth balanced with awareness of risk.',
+    High: 'Ruby reflects your high-risk, high-growth ambition.',
+  },
+  Diamond: {
+    Low: 'Diamond represents your broad, stable foundation — diversified and enduring.',
+    Medium: 'Diamond reflects your well-rounded strategy — strength through balance.',
+    High: 'Diamond captures your bold diversified conviction — aiming for brilliance.',
+  },
+  Pearl: {
+    Low: 'Pearl embodies your conservative approach — smooth, steady, and secure.',
+    Medium: 'Pearl reflects your preference for stability with modest growth.',
+    High: 'Pearl represents an unusual pairing — stability-seeking with aggressive returns.',
+  },
+  Opal: {
+    Low: 'Opal reflects your global curiosity with a cautious approach.',
+    Medium: 'Opal captures your internationally diversified, balanced worldview.',
+    High: 'Opal embodies your adventurous global ambition — risk across borders.',
+  },
+  Amber: {
+    Low: 'Amber reflects your income-focused, low-risk approach — warm and dependable.',
+    Medium: 'Amber captures your balanced income strategy — yield with growth.',
+    High: 'Amber represents aggressive income-seeking — maximizing yield at higher risk.',
+  },
+  Topaz: {
+    Low: 'Topaz reflects your cautious financial sector conviction — solid foundations.',
+    Medium: 'Topaz captures your balanced approach to financial growth.',
+    High: 'Topaz embodies your bold financial sector conviction — high-leverage ambition.',
+  },
+  Peridot: {
+    Low: 'Peridot reflects your patient commitment to clean energy — growth with values.',
+    Medium: 'Peridot captures your balanced approach to sustainable investing.',
+    High: 'Peridot embodies your aggressive clean energy conviction — green ambition.',
+  },
+  Onyx: {
+    Low: 'Onyx reflects your grounded, low-risk industrial strategy.',
+    Medium: 'Onyx captures your balanced industrial thesis — strength meets stability.',
+    High: 'Onyx embodies your aggressive industrial conviction — forged under pressure.',
+  },
+};
+
 // Progress messages for animation
 export const progressMessages = [
   'Analyzing your investment profile...',

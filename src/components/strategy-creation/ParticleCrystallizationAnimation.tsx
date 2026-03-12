@@ -6,6 +6,7 @@ import {
   deriveGemstone,
   generateStrategyNumber,
   gemstoneColors,
+  gemstoneDescriptions,
 } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
 
@@ -242,8 +243,11 @@ export function ParticleCrystallizationAnimation({
         >
           {strategyName}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mb-3">
           Your personalized {riskLevel.toLowerCase()}-risk investment strategy
+        </p>
+        <p className="text-sm italic max-w-md mx-auto" style={{ color: colors.glow }}>
+          "{gemstoneDescriptions[gemstoneType]?.[riskLevel] || `${gemstoneType} reflects your unique investment profile.`}"
         </p>
       </div>
       
