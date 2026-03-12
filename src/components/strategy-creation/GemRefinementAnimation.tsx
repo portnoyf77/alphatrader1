@@ -164,7 +164,7 @@ export function GemRefinementAnimation({ profile, onComplete }: GemRefinementAni
             <div className="text-5xl font-bold gradient-text mb-2 animate-scale-in">
               {strategyName}
             </div>
-            <p className="text-muted-foreground text-lg">Your personalized investment strategy</p>
+            <p className="text-muted-foreground text-lg">Your personalized investment portfolio</p>
           </div>
         )}
 
