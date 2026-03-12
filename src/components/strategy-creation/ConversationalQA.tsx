@@ -116,7 +116,7 @@ You can also ask me questions like "What does volatility mean?" and I'll explain
       setCurrentQuestionIndex(nextIndex);
       setTimeout(() => {
         addAssistantMessage(
-          `Excellent! I have all the information I need to create your personalized strategy. Let me analyze your preferences and build something perfect for you.`
+          `Excellent! I have all the information I need to create your personalized portfolio. Let me analyze your preferences and build something perfect for you.`
         );
 
         // Complete after showing final message
