@@ -81,12 +81,12 @@ export function AlphaEarningsCalculator() {
               <span>${totalAllocated.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Platform fee (1% annually)</span>
-              <span>${platformFee.toLocaleString()}</span>
+              <span>Your share (0.25% AUM)</span>
+              <span>${alphaShare.toLocaleString()}/year</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Your share (20%)</span>
-              <span>${alphaShare.toLocaleString()}/year</span>
+              <span>Platform fee (0.25% AUM)</span>
+              <span>${platformFee.toLocaleString()}/year</span>
             </div>
           </div>
         </div>
