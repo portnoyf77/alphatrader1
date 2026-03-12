@@ -243,6 +243,16 @@ export default function Dashboard() {
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={benchmarkDataSets[benchmarkTimeframe]} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="sp500Fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
+                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                   <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                   <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
@@ -252,7 +262,9 @@ export default function Dashboard() {
                     formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="My Portfolio" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="My Portfolio" fill="url(#portfolioFill)" stroke="none" />
+                  <Area type="monotone" dataKey="S&P 500" fill="url(#sp500Fill)" stroke="none" />
+                  <Line type="monotone" dataKey="My Portfolio" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} />
                   <Line type="monotone" dataKey="S&P 500" stroke="hsl(var(--success))" strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
                   <Line type="monotone" dataKey="Dow Jones" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} strokeDasharray="2 2" />
                 </LineChart>

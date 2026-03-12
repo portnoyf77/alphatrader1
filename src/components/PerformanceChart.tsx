@@ -56,6 +56,16 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="perfPortfolioFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(262 83% 58%)" stopOpacity={0.15} />
+                  <stop offset="100%" stopColor="hsl(262 83% 58%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="perfBenchmarkFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 10% 18%)" />
               <XAxis 
                 dataKey="date" 
@@ -80,12 +90,24 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
                 labelStyle={{ color: 'hsl(220 20% 95%)' }}
               />
               <Legend />
+              <Area
+                type="monotone"
+                dataKey="portfolio"
+                fill="url(#perfPortfolioFill)"
+                stroke="none"
+              />
+              <Area
+                type="monotone"
+                dataKey="benchmark"
+                fill="url(#perfBenchmarkFill)"
+                stroke="none"
+              />
               <Line
                 type="monotone"
                 dataKey="portfolio"
                 name={portfolioName}
                 stroke="hsl(262 83% 58%)"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 4, fill: 'hsl(262 83% 58%)' }}
               />
