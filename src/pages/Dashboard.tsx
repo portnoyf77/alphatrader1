@@ -14,7 +14,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area, defs } from 'recharts';
+import { useCountUp } from '@/hooks/useCountUp';
 
 // My portfolios (ones I created)
 const myPortfolios = mockStrategies.slice(0, 4);
