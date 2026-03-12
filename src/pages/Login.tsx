@@ -18,10 +18,11 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || '/dashboard';
 
-  const doLogin = async (loginEmail?: string, loginPassword?: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     try {
-      await login(loginEmail || email || 'guest@alphatrader.io', loginPassword || password || 'guest');
+      await login(email || 'guest@alphatrader.io', password || 'guest');
       navigate(from, { replace: true });
     } catch (error) {
       toast({
@@ -32,16 +33,6 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Auto-login immediately on mount
-  React.useEffect(() => {
-    doLogin('guest@alphatrader.io', 'guest');
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    doLogin();
   };
 
   return (
