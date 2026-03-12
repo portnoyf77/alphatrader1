@@ -1,4 +1,4 @@
-import { TrendingUp } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FooterProps {
@@ -20,7 +20,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
-              <TrendingUp className="h-4 w-4 text-primary" />
+              <Crown className="h-4 w-4 text-primary" />
             </div>
             <span className="font-semibold">Alpha Trader</span>
           </div>
@@ -33,7 +33,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
               Marketplace
             </Link>
             <Link to="/invest" className="hover:text-foreground transition-colors">
-              Invest
+              Create
             </Link>
             <Link to="/alpha" className="hover:text-foreground transition-colors">
               Become an Alpha
@@ -41,7 +41,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
           </div>
           
           <p className="text-sm text-muted-foreground">
-            © 2025 Alpha Trader. All rights reserved. Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
+            © 2026 Alpha Trader. All rights reserved. Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
           </p>
         </div>
       </div>

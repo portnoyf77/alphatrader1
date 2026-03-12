@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, HelpCircle, Crown } from 'lucide-react';
+import { ArrowRight, Sparkles, LineChart, Users, TrendingUp, Zap, Shield, DollarSign, HelpCircle, Crown, MessageSquare, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -32,7 +32,7 @@ export default function Landing() {
             
             <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in leading-tight">
               Build, simulate, and{' '}
-              <span className="gradient-text">earn from your strategies</span>
+              <span className="gradient-text">earn from your portfolios</span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in">
@@ -42,7 +42,7 @@ export default function Landing() {
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
               <Button asChild size="lg" className="glow-primary text-lg px-8 h-14">
-                <Link to="/invest">
+                <Link to="/signup">
                   Start Investing
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -57,8 +57,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Stats Section - Enhanced with Alpha earnings */}
-      <section className="border-y border-border/50 bg-card/50">
+      {/* Free Trial Banner */}
+      <section className="py-8 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center p-6 rounded-2xl bg-success/5 border border-success/20">
+            <h3 className="text-xl font-bold mb-2">Try Alpha Trader free for 7 days</h3>
+            <p className="text-muted-foreground mb-4">No credit card required.</p>
+            <Button asChild size="lg" className="glow-primary">
+              <Link to="/signup">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="border-b border-border/50 bg-card/50">
         <div className="container mx-auto px-4 py-12">
           <TooltipProvider delayDuration={200}>
             <div className="flex justify-center">
@@ -96,13 +112,54 @@ export default function Landing() {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[250px]">
-                    <strong>Alphas</strong> are portfolio managers who share their investment strategies. 
+                    <strong>Alphas</strong> are portfolio managers who share their investment portfolios. 
                     When investors allocate capital to an Alpha's portfolio, the Alpha earns a share of the platform fees.
                   </TooltipContent>
                 </Tooltip>
               </div>
             </div>
           </TooltipProvider>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Get started in three simple steps.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                <MessageSquare className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Tell the AI your goals</h3>
+              <p className="text-muted-foreground">
+                Answer a few questions and get a personalized portfolio in minutes.
+              </p>
+            </div>
+            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                <BarChart3 className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Simulate with live data</h3>
+              <p className="text-muted-foreground">
+                Test your portfolio with real market data before committing capital.
+              </p>
+            </div>
+            <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Invest or earn as an Alpha</h3>
+              <p className="text-muted-foreground">
+                Go live with your portfolio, or publish it to the marketplace and earn when others follow.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -115,7 +172,7 @@ export default function Landing() {
               What is an Alpha?
             </h3>
             <p className="text-muted-foreground">
-              An <span className="text-primary font-medium">Alpha</span> is a portfolio manager who designs investment strategies 
+              An <span className="text-primary font-medium">Alpha</span> is a portfolio manager who designs investment portfolios 
               and makes them available for others to replicate. When investors allocate capital to follow an Alpha's portfolio, 
               the Alpha earns passive income from management fees — turning expertise into earnings.
             </p>
@@ -123,7 +180,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Value Props Section - Enhanced Alpha Marketplace */}
+      {/* Value Props Section */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -131,12 +188,11 @@ export default function Landing() {
               Invest smarter — or earn from your expertise
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Whether you're looking to follow proven strategies or share your own, we've got you covered.
+              Whether you're looking to follow proven portfolios or share your own, we've got you covered.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* GenAI Portfolio Builder */}
             <div className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Sparkles className="h-7 w-7 text-primary" />
@@ -148,18 +204,16 @@ export default function Landing() {
               </p>
             </div>
 
-            {/* Simulation First */}
             <div className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <LineChart className="h-7 w-7 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Simulation First</h3>
               <p className="text-muted-foreground">
-                 Test your strategy with live market data in real time before committing real capital.
+                 Test your portfolio with live market data in real time before committing real capital.
               </p>
             </div>
 
-            {/* Alpha Marketplace - Enhanced */}
             <div className="group p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden">
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users className="h-7 w-7 text-primary" />
@@ -256,7 +310,7 @@ export default function Landing() {
             <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
               <h3 className="text-2xl font-bold mb-3">Ready to invest smarter?</h3>
               <p className="text-muted-foreground mb-6">
-                Explore proven strategies from top Alphas.
+                Explore proven portfolios from top Alphas.
               </p>
               <Button asChild size="lg" variant="outline" className="w-full">
                 <Link to="/explore">
@@ -273,7 +327,7 @@ export default function Landing() {
                 Build and publish your first portfolio today.
               </p>
               <Button asChild size="lg" className="w-full glow-primary">
-                <Link to="/onboarding">
+                <Link to="/alpha">
                   Become an Alpha
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

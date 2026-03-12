@@ -29,7 +29,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
             Top earning Alphas
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            These portfolio managers have built trusted strategies with proven track records. 
+            These portfolio managers have built trusted portfolios with proven track records. 
             See how much they're earning from their expertise.
           </p>
         </div>
@@ -70,7 +70,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
                   {/* Alpha & Portfolio */}
                   <Link 
-                    to={`/strategy/${strategy.id}`}
+                    to={`/portfolio/${strategy.id}`}
                     className="block group-hover:text-primary transition-colors"
                   >
                     <h3 className="font-semibold text-lg mb-1">{strategy.name}</h3>
@@ -115,7 +115,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
         <div className="text-center">
           <Button asChild size="lg" className="glow-primary">
-            <Link to="/onboarding">
+            <Link to="/alpha">
               Become an Alpha
               <TrendingUp className="ml-2 h-4 w-4" />
             </Link>

@@ -25,7 +25,7 @@ const mockTestimonials = [
     followers: 1247,
     aum: 1850000,
     monthlyEarnings: 385,
-    quote: 'I built a tech-focused strategy and now earn passive income while it runs on autopilot.',
+    quote: 'I built a tech-focused portfolio and now earn passive income while it runs on autopilot.',
     riskLevel: 'Medium' as const,
     reputationScore: 4.8,
   },
@@ -49,7 +49,7 @@ const mockTestimonials = [
     followers: 1567,
     aum: 1920000,
     monthlyEarnings: 400,
-    quote: 'My high-conviction growth strategy speaks for itself. The earnings follow the performance.',
+    quote: 'My high-conviction growth portfolio speaks for itself. The earnings follow the performance.',
     riskLevel: 'High' as const,
     reputationScore: 4.6,
   },
@@ -91,6 +91,16 @@ export default function Alpha() {
       met: userRequirements.portfolioAgeDays >= 30,
       description: 'Your portfolio needs a 30-day live track record before it can be published.',
     },
+    {
+      label: 'Max drawdown under 20%',
+      met: false,
+      description: 'Your portfolio must maintain a maximum drawdown under 20% during the validation period.',
+    },
+    {
+      label: 'Minimum 5 holdings',
+      met: false,
+      description: 'Your portfolio must contain at least 5 different holdings for adequate diversification.',
+    },
   ];
 
   return (
@@ -115,7 +125,7 @@ export default function Alpha() {
 
             <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
               Build a portfolio, prove it in simulation, then publish it to the marketplace.
-              When investors allocate to your strategy, you earn{' '}
+              When investors allocate to your portfolio, you earn{' '}
               <span className="font-semibold text-primary">0.25% of their AUM annually</span>, paid monthly.
             </p>
 
@@ -126,7 +136,7 @@ export default function Alpha() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
               <Button asChild size="lg" className="glow-primary text-lg px-8 h-14">
                 <Link to="/invest">
-                  Create Your Strategy
+                  Create Your Portfolio
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -146,7 +156,7 @@ export default function Alpha() {
         <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
         <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {[
-            { icon: BarChart3, title: '1. Build & Simulate', description: 'Use our AI advisor or build manually. Run a free simulation to prove your strategy works.' },
+            { icon: BarChart3, title: '1. Build & Simulate', description: 'Use our AI advisor or build manually. Run a free simulation to prove your portfolio works.' },
             { icon: Shield, title: '2. Invest & Validate', description: 'Put your own capital in — at least $1,000. After 30 days live, you can publish to the marketplace.' },
             { icon: DollarSign, title: '3. Earn Passively', description: 'When investors allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly.' },
           ].map((step) => (
@@ -297,7 +307,7 @@ export default function Alpha() {
                     </p>
                     <Button asChild variant="outline" size="lg">
                       <Link to="/invest">
-                        Start Building Your Strategy
+                        Start Building Your Portfolio
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Link>
                     </Button>
@@ -372,17 +382,6 @@ export default function Alpha() {
               </Card>
             );
           })}
-        </div>
-      </section>
-
-      {/* Disclaimer */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto p-6 rounded-xl bg-muted/50 border border-border/50">
-          <p className="text-xs text-muted-foreground text-center leading-relaxed">
-            ⚠️ Alpha Trader is not a registered investment adviser. Becoming an Alpha does not constitute managing a registered fund.
-            This platform is for informational and educational purposes only. Past performance does not guarantee future results.
-            Earnings shown are estimates based on the 0.25% AUM annual fee model and depend on follower count, allocation sizes, and retention.
-          </p>
         </div>
       </section>
     </PageLayout>

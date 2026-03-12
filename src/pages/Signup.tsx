@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, Mail, Lock, ArrowRight, User, Check, Crown, Sparkles } from 'lucide-react';
+import { Crown, Mail, Lock, ArrowRight, User, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -106,7 +106,7 @@ export default function Signup() {
           <div className="flex h-16 items-center">
             <Link to="/" className="flex items-center gap-2 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <Crown className="h-5 w-5 text-primary" />
               </div>
               <span className="text-lg font-bold">Alpha Trader</span>
             </Link>
@@ -312,7 +312,7 @@ export default function Signup() {
                     className="mt-0.5"
                   />
                   <Label htmlFor="disclaimer" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    I understand that Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
+                    I understand that Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only and does not constitute investment advice. Past performance does not guarantee future results.
                   </Label>
                 </div>
               </div>
