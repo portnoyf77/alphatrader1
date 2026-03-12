@@ -50,7 +50,7 @@ export function ConversationalQA({ onComplete, onCancel }: ConversationalQAProps
   useEffect(() => {
     const timer = setTimeout(() => {
       addAssistantMessage(
-        `Welcome! I'm your investment advisor. Let's build a personalized strategy together.
+        `Welcome! I'm your investment advisor. Let's build a personalized portfolio together.
 
 I'll ask you a few questions about your goals, risk tolerance, and preferences. Feel free to **type naturally** — I understand conversational language — or use the quick reply buttons.
 
