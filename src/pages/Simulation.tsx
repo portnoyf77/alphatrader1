@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle, DollarSign, Play, Square, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
-import { PerformanceChart } from '@/components/PerformanceChart';
-import { StatusBadge } from '@/components/StatusBadge';
 import { ValidationBadge } from '@/components/ValidationBadge';
 import { formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import type { ValidationStatus } from '@/lib/types';
 
 // Mock simulation data
@@ -26,265 +26,336 @@ const simulatedPortfolio = {
 };
 
 type ValidationState = 'pending' | 'submitting' | 'in_progress' | 'validated';
+type SimulationState = 'running' | 'stopped';
+
+const FREE_TRIAL_DAYS = 7;
+
+function formatElapsed(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
+}
+
+function formatCountdown(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${d}d ${h}h ${m}m`;
+}
 
 export default function Simulation() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [validationState, setValidationState] = useState<ValidationState>('pending');
+  const [simulationState, setSimulationState] = useState<SimulationState>('running');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [chartData, setChartData] = useState<Array<{ time: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }>>([]);
+
+  const startTime = useState(() => new Date())[0];
+  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedSeconds;
+
+  // Elapsed timer
+  useEffect(() => {
+    if (simulationState !== 'running') return;
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [simulationState]);
+
+  // Live chart data generation
+  useEffect(() => {
+    if (simulationState !== 'running') return;
+
+    // Initial data point
+    if (chartData.length === 0) {
+      setChartData([{ time: '0s', Portfolio: 100000, 'S&P 500': 100000, 'Dow Jones': 100000 }]);
+    }
+
+    const interval = setInterval(() => {
+      setChartData(prev => {
+        const last = prev[prev.length - 1];
+        const portfolioDelta = last.Portfolio * ((Math.random() - 0.47) * 0.003);
+        const sp500Delta = last['S&P 500'] * ((Math.random() - 0.48) * 0.002);
+        const dowDelta = last['Dow Jones'] * ((Math.random() - 0.48) * 0.0018);
+        const elapsed = prev.length;
+        const timeLabel = elapsed < 60 ? `${elapsed}s` : `${Math.floor(elapsed / 60)}m${elapsed % 60}s`;
+
+        return [...prev, {
+          time: timeLabel,
+          Portfolio: Math.round(last.Portfolio + portfolioDelta),
+          'S&P 500': Math.round(last['S&P 500'] + sp500Delta),
+          'Dow Jones': Math.round(last['Dow Jones'] + dowDelta),
+        }].slice(-120); // Keep last 120 points
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [simulationState, chartData.length]);
+
+  // Calculate live metrics from chart data
+  const currentPortfolioValue = chartData.length > 0 ? chartData[chartData.length - 1].Portfolio : 100000;
+  const liveReturn = ((currentPortfolioValue - 100000) / 100000) * 100;
+  const currentSP500 = chartData.length > 0 ? chartData[chartData.length - 1]['S&P 500'] : 100000;
+  const sp500Return = ((currentSP500 - 100000) / 100000) * 100;
+
+  // Track max drawdown
+  const maxValue = chartData.reduce((max, d) => Math.max(max, d.Portfolio), 100000);
+  const liveDrawdown = ((currentPortfolioValue - maxValue) / maxValue) * 100;
+
+  const handleStopSimulation = () => {
+    setSimulationState('stopped');
+    toast({ title: 'Simulation paused', description: 'You can invest or resume at any time.' });
+  };
+
+  const handleInvestNow = () => {
+    toast({ title: 'Invest Now (prototype)', description: 'In a live product, this would take you to fund your portfolio.' });
+  };
 
   const handleSubmitForValidation = async () => {
     setValidationState('submitting');
-    
-    // Simulate validation submission
     await new Promise(resolve => setTimeout(resolve, 1500));
     setValidationState('in_progress');
-    
-    // Simulate validation completion after delay
     await new Promise(resolve => setTimeout(resolve, 3000));
     setValidationState('validated');
-    
-    toast({
-      title: "Validation complete!",
-      description: "Your strategy has passed validation and can now be published.",
-    });
+    toast({ title: 'Validation complete!', description: 'Your strategy has passed validation and can now be published.' });
   };
 
   const handlePublish = () => {
     setShowPublishModal(false);
-    toast({
-      title: "Portfolio published!",
-      description: "Your portfolio is now visible to other users in the marketplace.",
-    });
+    toast({ title: 'Portfolio published!', description: 'Your portfolio is now visible in the marketplace.' });
     navigate('/dashboard');
   };
 
   const handleKeepPrivate = () => {
-    toast({
-      title: "Portfolio saved privately",
-      description: "Only you can see this portfolio.",
-    });
+    toast({ title: 'Portfolio saved privately', description: 'Only you can see this portfolio.' });
     navigate('/dashboard');
   };
 
   const { performance } = simulatedPortfolio;
 
-  const getValidationStatus = (): ValidationStatus => {
-    if (validationState === 'validated') return 'validated';
-    if (validationState === 'in_progress') return 'in_validation';
-    return 'simulated';
-  };
-
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="mb-4"
-            >
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold">{simulatedPortfolio.name}</h1>
-                  <ValidationBadge status={getValidationStatus()} />
-                </div>
-                <p className="text-muted-foreground">
-                  Simulation complete. Review your portfolio's projected performance below.
-                </p>
-              </div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">{simulatedPortfolio.name}</h1>
+              <ValidationBadge status={validationState === 'validated' ? 'validated' : 'simulated'} />
             </div>
           </div>
-
-          {/* Validation Status Card */}
-          <Card className={`mb-8 ${
-            validationState === 'validated' 
-              ? 'border-success/50 bg-success/5' 
-              : validationState === 'in_progress' 
-                ? 'border-warning/50 bg-warning/5'
-                : 'border-muted'
-          }`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                {validationState === 'validated' ? (
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                ) : validationState === 'in_progress' || validationState === 'submitting' ? (
-                  <Clock className="h-5 w-5 text-warning" />
-                ) : (
-                  <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-                )}
-                Validation Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {validationState === 'pending' && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded-md bg-muted text-muted-foreground text-sm font-medium">
-                      Not Validated
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    This strategy must complete validation before it can be published to the marketplace.
-                    Validation evaluates stability and risk behavior to ensure quality strategies for investors.
-                  </p>
-                  <Button onClick={handleSubmitForValidation} className="glow-primary">
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Submit for Validation
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Validation evaluates consistency, drawdown, and volatility vs benchmarks.
-                  </p>
-                </>
-              )}
-
-              {validationState === 'submitting' && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm font-medium">Submitting for validation...</span>
-                  </div>
-                </>
-              )}
-
-              {validationState === 'in_progress' && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded-md bg-warning/20 text-warning text-sm font-medium">
-                      Validation in Progress
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Evaluating consistency, drawdown, and volatility vs benchmarks.
-                    This typically takes a few moments...
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-warning" />
-                    <span className="text-sm text-muted-foreground">Processing validation criteria...</span>
-                  </div>
-                </>
-              )}
-
-              {validationState === 'validated' && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded-md bg-success/20 text-success text-sm font-medium">
-                      Validated
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Validated after simulation with stable drawdown profile and consistent risk-adjusted returns.
-                    Your strategy is now eligible for marketplace listing.
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <MetricCard
-              label="30-Day Return"
-              value={formatPercent(performance.return_30d)}
-              icon={performance.return_30d >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-              trend={performance.return_30d >= 0 ? 'up' : 'down'}
-            />
-            <MetricCard
-              label="90-Day Return"
-              value={formatPercent(performance.return_90d)}
-              icon={performance.return_90d >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-              trend={performance.return_90d >= 0 ? 'up' : 'down'}
-            />
-            <MetricCard
-              label="Max Drawdown"
-              value={formatPercent(performance.max_drawdown, false)}
-              icon={<TrendingDown className="h-4 w-4" />}
-              trend="down"
-            />
-            <MetricCard
-              label="Volatility"
-              value={formatPercent(performance.volatility, false)}
-              icon={<Activity className="h-4 w-4" />}
-              trend="neutral"
-            />
-            <MetricCard
-              label="Consistency"
-              value={`${performance.consistency_score}/100`}
-              icon={<Target className="h-4 w-4" />}
-              trend={performance.consistency_score >= 70 ? 'up' : 'neutral'}
-            />
-          </div>
-
-          {/* Performance Chart */}
-          <div className="mb-8">
-            <PerformanceChart
-              return30d={performance.return_30d}
-              return90d={performance.return_90d}
-              portfolioName={simulatedPortfolio.name}
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              onClick={() => setShowPublishModal(true)}
-              className="flex-1 h-12 glow-primary"
-              disabled={validationState !== 'validated'}
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              {validationState === 'validated' ? 'Publish to Marketplace' : 'Publish (Validation Required)'}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleKeepPrivate}
-              className="flex-1 h-12"
-            >
-              <Lock className="h-4 w-4 mr-2" />
-              Keep Private
-            </Button>
-          </div>
-
-          {validationState !== 'validated' && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              ⚠️ You must complete validation before publishing to the marketplace.
-            </p>
-          )}
-
-          {/* Publish Modal */}
-          <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
-            <DialogContent className="glass-card">
-              <DialogHeader>
-                <DialogTitle>Publish this strategy?</DialogTitle>
-                <DialogDescription className="pt-4 space-y-3">
-                  <p>
-                    Your strategy has been validated and can now be published to the marketplace.
-                    Other investors will be able to discover and invest in this strategy.
-                  </p>
-                  <p>
-                    If they allocate, you earn a share of platform fees.
-                    You can unpublish at any time.
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex gap-3 sm:gap-3">
-                <Button variant="outline" onClick={() => setShowPublishModal(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handlePublish} className="glow-primary">
-                  Publish to Marketplace
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
+
+        {/* Live Simulation Banner */}
+        <Card className={cn(
+          "mb-6 border",
+          simulationState === 'running' ? "border-success/30 bg-success/5" : "border-warning/30 bg-warning/5"
+        )}>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-3 h-3 rounded-full",
+                  simulationState === 'running' ? "bg-success animate-pulse" : "bg-warning"
+                )} />
+                <div>
+                  <p className="font-semibold">
+                    {simulationState === 'running' ? 'Live Simulation' : 'Simulation Paused'}
+                    {' — '}
+                    <span className="text-muted-foreground font-normal">
+                      started {startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </p>
+                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Timer className="h-3 w-3" />
+                      Elapsed: {formatElapsed(elapsedSeconds)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {simulationState === 'running' ? (
+                  <Button variant="outline" size="sm" onClick={handleStopSimulation}>
+                    <Square className="h-3 w-3 mr-1.5" />
+                    Stop
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => setSimulationState('running')}>
+                    <Play className="h-3 w-3 mr-1.5" />
+                    Resume
+                  </Button>
+                )}
+                <Button size="sm" className="bg-success hover:bg-success/90" onClick={handleInvestNow}>
+                  <DollarSign className="h-3 w-3 mr-1.5" />
+                  Invest Now
+                </Button>
+              </div>
+            </div>
+            {trialSecondsRemaining <= 86400 && trialSecondsRemaining > 0 && (
+              <p className="text-xs text-warning mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                Your free trial ends soon. Subscribe to continue simulating.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Live Performance Chart */}
+        <Card className="glass-card mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Live Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[320px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                  <XAxis dataKey="time" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveEnd" />
+                  <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="Portfolio" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="S&P 500" stroke="hsl(var(--success))" strokeWidth={1.5} dot={false} strokeDasharray="4 4" isAnimationActive={false} />
+                  <Line type="monotone" dataKey="Dow Jones" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} strokeDasharray="2 2" isAnimationActive={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Live Metrics */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <MetricCard
+            label="Sim. Return"
+            value={formatPercent(liveReturn)}
+            icon={liveReturn >= 0 ? TrendingUp : TrendingDown}
+            trend={liveReturn >= 0 ? 'up' : 'down'}
+            tooltip="Simulated portfolio return since start"
+          />
+          <MetricCard
+            label="vs S&P 500"
+            value={`${(liveReturn - sp500Return) >= 0 ? '+' : ''}${(liveReturn - sp500Return).toFixed(2)}%`}
+            icon={BarChart3}
+            trend={(liveReturn - sp500Return) >= 0 ? 'up' : 'down'}
+            tooltip="Your simulated return compared to S&P 500"
+          />
+          <MetricCard
+            label="Worst Drop"
+            value={formatPercent(liveDrawdown, false)}
+            icon={AlertTriangle}
+            trend="down"
+            tooltip="Largest peak-to-trough decline during simulation"
+          />
+          <MetricCard
+            label="Portfolio Value"
+            value={`$${currentPortfolioValue.toLocaleString()}`}
+            icon={DollarSign}
+            tooltip="Current simulated portfolio value"
+          />
+        </div>
+
+        {/* Validation Section */}
+        <Card className="glass-card mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Validation & Publishing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {validationState === 'pending' && (
+              <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border border-border">
+                <div>
+                  <p className="font-medium">Ready for validation</p>
+                  <p className="text-sm text-muted-foreground">Submit your simulation results for validation to publish to the marketplace.</p>
+                </div>
+                <Button onClick={handleSubmitForValidation}>
+                  Submit for Validation
+                </Button>
+              </div>
+            )}
+            {validationState === 'submitting' && (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                <p className="text-sm">Submitting for validation...</p>
+              </div>
+            )}
+            {validationState === 'in_progress' && (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-warning/5 border border-warning/20">
+                <Clock className="h-5 w-5 text-warning" />
+                <div>
+                  <p className="font-medium">Validation in progress</p>
+                  <p className="text-sm text-muted-foreground">Analyzing performance consistency and risk metrics...</p>
+                </div>
+              </div>
+            )}
+            {validationState === 'validated' && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-success/5 border border-success/20">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <div>
+                    <p className="font-medium text-success">Validated</p>
+                    <p className="text-sm text-muted-foreground">Your portfolio is eligible for the marketplace.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button onClick={() => setShowPublishModal(true)} className="flex-1">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Publish to Marketplace
+                  </Button>
+                  <Button variant="outline" onClick={handleKeepPrivate} className="flex-1">
+                    <Lock className="h-4 w-4 mr-2" />
+                    Keep Private
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Disclaimer */}
+        <p className="text-xs text-muted-foreground text-center">
+          Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
+        </p>
       </div>
+
+      {/* Publish Modal */}
+      <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
+        <DialogContent className="glass-card">
+          <DialogHeader>
+            <DialogTitle>Publish to Marketplace?</DialogTitle>
+            <DialogDescription>
+              Your portfolio will be visible to all users. Followers will mirror your trades automatically. If you exit your position, all followers will be automatically exited as well.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowPublishModal(false)}>Cancel</Button>
+            <Button onClick={handlePublish}>Confirm & Publish</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
