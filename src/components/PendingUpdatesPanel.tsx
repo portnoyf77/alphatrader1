@@ -69,7 +69,7 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">{strategy.name}</span>
+                    <span className="font-semibold flex items-center gap-2"><GemDot name={strategy.name} />{strategy.name}</span>
                     <span className="px-2 py-0.5 rounded bg-violet-500/20 text-violet-400 text-xs font-medium">
                       Update pending
                     </span>

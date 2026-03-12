@@ -431,7 +431,8 @@ export default function Dashboard() {
                       {simulatingPortfolios.map((portfolio) => (
                         <TableRow key={portfolio.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/simulation/${portfolio.id}`)}>
                           <TableCell>
-                            <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                            <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <GemDot name={portfolio.name} />
                               {portfolio.name}
                             </Link>
                           </TableCell>
