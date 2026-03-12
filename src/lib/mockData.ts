@@ -739,16 +739,18 @@ export const mockInvestorGrowth = [
   { month: 'Jan', investors: 4754 },
 ];
 
-export const generateChartData = (days: number, returnPct: number): ChartDataPoint[] => {
-  const data: ChartDataPoint[] = [];
+export const generateChartData = (days: number, returnPct: number): (ChartDataPoint & { dowJones: number })[] => {
+  const data: (ChartDataPoint & { dowJones: number })[] = [];
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
   
   let portfolioValue = 100;
   let benchmarkValue = 100;
+  let dowValue = 100;
   
   const dailyReturn = Math.pow(1 + returnPct / 100, 1 / days) - 1;
   const benchmarkDailyReturn = Math.pow(1.08, 1 / 365) - 1;
+  const dowDailyReturn = Math.pow(1.065, 1 / 365) - 1;
   
   for (let i = 0; i <= days; i++) {
     const date = new Date(startDate);
@@ -757,11 +759,13 @@ export const generateChartData = (days: number, returnPct: number): ChartDataPoi
     const noise = (Math.random() - 0.5) * 2;
     portfolioValue *= (1 + dailyReturn + noise / 100);
     benchmarkValue *= (1 + benchmarkDailyReturn + (Math.random() - 0.5) / 100);
+    dowValue *= (1 + dowDailyReturn + (Math.random() - 0.5) / 100);
     
     data.push({
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       portfolio: parseFloat(portfolioValue.toFixed(2)),
       benchmark: parseFloat(benchmarkValue.toFixed(2)),
+      dowJones: parseFloat(dowValue.toFixed(2)),
     });
   }
   

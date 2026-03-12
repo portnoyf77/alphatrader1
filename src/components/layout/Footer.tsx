@@ -26,14 +26,17 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
           </div>
           
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/dashboard" className="hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
             <Link to="/explore" className="hover:text-foreground transition-colors">
-              Explore
+              Marketplace
             </Link>
-            <Link to="/leaderboard" className="hover:text-foreground transition-colors">
-              Leaderboard
+            <Link to="/invest" className="hover:text-foreground transition-colors">
+              Invest
             </Link>
-            <Link to="/create" className="hover:text-foreground transition-colors">
-              Create
+            <Link to="/alpha" className="hover:text-foreground transition-colors">
+              Become an Alpha
             </Link>
           </div>
           

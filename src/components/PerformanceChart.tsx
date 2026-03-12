@@ -93,11 +93,21 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
                 type="monotone"
                 dataKey="benchmark"
                 name="S&P 500"
-                stroke="hsl(220 10% 50%)"
-                strokeWidth={2}
-                strokeDasharray="5 5"
+                stroke="hsl(var(--success))"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
                 dot={false}
-                activeDot={{ r: 4, fill: 'hsl(220 10% 50%)' }}
+                activeDot={{ r: 4, fill: 'hsl(var(--success))' }}
+              />
+              <Line
+                type="monotone"
+                dataKey="dowJones"
+                name="Dow Jones"
+                stroke="hsl(var(--muted-foreground))"
+                strokeWidth={1.5}
+                strokeDasharray="2 2"
+                dot={false}
+                activeDot={{ r: 4, fill: 'hsl(var(--muted-foreground))' }}
               />
             </LineChart>
           </ResponsiveContainer>
