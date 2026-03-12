@@ -1,53 +1,40 @@
 
 
-## Capture All Application Screenshots with Descriptive Names
+## Create Downloadable Site Map Document
 
-Since I'm in plan mode, here's the implementation plan for capturing every screen. Once approved, I'll navigate through each route using the browser tool and take screenshots.
+I'll create a comprehensive site map as a downloadable Markdown file at `public/docs/alpha-trader-sitemap.md` that documents every page, its access level, available actions/commands, navigation links, tabs, modals, and user interactions.
 
-### Screenshot List (25-30 captures)
+### Content Structure
 
-| # | Name | Route / Action |
-|---|------|---------------|
-| 1 | `landing-hero` | `/` (top) |
-| 2 | `landing-features` | `/` (scrolled down) |
-| 3 | `landing-cta` | `/` (bottom) |
-| 4 | `login` | `/login` |
-| 5 | `signup-credentials` | `/signup` (step 1) |
-| 6 | `signup-plan-selection` | `/signup` (step 2) |
-| 7 | `docs` | `/docs` |
-| 8 | `marketplace-all-portfolios` | `/explore` (All tab) |
-| 9 | `marketplace-leaderboard` | `/explore` (Leaderboard tab) |
-| 10 | `alpha-become-creator` | `/alpha` (top) |
-| 11 | `alpha-earnings-calculator` | `/alpha` (scrolled) |
-| 12 | `onboarding-setup` | `/onboarding` |
-| 13 | `create-strategy-ai-assisted` | `/invest` (AI tab) |
-| 14 | `create-strategy-manual` | `/invest` (Manual tab) |
-| 15 | `simulation-live` | `/simulation/1` |
-| 16 | `strategy-detail-overview` | `/strategy/1` (Overview tab) |
-| 17 | `strategy-detail-holdings` | `/strategy/1` (Holdings tab) |
-| 18 | `strategy-detail-exposure` | `/strategy/1` (Exposure tab) |
-| 19 | `strategy-detail-track-record` | `/strategy/1` (Track Record tab) |
-| 20 | `strategy-detail-analytics` | `/strategy/1` (Analytics tab) |
-| 21 | `strategy-detail-activity` | `/strategy/1` (Activity tab) |
-| 22 | `strategy-detail-discussion` | `/strategy/1` (Discussion tab) |
-| 23 | `strategy-allocate-modal` | `/strategy/1` → click Allocate |
-| 24 | `dashboard-my-portfolios` | `/dashboard` (My Portfolios tab) |
-| 25 | `dashboard-invested-in` | `/dashboard` (Invested In tab) |
-| 26 | `dashboard-simulating` | `/dashboard` (Simulating tab) |
-| 27 | `portfolio-owner-detail` | `/dashboard/portfolio/1` |
-| 28 | `not-found-404` | `/some-invalid-route` |
-| 29 | `mobile-landing` | `/` at 390x844 |
-| 30 | `mobile-marketplace` | `/explore` at 390x844 |
-| 31 | `mobile-dashboard` | `/dashboard` at 390x844 |
+The document will cover all 13 routes with:
+- **Page name and route**
+- **Access level** (Public / Protected / Protected + Allow Expired Trial)
+- **Available actions** (buttons, forms, filters, tabs, modals, sliders, toggles)
+- **Navigation links** to other pages
+- **Conditional states** (logged in vs out, owner vs visitor, basic vs pro, simulating vs live)
 
-### Approach
+### Pages to Document
 
-1. Log in first to access protected routes
-2. Navigate to each route, take screenshot, name it per the table above
-3. For tabbed pages, click each tab and capture separately
-4. For modals, trigger the modal and capture
-5. Resize viewport for mobile captures at the end
-6. All screenshots will be saved by the browser tool with the descriptive names noted
+1. **`/` (Home)** - Conditional: Landing (guest) or Dashboard (authenticated)
+2. **`/login`** - Login form with email/password
+3. **`/signup`** - Two-step: credentials then plan selection
+4. **`/docs`** - Download, copy link, open in new tab
+5. **`/explore`** - Marketplace with filters, tabs (All Portfolios / Leaderboard), search
+6. **`/alpha`** - Become an Alpha page with earnings calculator sliders, publishing requirements
+7. **`/onboarding`** - Role selection, objective, risk slider, time horizon
+8. **`/invest`** - Two tabs: AI-Assisted (conversational QA + animation + results) and Manual (form + holdings table)
+9. **`/simulation/:id`** - Live chart, stop/resume, invest now, submit for validation, publish/keep private modals
+10. **`/strategy/:id`** - 7 tabs, allocate modal, upgrade to pro modal, conditional owner/visitor views
+11. **`/dashboard`** - 3 tabs, benchmark chart timeframe buttons, validated filter toggle, rebalancing settings modal, portfolio row clicks
+12. **`/dashboard/portfolio/:id`** - Owner view with tweak modal (AI/manual), execute modal, make public modal, strategy controls (rebalance, pause, liquidate)
+13. **`/*`** (404) - Back to home link
 
-Note: The browser tool captures screenshots as temporary session images viewable in chat. To get actual downloadable PNG files saved to the project, I would create a `/screenshots` folder and use a canvas-based approach or simply provide the browser captures for you to save manually.
+### Also Include
+- **Navbar** actions (conditional on auth state)
+- **Mermaid diagram** of the route/navigation graph
+- A link to download this file from the Docs page
+
+### Implementation
+- Create `public/docs/alpha-trader-sitemap.md` with the full sitemap content
+- Update the Docs page to also offer the sitemap for download
 
