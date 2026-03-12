@@ -277,17 +277,36 @@ main > * {
 
 /* Table row hover with purple left border */
 table tbody tr {
-  transition: background-color 0.15s ease, border-left-color 0.15s ease;
+  transition: all 0.15s ease;
   border-left: 3px solid transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
 }
 
 table tbody tr:hover {
-  border-left-color: hsl(var(--primary));
+  background: rgba(124, 58, 237, 0.04);
+  border-left-color: #7C3AED;
 }
 
 /* Leaderboard row striping */
 .leaderboard-striped tbody tr:nth-child(even) {
-  background: hsl(240 10% 9% / 0.5);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.leaderboard-striped tbody tr:hover {
+  background: rgba(124, 58, 237, 0.04);
+}
+
+/* Leaderboard rank numbers */
+.leaderboard-striped tbody td:first-child {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* Monetary values in tables */
+table .font-medium,
+table .font-mono {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Pulsing live dot */
