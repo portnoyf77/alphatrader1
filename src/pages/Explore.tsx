@@ -396,7 +396,6 @@ export default function Explore() {
             </Card>
           </TabsContent>
         </Tabs>
-        )}
       </div>
     </PageLayout>
   );
