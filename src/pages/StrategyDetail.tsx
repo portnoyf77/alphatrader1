@@ -289,16 +289,35 @@ export default function StrategyDetail() {
           {/* Tabs */}
           <Tabs defaultValue="overview">
             <TabsList className="bg-secondary mb-6 flex-wrap">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="holdings">Holdings</TabsTrigger>
-              <TabsTrigger value="exposure">Exposure</TabsTrigger>
-              <TabsTrigger value="track-record">Track Record</TabsTrigger>
-              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
-                Advanced Analytics
-                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+              <TabsTrigger value="overview" className="flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5" />
+                Overview
               </TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="discussion">Discussion</TabsTrigger>
+              <TabsTrigger value="holdings" className="flex items-center gap-1.5">
+                <List className="h-3.5 w-3.5" />
+                Holdings
+              </TabsTrigger>
+              <TabsTrigger value="exposure" className="flex items-center gap-1.5">
+                <PieChart className="h-3.5 w-3.5" />
+                Exposure
+              </TabsTrigger>
+              <TabsTrigger value="track-record" className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Track Record
+              </TabsTrigger>
+              <TabsTrigger value="advanced-analytics" className="flex items-center gap-1.5">
+                {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+                <BarChart3 className="h-3.5 w-3.5" />
+                Advanced Analytics
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="flex items-center gap-1.5">
+                <History className="h-3.5 w-3.5" />
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="discussion" className="flex items-center gap-1.5">
+                <MessageCircle className="h-3.5 w-3.5" />
+                Discussion
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">

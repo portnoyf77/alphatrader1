@@ -263,12 +263,19 @@ export default function Dashboard() {
         {/* Tabbed Portfolio Lists — 3 tabs */}
         <Tabs defaultValue="my-portfolios" className="mb-8">
           <TabsList className="bg-secondary mb-6">
-            <TabsTrigger value="my-portfolios">My Portfolios</TabsTrigger>
-            <TabsTrigger value="invested">Invested In</TabsTrigger>
-            <TabsTrigger value="simulating">
+            <TabsTrigger value="my-portfolios" className="flex items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5" />
+              My Portfolios
+            </TabsTrigger>
+            <TabsTrigger value="invested" className="flex items-center gap-1.5">
+              <Handshake className="h-3.5 w-3.5" />
+              Invested In
+            </TabsTrigger>
+            <TabsTrigger value="simulating" className="flex items-center gap-1.5">
+              <FlaskConical className="h-3.5 w-3.5" />
               Simulating
               {simulatingCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-warning/20 text-warning text-xs font-medium">{simulatingCount}</span>
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning/20 text-warning text-xs font-medium">{simulatingCount}</span>
               )}
             </TabsTrigger>
           </TabsList>
