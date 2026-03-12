@@ -100,7 +100,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Est. Monthly Earnings</p>
+                        <p className="text-xs text-muted-foreground">Alpha Earnings (monthly est.)</p>
                         <p className="text-xl font-bold text-primary">
                           ${strategy.creator_est_monthly_earnings_usd.toLocaleString()}
                         </p>

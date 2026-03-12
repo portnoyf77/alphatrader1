@@ -19,6 +19,7 @@ const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/explore', label: 'Marketplace', icon: Store },
   { href: '/invest', label: 'Invest', icon: TrendingUp },
+  { href: '/alpha', label: 'Become an Alpha', icon: Crown },
 ];
 
 export function Navbar() {

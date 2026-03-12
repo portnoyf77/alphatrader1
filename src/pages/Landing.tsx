@@ -155,18 +155,12 @@ export default function Landing() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Simulation First</h3>
               <p className="text-muted-foreground">
-                See risk and drawdowns before you invest. Test your strategy against 
-                historical data and understand potential outcomes.
+                 Test your strategy with live market data in real time before committing real capital.
               </p>
             </div>
 
             {/* Alpha Marketplace - Enhanced */}
             <div className="group p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden">
-              <div className="absolute top-2 right-2">
-                <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                  Earn 20%
-                </span>
-              </div>
               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users className="h-7 w-7 text-primary" />
               </div>
@@ -241,7 +235,7 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold mb-1">Alpha Revenue Share</h4>
                     <p className="text-muted-foreground">
-                      Earn 20% of platform fees when investors allocate to your published portfolios.
+                      Earn 0.25% of follower AUM annually when investors allocate to your published portfolios.
                     </p>
                   </div>
                 </div>

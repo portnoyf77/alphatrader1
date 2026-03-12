@@ -8,10 +8,10 @@ export function AlphaEarningsCalculator() {
   const [investors, setInvestors] = useState([500]);
   const [avgAllocation, setAvgAllocation] = useState([5000]);
 
-  // Platform fee: 1% annually, Alpha gets 20% of that
+  // Alpha earns 0.25% of follower AUM annually, platform takes 0.25%
   const totalAllocated = investors[0] * avgAllocation[0];
-  const platformFee = totalAllocated * 0.01; // 1% annual platform fee
-  const alphaShare = platformFee * 0.20; // 20% to Alpha
+  const alphaShare = totalAllocated * 0.0025; // 0.25% AUM annually to Alpha
+  const platformFee = totalAllocated * 0.0025; // 0.25% AUM annually to platform
   const monthlyEarnings = alphaShare / 12;
 
   return (
@@ -81,12 +81,12 @@ export function AlphaEarningsCalculator() {
               <span>${totalAllocated.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Platform fee (1% annually)</span>
-              <span>${platformFee.toLocaleString()}</span>
+              <span>Your share (0.25% AUM)</span>
+              <span>${alphaShare.toLocaleString()}/year</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Your share (20%)</span>
-              <span>${alphaShare.toLocaleString()}/year</span>
+              <span>Platform fee (0.25% AUM)</span>
+              <span>${platformFee.toLocaleString()}/year</span>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ export function AlphaEarningsCalculator() {
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Based on 1% annual platform fee with 20% Alpha share. 
+          Based on 0.25% annual Alpha share of follower AUM. 
           Actual earnings depend on allocation and retention.
         </p>
       </CardContent>

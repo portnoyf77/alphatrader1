@@ -49,7 +49,7 @@ export default function Onboarding() {
           </div>
 
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-3">Welcome to ACME Trader</h1>
+            <h1 className="text-3xl font-bold mb-3">Welcome to Alpha Trader</h1>
             <p className="text-muted-foreground">
               Let's personalize your experience in just a few steps.
             </p>
@@ -107,7 +107,7 @@ export default function Onboarding() {
                             <span className="ml-1 underline cursor-help">How?</span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-[250px]">
-                            <p>When investors allocate to your portfolio, you earn 20% of the 1% annual platform fee. More followers = more earnings!</p>
+                            <p>When investors allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly. More followers = more earnings!</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

@@ -41,7 +41,7 @@ export default function Signup() {
       await signup(email, password);
       toast({
         title: 'Account created!',
-        description: 'Welcome to ACME Trader. Your unique ID has been assigned.',
+        description: 'Welcome to Alpha Trader. Your unique ID has been assigned.',
       });
       navigate('/dashboard', { replace: true });
     } catch (error) {
@@ -65,7 +65,7 @@ export default function Signup() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
                 <TrendingUp className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-lg font-bold">ACME Trader</span>
+              <span className="text-lg font-bold">Alpha Trader</span>
             </Link>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function Signup() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Create your account</h1>
             <p className="text-muted-foreground">
-              Join ACME Trader and start building your portfolio
+              Join Alpha Trader and start building your portfolio
             </p>
           </div>
 

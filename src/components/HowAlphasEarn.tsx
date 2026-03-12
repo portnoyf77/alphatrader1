@@ -19,7 +19,7 @@ const steps = [
   {
     icon: DollarSign,
     title: 'Earn Passively',
-    description: 'Get 20% of platform fees from every investor who allocates.',
+    description: 'Earn 0.25% of follower AUM annually, paid monthly.',
   },
 ];
 
@@ -76,9 +76,9 @@ export function HowAlphasEarn() {
         <div className="mt-16 max-w-2xl mx-auto p-6 rounded-2xl bg-card border border-border/50 text-center">
           <p className="text-sm text-muted-foreground mb-2">The math is simple</p>
           <p className="text-lg">
-            Platform charges a <span className="font-bold text-primary">1% annual fee</span> on allocated capital.
+            As an Alpha, you earn <span className="font-bold text-primary">0.25% of follower AUM annually</span>, paid monthly.
             <br />
-            As an Alpha, you receive <span className="font-bold text-primary">20% of that fee</span> — automatically, every month.
+            The platform also charges <span className="font-bold text-primary">0.25% annually</span> — simple and transparent.
           </p>
         </div>
       </div>
