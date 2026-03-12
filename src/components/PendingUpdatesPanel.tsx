@@ -77,25 +77,32 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
                     {strategy.pending_change_summary}
                   </p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleExitClick(strategy)}
-                    className="text-destructive border-destructive/50 hover:bg-destructive/10"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Exit
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAccept(strategy)}
-                    className="bg-success hover:bg-success/90"
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    Accept
-                  </Button>
-                </div>
+                {rebalancingMode === 'auto' ? (
+                  <div className="flex items-center gap-2 shrink-0 text-success">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="text-sm font-medium">Auto-applied</span>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExitClick(strategy)}
+                      className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Exit
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAccept(strategy)}
+                      className="bg-success hover:bg-success/90"
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Accept
+                    </Button>
+                  </div>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
                 <ArrowRight className="h-3 w-3" />
