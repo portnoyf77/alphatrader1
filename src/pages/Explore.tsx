@@ -92,7 +92,23 @@ export default function Explore() {
     setTurnoverFilter('all');
   };
 
-  const barColors = ['hsl(var(--primary))', 'hsl(var(--primary) / 0.8)', 'hsl(var(--primary) / 0.6)', 'hsl(var(--primary) / 0.4)', 'hsl(var(--primary) / 0.3)'];
+  // Gemstone-themed bar colors for top performers
+  const gemstoneBarColors: Record<string, string> = {
+    'Sapphire': 'hsl(217 91% 60%)',
+    'Pearl': 'hsl(240 5% 80%)',
+    'Emerald': 'hsl(160 84% 39%)',
+    'Amber': 'hsl(38 92% 50%)',
+    'Opal': 'hsl(300 60% 70%)',
+    'Diamond': 'hsl(262 83% 58%)',
+    'Peridot': 'hsl(120 40% 55%)',
+    'Topaz': 'hsl(40 80% 55%)',
+    'Quartz': 'hsl(0 0% 70%)',
+  };
+
+  const getBarColor = (name: string) => {
+    const gemName = name.split('-')[0];
+    return gemstoneBarColors[gemName] || 'hsl(262 83% 58%)';
+  };
 
   const FilterContent = () => (
     <div className="space-y-4">
