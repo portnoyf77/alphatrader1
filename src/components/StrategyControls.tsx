@@ -59,8 +59,8 @@ export function StrategyControls({
     setLiquidateDialogOpen(false);
     onLiquidate?.();
     toast({
-      title: "Strategy liquidated (prototype)",
-      description: "All followers have been auto-exited. Strategy removed from marketplace.",
+      title: "Portfolio liquidated (prototype)",
+      description: "All followers have been auto-exited. Portfolio removed from marketplace.",
       variant: "destructive",
     });
   };
