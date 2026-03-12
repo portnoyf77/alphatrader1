@@ -248,7 +248,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help flex flex-col justify-between h-10">
-                    <p className="text-xs text-muted-foreground leading-none">Max Drawdown</p>
+                    <p className="text-xs text-muted-foreground leading-none">Worst Drop</p>
                     <p className="font-semibold text-destructive">
                       {formatPercent(strategy.performance.max_drawdown, false)}
                     </p>

@@ -122,7 +122,7 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="cursor-help">
-                    <p className="text-xs text-muted-foreground mb-1">Max Drawdown</p>
+                    <p className="text-xs text-muted-foreground mb-1">Worst Drop</p>
                     <p className="font-semibold text-destructive">
                       {formatPercent(portfolio.performance.max_drawdown, false)}
                     </p>
