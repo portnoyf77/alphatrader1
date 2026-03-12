@@ -187,7 +187,7 @@ export default function Dashboard() {
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Total Value</p>
                     </div>
-                    <p className="text-3xl font-bold">{formatCurrency(totalMyInvestment + totalInvestedInOthers)}</p>
+                    <p className="text-3xl font-bold">{formatCurrency(useCountUp(totalMyInvestment + totalInvestedInOthers, 800))}</p>
                     <p className="text-xs text-muted-foreground mt-2">All investments</p>
                   </CardContent>
                 </Card>
