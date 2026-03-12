@@ -74,7 +74,10 @@ const mockNews = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showOnlyValidated, setShowOnlyValidated] = useState(false);
-  const [rebalancingMode, setRebalancingMode] = useState<'auto' | 'manual'>('auto');
+  const [rebalancingMode, setRebalancingMode] = useState<'auto' | 'manual'>(() => {
+    const saved = localStorage.getItem('rebalancingMode');
+    return saved === 'manual' ? 'manual' : 'auto';
+  });
   const [rebalancingModalOpen, setRebalancingModalOpen] = useState(false);
   const [benchmarkTimeframe, setBenchmarkTimeframe] = useState('30D');
 
