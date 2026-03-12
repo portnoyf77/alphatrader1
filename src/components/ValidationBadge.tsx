@@ -20,7 +20,7 @@ const statusConfig: Record<ValidationStatus, {
     label: 'Simulated',
     icon: <FlaskConical className="h-3 w-3" />,
     className: 'bg-muted text-muted-foreground border-muted-foreground/30',
-    tooltip: 'This strategy has only paper-trading history and is not publicly listed.',
+    tooltip: 'This portfolio has only paper-trading history and is not publicly listed.',
   },
   in_validation: {
     label: 'In Validation',
