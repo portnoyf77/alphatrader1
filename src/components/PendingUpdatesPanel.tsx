@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { GemDot } from '@/components/GemDot';
 import type { Portfolio } from '@/lib/types';
 
 interface PendingUpdatesPanelProps {
