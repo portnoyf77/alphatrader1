@@ -382,7 +382,7 @@ export default function Explore() {
                         </TableCell>
                         <TableCell>
                           <Link to={`/portfolio/${alpha.id}`} className="hover:text-primary transition-colors">
-                            <p className="font-medium">{alpha.name}</p>
+                            <p className="font-medium flex items-center gap-2"><GemDot name={alpha.name} />{alpha.name}</p>
                             <p className="text-xs text-muted-foreground font-mono">{alpha.creator_id}</p>
                           </Link>
                         </TableCell>
