@@ -278,7 +278,7 @@ export default function Dashboard() {
 
         {/* Tabbed Portfolio Lists — 3 tabs */}
         <Tabs defaultValue="my-portfolios" className="mb-8">
-          <TabsList className="bg-secondary mb-6">
+          <TabsList className="mb-6">
             <TabsTrigger value="my-portfolios" className="flex items-center gap-1.5">
               <Briefcase className="h-3.5 w-3.5" />
               My Portfolios

@@ -43,7 +43,7 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Performance vs Benchmark</CardTitle>
         <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as TimeframeKey)}>
-          <TabsList className="bg-secondary">
+          <TabsList>
             <TabsTrigger value="30">30D</TabsTrigger>
             <TabsTrigger value="90">90D</TabsTrigger>
             <TabsTrigger value="ytd">YTD</TabsTrigger>
