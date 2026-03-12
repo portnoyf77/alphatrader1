@@ -13,6 +13,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyControls } from '@/components/StrategyControls';
+import { GemDot } from '@/components/GemDot';
+import { getGemHex } from '@/lib/portfolioNaming';
 import { mockStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
