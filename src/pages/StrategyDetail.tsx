@@ -207,9 +207,7 @@ export default function StrategyDetail() {
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="glass-card cursor-help">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1">30d Return</p>
+                   <Card className="glass-card glass-tile cursor-help">
                       <p className={cn("text-2xl font-bold flex items-center gap-1", strategy.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
                         {strategy.performance.return_30d >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
                         {formatPercent(strategy.performance.return_30d)}
