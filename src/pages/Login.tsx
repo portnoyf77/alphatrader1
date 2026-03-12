@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { TrendingUp, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Crown, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -56,7 +56,7 @@ export default function Login() {
           <div className="flex h-16 items-center">
             <Link to="/" className="flex items-center gap-2 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <Crown className="h-5 w-5 text-primary" />
               </div>
               <span className="text-lg font-bold">Alpha Trader</span>
             </Link>

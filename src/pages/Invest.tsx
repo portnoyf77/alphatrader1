@@ -363,10 +363,10 @@ export default function Create() {
             </Card>
           )}
 
-          {/* Overall Strategy Rationale */}
+          {/* Overall Portfolio Rationale */}
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-lg">Strategy Rationale</CardTitle>
+              <CardTitle className="text-lg">Portfolio Rationale</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p>
@@ -447,9 +447,9 @@ export default function Create() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Create Strategy</h1>
+            <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
             <p className="text-muted-foreground">
-              Build your investment strategy with AI assistance or manually configure holdings.
+              Build your portfolio with AI assistance or manually configure holdings.
             </p>
           </div>
 

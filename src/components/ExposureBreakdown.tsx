@@ -40,10 +40,10 @@ export function ExposureBreakdown({
           <div className="flex items-start gap-3">
             <Lock className="h-5 w-5 text-violet-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-violet-400">IP-Protected Strategy</p>
+              <p className="font-medium text-violet-400">IP-Protected Portfolio</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Exact holdings and weights are hidden to protect the creator's intellectual property. 
-                Below you'll find high-level exposure information to help you understand the strategy.
+                Below you'll find high-level exposure information to help you understand the portfolio.
               </p>
             </div>
           </div>
@@ -86,12 +86,12 @@ export function ExposureBreakdown({
           </CardContent>
         </Card>
 
-        {/* Strategy Characteristics */}
+        {/* Portfolio Characteristics */}
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              Strategy Characteristics
+              Portfolio Characteristics
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">

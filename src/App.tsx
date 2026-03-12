@@ -2,14 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MockAuthProvider } from "@/contexts/MockAuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
-import Docs from "./pages/Docs";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Onboarding from "./pages/Onboarding";
 import Invest from "./pages/Invest";
 import Simulation from "./pages/Simulation";
 import StrategyDetail from "./pages/StrategyDetail";
@@ -33,28 +31,23 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/docs" element={<Docs />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/alpha" element={
               <ProtectedRoute allowExpiredTrial><Alpha /></ProtectedRoute>
             } />
             
             {/* Protected routes */}
-            <Route path="/onboarding" element={
-              <ProtectedRoute><Onboarding /></ProtectedRoute>
-            } />
             <Route path="/invest" element={
               <ProtectedRoute><Invest /></ProtectedRoute>
             } />
             <Route path="/simulation/:id" element={
               <ProtectedRoute><Simulation /></ProtectedRoute>
             } />
-            <Route path="/strategy/:id" element={
-              <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
-            } />
             <Route path="/portfolio/:id" element={
               <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
             } />
+            {/* Redirect /strategy/:id to /portfolio/:id for backwards compatibility */}
+            <Route path="/strategy/:id" element={<Navigate to={window.location.pathname.replace('/strategy/', '/portfolio/')} replace />} />
             <Route path="/dashboard/portfolio/:id" element={
               <ProtectedRoute><PortfolioOwnerDetail /></ProtectedRoute>
             } />

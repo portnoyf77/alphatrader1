@@ -300,7 +300,7 @@ export default function StrategyDetail() {
                       <div className="flex-1">
                         <p className="font-medium text-violet-400">Protected Holdings</p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Individual holdings are hidden to protect the Alpha's strategy. You can see sector allocations only.
+                          Individual holdings are hidden to protect the Alpha's intellectual property. You can see sector allocations only.
                         </p>
                       </div>
                       <TooltipProvider delayDuration={200}>
@@ -309,7 +309,7 @@ export default function StrategyDetail() {
                             <Info className="h-4 w-4 text-muted-foreground shrink-0 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent className="text-xs max-w-[240px]">
-                            Alphas' exact tickers and fund names are masked to protect their intellectual property. Sector-level allocations are shown instead.
+                            Individual holdings are hidden to protect the creator's intellectual property. Sector-level allocations are shown instead.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

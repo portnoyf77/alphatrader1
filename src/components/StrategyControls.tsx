@@ -50,7 +50,7 @@ export function StrategyControls({
     toast({
       title: isPaused ? "Allocations resumed (prototype)" : "Allocations paused (prototype)",
       description: isPaused 
-        ? "New investors can now allocate to this strategy."
+        ? "New investors can now allocate to this portfolio."
         : "New allocations are temporarily paused. Existing followers are unaffected.",
     });
   };
@@ -59,8 +59,8 @@ export function StrategyControls({
     setLiquidateDialogOpen(false);
     onLiquidate?.();
     toast({
-      title: "Strategy liquidated (prototype)",
-      description: "All followers have been auto-exited. Strategy removed from marketplace.",
+      title: "Portfolio liquidated (prototype)",
+      description: "All followers have been auto-exited. Portfolio removed from marketplace.",
       variant: "destructive",
     });
   };
@@ -124,8 +124,8 @@ export function StrategyControls({
             </TooltipTrigger>
             <TooltipContent className="text-xs max-w-[200px]">
               {isPaused 
-                ? "Allow new investors to allocate to this strategy"
-                : "Temporarily stop accepting new allocations"}
+               ? "Allow new investors to allocate to this portfolio"
+                 : "Temporarily stop accepting new allocations"}
             </TooltipContent>
           </Tooltip>
 
@@ -142,7 +142,7 @@ export function StrategyControls({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs max-w-[200px]">
-              Permanently deactivate this strategy and exit all followers
+              Permanently deactivate this portfolio and exit all followers
             </TooltipContent>
           </Tooltip>
         </div>
@@ -158,7 +158,7 @@ export function StrategyControls({
             </DialogTitle>
             <DialogDescription className="space-y-2">
               <p>Major changes require follower opt-in and will create a new portfolio configuration.</p>
-              <p className="text-warning">Followers who don't approve within {strategy.exit_window_days} days will be auto-exited.</p>
+              <p className="text-warning">Followers who don&apos;t approve within {strategy.exit_window_days} days will be auto-exited.</p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

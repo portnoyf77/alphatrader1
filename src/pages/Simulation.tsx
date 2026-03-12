@@ -128,7 +128,7 @@ export default function Simulation() {
     setValidationState('in_progress');
     await new Promise(resolve => setTimeout(resolve, 3000));
     setValidationState('validated');
-    toast({ title: 'Validation complete!', description: 'Your strategy has passed validation and can now be published.' });
+    toast({ title: 'Validation complete!', description: 'Your portfolio has passed validation and can now be published.' });
   };
 
   const handlePublish = () => {

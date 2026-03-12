@@ -145,7 +145,7 @@ export default function Explore() {
         </Select>
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Strategy Type</label>
+        <label className="text-sm font-medium">Portfolio Type</label>
         <Select value={strategyFilter} onValueChange={(v) => setStrategyFilter(v as StrategyFilter)}>
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -257,7 +257,7 @@ export default function Explore() {
                   {leaderboardData.map((strategy, index) => (
                     <Link 
                       key={strategy.id}
-                      to={`/strategy/${strategy.id}`}
+                      to={`/portfolio/${strategy.id}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
                     >
                       <span className="font-bold text-primary">#{index + 1}</span>
@@ -276,9 +276,9 @@ export default function Explore() {
               </div>
               <div className="hidden lg:flex gap-3">
                 <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
-                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Risk</SelectItem>
+                    <SelectItem value="all">All Risk Levels</SelectItem>
                     <SelectItem value="Low">Low</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="High">High</SelectItem>
@@ -287,15 +287,15 @@ export default function Explore() {
                 <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
                   <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Visibility</SelectItem>
                     <SelectItem value="masked">Masked</SelectItem>
                     <SelectItem value="transparent">Transparent</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
-                  <SelectTrigger className="w-[130px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Turnover</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>
@@ -376,7 +376,7 @@ export default function Explore() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Link to={`/strategy/${alpha.id}`} className="hover:text-primary transition-colors">
+                          <Link to={`/portfolio/${alpha.id}`} className="hover:text-primary transition-colors">
                             <p className="font-medium">{alpha.name}</p>
                             <p className="text-xs text-muted-foreground font-mono">{alpha.creator_id}</p>
                           </Link>
