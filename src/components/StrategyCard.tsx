@@ -95,7 +95,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus).toFixed(1);
 
   return (
-    <Link to={`/strategy/${strategy.id}`}>
+    <Link to={`/portfolio/${strategy.id}`}>
       <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-4">
