@@ -70,7 +70,7 @@ export const mockStrategies: Portfolio[] = [
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 75 days with excellent consistency score and low volatility metrics.',
-    created_date: '2024-10-22',
+    created_date: '2025-07-15',
     last_rebalanced_date: '2024-12-20',
     strategy_type: 'GenAI',
     objective: 'Balanced',
