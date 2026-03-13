@@ -65,7 +65,7 @@ export default function Dashboard() {
     return saved === 'manual' ? 'manual' : 'auto';
   });
   const [rebalancingModalOpen, setRebalancingModalOpen] = useState(false);
-  const [benchmarkTimeframe, setBenchmarkTimeframe] = useState('30D');
+  
 
   const filteredMyPortfolios = showOnlyValidated 
     ? myPortfolios.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
