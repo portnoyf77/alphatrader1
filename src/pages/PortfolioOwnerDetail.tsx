@@ -417,7 +417,7 @@ export default function PortfolioOwnerDetail() {
               <DialogHeader>
                 <DialogTitle>Execute Portfolio & Go Live</DialogTitle>
                 <DialogDescription>
-                  You're about to take your portfolio live. This will allow other investors to allocate to it.
+                  You're about to take your portfolio live. This will allow followers to allocate to it.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
