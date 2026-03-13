@@ -58,29 +58,26 @@ export default function Explore() {
 
   const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
 
-  // Return key based on timeframe
-  const getReturnForTimeframe = (strategy: any, tf: ChartTimeframe) => {
-    switch (tf) {
-      case '30D': return strategy.performance.return_30d;
-      case '90D': return strategy.performance.return_90d;
-      case 'YTD': return strategy.performance.return_90d * 1.2; // simulated
-      case '1Y': return strategy.performance.return_90d * 2.5; // simulated
-      default: return strategy.performance.return_30d;
-    }
+  // Get return for a portfolio at the selected timeframe using hardcoded data
+  const getReturnForTimeframe = (portfolio: any, tf: ChartTimeframe) => {
+    const returns = timeReturns[portfolio.name];
+    if (returns) return returns[tf];
+    return portfolio.performance.return_30d;
   };
 
-  // Top 5 strategies by return for selected timeframe
-  const leaderboardData = useMemo(() => {
+  // Top 5 portfolios by return for selected timeframe
+  const topPerformers = useMemo(() => {
     return [...validatedStrategies]
       .sort((a, b) => getReturnForTimeframe(b, chartTimeframe) - getReturnForTimeframe(a, chartTimeframe))
-      .slice(0, 5)
-      .map((strategy) => ({
-        name: strategy.name,
-        id: strategy.id,
-        returnValue: Number(getReturnForTimeframe(strategy, chartTimeframe).toFixed(1)),
-        riskAdjusted: (strategy.performance.return_90d / strategy.performance.volatility).toFixed(2),
-      }));
+      .slice(0, 5);
   }, [validatedStrategies, chartTimeframe]);
+
+  const timeLabels: Record<ChartTimeframe, string> = {
+    '30D': '30d return',
+    '90D': '90d return',
+    'YTD': 'YTD return',
+    '1Y': '1Y return',
+  };
 
   // Alpha leaderboard ranking by composite score
   const alphaLeaderboard = useMemo(() => {
