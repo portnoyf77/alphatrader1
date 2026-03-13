@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
-import { TrendingUp, Users, DollarSign, Crown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, DollarSign, Crown, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PortfolioThumbnail } from '@/components/PortfolioThumbnail';
-import { formatCurrency } from '@/lib/mockData';
+import { GemDot } from '@/components/GemDot';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatCurrency, formatPercent } from '@/lib/mockData';
 import { riskToGem } from '@/lib/portfolioNaming';
+import { cn } from '@/lib/utils';
 import { Strategy } from '@/lib/types';
 
 interface AlphaSpotlightProps {
@@ -12,7 +14,6 @@ interface AlphaSpotlightProps {
 }
 
 export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
-  // Sort by earnings and take top 3
   const topAlphas = [...strategies]
     .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
     .slice(0, 3);
@@ -35,80 +36,106 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
-          {topAlphas.map((strategy, index) => {
+          {topAlphas.map((strategy) => {
             const gemstone = riskToGem(strategy.risk_level);
-            
+            const isPositive = strategy.performance.return_30d >= 0;
+
             return (
-              <Card 
-                key={strategy.id} 
-                className="glass-card overflow-hidden group hover:border-primary/50 transition-all duration-300"
-              >
-                <CardContent className="p-6">
-                  {/* Rank badge and thumbnail */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`
-                        w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
-                        ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' : 
-                          index === 1 ? 'bg-gray-400/20 text-gray-300' : 
-                          'bg-amber-700/20 text-amber-600'}
-                      `}>
-                        #{index + 1}
-                      </div>
-                      <PortfolioThumbnail
-                        sectors={strategy.sectors}
-                        geoFocus={strategy.geo_focus}
-                        riskLevel={strategy.risk_level}
-                        gemstone={gemstone}
-                        size="sm"
-                      />
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {strategy.strategy_type}
-                    </span>
-                  </div>
-
-                  {/* Alpha & Portfolio */}
-                  <Link 
-                    to={`/portfolio/${strategy.id}`}
-                    className="block group-hover:text-primary transition-colors"
-                  >
-                    <h3 className="font-semibold text-lg mb-1">{strategy.name}</h3>
-                    <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
-                  </Link>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="p-3 rounded-lg bg-secondary/50">
-                      <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
-                        <Users className="h-3 w-3" />
-                        Followers
-                      </div>
-                      <p className="font-semibold">{strategy.followers_count.toLocaleString()}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-secondary/50">
-                      <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
-                        <TrendingUp className="h-3 w-3" />
-                        Allocated
-                      </div>
-                      <p className="font-semibold">{formatCurrency(strategy.allocated_amount_usd)}</p>
-                    </div>
-                  </div>
-
-                  {/* Monthly Earnings - Highlighted */}
-                  <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-primary" />
+              <Link key={strategy.id} to={`/portfolio/${strategy.id}`}>
+                <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+                  <CardContent className="p-5">
+                    {/* Header: Gem + Name */}
+                    <div className="flex items-start gap-3 mb-4">
+                      <GemDot name={gemstone} size={16} showTooltip />
                       <div>
-                        <p className="text-xs text-muted-foreground">Alpha Earnings (monthly est.)</p>
-                        <p className="text-xl font-bold text-primary">
-                          ${strategy.creator_est_monthly_earnings_usd.toLocaleString()}
-                        </p>
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {strategy.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                    {/* Creator invested badge */}
+                    <TooltipProvider delayDuration={200}>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-success/10 text-xs text-success border border-success/20 cursor-help">
+                              <Shield className="h-3 w-3" />
+                              Creator invested
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs max-w-[200px]">
+                            Creator has {formatCurrency(strategy.creator_investment)} of their own capital invested
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
+
+                    {/* Stats grid — matches marketplace card */}
+                    <TooltipProvider delayDuration={200}>
+                      <div className="grid grid-cols-3 gap-4">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <p className="text-xs text-muted-foreground mb-1">30d Return</p>
+                              <div className={cn(
+                                "flex items-center gap-1 font-semibold",
+                                isPositive ? "text-success" : "text-destructive"
+                              )}>
+                                {isPositive ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {formatPercent(strategy.performance.return_30d)}
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs">
+                            Portfolio return over the last 30 days
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <p className="text-xs text-muted-foreground mb-1">Followers</p>
+                              <div className="flex items-center gap-1 font-semibold">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                {strategy.followers_count.toLocaleString()}
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs">
+                            Number of followers allocating to this portfolio
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <p className="text-xs text-muted-foreground mb-1">Allocated</p>
+                              <p className="font-semibold">{formatCurrency(strategy.allocated_amount_usd)}</p>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs">
+                            Total capital allocated by all followers
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
+
+                    {/* Alpha Earnings — green highlight */}
+                    <div className="mt-4 pt-4 border-t border-border/50">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Alpha Earnings (monthly est.)</span>
+                        <span className="font-semibold text-success">
+                          ${strategy.creator_est_monthly_earnings_usd.toLocaleString()}/mo
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>
