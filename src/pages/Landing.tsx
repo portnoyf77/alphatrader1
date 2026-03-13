@@ -95,8 +95,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help relative">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>{totalFollowers.toLocaleString()}</p>
-                      <p className="text-muted-foreground mt-1 text-sm">Active Followers</p>
+                      <p className="font-bold gradient-text font-mono tabular-nums text-xl sm:text-2xl md:text-[2rem]" style={{ fontWeight: 700 }}>{totalFollowers.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1 text-xs sm:text-sm">Active Followers</p>
                       <div className="absolute bottom-[-4px] left-[20%] w-[60%] h-[2px] opacity-50" style={{ background: 'linear-gradient(90deg, transparent, #7C3AED, transparent)' }} />
                     </div>
                   </TooltipTrigger>
