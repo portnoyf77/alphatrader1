@@ -429,7 +429,7 @@ export default function Landing() {
               }}
             >
               <h3 className="font-heading text-2xl font-bold mb-3">Ready to earn as an Alpha?</h3>
-              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 Build and publish your portfolio. Earn 0.25% of follower AUM.
               </p>
               <Button asChild size="lg" className="w-full">
