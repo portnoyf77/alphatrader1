@@ -486,7 +486,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    capacity_limit_usd: 7000000,
+    
     holdings: [
       { ticker: 'VTV', name: 'Vanguard Value ETF', weight: 30, sector: 'Value' },
       { ticker: 'VOOV', name: 'Vanguard S&P 500 Value ETF', weight: 25, sector: 'Large Value' },
