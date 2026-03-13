@@ -280,7 +280,7 @@ export default function Landing() {
               <span style={{ color: '#E11D48' }}>see</span>{' '}
               at a glance
             </h2>
-            <p className="mt-4 text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Every portfolio is named after a gemstone that reflects its risk level. No jargon. No guesswork.
             </p>
           </div>
