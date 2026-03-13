@@ -64,13 +64,21 @@ const benchmarkDataSets: Record<string, ReturnType<typeof generateBenchmarkData>
   '1Y': generateBenchmarkData(365),
 };
 
-// Mock news
+// Mock news with thumbnail gradients per sector
+const sectorGradients: Record<string, string> = {
+  Financials: 'linear-gradient(135deg, #1e3a5f 0%, #0f1f3a 100%)',
+  Technology: 'linear-gradient(135deg, #3b1f6e 0%, #1a0e3a 100%)',
+  'Clean Energy': 'linear-gradient(135deg, #0f4a2e 0%, #0a2618 100%)',
+  Healthcare: 'linear-gradient(135deg, #134e5e 0%, #0a2a30 100%)',
+  Industrial: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)',
+};
+
 const mockNews = [
-  { headline: 'Fed Signals Potential Rate Pause in Q3', url: 'https://reuters.com', sector: 'Financials', tag: 'Relevant to your Financials holdings' },
-  { headline: 'NVIDIA Reports Record Data Center Revenue', url: 'https://reuters.com', sector: 'Technology', tag: 'Relevant to your Tech holdings' },
-  { headline: 'Renewable Energy Stocks Surge on Policy Update', url: 'https://reuters.com', sector: 'Clean Energy', tag: 'Relevant to your Clean Energy holdings' },
-  { headline: 'Healthcare M&A Activity Hits 2025 High', url: 'https://reuters.com', sector: 'Healthcare', tag: 'Relevant to your Healthcare holdings' },
-  { headline: 'Global Supply Chain Bottlenecks Easing', url: 'https://reuters.com', sector: 'Industrial', tag: 'Market-wide impact' },
+  { headline: 'Fed Signals Potential Rate Pause in Q3', url: 'https://reuters.com', sector: 'Financials', tag: 'Relevant to your Financials holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&h=134&fit=crop' },
+  { headline: 'NVIDIA Reports Record Data Center Revenue', url: 'https://reuters.com', sector: 'Technology', tag: 'Relevant to your Tech holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=134&fit=crop' },
+  { headline: 'Renewable Energy Stocks Surge on Policy Update', url: 'https://reuters.com', sector: 'Clean Energy', tag: 'Relevant to your Clean Energy holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=200&h=134&fit=crop' },
+  { headline: 'Healthcare M&A Activity Hits 2025 High', url: 'https://reuters.com', sector: 'Healthcare', tag: 'Relevant to your Healthcare holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=200&h=134&fit=crop' },
+  { headline: 'Global Supply Chain Bottlenecks Easing', url: 'https://reuters.com', sector: 'Industrial', tag: 'Market-wide impact', thumbnailUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=200&h=134&fit=crop' },
 ];
 
 export default function Dashboard() {
@@ -516,23 +524,34 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-lg">Market News</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             {mockNews.map((news, i) => (
               <a
                 key={i}
                 href={news.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start justify-between gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
+                className="flex items-center gap-4 py-3.5 px-4 rounded-lg hover:bg-[rgba(255,255,255,0.02)] transition-colors group"
+                style={{ borderBottom: i < mockNews.length - 1 ? '1px solid rgba(255, 255, 255, 0.04)' : undefined }}
               >
+                {/* Thumbnail */}
+                <div className="w-[72px] h-[48px] rounded-lg overflow-hidden shrink-0" style={{ background: sectorGradients[news.sector] || sectorGradients.Industrial }}>
+                  <img
+                    src={news.thumbnailUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+                {/* Text */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium group-hover:text-primary transition-colors">{news.headline}</p>
+                  <p className="text-sm font-semibold text-[rgba(255,255,255,0.92)] group-hover:text-white transition-colors truncate">{news.headline}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Tag className="h-3 w-3 text-primary" />
                     <span className="text-xs text-primary/80">{news.tag}</span>
                   </div>
                 </div>
-                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-primary transition-colors" />
+                <ExternalLink size={14} className="text-[rgba(255,255,255,0.25)] shrink-0" />
               </a>
             ))}
           </CardContent>
