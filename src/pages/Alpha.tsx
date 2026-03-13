@@ -198,7 +198,14 @@ export default function Alpha() {
                 <div className="flex justify-between items-center mb-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    Number of Followers
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help border-b border-dashed border-muted-foreground/40">Number of Followers</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs max-w-[250px]">Estimated number of followers for your portfolio</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </label>
                   <span className="text-2xl font-bold text-primary">{followers[0]}</span>
                 </div>
