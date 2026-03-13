@@ -366,7 +366,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'low',
-    capacity_limit_usd: 20000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'TLT', name: 'iShares 20+ Year Treasury Bond ETF', weight: 25, sector: 'Long Bonds' },
