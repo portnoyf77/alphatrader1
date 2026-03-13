@@ -9,7 +9,7 @@ import {
   deriveGemstone,
   questions 
 } from '@/lib/strategyProfile';
-import { cn } from '@/lib/utils';
+import { cn, riskDisplayLabel } from '@/lib/utils';
 
 interface ProfileSummaryProps {
   profile: StrategyProfile;
