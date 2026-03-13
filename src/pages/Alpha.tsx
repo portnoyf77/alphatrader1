@@ -257,18 +257,35 @@ export default function Alpha() {
 
               {/* Results */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Total AUM</p>
-                  <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Monthly Earnings</p>
-                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Annual Earnings</p>
-                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
-                </div>
+                <TooltipProvider delayDuration={300}>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Total AUM</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Assets Under Management — total capital allocated by all your followers</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Monthly Earnings</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Estimated monthly earnings based on 0.25% annual fee</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Annual Earnings</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Estimated annual earnings based on 0.25% annual fee</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
+                  </div>
+                </TooltipProvider>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
