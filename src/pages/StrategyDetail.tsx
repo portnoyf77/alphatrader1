@@ -221,7 +221,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How many people have put money into this portfolio</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Number of people currently following this portfolio</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
