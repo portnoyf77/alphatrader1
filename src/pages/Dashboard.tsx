@@ -390,9 +390,18 @@ export default function Dashboard() {
                           </Link>
                         </TableCell>
                         <TableCell>
-                          <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
-                            {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
-                          </span>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className={cn("px-2 py-1 rounded text-xs cursor-help", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
+                                  {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">
+                                {portfolio.status === 'validated_listed' ? 'This portfolio is actively invested with real capital' : portfolio.status === 'inactive' ? 'This portfolio has been liquidated and is no longer active' : 'This portfolio is running a live simulation with market data'}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
                         <TableCell className="text-right">
