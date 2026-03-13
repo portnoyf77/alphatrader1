@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PortfolioThumbnail } from '@/components/PortfolioThumbnail';
 import { formatCurrency } from '@/lib/mockData';
-import { getGemstoneForSector } from '@/lib/portfolioNaming';
+import { riskToGem } from '@/lib/portfolioNaming';
 import { Strategy } from '@/lib/types';
 
 interface AlphaSpotlightProps {
