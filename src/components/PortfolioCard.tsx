@@ -143,7 +143,7 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs">
-                  Number of investors following this portfolio
+                  Number of followers allocating to this portfolio
                 </TooltipContent>
               </Tooltip>
             </div>
