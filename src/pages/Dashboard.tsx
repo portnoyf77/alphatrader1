@@ -371,18 +371,6 @@ export default function Dashboard() {
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">
-                              Percentage of maximum follower allocation reached
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
