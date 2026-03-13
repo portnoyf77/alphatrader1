@@ -7,6 +7,7 @@ import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
+import { cn } from '@/lib/utils';
 
 function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200, formatFn }: { target: number; prefix?: string; suffix?: string; duration?: number; formatFn?: (v: number) => string }) {
   const [val, setVal] = useState(0);
