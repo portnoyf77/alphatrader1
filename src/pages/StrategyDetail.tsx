@@ -263,7 +263,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How steady the returns are — higher means fewer big swings</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">How consistently this portfolio follows its stated strategy (0-100)</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
