@@ -1,6 +1,8 @@
 import { Portfolio, ChartDataPoint, Comment } from './types';
 
-export const mockStrategies: Portfolio[] = [
+export const mockPortfolios: Portfolio[] = [
+// Legacy alias
+export { mockPortfolios as mockStrategies };
   {
     id: '1',
     name: 'Sapphire-347',
