@@ -1,7 +1,7 @@
 import { Laptop, Heart, Globe, Zap, Shield, DollarSign, Gem, BarChart3, Leaf, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RiskLevel, GeoFocus } from '@/lib/types';
-import { getRiskGradient, getGemstoneForSector, getGemstoneColor } from '@/lib/portfolioNaming';
+import { getRiskGradient, riskToGem, getGemstoneColor } from '@/lib/portfolioNaming';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PortfolioThumbnailProps {
