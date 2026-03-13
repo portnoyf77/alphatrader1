@@ -9,7 +9,7 @@ const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/explore', label: 'Marketplace', icon: Store },
   { href: '/invest', label: 'Create', icon: Sparkles },
-  { href: '/alpha', label: 'Become an Alpha', icon: Gem },
+  { href: '/alpha', label: 'Become an Alpha', icon: Crown },
 ];
 
 export function Navbar() {

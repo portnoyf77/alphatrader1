@@ -56,8 +56,8 @@ const mockTestimonials = [
 ];
 
 const gemstoneColorMap: Record<string, { bg: string; text: string; border: string; icon: React.ElementType }> = {
-  Sapphire: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', icon: Gem },
-  Pearl: { bg: 'bg-slate-300/10', text: 'text-slate-300', border: 'border-slate-300/30', icon: Gem },
+  Sapphire: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', icon: Crown },
+  Pearl: { bg: 'bg-slate-300/10', text: 'text-slate-300', border: 'border-slate-300/30', icon: Crown },
   Ruby: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30', icon: Gem },
 };
 
