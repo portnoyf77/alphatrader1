@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { GemDot } from '@/components/GemDot';
-import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
+import { formatCurrency, formatPercent, mockPortfolios, getPortfoliosWithPendingUpdates } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
 import { useCountUp } from '@/hooks/useCountUp';
