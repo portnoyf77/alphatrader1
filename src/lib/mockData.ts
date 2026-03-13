@@ -425,7 +425,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    capacity_limit_usd: 6000000,
+    
     holdings: [
       { ticker: 'XLV', name: 'Health Care Select Sector SPDR', weight: 30, sector: 'Healthcare' },
       { ticker: 'IBB', name: 'iShares Biotechnology ETF', weight: 25, sector: 'Biotech' },
