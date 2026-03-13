@@ -200,8 +200,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Your own capital invested in portfolios you created
+              <TooltipContent className="text-xs max-w-[250px]">
+                Total capital invested in your own portfolios
               </TooltipContent>
             </Tooltip>
             <Tooltip>
