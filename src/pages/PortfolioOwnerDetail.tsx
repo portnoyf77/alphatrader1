@@ -467,7 +467,7 @@ export default function PortfolioOwnerDetail() {
               <DialogHeader>
                 <DialogTitle>Make Portfolio Public</DialogTitle>
                 <DialogDescription>
-                  Your portfolio will be visible in the marketplace. Other investors can discover and allocate to it.
+                  Your portfolio will be visible in the marketplace. Followers can discover and allocate to it.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4 space-y-4">
