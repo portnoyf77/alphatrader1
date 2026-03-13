@@ -441,6 +441,7 @@ export default function Dashboard() {
                         <TableHead className="text-right">Sim. Return</TableHead>
                         <TableHead className="text-right">Worst Drop</TableHead>
                         <TableHead className="text-right">Risk Level</TableHead>
+                        <TableHead className="w-8"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
