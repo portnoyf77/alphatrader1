@@ -239,8 +239,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Your total portfolio return compared to the S&P 500 over the same period
+              <TooltipContent className="text-xs max-w-[250px]">
+                Your total return compared to the S&P 500 index over the same period
               </TooltipContent>
             </Tooltip>
           </div>
