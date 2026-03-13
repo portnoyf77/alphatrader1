@@ -78,13 +78,13 @@ export function AlphaEarningsCalculator() {
             value={avgAllocation}
             onValueChange={setAvgAllocation}
             min={1000}
-            max={25000}
-            step={500}
+            max={100000}
+            step={1000}
             className="py-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$1,000</span>
-            <span>$25,000</span>
+            <span>$1K</span>
+            <span>$100K</span>
           </div>
         </div>
 

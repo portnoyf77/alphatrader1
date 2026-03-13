@@ -432,7 +432,7 @@ export default function StrategyDetail() {
                                   <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
                                     <div className="h-full bg-primary rounded-full" style={{ width: `${weight}%` }} />
                                   </div>
-                                  <span className="font-medium">{Math.round(weight)}%</span>
+                                  <span className="font-medium">{Math.round(weight as number)}%</span>
                                 </div>
                               </TableCell>
                             </TableRow>
