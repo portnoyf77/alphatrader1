@@ -50,7 +50,7 @@ export function DemoGate({ onAccessGranted }: DemoGateProps) {
             />
             {error && <p className="text-destructive text-xs">{error}</p>}
           </div>
-          <Button type="submit" className="w-full glow-primary">
+          <Button type="submit" className="w-full">
             Enter Demo
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>

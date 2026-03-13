@@ -6,22 +6,22 @@
 
 @layer base {
   :root {
-    --background: 240 20% 2%;
+    --background: 240 17% 1.5%;
     --foreground: 0 0% 100%;
 
-    --card: 240 18% 6%;
+    --card: 240 17% 3%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 240 18% 6%;
+    --popover: 240 17% 3%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 16% 16%;
+    --secondary: 240 12% 10%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 16% 16%;
+    --muted: 240 12% 10%;
     --muted-foreground: 220 10% 55%;
 
     --accent: 262 83% 58%;
@@ -36,8 +36,8 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 240 12% 20%;
-    --input: 240 12% 20%;
+    --border: 240 8% 12%;
+    --input: 240 8% 12%;
     --ring: 262 83% 58%;
 
     --radius: 0.75rem;
@@ -48,13 +48,13 @@
     --chart-4: 38 92% 50%;
     --chart-5: 0 72% 51%;
 
-    --sidebar-background: 240 20% 8%;
+    --sidebar-background: 240 17% 3%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 16% 16%;
+    --sidebar-accent: 240 12% 10%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 12% 20%;
+    --sidebar-border: 240 8% 12%;
     --sidebar-ring: 262 83% 58%;
 
     /* Font families */
@@ -69,22 +69,22 @@
   }
 
   .dark {
-    --background: 240 20% 2%;
+    --background: 240 17% 1.5%;
     --foreground: 0 0% 100%;
 
-    --card: 240 18% 6%;
+    --card: 240 17% 3%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 240 18% 6%;
+    --popover: 240 17% 3%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 16% 16%;
+    --secondary: 240 12% 10%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 16% 16%;
+    --muted: 240 12% 10%;
     --muted-foreground: 220 10% 55%;
 
     --accent: 262 83% 58%;
@@ -99,17 +99,17 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 240 12% 20%;
-    --input: 240 12% 20%;
+    --border: 240 8% 12%;
+    --input: 240 8% 12%;
     --ring: 262 83% 58%;
 
-    --sidebar-background: 240 20% 8%;
+    --sidebar-background: 240 17% 3%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 16% 16%;
+    --sidebar-accent: 240 12% 10%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 12% 20%;
+    --sidebar-border: 240 8% 12%;
     --sidebar-ring: 262 83% 58%;
   }
 }
@@ -191,29 +191,29 @@
   }
 
   .glass-card {
-    background: rgba(22, 22, 40, 0.6);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
 
   .glass-card:hover {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   }
 
   .glass-elevated {
-    background: rgba(26, 26, 46, 0.7);
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   .glass-tile {
-    background: rgba(22, 22, 40, 0.6);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -257,12 +257,18 @@
 
 /* Page transition */
 main > * {
-  animation: page-enter 0.3s ease-out;
+  animation: fadeUp 0.4s ease-out;
 }
 
 @keyframes page-enter {
-  0% { opacity: 0; transform: translateY(8px); }
+  0% { opacity: 0; transform: translateY(12px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Modal entrance animation */
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* Card hover states — clickable cards */
