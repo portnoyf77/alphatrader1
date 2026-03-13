@@ -125,9 +125,6 @@ export default function Explore() {
     setTurnoverFilter('all');
   };
 
-  const getBarColor = (name: string) => {
-    return getGemHex(name).color;
-  };
 
   const FilterContent = () => (
     <div className="space-y-4">
