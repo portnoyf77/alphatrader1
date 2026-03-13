@@ -289,69 +289,27 @@ export function generateStrategyNumber(riskLevel: RiskLevel): number {
 
 // Gemstone colors for animation
 export const gemstoneColors: Record<string, { primary: string; secondary: string; glow: string }> = {
+  Pearl:    { primary: '#cbd5e1', secondary: '#e2e8f0', glow: '#f1f5f9' },
   Sapphire: { primary: '#2563eb', secondary: '#3b82f6', glow: '#60a5fa' },
-  Emerald: { primary: '#059669', secondary: '#10b981', glow: '#34d399' },
-  Peridot: { primary: '#65a30d', secondary: '#84cc16', glow: '#a3e635' },
-  Topaz: { primary: '#d97706', secondary: '#f59e0b', glow: '#fbbf24' },
-  Ruby: { primary: '#dc2626', secondary: '#ef4444', glow: '#f87171' },
-  Onyx: { primary: '#374151', secondary: '#4b5563', glow: '#6b7280' },
-  Amber: { primary: '#b45309', secondary: '#d97706', glow: '#f59e0b' },
-  Diamond: { primary: '#a855f7', secondary: '#c084fc', glow: '#d8b4fe' },
-  Pearl: { primary: '#e5e7eb', secondary: '#f3f4f6', glow: '#ffffff' },
-  Opal: { primary: '#8b5cf6', secondary: '#a78bfa', glow: '#c4b5fd' },
+  Ruby:     { primary: '#be123c', secondary: '#e11d48', glow: '#fb7185' },
 };
 
 // Gemstone descriptions based on risk profile
 export const gemstoneDescriptions: Record<string, Record<string, string>> = {
-  Sapphire: {
-    Low: 'Sapphire reflects your steady, long-term vision — clarity and calm in your approach.',
-    Medium: 'Sapphire mirrors your balanced tech-forward strategy — precision with purpose.',
-    High: 'Sapphire captures your bold bet on innovation — deep conviction in technology.',
-  },
-  Emerald: {
-    Low: 'Emerald represents your patient approach to healthcare — steady growth with purpose.',
-    Medium: 'Emerald reflects your balanced healthcare thesis — resilience meets opportunity.',
-    High: 'Emerald embodies your ambitious healthcare conviction — high growth potential.',
-  },
-  Ruby: {
-    Low: 'Ruby reflects measured ambition — warmth without recklessness.',
-    Medium: 'Ruby captures your appetite for growth balanced with awareness of risk.',
-    High: 'Ruby reflects your high-risk, high-growth ambition.',
-  },
-  Diamond: {
-    Low: 'Diamond represents your broad, stable foundation — diversified and enduring.',
-    Medium: 'Diamond reflects your well-rounded strategy — strength through balance.',
-    High: 'Diamond captures your bold diversified conviction — aiming for brilliance.',
-  },
   Pearl: {
     Low: 'Pearl embodies your conservative approach — smooth, steady, and secure.',
     Medium: 'Pearl reflects your preference for stability with modest growth.',
     High: 'Pearl represents an unusual pairing — stability-seeking with aggressive returns.',
   },
-  Opal: {
-    Low: 'Opal reflects your global curiosity with a cautious approach.',
-    Medium: 'Opal captures your internationally diversified, balanced worldview.',
-    High: 'Opal embodies your adventurous global ambition — risk across borders.',
+  Sapphire: {
+    Low: 'Sapphire reflects your steady, long-term vision — clarity and calm in your approach.',
+    Medium: 'Sapphire mirrors your balanced strategy — precision with purpose.',
+    High: 'Sapphire captures your bold conviction — deep clarity in your approach.',
   },
-  Amber: {
-    Low: 'Amber reflects your income-focused, low-risk approach — warm and dependable.',
-    Medium: 'Amber captures your balanced income strategy — yield with growth.',
-    High: 'Amber represents aggressive income-seeking — maximizing yield at higher risk.',
-  },
-  Topaz: {
-    Low: 'Topaz reflects your cautious financial sector conviction — solid foundations.',
-    Medium: 'Topaz captures your balanced approach to financial growth.',
-    High: 'Topaz embodies your bold financial sector conviction — high-leverage ambition.',
-  },
-  Peridot: {
-    Low: 'Peridot reflects your patient commitment to clean energy — growth with values.',
-    Medium: 'Peridot captures your balanced approach to sustainable investing.',
-    High: 'Peridot embodies your aggressive clean energy conviction — green ambition.',
-  },
-  Onyx: {
-    Low: 'Onyx reflects your grounded, low-risk industrial strategy.',
-    Medium: 'Onyx captures your balanced industrial thesis — strength meets stability.',
-    High: 'Onyx embodies your aggressive industrial conviction — forged under pressure.',
+  Ruby: {
+    Low: 'Ruby reflects measured ambition — warmth without recklessness.',
+    Medium: 'Ruby captures your appetite for growth balanced with awareness of risk.',
+    High: 'Ruby reflects your high-risk, high-growth ambition — bold and decisive.',
   },
 };
 
