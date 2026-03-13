@@ -140,7 +140,7 @@ export default function Dashboard() {
                     <Settings className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Rebalancing settings</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Configure rebalancing mode: auto-apply or require approval</TooltipContent>
               </Tooltip>
             </div>
             <PendingUpdatesPanel strategies={strategiesWithPending} rebalancingMode={rebalancingMode} />
