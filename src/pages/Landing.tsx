@@ -101,7 +101,7 @@ export default function Landing() {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
-                    Number of unique investors currently following portfolios
+                    Number of unique followers currently allocating to portfolios
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
