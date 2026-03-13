@@ -106,9 +106,9 @@ export default function Explore() {
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Risk Levels</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Low">Conservative (Pearl)</SelectItem>
+            <SelectItem value="Medium">Moderate (Sapphire)</SelectItem>
+            <SelectItem value="High">Aggressive (Ruby)</SelectItem>
           </SelectContent>
         </Select>
       </div>
