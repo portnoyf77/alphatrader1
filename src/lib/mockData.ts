@@ -351,7 +351,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '7',
-    name: 'Diamond-127',
+    name: 'Pearl-127',
     creator_id: '@steady_returns',
     status: 'validated_listed',
     visibility_mode: 'transparent',
