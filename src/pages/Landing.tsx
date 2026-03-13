@@ -368,7 +368,7 @@ export default function Landing() {
                         +{portfolio.performance.return_30d.toFixed(1)}%
                       </span>
                     </span>
-                    <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       <Users className="h-3 w-3" />
                       {portfolio.followers_count.toLocaleString()}
                     </span>
