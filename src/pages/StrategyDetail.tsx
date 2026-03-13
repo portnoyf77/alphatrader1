@@ -23,17 +23,7 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 
-const gemstoneIcons: Record<string, React.ElementType> = {
-  'Sapphire': Gem,
-  'Emerald': Hexagon,
-  'Peridot': Pentagon,
-  'Amber': SquareIcon,
-  'Pearl': Circle,
-  'Opal': Octagon,
-  'Diamond': Diamond,
-  'Topaz': Triangle,
-  'Quartz': Gem,
-};
+// Removed old gemstone icon mapping — now uses GemDot component
 
 export default function StrategyDetail() {
   const { id } = useParams();
