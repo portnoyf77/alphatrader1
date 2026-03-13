@@ -155,25 +155,11 @@ export default function StrategyDetail() {
             </div>
 
             <div className="flex gap-3">
-              {isValidated && !isPaused ? (
+              {isValidated ? (
                 <Button onClick={() => setShowAllocateModal(true)} className="glow-primary">
                   <Users className="h-4 w-4 mr-2" />
                   Follow Portfolio
                 </Button>
-              ) : isPaused ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button disabled className="opacity-50 cursor-not-allowed">
-                        <Clock className="h-4 w-4 mr-2" />
-                        Capacity Reached
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs">
-                      New allocations are paused due to capacity limits.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               ) : (
                 <TooltipProvider>
                   <Tooltip>
