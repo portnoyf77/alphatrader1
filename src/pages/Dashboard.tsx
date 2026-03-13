@@ -140,7 +140,7 @@ export default function Dashboard() {
                     <Settings className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Rebalancing settings</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Configure rebalancing mode: auto-apply or require approval</TooltipContent>
               </Tooltip>
             </div>
             <PendingUpdatesPanel strategies={strategiesWithPending} rebalancingMode={rebalancingMode} />
@@ -166,8 +166,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Portfolios you've created — live ones are accepting investments
+              <TooltipContent className="text-xs max-w-[250px]">
+                Number of portfolios you've created (live and simulating)
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -183,8 +183,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Portfolios created by others that you've invested in
+              <TooltipContent className="text-xs max-w-[250px]">
+                Number of Alpha portfolios you're following
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -200,8 +200,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Your own capital invested in portfolios you created
+              <TooltipContent className="text-xs max-w-[250px]">
+                Total capital invested in your own portfolios
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -217,8 +217,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Combined value of all your investments
+              <TooltipContent className="text-xs max-w-[250px]">
+                Combined current value of all your investments
               </TooltipContent>
             </Tooltip>
             {/* vs S&P 500 tile */}
@@ -239,8 +239,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Your total portfolio return compared to the S&P 500 over the same period
+              <TooltipContent className="text-xs max-w-[250px]">
+                Your total return compared to the S&P 500 index over the same period
               </TooltipContent>
             </Tooltip>
           </div>
@@ -336,17 +336,44 @@ export default function Dashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">My Investment</TableHead>
-                      <TableHead className="text-right">30d Return</TableHead>
+                      <TableHead>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Status</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Current portfolio status: Live, Simulating, or Inactive</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                       <TableHead className="text-right">
-                        <TooltipProvider delayDuration={200}>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">My Investment</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Capital you've invested in this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
                             </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[240px]">
-                              Percentage of maximum follower allocation reached for this portfolio.
+                            <TooltipContent className="text-xs max-w-[250px]">
+                              Percentage of maximum follower allocation reached
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -363,9 +390,18 @@ export default function Dashboard() {
                           </Link>
                         </TableCell>
                         <TableCell>
-                          <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
-                            {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
-                          </span>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className={cn("px-2 py-1 rounded text-xs cursor-help", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
+                                  {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">
+                                {portfolio.status === 'validated_listed' ? 'This portfolio is actively invested with real capital' : portfolio.status === 'inactive' ? 'This portfolio has been liquidated and is no longer active' : 'This portfolio is running a live simulation with market data'}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
                         <TableCell className="text-right">
@@ -410,10 +446,38 @@ export default function Dashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
-                      <TableHead>Creator</TableHead>
-                      <TableHead className="text-right">30d Return</TableHead>
-                      <TableHead className="text-right">My Allocation</TableHead>
-                      <TableHead className="text-right">My Return</TableHead>
+                      <TableHead>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Creator</span></TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">The Alpha who manages this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span></TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">My Allocation</span></TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Capital you've allocated to this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">My Return</span></TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Your return since you started following this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -473,12 +537,40 @@ export default function Dashboard() {
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                       <TableRow>
                         <TableHead>Portfolio</TableHead>
-                        <TableHead>Sim. Duration</TableHead>
-                        <TableHead className="text-right">Sim. Return</TableHead>
-                        <TableHead className="text-right">Worst Drop</TableHead>
-                        <TableHead className="text-right">Risk Level</TableHead>
+                        <TableHead>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Sim. Duration</span></TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">Number of days this simulation has been running</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Sim. Return</span></TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">Simulated return since simulation started</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Worst Drop</span></TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">Largest peak-to-trough decline during simulation</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Risk Level</span></TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[250px]">Portfolio risk classification: Conservative, Moderate, or Aggressive</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableHead>
                         <TableHead className="w-8"></TableHead>
                       </TableRow>
                     </TableHeader>

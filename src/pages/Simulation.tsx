@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle, DollarSign, Play, Square, Timer } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -170,10 +171,19 @@ export default function Simulation() {
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-[10px] h-[10px] rounded-full",
-                  simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
-                )} />
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "w-[10px] h-[10px] rounded-full cursor-help",
+                        simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
+                      )} />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      {simulationState === 'running' ? 'Simulation is running — receiving live market data' : 'Simulation is paused'}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div>
                   <p className="font-semibold">
                     {simulationState === 'running' ? 'Live Simulation' : 'Simulation Paused'}
@@ -183,14 +193,26 @@ export default function Simulation() {
                     </span>
                   </p>
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Timer className="h-3 w-3" />
-                      Elapsed: {formatElapsed(elapsedSeconds)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
-                    </span>
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            <Timer className="h-3 w-3" />
+                            Elapsed: {formatElapsed(elapsedSeconds)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">Time since simulation started</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            <Clock className="h-3 w-3" />
+                            Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">Time remaining in your free trial</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
@@ -276,7 +298,7 @@ export default function Simulation() {
             value={formatPercent(liveReturn)}
             icon={liveReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             trend={liveReturn >= 0 ? 'up' : 'down'}
-            tooltip="Simulated portfolio return since start"
+            tooltip="Percentage return since simulation started"
           />
           <MetricCard
             label="Worst Drop"
@@ -289,7 +311,7 @@ export default function Simulation() {
             label="Sharpe Ratio"
             value={(liveReturn / Math.max(Math.abs(liveDrawdown) * 2 || 1, 0.01)).toFixed(2)}
             icon={<BarChart3 className="h-4 w-4" />}
-            tooltip="Risk-adjusted return — higher is better (return divided by volatility)"
+            tooltip="Risk-adjusted return — higher is better. Above 1.0 is considered good."
           />
           <MetricCard
             label="vs S&P 500"

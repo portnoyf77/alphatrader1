@@ -207,7 +207,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How much this portfolio gained or lost in the past 30 days</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -221,7 +221,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How many people have put money into this portfolio</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Number of people currently following this portfolio</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -235,7 +235,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">The creator's own money in this portfolio — shows they believe in it</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">How much of their own capital the Alpha has invested — their skin in the game</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -249,7 +249,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">Total money from all followers combined</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Total capital allocated by all followers</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -263,7 +263,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How steady the returns are — higher means fewer big swings</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">How consistently this portfolio follows its stated strategy (0-100)</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>

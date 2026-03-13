@@ -1,16 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 
-const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/explore', label: 'Marketplace', icon: Store },
-  { href: '/invest', label: 'Create', icon: Sparkles },
-  { href: '/alpha', label: 'Become an Alpha', icon: Crown },
+const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
+  { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
+  { href: '/invest', label: 'Create', icon: Sparkles, tooltip: 'Build a new portfolio with AI or manually' },
+  { href: '/alpha', label: 'Become an Alpha', icon: Crown, tooltip: 'Earn passive income from your portfolios' },
 ];
+
+const planTooltips: Record<string, string> = {
+  basic: 'You are on the Basic plan ($19.99/month)',
+  pro: 'You are on the Pro plan ($49.99/month)',
+};
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,64 +31,91 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(15,15,26,0.8)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.04)]">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
-              <Crown className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-lg font-bold">Alpha Trader</span>
-          </Link>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/" className="flex items-center gap-2 group">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                    <Crown className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-lg font-bold">Alpha Trader</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs">Alpha Trader — Home</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Only show nav links if authenticated */}
           {isAuthenticated && (
-            <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-[0.875rem] font-medium transition-all",
-                      "font-[var(--font-heading)]",
-                      location.pathname === link.href
-                        ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </div>
+            <TooltipProvider delayDuration={300}>
+              <div className="hidden md:flex items-center gap-1">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Tooltip key={link.href}>
+                      <TooltipTrigger asChild>
+                        <Link
+                          to={link.href}
+                          className={cn(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-[0.875rem] font-medium transition-all",
+                            "font-[var(--font-heading)]",
+                            location.pathname === link.href
+                              ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
+                              : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {link.label}
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">{link.tooltip}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
           )}
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-mono text-xs">{user.username}</span>
-                  {userPlan && (
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                      userPlan === 'pro' 
-                        ? "bg-primary/20 text-primary border border-primary/30" 
-                        : "bg-secondary text-muted-foreground border border-border"
-                    )}>
-                      {userPlan}
-                    </span>
-                  )}
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 cursor-default">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-mono text-xs">{user.username}</span>
+                        {userPlan && (
+                          <span className={cn(
+                            "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                            userPlan === 'pro' 
+                              ? "bg-primary/20 text-primary border border-primary/30" 
+                              : "bg-secondary text-muted-foreground border border-border"
+                          )}>
+                            {userPlan}
+                          </span>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      {userPlan ? planTooltips[userPlan] || 'Your account' : 'Your account'}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleLogout}
+                        className="gap-1.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">Sign out of Alpha Trader</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             ) : (
               <div className="flex items-center gap-2">

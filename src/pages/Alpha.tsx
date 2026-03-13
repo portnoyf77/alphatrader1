@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 // Mock: whether the current user meets Alpha requirements
@@ -135,7 +136,14 @@ export default function Alpha() {
             <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
               Build a portfolio, prove it in simulation, then publish it to the marketplace.
               When followers allocate to your portfolio, you earn{' '}
-              <span className="font-semibold text-primary">0.25% of their AUM annually</span>, paid monthly.
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-semibold text-primary cursor-help border-b border-dashed border-primary/40">0.25% of their AUM annually</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">You earn 0.25% of the total capital your followers allocate, calculated annually and paid monthly</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>, paid monthly.
             </p>
 
             <p className="text-muted-foreground mb-10 animate-fade-in">
@@ -197,7 +205,14 @@ export default function Alpha() {
                 <div className="flex justify-between items-center mb-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    Number of Followers
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help border-b border-dashed border-muted-foreground/40">Number of Followers</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs max-w-[250px]">Estimated number of followers for your portfolio</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </label>
                   <span className="text-2xl font-bold text-primary">{followers[0]}</span>
                 </div>
@@ -220,7 +235,14 @@ export default function Alpha() {
                 <div className="flex justify-between items-center mb-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    Avg. Allocation per Follower
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help border-b border-dashed border-muted-foreground/40">Avg. Allocation per Follower</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs max-w-[250px]">Average capital each follower allocates to your portfolio</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </label>
                   <span className="text-2xl font-bold text-primary">
                     ${avgAllocation[0].toLocaleString()}
@@ -242,18 +264,35 @@ export default function Alpha() {
 
               {/* Results */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Total AUM</p>
-                  <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Monthly Earnings</p>
-                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Annual Earnings</p>
-                  <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
-                </div>
+                <TooltipProvider delayDuration={300}>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Total AUM</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Assets Under Management — total capital allocated by all your followers</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Monthly Earnings</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Estimated monthly earnings based on 0.25% annual fee</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
+                  </div>
+                  <div className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Annual Earnings</p>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs max-w-[250px]">Estimated annual earnings based on 0.25% annual fee</TooltipContent>
+                    </Tooltip>
+                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
+                  </div>
+                </TooltipProvider>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
