@@ -121,7 +121,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '3',
-    name: 'Sapphire-872',
+    name: 'Ruby-872',
     creator_id: '@quant_trader',
     status: 'private',
     visibility_mode: 'transparent',
