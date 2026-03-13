@@ -191,7 +191,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'low',
-    capacity_limit_usd: 8000000,
+    
     holdings: [
       { ticker: 'SCHD', name: 'Schwab US Dividend Equity ETF', weight: 30, sector: 'Dividend' },
       { ticker: 'VYM', name: 'Vanguard High Dividend Yield ETF', weight: 25, sector: 'Dividend' },
