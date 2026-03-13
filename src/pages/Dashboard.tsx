@@ -321,7 +321,18 @@ export default function Dashboard() {
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">My Investment</TableHead>
                       <TableHead className="text-right">30d Return</TableHead>
-                      <TableHead className="text-right">Capacity</TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[240px]">
+                              Percentage of maximum follower allocation reached for this portfolio.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -346,13 +357,22 @@ export default function Dashboard() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                              <div className={cn("h-full rounded-full", (portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100, 100)}%` }} />
-                            </div>
-                            <span className="text-xs text-muted-foreground">{Math.round((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100)}%</span>
-                            {portfolio.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
-                          </div>
+                          <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center justify-end gap-2 cursor-help">
+                                  <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
+                                    <div className={cn("h-full rounded-full", (portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100, 100)}%` }} />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{Math.round((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100)}%</span>
+                                  {portfolio.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="text-xs">
+                                {formatCurrency(portfolio.allocated_amount_usd)} / {formatCurrency(portfolio.capacity_limit_usd)} allocated by followers
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                       </TableRow>
                     ))}
