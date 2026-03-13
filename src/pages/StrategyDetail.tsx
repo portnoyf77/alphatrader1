@@ -132,12 +132,11 @@ export default function StrategyDetail() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 {(() => {
-                  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
-                  const gemColors = getGemstoneColor(gemstone);
-                  const GemIcon = gemstoneIcons[gemstone] || Gem;
+                  const gemType = getGemFromName(strategy.name);
+                  const gemColors = getGemstoneColor(gemType);
                   return (
                     <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border", gemColors.bg, gemColors.border)}>
-                      <GemIcon className={cn("h-6 w-6", gemColors.text)} />
+                      <GemDot name={strategy.name} size={24} />
                     </div>
                   );
                 })()}
