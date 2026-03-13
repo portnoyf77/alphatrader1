@@ -66,7 +66,6 @@ export interface Portfolio {
   leverage_allowed: boolean;
   max_single_sector_exposure_pct: number;
   max_turnover: TurnoverLevel;
-  capacity_limit_usd: number;
   
   // Holdings (only shown if visibility_mode = 'transparent')
   holdings: Holding[];
