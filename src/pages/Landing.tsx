@@ -10,9 +10,9 @@ import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Landing() {
-  const validatedStrategies = mockStrategies.filter(s => s.status === 'validated_listed');
-  const totalAllocated = validatedStrategies.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
-  const totalFollowers = validatedStrategies.reduce((acc, s) => acc + s.followers_count, 0);
+  const validatedPortfolios = mockPortfolios.filter(s => s.status === 'validated_listed');
+  const totalAllocated = validatedPortfolios.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
+  const totalFollowers = validatedPortfolios.reduce((acc, s) => acc + s.followers_count, 0);
   
   return (
     <PageLayout showDisclaimer={true}>
