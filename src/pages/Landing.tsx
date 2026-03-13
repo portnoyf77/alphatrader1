@@ -166,7 +166,7 @@ export default function Landing() {
               {[
                 { label: 'CAPITAL ALLOCATED', target: totalAllocated, formatFn: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
                 { label: 'ACTIVE FOLLOWERS', target: totalFollowers, formatFn: (v: number) => v.toLocaleString() },
-                { label: 'ALPHA EARNINGS', target: totalEarnings, formatFn: (v: number) => `$${v.toLocaleString()}/mo` },
+                { label: 'ALPHA EARNINGS', target: totalEarnings, formatFn: (v: number) => `$${(v / 1e3).toFixed(0)}K/mo` },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p
