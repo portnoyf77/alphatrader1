@@ -207,7 +207,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">How much this portfolio gained or lost in the past 30 days</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
