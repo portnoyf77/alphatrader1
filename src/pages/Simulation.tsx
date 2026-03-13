@@ -156,7 +156,7 @@ export default function Simulation() {
               Back
             </Button>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{simulatedPortfolio.name}</h1>
+              <h1 className="text-3xl font-bold flex items-center gap-2"><GemDot name={simulatedPortfolio.name} size={10} />{simulatedPortfolio.name}</h1>
               <ValidationBadge status={validationState === 'validated' ? 'validated' : 'simulated'} />
             </div>
           </div>
