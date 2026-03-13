@@ -18,6 +18,7 @@ import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
 import Alpha from "./pages/Alpha";
 import NotFound from "./pages/NotFound";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 

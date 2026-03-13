@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, LucideIcon } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, HelpCircle, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
   { href: '/invest', label: 'Create', icon: Sparkles, tooltip: 'Build a new portfolio with AI or manually' },
   { href: '/alpha', label: 'Become an Alpha', icon: Crown, tooltip: 'Earn passive income from your portfolios' },
+  { href: '/faq', label: 'FAQ', icon: HelpCircle, tooltip: 'Frequently asked questions' },
 ];
 
 const planTooltips: Record<string, string> = {
@@ -26,6 +27,9 @@ export function Navbar() {
   const handleLogout = () => {
     logout();
   };
+
+  // Guest users only see FAQ link
+  const visibleLinks = isAuthenticated ? navLinks : navLinks.filter(l => l.href === '/faq');
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(15,15,26,0.8)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.04)]">
@@ -45,11 +49,11 @@ export function Navbar() {
             </Tooltip>
           </TooltipProvider>
 
-          {/* Only show nav links if authenticated */}
-          {isAuthenticated && (
+          {/* Nav links */}
+          {visibleLinks.length > 0 && (
             <TooltipProvider delayDuration={300}>
               <div className="hidden md:flex items-center gap-1">
-                {navLinks.map((link) => {
+                {visibleLinks.map((link) => {
                   const Icon = link.icon;
                   return (
                     <Tooltip key={link.href}>
@@ -140,8 +144,7 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
-              {/* Only show nav links if authenticated */}
-              {isAuthenticated && navLinks.map((link) => {
+              {visibleLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <Link

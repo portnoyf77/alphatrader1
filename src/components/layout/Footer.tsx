@@ -38,6 +38,9 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
             <Link to="/alpha" className="hover:text-foreground transition-colors whitespace-nowrap">
               Alpha
             </Link>
+            <Link to="/faq" className="hover:text-foreground transition-colors whitespace-nowrap">
+              FAQ
+            </Link>
           </div>
           
           <p className="text-sm text-muted-foreground">
