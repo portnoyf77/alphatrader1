@@ -6,7 +6,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { AlphaSpotlight } from '@/components/AlphaSpotlight';
 import { HowAlphasEarn } from '@/components/HowAlphasEarn';
 import { AlphaEarningsCalculator } from '@/components/AlphaEarningsCalculator';
-import { mockStrategies, formatCurrency, creatorStats } from '@/lib/mockData';
+import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Landing() {
