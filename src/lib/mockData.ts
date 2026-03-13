@@ -235,7 +235,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '5',
-    name: 'Ruby-412',
+    name: 'Sapphire-412',
     creator_id: '@macro_edge',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -295,7 +295,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '6',
-    name: 'Sapphire-756',
+    name: 'Ruby-756',
     creator_id: '@green_alpha',
     status: 'private',
     visibility_mode: 'transparent',
@@ -471,7 +471,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '9',
-    name: 'Pearl-385',
+    name: 'Sapphire-385',
     creator_id: '@value_seeker',
     status: 'validated_listed',
     visibility_mode: 'masked',
