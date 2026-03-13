@@ -309,7 +309,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    capacity_limit_usd: 3000000,
+    
     holdings: [
       { ticker: 'ICLN', name: 'iShares Global Clean Energy ETF', weight: 30, sector: 'Clean Energy' },
       { ticker: 'TAN', name: 'Invesco Solar ETF', weight: 20, sector: 'Solar' },
