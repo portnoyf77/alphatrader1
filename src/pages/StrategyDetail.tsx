@@ -249,7 +249,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">Total money from all followers combined</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">Total capital allocated by all followers</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
