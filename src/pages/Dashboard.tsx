@@ -373,6 +373,7 @@ export default function Dashboard() {
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
                       <TableHead>Creator</TableHead>
+                      <TableHead className="text-right">30d Return</TableHead>
                       <TableHead className="text-right">My Allocation</TableHead>
                       <TableHead className="text-right">My Return</TableHead>
                     </TableRow>
