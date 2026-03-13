@@ -265,7 +265,7 @@ export default function PortfolioOwnerDetail() {
               <>
                 <Card className="glass-card">
                   <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground mb-1">Investors</p>
+                    <p className="text-sm text-muted-foreground mb-1">Followers</p>
                     <p className="text-2xl font-bold flex items-center gap-2">
                       <Users className="h-5 w-5 text-muted-foreground" />
                       {portfolio.followers_count.toLocaleString()}
