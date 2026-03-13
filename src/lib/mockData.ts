@@ -176,7 +176,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '4',
-    name: 'Amber-108',
+    name: 'Pearl-108',
     creator_id: '@div_hunter',
     status: 'validated_listed',
     visibility_mode: 'transparent',
