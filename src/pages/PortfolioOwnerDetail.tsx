@@ -57,7 +57,7 @@ export default function PortfolioOwnerDetail() {
     }
   };
 
-  const portfolio = mockStrategies.find(s => s.id === id);
+  const portfolio = mockPortfolios.find(s => s.id === id);
 
   if (!portfolio) {
     return (

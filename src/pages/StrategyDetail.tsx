@@ -42,7 +42,7 @@ export default function StrategyDetail() {
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
 
-  const strategy = mockStrategies.find(s => s.id === id);
+  const strategy = mockPortfolios.find(s => s.id === id);
 
   if (!strategy) {
     return (
