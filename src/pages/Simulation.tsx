@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle, DollarSign, Play, Square, Timer } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -7,26 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
-import { ValidationBadge } from '@/components/ValidationBadge';
-import { formatPercent } from '@/lib/mockData';
+import { formatPercent, mockPortfolios } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
 import type { ValidationStatus } from '@/lib/types';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-
-// Mock simulation data
-const simulatedPortfolio = {
-  name: 'Ruby-872',
-  performance: {
-    return_30d: 4.2,
-    return_90d: 12.8,
-    max_drawdown: -8.5,
-    volatility: 15.2,
-    consistency_score: 78,
-  }
-};
 
 type ValidationState = 'pending' | 'submitting' | 'in_progress' | 'validated';
 type SimulationState = 'running' | 'stopped';
@@ -51,6 +38,7 @@ function formatCountdown(seconds: number): string {
 }
 
 export default function Simulation() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trialStartDate } = useMockAuth();
@@ -58,6 +46,20 @@ export default function Simulation() {
   const [validationState, setValidationState] = useState<ValidationState>('pending');
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
   const [chartData, setChartData] = useState<Array<{ time: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }>>([]);
+
+  // Look up portfolio by :id param
+  const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
+
+  // Redirect if portfolio not found, or not in simulating status
+  useEffect(() => {
+    if (!portfolio) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+    if (portfolio.status !== 'private') {
+      navigate(`/portfolio/${portfolio.id}`, { replace: true });
+    }
+  }, [portfolio, navigate]);
 
   // Compute elapsed from trialStartDate (real time elapsed since signup)
   const [now, setNow] = useState(Date.now());
@@ -98,12 +100,17 @@ export default function Simulation() {
           Portfolio: Math.round(last.Portfolio + portfolioDelta),
           'S&P 500': Math.round(last['S&P 500'] + sp500Delta),
           'Dow Jones': Math.round(last['Dow Jones'] + dowDelta),
-        }].slice(-120); // Keep last 120 points
+        }].slice(-120);
       });
     }, 2000);
 
     return () => clearInterval(interval);
   }, [simulationState, chartData.length]);
+
+  // If no portfolio found or wrong status, render nothing (redirect happens in useEffect)
+  if (!portfolio || portfolio.status !== 'private') {
+    return null;
+  }
 
   // Calculate live metrics from chart data
   const currentPortfolioValue = chartData.length > 0 ? chartData[chartData.length - 1].Portfolio : 100000;
@@ -144,7 +151,7 @@ export default function Simulation() {
     navigate('/dashboard');
   };
 
-  const { performance } = simulatedPortfolio;
+  const { performance } = portfolio;
 
   return (
     <PageLayout>
@@ -157,8 +164,14 @@ export default function Simulation() {
               Back
             </Button>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold flex items-center gap-2"><GemDot name={simulatedPortfolio.name} size={10} />{simulatedPortfolio.name}</h1>
-              <ValidationBadge status={validationState === 'validated' ? 'validated' : 'simulated'} />
+              <h1 className="text-3xl font-bold flex items-center gap-2"><GemDot name={portfolio.name} size={10} />{portfolio.name}</h1>
+              {/* ValidationBadge removed — using inline status */}
+              <span className={cn(
+                "px-2 py-1 rounded text-xs",
+                validationState === 'validated' ? "bg-success/20 text-success" : "bg-warning/20 text-warning"
+              )}>
+                {validationState === 'validated' ? 'Validated' : 'Simulating'}
+              </span>
             </div>
           </div>
         </div>
@@ -381,27 +394,32 @@ export default function Simulation() {
           </CardContent>
         </Card>
 
-        {/* Disclaimer */}
-        <p className="text-xs text-muted-foreground text-center">
-          Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
-        </p>
+        {/* Publish Confirmation Modal */}
+        <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
+          <DialogContent className="glass-card">
+            <DialogHeader>
+              <DialogTitle>Publish to Marketplace</DialogTitle>
+              <DialogDescription>
+                Your portfolio will be visible to all users. Followers can allocate capital to it, and you'll earn 0.25% of their AUM annually.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-success mt-0.5" />
+                <p className="text-sm">Your portfolio has passed validation requirements</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
+                <p className="text-sm text-muted-foreground">Publishing is permanent. You can unpublish later, but existing followers will need to be notified.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPublishModal(false)}>Cancel</Button>
+              <Button onClick={handlePublish} className="glow-primary">Confirm & Publish</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Publish Modal */}
-      <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
-        <DialogContent className="glass-card">
-          <DialogHeader>
-            <DialogTitle>Publish to Marketplace?</DialogTitle>
-            <DialogDescription>
-              Your portfolio will be visible to all users. Followers will mirror your trades automatically. If you exit your position, all followers will be automatically exited as well.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowPublishModal(false)}>Cancel</Button>
-            <Button onClick={handlePublish}>Confirm & Publish</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </PageLayout>
   );
 }

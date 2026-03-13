@@ -16,7 +16,7 @@ import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyRiskProfile } from '@/components/StrategyRiskProfile';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
-import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
+import { mockPortfolios, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -42,7 +42,7 @@ export default function StrategyDetail() {
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
 
-  const strategy = mockStrategies.find(s => s.id === id);
+  const strategy = mockPortfolios.find(s => s.id === id);
 
   if (!strategy) {
     return (
@@ -423,7 +423,7 @@ export default function StrategyDetail() {
                             return acc;
                           }, {})
                         )
-                          .sort(([, a], [, b]) => b - a)
+                          .sort(([, a], [, b]) => (b as number) - (a as number))
                           .map(([sector, weight]) => (
                             <TableRow key={sector}>
                               <TableCell className="font-medium">{sector}</TableCell>
@@ -432,7 +432,7 @@ export default function StrategyDetail() {
                                   <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
                                     <div className="h-full bg-primary rounded-full" style={{ width: `${weight}%` }} />
                                   </div>
-                                  <span className="font-medium">{Math.round(weight)}%</span>
+                                  <span className="font-medium">{Math.round(weight as number)}%</span>
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -492,8 +492,8 @@ export default function StrategyDetail() {
                           { label: 'Annualized Volatility', value: `${strategy.performance.volatility.toFixed(1)}%` },
                           { label: 'Sharpe Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility, 1) * 3.46).toFixed(2) },
                           { label: 'Sortino Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility * 0.7, 1) * 3.46).toFixed(2) },
-                          { label: 'Beta vs S&P 500', value: (0.6 + Math.random() * 0.8).toFixed(2) },
-                          { label: 'Worst Drop Duration', value: `${Math.floor(Math.random() * 30) + 5} days` },
+                          { label: 'Beta vs S&P 500', value: (0.6 + (strategy.performance.volatility / 30) * 0.8).toFixed(2) },
+                          { label: 'Worst Drop Duration', value: `${Math.max(5, Math.round(Math.abs(strategy.performance.max_drawdown) * 1.5))} days` },
                         ].map((metric) => (
                           <div key={metric.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                             <span className="text-sm text-muted-foreground">{metric.label}</span>

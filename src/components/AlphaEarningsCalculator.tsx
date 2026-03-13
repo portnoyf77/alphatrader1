@@ -6,8 +6,8 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
 export function AlphaEarningsCalculator() {
-  const [followers, setFollowers] = useState([500]);
-  const [avgAllocation, setAvgAllocation] = useState([5000]);
+  const [followers, setFollowers] = useState([50]);
+  const [avgAllocation, setAvgAllocation] = useState([10000]);
 
   // Alpha earns 0.25% of follower AUM annually, platform takes 0.25%
   const totalAllocated = followers[0] * avgAllocation[0];
@@ -45,14 +45,14 @@ export function AlphaEarningsCalculator() {
           <Slider
             value={followers}
             onValueChange={setFollowers}
-            min={100}
-            max={5000}
-            step={100}
+            min={1}
+            max={500}
+            step={1}
             className="py-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>100</span>
-            <span>5,000</span>
+            <span>1</span>
+            <span>500</span>
           </div>
         </div>
 
@@ -78,13 +78,13 @@ export function AlphaEarningsCalculator() {
             value={avgAllocation}
             onValueChange={setAvgAllocation}
             min={1000}
-            max={25000}
-            step={500}
+            max={100000}
+            step={1000}
             className="py-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$1,000</span>
-            <span>$25,000</span>
+            <span>$1K</span>
+            <span>$100K</span>
           </div>
         </div>
 

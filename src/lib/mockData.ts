@@ -1,6 +1,6 @@
 import { Portfolio, ChartDataPoint, Comment } from './types';
 
-export const mockStrategies: Portfolio[] = [
+export const mockPortfolios: Portfolio[] = [
   {
     id: '1',
     name: 'Sapphire-347',
@@ -693,30 +693,36 @@ export const mockStrategies: Portfolio[] = [
   },
 ];
 
+// Legacy aliases for backward compatibility
+export const mockStrategies = mockPortfolios;
+
 // Get only validated and listed portfolios for marketplace
 export const getValidatedStrategies = () => 
-  mockStrategies.filter(s => 
+  mockPortfolios.filter(s => 
     s.validation_status === 'validated' && 
     s.validation_criteria_met && 
     s.status === 'validated_listed'
   );
 
+export const getValidatedPortfolios = getValidatedStrategies;
+
 // Get portfolios with pending updates (for follower dashboard)
 export const getStrategiesWithPendingUpdates = () =>
-  mockStrategies.filter(s => s.pending_update !== undefined);
+  mockPortfolios.filter(s => s.pending_update !== undefined);
+
+export const getPortfoliosWithPendingUpdates = getStrategiesWithPendingUpdates;
 
 // Aggregate Alpha stats
 export const creatorStats = {
-  totalCreatorEarnings30d: mockStrategies.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0),
-  // Total Alpha earnings to date (simulated as ~6 months of cumulative earnings)
-  totalAlphaEarnings: mockStrategies.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) * 6,
-  topCreatorEarnings: Math.max(...mockStrategies.map(s => s.creator_est_monthly_earnings_usd)),
+  totalCreatorEarnings30d: mockPortfolios.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0),
+  totalAlphaEarnings: mockPortfolios.reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) * 6,
+  topCreatorEarnings: Math.max(...mockPortfolios.map(s => s.creator_est_monthly_earnings_usd)),
   avgEarningsPerStrategy: Math.round(
-    mockStrategies.filter(s => s.status === 'validated_listed').reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) / 
-    mockStrategies.filter(s => s.status === 'validated_listed').length
+    mockPortfolios.filter(s => s.status === 'validated_listed').reduce((acc, s) => acc + s.creator_est_monthly_earnings_usd, 0) / 
+    mockPortfolios.filter(s => s.status === 'validated_listed').length
   ),
-  totalCreators: new Set(mockStrategies.map(s => s.creator_id)).size,
-  totalCreatorInvestment: mockStrategies.reduce((acc, s) => acc + s.creator_investment, 0),
+  totalCreators: new Set(mockPortfolios.map(s => s.creator_id)).size,
+  totalCreatorInvestment: mockPortfolios.reduce((acc, s) => acc + s.creator_investment, 0),
 };
 
 // Mock earnings history for dashboard charts

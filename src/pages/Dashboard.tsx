@@ -13,18 +13,23 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { GemDot } from '@/components/GemDot';
-import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
+import { formatCurrency, formatPercent, mockPortfolios, getPortfoliosWithPendingUpdates } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
 import { useCountUp } from '@/hooks/useCountUp';
 
 // My portfolios (ones I created)
-const myPortfolios = mockStrategies.slice(0, 4);
-// Portfolios I've invested in
-const investedPortfolios = mockStrategies.slice(4, 7).map(p => ({
+const myPortfolios = mockPortfolios.slice(0, 4);
+// Portfolios I've invested in — hardcoded values per portfolio
+const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
+  '5': { myAllocation: 38000, myReturn: -4.8 },  // Sapphire-412
+  '6': { myAllocation: 33000, myReturn: 0.0 },    // Ruby-756
+  '7': { myAllocation: 33000, myReturn: 5.0 },    // Pearl-127
+};
+const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
   ...p,
-  myAllocation: Math.round(Math.random() * 50000) + 5000,
-  myReturn: (Math.random() - 0.3) * 20,
+  myAllocation: investedPortfolioData[p.id]?.myAllocation ?? 25000,
+  myReturn: investedPortfolioData[p.id]?.myReturn ?? 0,
 }));
 // Simulating portfolios
 const simulatingPortfolios = myPortfolios.filter(p => p.status === 'private');
@@ -117,7 +122,7 @@ export default function Dashboard() {
   const animTotalValue = useCountUp(totalMyInvestment + totalInvestedInOthers, 800);
   const animVsSP500 = useCountUp(vsSP500, 800, 1);
 
-  const strategiesWithPending = getStrategiesWithPendingUpdates();
+  const strategiesWithPending = getPortfoliosWithPendingUpdates();
 
   return (
     <PageLayout>
@@ -584,7 +589,7 @@ export default function Dashboard() {
                             </Link>
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {Math.floor(Math.random() * 25) + 5} days
+                            19 days
                           </TableCell>
                           <TableCell className="text-right">
                             <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>

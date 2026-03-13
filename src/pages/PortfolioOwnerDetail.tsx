@@ -15,7 +15,7 @@ import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyControls } from '@/components/StrategyControls';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { mockStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
+import { mockPortfolios, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -57,7 +57,7 @@ export default function PortfolioOwnerDetail() {
     }
   };
 
-  const portfolio = mockStrategies.find(s => s.id === id);
+  const portfolio = mockPortfolios.find(s => s.id === id);
 
   if (!portfolio) {
     return (

@@ -6,13 +6,13 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { AlphaSpotlight } from '@/components/AlphaSpotlight';
 import { HowAlphasEarn } from '@/components/HowAlphasEarn';
 import { AlphaEarningsCalculator } from '@/components/AlphaEarningsCalculator';
-import { mockStrategies, formatCurrency, creatorStats } from '@/lib/mockData';
+import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Landing() {
-  const validatedStrategies = mockStrategies.filter(s => s.status === 'validated_listed');
-  const totalAllocated = validatedStrategies.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
-  const totalFollowers = validatedStrategies.reduce((acc, s) => acc + s.followers_count, 0);
+  const validatedPortfolios = mockPortfolios.filter(s => s.status === 'validated_listed');
+  const totalAllocated = validatedPortfolios.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
+  const totalFollowers = validatedPortfolios.reduce((acc, s) => acc + s.followers_count, 0);
   
   return (
     <PageLayout showDisclaimer={true}>
@@ -233,7 +233,7 @@ export default function Landing() {
       </section>
 
       {/* Alpha Spotlight Section */}
-      <AlphaSpotlight strategies={validatedStrategies} />
+      <AlphaSpotlight strategies={validatedPortfolios} />
 
       {/* How Alphas Earn Section */}
       <HowAlphasEarn />
@@ -326,7 +326,7 @@ export default function Landing() {
                 Build and publish your first portfolio today.
               </p>
               <Button asChild size="lg" className="w-full glow-primary">
-                <Link to="/alpha">
+                <Link to="/signup">
                   Become an Alpha
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
