@@ -135,7 +135,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 50,
     max_turnover: 'high',
-    capacity_limit_usd: 2000000,
+    
     holdings: [
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
       { ticker: 'SMH', name: 'VanEck Semiconductor ETF', weight: 25, sector: 'Semiconductors' },
