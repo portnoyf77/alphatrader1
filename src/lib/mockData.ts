@@ -250,7 +250,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'medium',
-    capacity_limit_usd: 15000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 25, sector: 'International' },
