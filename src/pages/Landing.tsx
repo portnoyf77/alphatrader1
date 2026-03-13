@@ -346,7 +346,7 @@ export default function Landing() {
                     <span className="flex items-center gap-1">
                       <TrendingUp className="h-3 w-3 text-success" />
                       <span className="text-success font-mono font-medium">
-                        +{portfolio.return_30d_pct.toFixed(1)}%
+                        +{portfolio.performance.return_30d.toFixed(1)}%
                       </span>
                     </span>
                     <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
