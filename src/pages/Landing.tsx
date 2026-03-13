@@ -327,7 +327,7 @@ export default function Landing() {
             >
               Top earning Alphas
             </h2>
-            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Real portfolios. Real returns. Real earnings.
             </p>
           </div>
