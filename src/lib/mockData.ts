@@ -471,7 +471,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '9',
-    name: 'Citrine-385',
+    name: 'Pearl-385',
     creator_id: '@value_seeker',
     status: 'validated_listed',
     visibility_mode: 'masked',
