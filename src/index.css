@@ -653,3 +653,32 @@ table .font-mono {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Landing page hero animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orbDrift1 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(3%, -2%); }
+  66% { transform: translate(-2%, 1%); }
+}
+
+@keyframes orbDrift2 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-2%, 3%); }
+  66% { transform: translate(2%, -1%); }
+}
+
+@keyframes orbDrift3 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(4%, 2%); }
+  66% { transform: translate(-3%, -2%); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
