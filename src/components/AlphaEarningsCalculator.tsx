@@ -45,14 +45,14 @@ export function AlphaEarningsCalculator() {
           <Slider
             value={followers}
             onValueChange={setFollowers}
-            min={100}
-            max={5000}
-            step={100}
+            min={1}
+            max={500}
+            step={1}
             className="py-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>100</span>
-            <span>5,000</span>
+            <span>1</span>
+            <span>500</span>
           </div>
         </div>
 
