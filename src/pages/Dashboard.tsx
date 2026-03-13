@@ -212,61 +212,6 @@ export default function Dashboard() {
           </div>
         </TooltipProvider>
 
-        {/* Benchmark Comparison Chart */}
-        <Card className="glass-card mb-8">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg">Performance vs Benchmarks</CardTitle>
-            <div className="flex gap-1 bg-[rgba(255,255,255,0.03)] p-1 rounded-xl">
-              {(['30D', '90D', 'YTD', '1Y'] as const).map((tf) => (
-                <button
-                  key={tf}
-                  onClick={() => setBenchmarkTimeframe(tf)}
-                  className={cn(
-                    "px-3.5 py-1.5 rounded-lg text-[0.8125rem] font-semibold font-heading transition-all duration-150 border",
-                    benchmarkTimeframe === tf
-                      ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-white border-primary/30 shadow-[0_2px_8px_rgba(124,58,237,0.25)]"
-                      : "text-[rgba(255,255,255,0.55)] border-transparent hover:bg-[rgba(255,255,255,0.04)] hover:text-[rgba(255,255,255,0.92)]"
-                  )}
-                >
-                  {tf}
-                </button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={benchmarkDataSets[benchmarkTimeframe]} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="sp500Fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
-                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                  <YAxis domain={[(dataMin: number) => Math.floor((dataMin - 5000) / 1000) * 1000, (dataMax: number) => Math.ceil((dataMax + 5000) / 1000) * 1000]} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                  <RechartsTooltip
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
-                  />
-                  <Legend />
-                  <Area type="monotone" dataKey="My Portfolio" fill="url(#portfolioFill)" stroke="none" />
-                  <Area type="monotone" dataKey="S&P 500" fill="url(#sp500Fill)" stroke="none" />
-                   <Line type="monotone" dataKey="My Portfolio" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
-                   <Line type="monotone" dataKey="S&P 500" stroke="hsl(var(--success))" strokeWidth={2.5} dot={false} strokeDasharray="4 4" />
-                   <Line type="monotone" dataKey="Dow Jones" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} strokeDasharray="2 2" opacity={0.5} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Tabbed Portfolio Lists — 3 tabs */}
         <Tabs defaultValue="my-portfolios" className="mb-8">
           <TabsList className="mb-6">
