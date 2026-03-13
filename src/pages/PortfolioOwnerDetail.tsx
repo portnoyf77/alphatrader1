@@ -173,7 +173,7 @@ export default function PortfolioOwnerDetail() {
     setShowMakePublicModal(false);
     toast({
       title: "Portfolio is now public",
-      description: "Your portfolio is visible in the marketplace. Investors can now allocate to it.",
+      description: "Your portfolio is visible in the marketplace. Followers can now allocate to it.",
     });
   };
 
