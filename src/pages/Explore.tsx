@@ -12,12 +12,25 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
 import { GemDot } from '@/components/GemDot';
 import { MarketplaceHelpButton } from '@/components/MarketplaceHelpModal';
+import { TopPerformerCard } from '@/components/TopPerformerCard';
 import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+
+// Hardcoded time-period returns for ranking shifts
+const timeReturns: Record<string, Record<ChartTimeframe, number>> = {
+  'Ruby-891':      { '30D': 6.2, '90D': 12.8, 'YTD': 18.1, '1Y': 21.5 },
+  'Sapphire-347':  { '30D': 4.2, '90D': 13.3, 'YTD': 22.7, '1Y': 28.2 },
+  'Sapphire-489':  { '30D': 3.4, '90D': 8.9,  'YTD': 12.4, '1Y': 16.8 },
+  'Sapphire-412':  { '30D': 2.9, '90D': 10.7, 'YTD': 19.2, '1Y': 26.1 },
+  'Sapphire-385':  { '30D': 2.1, '90D': 7.2,  'YTD': 11.8, '1Y': 15.3 },
+  'Pearl-142':     { '30D': 1.8, '90D': 6.8,  'YTD': 13.2, '1Y': 24.7 },
+  'Pearl-217':     { '30D': 1.5, '90D': 4.9,  'YTD': 8.1,  '1Y': 12.4 },
+  'Pearl-108':     { '30D': 1.2, '90D': 5.1,  'YTD': 10.5, '1Y': 22.2 },
+  'Pearl-127':     { '30D': 0.8, '90D': 3.2,  'YTD': 6.8,  '1Y': 10.5 },
+};
 
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
@@ -45,29 +58,26 @@ export default function Explore() {
 
   const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
 
-  // Return key based on timeframe
-  const getReturnForTimeframe = (strategy: any, tf: ChartTimeframe) => {
-    switch (tf) {
-      case '30D': return strategy.performance.return_30d;
-      case '90D': return strategy.performance.return_90d;
-      case 'YTD': return strategy.performance.return_90d * 1.2; // simulated
-      case '1Y': return strategy.performance.return_90d * 2.5; // simulated
-      default: return strategy.performance.return_30d;
-    }
+  // Get return for a portfolio at the selected timeframe using hardcoded data
+  const getReturnForTimeframe = (portfolio: any, tf: ChartTimeframe) => {
+    const returns = timeReturns[portfolio.name];
+    if (returns) return returns[tf];
+    return portfolio.performance.return_30d;
   };
 
-  // Top 5 strategies by return for selected timeframe
-  const leaderboardData = useMemo(() => {
+  // Top 5 portfolios by return for selected timeframe
+  const topPerformers = useMemo(() => {
     return [...validatedStrategies]
       .sort((a, b) => getReturnForTimeframe(b, chartTimeframe) - getReturnForTimeframe(a, chartTimeframe))
-      .slice(0, 5)
-      .map((strategy) => ({
-        name: strategy.name,
-        id: strategy.id,
-        returnValue: Number(getReturnForTimeframe(strategy, chartTimeframe).toFixed(1)),
-        riskAdjusted: (strategy.performance.return_90d / strategy.performance.volatility).toFixed(2),
-      }));
+      .slice(0, 5);
   }, [validatedStrategies, chartTimeframe]);
+
+  const timeLabels: Record<ChartTimeframe, string> = {
+    '30D': '30d return',
+    '90D': '90d return',
+    'YTD': 'YTD return',
+    '1Y': '1Y return',
+  };
 
   // Alpha leaderboard ranking by composite score
   const alphaLeaderboard = useMemo(() => {
@@ -112,9 +122,6 @@ export default function Explore() {
     setTurnoverFilter('all');
   };
 
-  const getBarColor = (name: string) => {
-    return getGemHex(name).color;
-  };
 
   const FilterContent = () => (
     <div className="space-y-4">
@@ -183,18 +190,6 @@ export default function Explore() {
     </div>
   );
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium text-sm">{payload[0].payload.name}</p>
-          <p className="text-xs text-muted-foreground">Return: <span className="text-success font-medium">{payload[0].value.toFixed(1)}%</span></p>
-          <p className="text-xs text-muted-foreground">Risk-Adjusted: <span className="text-primary font-medium">{payload[0].payload.riskAdjusted}</span></p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <PageLayout>
@@ -241,7 +236,7 @@ export default function Explore() {
           </TabsList>
 
           <TabsContent value="all-portfolios">
-            {/* Top Performers Bar Chart */}
+            {/* Top Performers Cards */}
             <Card className="mb-8 bg-card/50 border-border/50">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -255,9 +250,9 @@ export default function Explore() {
                         key={tf}
                         onClick={() => setChartTimeframe(tf)}
                         className={cn(
-                          "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                          "px-3 py-1 rounded-full text-xs font-medium transition-all",
                           chartTimeframe === tf
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-primary-foreground shadow-[0_2px_8px_rgba(124,58,237,0.3)]"
                             : "text-muted-foreground hover:bg-secondary"
                         )}
                       >
@@ -271,69 +266,16 @@ export default function Explore() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={leaderboardData}
-                      layout="vertical"
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.id) {
-                          navigate(`/portfolio/${data.activePayload[0].payload.id}`);
-                        }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        width={120} 
-                        stroke="hsl(var(--muted-foreground))" 
-                        fontSize={12}
-                        tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
-                        tick={({ x, y, payload }: any) => {
-                          const entry = leaderboardData.find(d => d.name === payload.value);
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              dy={4}
-                              textAnchor="end"
-                              fill="hsl(var(--muted-foreground))"
-                              fontSize={12}
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => entry && navigate(`/portfolio/${entry.id}`)}
-                            >
-                              {payload.value.length > 15 ? `${payload.value.slice(0, 15)}...` : payload.value}
-                            </text>
-                          );
-                        }}
-                      />
-                      <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
-                      <Bar dataKey="returnValue" radius={[0, 4, 4, 0]}>
-                        {leaderboardData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={getBarColor(entry.name)}
-                            className="cursor-pointer hover:brightness-115"
-                            style={{ filter: 'brightness(1)', transition: 'filter 0.2s' }}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {leaderboardData.map((strategy) => (
-                    <Link 
-                      key={strategy.id}
-                      to={`/portfolio/${strategy.id}`}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
-                    >
-                      <GemDot name={strategy.name} size={6} />
-                      <span className="text-foreground">{strategy.name}</span>
-                    </Link>
+                <div className="flex gap-3 overflow-x-auto pb-2 md:overflow-visible">
+                  {topPerformers.map((portfolio, index) => (
+                    <TopPerformerCard
+                      key={`${chartTimeframe}-${portfolio.id}`}
+                      portfolio={portfolio}
+                      rank={index + 1}
+                      returnValue={getReturnForTimeframe(portfolio, chartTimeframe)}
+                      timeLabel={timeLabels[chartTimeframe]}
+                      isAnimating
+                    />
                   ))}
                 </div>
               </CardContent>
