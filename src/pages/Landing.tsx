@@ -8,7 +8,7 @@ import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
 
-function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200 }: { target: number; prefix?: string; suffix?: string; duration?: number }) {
+function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200, formatFn }: { target: number; prefix?: string; suffix?: string; duration?: number; formatFn?: (v: number) => string }) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
@@ -31,7 +31,8 @@ function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200 }: 
     return () => obs.disconnect();
   }, [target, duration]);
 
-  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>;
+  const display = formatFn ? formatFn(val) : `${prefix}${val.toLocaleString()}${suffix}`;
+  return <span ref={ref}>{display}</span>;
 }
 
 export default function Landing() {
@@ -161,22 +162,21 @@ export default function Landing() {
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div className="container mx-auto px-4 py-14">
           <div className="flex justify-center">
-            <div className="grid grid-cols-3 gap-6 md:gap-20 max-w-3xl w-full">
+            <div className="grid grid-cols-3 gap-4 md:gap-20 max-w-3xl w-full">
               {[
-                { label: 'CAPITAL ALLOCATED', target: totalAllocated, prefix: '$', suffix: '', format: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
-                { label: 'ACTIVE FOLLOWERS', target: totalFollowers, prefix: '', suffix: '' },
-                { label: 'ALPHA EARNINGS', target: totalEarnings, prefix: '$', suffix: '/mo' },
+                { label: 'CAPITAL ALLOCATED', target: totalAllocated, formatFn: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
+                { label: 'ACTIVE FOLLOWERS', target: totalFollowers, formatFn: (v: number) => v.toLocaleString() },
+                { label: 'ALPHA EARNINGS', target: totalEarnings, formatFn: (v: number) => `$${(v / 1e3).toFixed(0)}K/mo` },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p
-                    className="font-mono font-bold tabular-nums"
-                    style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                    className="font-mono font-bold tabular-nums text-xl sm:text-2xl md:text-[2.5rem]"
                   >
-                    <CountUpOnScroll target={stat.target} prefix={stat.prefix} suffix={stat.suffix} />
+                    <CountUpOnScroll target={stat.target} formatFn={stat.formatFn} />
                   </p>
                   <p
-                    className="mt-2 uppercase tracking-[0.05em]"
-                    style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}
+                    className="mt-2 uppercase tracking-[0.05em] text-[0.65rem] sm:text-[0.8rem]"
+                    style={{ color: 'rgba(255,255,255,0.35)' }}
                   >
                     {stat.label}
                   </p>
