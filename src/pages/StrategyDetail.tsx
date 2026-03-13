@@ -559,7 +559,7 @@ export default function StrategyDetail() {
           <Dialog open={showAllocateModal} onOpenChange={setShowAllocateModal}>
             <DialogContent className="glass-elevated">
               <DialogHeader>
-                <DialogTitle>Allocate to {strategy.name}</DialogTitle>
+                <DialogTitle>Follow {strategy.name}</DialogTitle>
                 <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">

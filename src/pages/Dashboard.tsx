@@ -403,24 +403,6 @@ export default function Dashboard() {
                             {formatPercent(portfolio.performance.return_30d)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <TooltipProvider delayDuration={200}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center justify-end gap-2 cursor-help">
-                                  <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                                    <div className={cn("h-full rounded-full", (portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100, 100)}%` }} />
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{Math.round((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100)}%</span>
-                                  {portfolio.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="text-xs">
-                                {formatCurrency(portfolio.allocated_amount_usd)} / {formatCurrency(portfolio.capacity_limit_usd)} allocated by followers
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

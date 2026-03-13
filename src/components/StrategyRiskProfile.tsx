@@ -99,51 +99,6 @@ export function StrategyRiskProfile({ strategy }: StrategyRiskProfileProps) {
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="p-3 rounded-lg bg-secondary/50 cursor-help">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                    <Shield className="h-4 w-4" />
-                    Capacity
-                  </div>
-                  <p className="font-semibold">
-                    ${(strategy.capacity_limit_usd / 1000000).toFixed(0)}M
-                  </p>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[200px]">
-                Maximum total capital this portfolio can manage before new allocations are paused
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          {/* Capacity Utilization Bar */}
-          <div className="pt-4 border-t border-border/50">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Capacity Utilization</span>
-              <span className="font-medium">
-                {Math.round((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100)}%
-              </span>
-            </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full rounded-full transition-all",
-                  (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.9 
-                    ? "bg-destructive" 
-                    : (strategy.allocated_amount_usd / strategy.capacity_limit_usd) > 0.7
-                      ? "bg-warning"
-                      : "bg-primary"
-                )}
-                style={{ width: `${Math.min((strategy.allocated_amount_usd / strategy.capacity_limit_usd) * 100, 100)}%` }}
-              />
-            </div>
-            {strategy.new_allocations_paused && (
-              <p className="text-xs text-warning mt-2 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" />
-                New allocations are currently paused due to capacity limits
-              </p>
-            )}
           </div>
         </TooltipProvider>
       </CardContent>
