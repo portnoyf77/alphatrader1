@@ -15,7 +15,7 @@ import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { GemDot } from '@/components/GemDot';
 import { formatCurrency, formatPercent, mockPortfolios, getPortfoliosWithPendingUpdates } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
+
 import { useCountUp } from '@/hooks/useCountUp';
 
 // My portfolios (ones I created)
