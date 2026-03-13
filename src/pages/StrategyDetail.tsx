@@ -423,7 +423,7 @@ export default function StrategyDetail() {
                             return acc;
                           }, {})
                         )
-                          .sort(([, a], [, b]) => b - a)
+                          .sort(([, a], [, b]) => (b as number) - (a as number))
                           .map(([sector, weight]) => (
                             <TableRow key={sector}>
                               <TableCell className="font-medium">{sector}</TableCell>
