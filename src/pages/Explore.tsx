@@ -12,12 +12,25 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
 import { GemDot } from '@/components/GemDot';
 import { MarketplaceHelpButton } from '@/components/MarketplaceHelpModal';
+import { TopPerformerCard } from '@/components/TopPerformerCard';
 import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+
+// Hardcoded time-period returns for ranking shifts
+const timeReturns: Record<string, Record<ChartTimeframe, number>> = {
+  'Ruby-891':      { '30D': 6.2, '90D': 12.8, 'YTD': 18.1, '1Y': 21.5 },
+  'Sapphire-347':  { '30D': 4.2, '90D': 13.3, 'YTD': 22.7, '1Y': 28.2 },
+  'Sapphire-489':  { '30D': 3.4, '90D': 8.9,  'YTD': 12.4, '1Y': 16.8 },
+  'Sapphire-412':  { '30D': 2.9, '90D': 10.7, 'YTD': 19.2, '1Y': 26.1 },
+  'Sapphire-385':  { '30D': 2.1, '90D': 7.2,  'YTD': 11.8, '1Y': 15.3 },
+  'Pearl-142':     { '30D': 1.8, '90D': 6.8,  'YTD': 13.2, '1Y': 24.7 },
+  'Pearl-217':     { '30D': 1.5, '90D': 4.9,  'YTD': 8.1,  '1Y': 12.4 },
+  'Pearl-108':     { '30D': 1.2, '90D': 5.1,  'YTD': 10.5, '1Y': 22.2 },
+  'Pearl-127':     { '30D': 0.8, '90D': 3.2,  'YTD': 6.8,  '1Y': 10.5 },
+};
 
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
