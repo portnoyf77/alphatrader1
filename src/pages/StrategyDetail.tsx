@@ -309,12 +309,8 @@ export default function StrategyDetail() {
                   <CardHeader><CardTitle>Portfolio Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-3">
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-sm">
-                        {strategy.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4" />}
-                        {strategy.strategy_type}
-                      </span>
                       <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)} Risk</span>
+                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)}</span>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Portfolio Rationale</h4>
