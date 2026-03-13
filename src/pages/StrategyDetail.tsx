@@ -20,7 +20,7 @@ import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/l
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 
 const gemstoneIcons: Record<string, React.ElementType> = {
