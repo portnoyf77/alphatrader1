@@ -79,12 +79,12 @@ export default function Landing() {
         <div className="container mx-auto px-4 py-12">
           <TooltipProvider delayDuration={200}>
             <div className="flex justify-center">
-              <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl">
+              <div className="grid grid-cols-3 gap-4 md:gap-16 max-w-3xl">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help relative">
-                      <p className="text-3xl md:text-4xl font-bold gradient-text font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>{formatCurrency(totalAllocated)}</p>
-                      <p className="text-muted-foreground mt-1 text-sm">Capital Allocated</p>
+                      <p className="font-bold gradient-text font-mono tabular-nums text-xl sm:text-2xl md:text-[2rem]" style={{ fontWeight: 700 }}>{formatCurrency(totalAllocated)}</p>
+                      <p className="text-muted-foreground mt-1 text-xs sm:text-sm">Capital Allocated</p>
                       <div className="absolute bottom-[-4px] left-[20%] w-[60%] h-[2px] opacity-50" style={{ background: 'linear-gradient(90deg, transparent, #7C3AED, transparent)' }} />
                     </div>
                   </TooltipTrigger>
