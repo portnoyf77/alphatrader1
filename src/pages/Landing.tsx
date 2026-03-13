@@ -197,7 +197,7 @@ export default function Landing() {
             >
               How it works
             </h2>
-            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
               From first question to first investment — in minutes.
             </p>
           </div>
