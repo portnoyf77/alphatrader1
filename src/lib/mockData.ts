@@ -235,7 +235,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '5',
-    name: 'Opal-412',
+    name: 'Ruby-412',
     creator_id: '@macro_edge',
     status: 'validated_listed',
     visibility_mode: 'masked',
