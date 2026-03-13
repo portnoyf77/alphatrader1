@@ -660,7 +660,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    capacity_limit_usd: 5000000,
+    
     holdings: [],
     exposure_breakdown: [],
     top_themes: ['Liquidated'],
