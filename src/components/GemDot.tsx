@@ -1,12 +1,20 @@
 import { getGemHex } from '@/lib/portfolioNaming';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface GemDotProps {
   name: string;
   size?: number;
   className?: string;
+  showTooltip?: boolean;
 }
 
-export function GemDot({ name, size = 16, className }: GemDotProps) {
+const gemTooltips: Record<string, string> = {
+  Pearl: 'Conservative — Low risk portfolio focused on capital preservation',
+  Sapphire: 'Moderate — Standard risk portfolio balancing growth and stability',
+  Ruby: 'Aggressive — High risk portfolio pursuing maximum growth',
+};
+
+export function GemDot({ name, size = 16, className, showTooltip = true }: GemDotProps) {
   const prefix = name.split('-')[0];
   const { color: c, glow: g } = getGemHex(name);
 
@@ -51,8 +59,9 @@ export function GemDot({ name, size = 16, className }: GemDotProps) {
   };
 
   const icon = icons[prefix] || icons['Sapphire'];
+  const tooltipText = gemTooltips[prefix] || gemTooltips['Sapphire'];
 
-  return (
+  const dot = (
     <span
       className={className}
       style={{
@@ -68,5 +77,20 @@ export function GemDot({ name, size = 16, className }: GemDotProps) {
     >
       {icon}
     </span>
+  );
+
+  if (!showTooltip) return dot;
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {dot}
+        </TooltipTrigger>
+        <TooltipContent className="text-xs max-w-[250px]">
+          {tooltipText}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
