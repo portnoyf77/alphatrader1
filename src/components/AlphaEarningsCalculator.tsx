@@ -61,7 +61,14 @@ export function AlphaEarningsCalculator() {
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              Avg. Allocation per Follower
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help border-b border-dashed border-muted-foreground/40">Avg. Allocation per Follower</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">Average capital each follower allocates to your portfolio</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </Label>
             <span className="text-lg font-semibold text-primary">
               ${avgAllocation[0].toLocaleString()}

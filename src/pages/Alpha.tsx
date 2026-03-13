@@ -136,7 +136,14 @@ export default function Alpha() {
             <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
               Build a portfolio, prove it in simulation, then publish it to the marketplace.
               When followers allocate to your portfolio, you earn{' '}
-              <span className="font-semibold text-primary">0.25% of their AUM annually</span>, paid monthly.
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-semibold text-primary cursor-help border-b border-dashed border-primary/40">0.25% of their AUM annually</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">You earn 0.25% of the total capital your followers allocate, calculated annually and paid monthly</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>, paid monthly.
             </p>
 
             <p className="text-muted-foreground mb-10 animate-fade-in">
