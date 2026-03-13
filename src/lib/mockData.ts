@@ -601,7 +601,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 45,
     max_turnover: 'high',
-    capacity_limit_usd: 4500000,
+    
     holdings: [
       { ticker: 'MTUM', name: 'iShares MSCI USA Momentum Factor ETF', weight: 35, sector: 'Momentum' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
