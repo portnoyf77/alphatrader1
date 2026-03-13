@@ -64,13 +64,21 @@ const benchmarkDataSets: Record<string, ReturnType<typeof generateBenchmarkData>
   '1Y': generateBenchmarkData(365),
 };
 
-// Mock news
+// Mock news with thumbnail gradients per sector
+const sectorGradients: Record<string, string> = {
+  Financials: 'linear-gradient(135deg, #1e3a5f 0%, #0f1f3a 100%)',
+  Technology: 'linear-gradient(135deg, #3b1f6e 0%, #1a0e3a 100%)',
+  'Clean Energy': 'linear-gradient(135deg, #0f4a2e 0%, #0a2618 100%)',
+  Healthcare: 'linear-gradient(135deg, #134e5e 0%, #0a2a30 100%)',
+  Industrial: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)',
+};
+
 const mockNews = [
-  { headline: 'Fed Signals Potential Rate Pause in Q3', url: 'https://reuters.com', sector: 'Financials', tag: 'Relevant to your Financials holdings' },
-  { headline: 'NVIDIA Reports Record Data Center Revenue', url: 'https://reuters.com', sector: 'Technology', tag: 'Relevant to your Tech holdings' },
-  { headline: 'Renewable Energy Stocks Surge on Policy Update', url: 'https://reuters.com', sector: 'Clean Energy', tag: 'Relevant to your Clean Energy holdings' },
-  { headline: 'Healthcare M&A Activity Hits 2025 High', url: 'https://reuters.com', sector: 'Healthcare', tag: 'Relevant to your Healthcare holdings' },
-  { headline: 'Global Supply Chain Bottlenecks Easing', url: 'https://reuters.com', sector: 'Industrial', tag: 'Market-wide impact' },
+  { headline: 'Fed Signals Potential Rate Pause in Q3', url: 'https://reuters.com', sector: 'Financials', tag: 'Relevant to your Financials holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&h=134&fit=crop' },
+  { headline: 'NVIDIA Reports Record Data Center Revenue', url: 'https://reuters.com', sector: 'Technology', tag: 'Relevant to your Tech holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=134&fit=crop' },
+  { headline: 'Renewable Energy Stocks Surge on Policy Update', url: 'https://reuters.com', sector: 'Clean Energy', tag: 'Relevant to your Clean Energy holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=200&h=134&fit=crop' },
+  { headline: 'Healthcare M&A Activity Hits 2025 High', url: 'https://reuters.com', sector: 'Healthcare', tag: 'Relevant to your Healthcare holdings', thumbnailUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=200&h=134&fit=crop' },
+  { headline: 'Global Supply Chain Bottlenecks Easing', url: 'https://reuters.com', sector: 'Industrial', tag: 'Market-wide impact', thumbnailUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=200&h=134&fit=crop' },
 ];
 
 export default function Dashboard() {
