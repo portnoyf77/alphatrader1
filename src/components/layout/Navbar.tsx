@@ -32,7 +32,7 @@ export function Navbar() {
   const visibleLinks = isAuthenticated ? navLinks : navLinks.filter(l => l.href === '/faq');
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.85)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.04)]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.7)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.04)]">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <TooltipProvider delayDuration={300}>
