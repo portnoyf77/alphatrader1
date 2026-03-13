@@ -193,7 +193,7 @@ export function Navbar() {
                   <Link
                     to="/signup"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center"
+                    className="px-4 py-3 rounded-lg text-sm font-medium bg-white text-[#050508] text-center"
                   >
                     Sign Up
                   </Link>
