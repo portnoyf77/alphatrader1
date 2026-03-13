@@ -56,12 +56,16 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-warning">
             <AlertTriangle className="h-5 w-5" />
-            Pending Portfolio Updates ({strategiesWithPending.length})
+            {rebalancingMode === 'auto'
+              ? `Recent Portfolio Updates (${strategiesWithPending.length})`
+              : `Pending Portfolio Updates (${strategiesWithPending.length})`}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            The following portfolios have published major updates that require your approval to continue.
+            {rebalancingMode === 'auto'
+              ? 'The following portfolios have been automatically updated. Review the changes below.'
+              : 'The following portfolios have published major updates that require your approval to continue.'}
           </p>
           
           {strategiesWithPending.map((strategy) => {
