@@ -166,8 +166,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Portfolios you've created — live ones are accepting investments
+              <TooltipContent className="text-xs max-w-[250px]">
+                Number of portfolios you've created (live and simulating)
               </TooltipContent>
             </Tooltip>
             <Tooltip>
