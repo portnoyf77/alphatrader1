@@ -29,7 +29,14 @@ export function AlphaEarningsCalculator() {
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Followers
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help border-b border-dashed border-muted-foreground/40">Followers</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">Estimated number of followers for your portfolio</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </Label>
             <span className="text-lg font-semibold text-primary">
               {followers[0].toLocaleString()}
