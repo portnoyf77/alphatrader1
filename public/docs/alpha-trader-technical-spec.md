@@ -1,366 +1,366 @@
 # Alpha Trader — Complete Technical Specification
 
-**Generated:** 2026-03-12  
-**Codebase Status:** Prototype (no real trading, auth, or payments)  
-**Stack:** React 18 + Vite + TypeScript + Tailwind CSS + shadcn/ui
+**Generated:** 2026-03-13  
+**Version:** Current production build  
+**Stack:** React 18 + Vite + TypeScript + Tailwind CSS  
+**Auth:** Mock client-side (localStorage)  
+**Backend:** None (all data is hardcoded mock)
 
 ---
 
-## 1. NAVIGATION & ROUTING
+## Table of Contents
 
-### Route Map
+1. [Routes & Pages](#1-routes--pages)
+2. [Verbatim Copy per Page](#2-verbatim-copy-per-page)
+3. [Business Rules](#3-business-rules)
+4. [Mock Data Reference](#4-mock-data-reference)
+5. [Icon Inventory](#5-icon-inventory)
+6. [Animations & Transitions](#6-animations--transitions)
+7. [Inconsistencies & Flags](#7-inconsistencies--flags)
 
-| Route | Component | Access | Description |
+---
+
+## 1. Routes & Pages
+
+| Route | Component | Auth Required | Expired Trial Allowed |
 |---|---|---|---|
-| `/` | `Home.tsx` → `Landing.tsx` (guest) or `Dashboard.tsx` (logged-in) | Public | Entry point — conditional render |
-| `/login` | `Login.tsx` | Public | Mock sign-in form |
-| `/signup` | `Signup.tsx` | Public | Two-step: credentials → plan selection |
-| `/docs` | `Docs.tsx` | Public | Documentation page |
-| `/explore` | `Explore.tsx` | Public | Marketplace — browse & filter portfolios |
-| `/onboarding` | `Onboarding.tsx` | 🔒 Protected | Post-signup onboarding flow |
-| `/invest` | `Invest.tsx` | 🔒 Protected | AI questionnaire → portfolio creation |
-| `/simulation/:id` | `Simulation.tsx` | 🔒 Protected | Live simulation with chart |
-| `/strategy/:id` | `StrategyDetail.tsx` | 🔒 Protected | Public portfolio detail view |
-| `/portfolio/:id` | `StrategyDetail.tsx` | 🔒 Protected | Alias for `/strategy/:id` |
-| `/dashboard/portfolio/:id` | `PortfolioOwnerDetail.tsx` | 🔒 Protected | Owner-only portfolio management |
-| `/dashboard` | `Dashboard.tsx` | 🔒 Protected | Personal dashboard |
-| `*` | `NotFound.tsx` | Public | 404 page |
+| `/` | `Home` → renders `Landing` (guest) or `Dashboard` (auth) | No | N/A |
+| `/login` | `Login` | No | N/A |
+| `/signup` | `Signup` | No | N/A |
+| `/explore` | `Explore` (Marketplace) | No | N/A |
+| `/alpha` | `Alpha` (Become an Alpha) | Yes | Yes |
+| `/invest` | `Invest` (Create) | Yes | No |
+| `/simulation/:id` | `Simulation` | Yes | No |
+| `/portfolio/:id` | `StrategyDetail` | Yes | Yes |
+| `/strategy/:id` | Redirect → `/portfolio/:id` | N/A | N/A |
+| `/dashboard` | `Dashboard` | Yes | No |
+| `/dashboard/portfolio/:id` | `PortfolioOwnerDetail` | Yes | No |
+| `*` | `NotFound` (404) | No | N/A |
 
-### Missing Route: `/alpha`
-
-The navbar includes a "Become an Alpha" link pointing to `/alpha`, but **no route or page exists for this path**. Clicking it renders the 404 page.
-
-### Navigation Triggers
-
-- **Landing → Invest:** "Start Investing" CTA button
-- **Landing → Explore:** "Browse Marketplace" button
-- **Signup → Onboarding:** After successful signup (manual navigation in mock)
-- **Invest → Simulation:** "Run Simulation" button after portfolio generation
-- **Invest → (toast only):** "Invest Now" button shows prototype toast, no actual navigation
-- **Invest → (toast only):** "Save Draft" button shows prototype toast
-- **Marketplace → Strategy Detail:** Clicking any portfolio card
-- **Dashboard → Portfolio Owner Detail:** Clicking owned portfolio row
-- **Dashboard → Strategy Detail:** Clicking invested portfolio row
-
-### Unauthenticated Access to Protected Routes
-
-`ProtectedRoute` component checks `isAuthenticated` from `MockAuthContext`. If false, redirects to `/login` with the attempted path stored in `location.state.from`. The login page does **not** currently use `state.from` to redirect back after login — it always navigates to `/dashboard`.
+### Layout
+- `PageLayout` wraps all authenticated pages: `<Navbar />` + `<main>` + `<Footer />`
+- Login and Signup have their own minimal headers (no Navbar/Footer)
+- Navbar is fixed top, 64px height, backdrop blur
+- Footer includes persistent disclaimer bar (amber) on all pages
 
 ---
 
-## 2. USER STATE & AUTHENTICATION
+## 2. Verbatim Copy per Page
 
-### Authentication System
+### Landing Page (`/` — unauthenticated)
 
-**Type:** Mock (client-side only, no real auth)  
-**Provider:** `MockAuthContext` using React Context + `localStorage`
+**Hero:**
+- Badge: "AI-Powered Portfolio Builder"
+- H1: "Build, simulate, and earn from your portfolios"
+- Subtitle: "Create portfolios with GenAI, prove them in simulation, then publish and earn when others allocate. Turn your investing expertise into passive income."
+- CTA buttons: "Start Investing" → `/signup`, "Explore Portfolios" → `/explore`
 
-### User Data Model
+**Free Trial Banner:**
+- "Try Alpha Trader free for 7 days"
+- "No credit card required."
+- CTA: "Start Free Trial" → `/signup`
 
-```typescript
-interface MockUser {
-  id: string;       // crypto.randomUUID()
-  username: string;  // Generated as @inv_XXXX (random 4-char alphanumeric)
-  email: string;     // From signup/login form
-}
-```
+**Stats Section:**
+- "Capital Allocated" (dynamic, ~$8.5M)
+- "Active Followers" (dynamic, ~7,680)
+- "Alpha Earnings" (dynamic)
+- Tooltip on Alpha Earnings: "Alphas are portfolio managers who share their investment portfolios. When investors allocate capital to an Alpha's portfolio, the Alpha earns a share of the platform fees."
 
-### Session Persistence
+**How It Works:**
+- H2: "How It Works"
+- "Get started in three simple steps."
+- Step 1: "Tell the AI your goals" — "Answer a few questions and get a personalized portfolio in minutes."
+- Step 2: "Simulate with live data" — "Test your portfolio with real market data before committing capital."
+- Step 3: "Invest or earn as an Alpha" — "Go live with your portfolio, or publish it to the marketplace and earn when others follow."
 
-- Stored in `localStorage` under key `mockUser`
-- Checked on app mount via `useEffect` in `MockAuthProvider`
-- No token, no expiry, no refresh mechanism
-- Logout removes the key from localStorage
+**What is an Alpha?:**
+- "What is an Alpha?"
+- "An Alpha is a portfolio manager who designs investment portfolios and makes them available for others to replicate. When investors allocate capital to follow an Alpha's portfolio, the Alpha earns passive income from management fees — turning expertise into earnings."
 
-### User Types: Investor vs Alpha
+**Value Props:**
+- H2: "Invest smarter — or earn from your expertise"
+- "GenAI Portfolio Builder" — "Turn goals and constraints into a diversified portfolio in minutes."
+- "Simulation First" — "Test your portfolio with live market data in real time before committing real capital."
+- "Alpha Marketplace" — "Publish your portfolios and earn when others allocate."
+- "Top Alpha earning ~$875/mo"
 
-**There is NO differentiation between user types in the current system.** All users share the same `MockUser` interface. There is no role field, no "Alpha" flag, and no permissions system. The dashboard shows both "My Portfolios" (as if the user is an Alpha) and "Invested In" (as if the user is an investor) using hardcoded mock data slices — the first 4 mock strategies are shown as "my portfolios" and the next 3 as "invested in."
+**How Alphas Earn:**
+- Badge: "For Alphas"
+- H2: "How Alphas earn"
+- Steps: Build Your Portfolio → Simulate & Prove → Publish & Share → Earn Passively
+- Fee callout: "As an Alpha, you earn 0.25% of follower AUM annually, paid monthly. The platform also charges 0.25% annually — simple and transparent."
 
-The concept of "becoming an Alpha" exists in UI copy and navigation but has no backing logic.
+**Built for modern investors:**
+- "Real-time Simulations", "Risk-Adjusted Rankings", "Transparent Track Records"
+- "Alpha Revenue Share" — "Earn 0.25% of follower AUM annually when investors allocate to your published portfolios."
+
+**Alpha Earnings Calculator (Landing):**
+- Sliders: Investors (100–5000), Avg. Allocation ($1K–$25K)
+- Breakdown: Total AUM, Your share (0.25% AUM), Platform fee (0.25% AUM)
+
+**Dual CTA:**
+- "Ready to invest smarter?" → "Explore Portfolios"
+- "Ready to earn as an Alpha?" → "Start Building"
+
+**Footer Disclaimer:**
+- "⚠️ Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results."
+- "© 2026 Alpha Trader. All rights reserved..."
+
+### Login Page (`/login`)
+
+- H1: "Welcome back"
+- "Sign in to access your portfolio and investments"
+- Fields: Email, Password
+- CTA: "Sign In"
+- Link: "Don't have an account? Sign up"
+- Demo hint: "Demo mode: Enter any email and password to continue"
+
+### Signup Page (`/signup`)
+
+**Step 1 — Credentials:**
+- H1: "Create your account"
+- "Join Alpha Trader and start building your portfolio"
+- Fields: Email, Password, Confirm Password
+- Privacy callout: "Privacy-first identity — You'll be assigned an anonymous ID (e.g., @inv_7x2k)"
+
+**Step 2 — Plan Selection:**
+- H1: "Choose your plan"
+- "Both plans include a 7-day free trial. Cancel anytime."
+- Basic ($19.99/mo): Unlimited AI portfolio creation, Live simulations, Marketplace access, Auto-rebalancing
+- Pro ($49.99/mo, "Most Popular"): Everything in Basic + Advanced risk analytics, Priority marketplace, Tax reports
+- Disclaimer checkbox required
+- CTA: "Start Free Trial" (disabled until plan selected AND disclaimer accepted)
+
+### Dashboard (`/dashboard`)
+
+- H1: "Dashboard" — "Overview of your portfolios and investments."
+- 5 stat tiles: My Portfolios, Invested in Others, My Investment, Total Value, vs S&P 500
+- Performance vs Benchmarks chart (30D/90D/YTD/1Y): My Portfolio, S&P 500, Dow Jones
+- 3 tabs: My Portfolios, Invested In, Simulating
+- Pending Updates Panel, Market News (5 items)
+- Rebalancing Mode Modal (Auto-apply vs Require approval)
+
+### Marketplace (`/explore`)
+
+- H1: "Marketplace"
+- Badge: "All portfolios here are validated and eligible to accept allocations."
+- Tabs: All Portfolios | Leaderboard
+- Top Performers bar chart (top 5 by risk-adjusted returns)
+- Filters: Risk (Conservative/Moderate/Aggressive), Objective, Visibility, Turnover, Type
+- Leaderboard table: Rank, Alpha, Score, Followers, Allocated, Earnings, Track Record
+
+### Create Page (`/invest`)
+
+- Tabs: AI Advisor | Manual Build
+- AI flow: Questionnaire (4 phases) → Gem animation → Results with holdings
+- Manual: Objective, Risk Level, Holdings table, Save/Simulate buttons
+
+### Simulation Page (`/simulation/:id`)
+
+- Portfolio: "Harborline Growth" (hardcoded)
+- Live chart (2s updates), elapsed timer, trial countdown
+- Metrics: Portfolio Value, Total Return, Worst Drop, Sharpe Ratio, vs S&P 500
+- Validation flow: Submit → Validating → Validated → Publish/Keep Private
+
+### Portfolio Detail (`/portfolio/:id`)
+
+- Header: Gem icon + colored name + Creator ID
+- Red liquidation warning box
+- Stats: 30d Return, Followers, Creator Invested, Allocated, Consistency
+- 7 tabs: Overview, Holdings, Exposure, Track Record, Advanced Analytics (Pro-gated), Activity, Discussion
+- Allocation modal with fee breakdown
+
+### Portfolio Owner Detail (`/dashboard/portfolio/:id`)
+
+- Header: Gem icon + colored name + Live/Simulating badge
+- Performance chart, Holdings table, Controls (live), Activity Log (collapsible)
+- Tweak modal, Execute & Go Live modal, Make Public button
+
+### Become an Alpha (`/alpha`)
+
+- Crown badge: "Become an Alpha"
+- H1: "Turn your investing expertise into passive income"
+- How It Works (3 steps), Earnings Calculator, 7 Publishing Requirements, 3 Testimonials
+
+### 404 Page
+- Crown icon, "404", "Page not found", "Return to Home"
+
+### Trial Expired Modal
+- Crown icon, "Your free trial has ended", plan selection, "Activate Plan"
 
 ---
 
-## 3. BUSINESS LOGIC & RULES
+## 3. Business Rules
 
-### 3.1 Rebalancing
+### 3.1 Gemstone Assignment (Pearl / Sapphire / Ruby)
 
-**UI Implementation:**
-- Dashboard has a settings gear icon on the `PendingUpdatesPanel` section
-- Opens a modal with two options: "Require my approval" or "Auto-apply and notify me"
-- **Default: Auto-apply** (state: `rebalancingMode` initialized to `'auto'`)
-- Disclaimer text: "By selecting Auto-apply, you authorize Alpha Trader to rebalance your portfolio automatically. This does not constitute investment advice."
+**Rule:** Gem type = risk level:
+- `Low` → **Pearl** (silver #E2E8F0)
+- `Medium` → **Sapphire** (blue #3B82F6)
+- `High` → **Ruby** (red #E11D48)
 
-**Actual Enforcement:** None. The `rebalancingMode` state is local to the Dashboard component and is not persisted or used anywhere. The `PendingUpdatesPanel` always shows Accept/Exit buttons regardless of the mode setting.
+**Functions:** `riskToGem()`, `assignGemType(1-5)`, `deriveGemstone(profile)`
+**Naming:** `{GemType}-{3-digit number}` — ranges: Low 100-299, Medium 300-599, High 600-999
 
-**Pending Updates Logic:**
-- Mock data has `pending_update` and `pending_change_summary` fields on Portfolio objects
-- `getStrategiesWithPendingUpdates()` filters for portfolios with `pending_update` defined
-- Accepting or exiting shows a toast — no data mutation
+**Visual:** Custom inline SVGs in `GemDot`: Pearl=circle, Sapphire=hexagon, Ruby=faceted gem. All use stroke + 15% fill + drop-shadow glow.
 
-### 3.2 Alpha Liquidation
+### 3.2 Liquidation / Auto-Exit
 
-**UI Disclosure:** Every `StrategyCard` in the marketplace displays: *"If this Alpha exits their position, your allocation will automatically follow."* (Warning banner at bottom of each card)
+Every portfolio has `auto_exit_on_liquidation: true`. When liquidated: status='inactive', empty holdings, 0 followers. Activity log: "Portfolio liquidated - all followers auto-exited." Warning shown on marketplace cards, dashboard invested tab, and portfolio detail page.
 
-**Backend Logic:** The `Portfolio` type has `auto_exit_on_liquidation: boolean` (always `true` in mock data). There is **no actual liquidation mechanism** — it's purely a UI disclosure. No follower notification, no fund movement, no automatic exit is implemented.
+### 3.3 Rebalancing Mode
 
-### 3.3 Simulation
+Stored in `localStorage` as `rebalancingMode` ('auto'|'manual'). Auto=changes apply automatically with notification. Manual=requires review/approval. Accessed via gear icon on Pending Updates Panel.
 
-**Data Source:** 100% mock/random data. No real market feed.
+### 3.4 7-Day Trial Logic
 
-**Simulation Chart:** Uses `setInterval` to generate random data points every 2 seconds when `simulationState === 'running'`. Each tick adds random deltas to Portfolio, S&P 500, and Dow Jones values:
-- Portfolio: `±0.3%` per tick (biased slightly positive)
-- S&P 500: `±0.2%` per tick
-- Dow Jones: `±0.18%` per tick
+`trialStartDate` in localStorage. Expired = `!userPlan && elapsed > 7 days`. Blocked pages: Dashboard, Create, Simulation. Accessible after expiry: Marketplace, Alpha, Portfolio Detail.
 
-**Duration:** Unlimited — the simulation runs as long as the page is open. The 7-day free trial shows a countdown timer (`FREE_TRIAL_DAYS * 86400 - elapsedSeconds`) but **nothing happens when it reaches zero**. No lockout, no degradation, no notification.
+### 3.5 Basic vs Pro Features
 
-**Elapsed Time:** Tracked in real seconds via `elapsedSeconds` state, displayed with d/h/m/s formatting.
-
-**Controls:**
-- Stop/Resume toggle (pauses the interval)
-- "Invest Now" button (shows prototype toast)
-- Validation/Publish flow (multi-step modal, but only shows toasts)
-
-### 3.4 Marketplace Publishing Conditions
-
-**Code Logic (in Simulation.tsx):** To publish, a portfolio must complete validation. The validation flow has 4 states: `pending → submitting → in_progress → validated`. However, this is a **purely cosmetic state machine** driven by `setTimeout`:
-- Submitting → in_progress: 2 seconds
-- in_progress → validated: 3 seconds
-
-**Actual Requirements from Mock Data:** Portfolios in the marketplace are filtered by `getValidatedStrategies()` which returns `mockStrategies.filter(s => s.status === 'validated_listed')`. The `validation_criteria_met` boolean and `validation_summary` string exist on the type but are not gatekeeping anything — the filter only checks `status`.
-
-**No actual criteria enforced:** No minimum track record, no minimum Alpha investment, no performance threshold.
-
-### 3.5 Portfolio Naming (Gemstone System)
-
-**Two parallel systems exist:**
-
-**System A — `portfolioNaming.ts` (for existing portfolios):**
-- Gemstone determined by primary sector of holdings (highest weight)
-- Sector → Gemstone map: Technology→Sapphire, Healthcare→Emerald, Clean Energy→Peridot, Dividend→Amber, Bonds→Pearl, International→Opal, Broad Market→Diamond, Commodities→Topaz
-- Number determined by risk level + deterministic hash of portfolio ID: Low→100-299, Medium→300-599, High→600-999
-- Format: `Gemstone-Number` (e.g., "Sapphire-347")
-
-**System B — `strategyProfile.ts` (for AI-generated portfolios):**
-- Gemstone determined by: (1) sector emphasis from questionnaire, (2) geographic preference, or (3) **risk level fallback** (High→Ruby, Medium→Emerald, Low→Sapphire)
-- Number range same as System A but uses `Math.random()` instead of deterministic hash
-- Additional gemstone-risk descriptions provided for the animation reveal
-
-**Color Mapping for Animation:**
-- Each gemstone has `{ primary, secondary, glow }` hex colors
-- Risk level modulates animation intensity (High=1.5x, Medium=1x, Low=0.7x)
-- Warm colors (Ruby, Amber, Topaz) for high risk; cool colors (Sapphire, Emerald) for low risk — **only applies when no sector is selected** (risk-based fallback)
-
----
-
-## 4. PRICING & SUBSCRIPTION LOGIC
-
-### Plan Definitions (Signup.tsx)
-
-| Plan | Price | Features |
+| Feature | Basic ($19.99) | Pro ($49.99) |
 |---|---|---|
-| Basic | $19.99/mo | Unlimited AI creation, live simulations, marketplace access, auto-rebalancing |
-| Pro | $49.99/mo | Everything in Basic + advanced risk analytics, priority marketplace, tax reports |
+| AI portfolio creation, simulations, marketplace, auto-rebalancing | ✅ | ✅ |
+| Advanced risk analytics, stress testing, correlation | ❌ | ✅ |
+| Priority marketplace access | ❌ | ✅ |
+| Downloadable tax reports | ❌ | ✅ |
 
-### 7-Day Free Trial
+### 3.6 Fee Calculation
 
-**UI References:**
-- Signup page has a "Start Free Trial" button
-- Simulation page shows a 7-day countdown timer
+- Alpha fee: 0.25% AUM annually (`creator_fee_pct: 0.25`)
+- Platform fee: 0.25% AUM annually (hardcoded)
+- Total: 0.50% annually
+- Monthly earnings: `(totalAUM × 0.0025) / 12`
+- Displayed: Landing, Alpha page, earnings calculators, allocation modal
 
-**Enforcement:** **None.** There is no trial tracking, no expiry check, no feature gating. The signup creates a mock user immediately. The trial countdown on the simulation page is cosmetic and counts from when the page was opened, not from account creation.
+---
 
-### Trial Expiry Behavior
+## 4. Mock Data Reference
 
-**Not implemented.** No lockout, no downgrade, no notification.
+### 4.1 All Portfolios (12)
 
-### AUM Fee Logic (0.25% model)
+| ID | Name | Creator | Status | Risk | Objective | 30d | Max DD | Followers | AUM | Earnings/mo | Creator Inv |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Sapphire-347 | @inv_7x2k | validated_listed | Medium | Growth | +4.2% | -8.5% | 1,247 | $1.85M | $385 | $25K |
+| 2 | Pearl-142 | @alpha_99 | validated_listed | Low | Balanced | +1.8% | -3.2% | 2,389 | $2.45M | $510 | $50K |
+| 3 | Ruby-872 | @quant_trader | private | High | Growth | +8.7% | -18.3% | 0 | $0 | $0 | $15K |
+| 4 | Pearl-108 | @div_hunter | validated_listed | Low | Income | +1.2% | -4.8% | 1,823 | $1.68M | $350 | $40K |
+| 5 | Ruby-412 | @macro_edge | validated_listed | Medium | Growth | +2.9% | -7.1% | 654 | $580K | $121 | $20K |
+| 6 | Sapphire-756 | @green_alpha | private | High | Growth | -2.1% | -22.4% | 0 | $0 | $0 | $10K |
+| 7 | Pearl-127 | @steady_returns | validated_listed | Low | Low vol | +0.8% | -2.1% | 1,567 | $1.92M | $400 | $35K |
+| 8 | Sapphire-489 | @bio_investor | validated_listed | Medium | Growth | +3.4% | -11.2% | 987 | $820K | $171 | $30K |
+| 9 | Pearl-385 | @value_seeker | validated_listed | Medium | Balanced | +2.1% | -6.8% | 543 | $460K | $96 | $18K |
+| 10 | Pearl-217 | @simple_60_40 | validated_listed | Low | Balanced | +1.5% | -5.2% | 2,156 | $2.1M | $438 | $75K |
+| 11 | Ruby-891 | @momentum_pro | validated_listed | High | Growth | +6.2% | -15.3% | 756 | $4.2M | $875 | $45K |
+| 12 | Sapphire-333 | @retired_fund_mgr | inactive | Medium | Growth | 0% | -9.5% | 0 | $0 | $0 | $0 |
 
-**Where it's referenced:**
+**Dashboard groupings:** My Portfolios=IDs 1-4, Invested In=IDs 5-7, Simulating=private from 1-4
 
-| Location | Implementation |
+**Marketplace:** validated_listed + validation_criteria_met: IDs 1,2,4,5,7,8,9,10,11
+
+### 4.2 Alpha Page Testimonials (separate mock data)
+- Sapphire-347 @alpha_m9x2, Pearl-512 @alpha_k4p1, Ruby-718 @alpha_q7r3
+
+### 4.3 Simulation Page
+- Hardcoded name: "Harborline Growth", starting value $100K, 2s chart updates
+
+### 4.4 Questionnaire (4 phases, 10 questions)
+- Phase 1 Goals: primaryGoal, timeline, financialSituation
+- Phase 2 Risk: drawdownReaction, riskStatement, volatilityTolerance (5-40%)
+- Phase 3 Preferences: sectorEmphasis (multi), restrictions (multi), geographicPreference
+- Phase 4 Style: managementApproach, initialInvestment (optional)
+
+---
+
+## 5. Icon Inventory
+
+### Branding
+- **Crown**: Logo (Navbar, Footer, Login, Signup, 404), "Become an Alpha" nav link & page badge, Alpha testimonial cards, Leaderboard reputation badge, Earnings Calculator headers, Trial Expired modal, StrategyCard reputation badge, Pro plan icon
+- **Sparkles**: "Create" nav link, AI/GenAI indicators, Landing hero badge
+
+### Gemstone Icons (Custom SVGs in GemDot)
+- **Pearl** (circle + luster): all Pearl-prefixed portfolio names
+- **Sapphire** (hexagonal cut): all Sapphire-prefixed portfolio names
+- **Ruby** (faceted gem): all Ruby-prefixed portfolio names
+
+### Navigation: LayoutDashboard, Store, Menu, X, LogOut, User, ArrowLeft, ArrowRight, ChevronRight/Down/Up
+### Financial: DollarSign, TrendingUp/Down, BarChart3, Wallet, Shield, Users, Activity, Gauge, PieChart, LineChart
+### Status: CheckCircle2, XCircle, Clock, FlaskConical, AlertTriangle, Pause, Lock, Loader2
+### Actions: Settings, Rocket, Globe, Share2, Play, Square, Timer, Target, Save, RotateCcw, Plus, Trash2, Filter, Search, SlidersHorizontal, ExternalLink, Tag, Info, HelpCircle
+### Sectors: Laptop (Tech), Heart (Healthcare), Leaf (Clean Energy), Zap (Batteries), DollarSign (Dividend), Shield (Bonds), Globe (International), BarChart3 (Broad Market), TrendingUp (Value/Momentum)
+### Forms: Mail, Lock, Check
+### Content: MessageSquare, MessageCircle, Star, Trophy, Upload, Eye, List, History, Coins, PenLine
+
+---
+
+## 6. Animations & Transitions
+
+| Type | Details |
 |---|---|
-| `mockData.ts` | `creator_fee_pct: 0.25` on all 12 mock portfolios |
-| `mockData.ts` | `creator_est_monthly_earnings_usd` = `allocated_amount_usd * 0.0025 / 12` |
-| `StrategyDetail.tsx` | Fee breakdown: 0.50% total (0.25% Alpha + 0.25% platform) |
-| `AlphaEarningsCalculator.tsx` | `alphaShare = totalAllocated * 0.0025` and `platformFee = totalAllocated * 0.0025` |
-| `HowAlphasEarn.tsx` | Copy: "Earn 0.25% of follower AUM annually, paid monthly" and "Platform also charges 0.25% annually" |
-| `Landing.tsx` | Copy: "Earn 0.25% of follower AUM annually" |
-| `Onboarding.tsx` | Tooltip: "you earn 0.25% of their AUM annually, paid monthly" |
-
-**Actual Fee Calculation:** No real billing exists. The earnings calculator is a client-side slider that computes `investors × avgAllocation × 0.0025` for the Alpha share.
-
----
-
-## 5. NOTIFICATIONS
-
-### Notification Types
-
-| Type | Trigger | Delivery | Status |
-|---|---|---|---|
-| Rebalancing update | Portfolio has `pending_update` | In-app (PendingUpdatesPanel on Dashboard) | ✅ UI only |
-| Allocation confirmed | User clicks "Allocate" on StrategyDetail | In-app toast | ✅ Toast only |
-| Portfolio saved | User clicks "Save Draft" on Invest | In-app toast | ✅ Toast only |
-| Exit confirmed | User exits a portfolio from PendingUpdatesPanel | In-app toast | ✅ Toast only |
-| Simulation invest | User clicks "Invest Now" on Simulation | In-app toast | ✅ Toast only |
-| Validation complete | Publish flow completes on Simulation | In-app toast | ✅ Toast only |
-
-**Email notifications:** Not implemented.  
-**Push notifications:** Not implemented.  
-**Persistent notification center:** Not implemented.  
-**Auto-apply rebalancing notifications:** Referenced in UI copy but not implemented.
+| `animate-fade-in` | Hero text, badges, CTAs on Landing & Alpha |
+| `animate-pulse` | Background blobs, live indicator dot |
+| `live-pulse` | Green simulation running dot |
+| `earnings-glow` | Green text-shadow on earnings figures |
+| `glow-primary` | Purple glow on primary CTAs |
+| `gradient-text` | Hero headline gradient |
+| Count-up | Dashboard stat tiles (useCountUp, 800ms) |
+| Gem crystallization | Create page particle → gem animation |
+| Live chart | Simulation page 2s interval updates |
+| Hover effects | Cards (border/shadow), icons (scale), nav links (bg color), table rows (highlight) |
+| Collapsible/Accordion | Activity Log, Holdings rationale |
+| Background blobs | 3 on Landing hero, 2 on Alpha hero (pulsing blur-3xl) |
 
 ---
 
-## 6. DATA & CALCULATIONS
+## 7. Inconsistencies & Flags
 
-### 6.1 "vs S&P 500" Calculation
+### 7.1 ❌ Gem Name vs Risk Level Mismatches (3 portfolios)
+- **Ruby-412** has Medium risk → should be Sapphire
+- **Pearl-385** has Medium risk → should be Sapphire
+- **Sapphire-756** has High risk → should be Ruby
 
-**Dashboard tile:** Hardcoded mock values:
-```typescript
-const userTotalReturn = 12.4;
-const sp500Return = 9.8;
-const vsSP500 = userTotalReturn - sp500Return; // +2.6%
-```
-Not derived from any portfolio data.
+### 7.2 ❌ Simulation Page Uses Non-Gem Name
+"Harborline Growth" instead of `{Gem}-{Number}` format. No GemDot icon displayed.
 
-### 6.2 Alpha Reputation Score
+### 7.3 ❌ Number Ranges Violated
+`generateStrategyNumber()` defines Low=100-299, Med=300-599, High=600-999 but Ruby-412 (412 is medium range) and Pearl-385 (385 is medium range) violate this.
 
-**Formula (in StrategyCard.tsx and Explore.tsx):**
-```typescript
-Math.min(5.0, consistency_score * 4 + (followers_count > 500 ? 0.5 : 0) + 0.3)
-```
-Where `consistency_score` is a 0-1 float from mock data (e.g., 0.78 = 78%).
+### 7.4 ❌ Terminology: "Followers" vs "Investors"
+Used interchangeably. "Followers" in Dashboard/Marketplace cards/Leaderboard. "Investors" in Alpha Spotlight/Alpha page/calculators.
 
-**Issues:**
-- `consistency_score * 4` means any score > 1.075 (i.e., any consistency > ~27%) caps the reputation at 5.0
-- Most mock portfolios have consistency scores of 55-90%, meaning almost all have a 5.0 reputation
-- The `+ 0.3` baseline means the minimum possible score is 0.3 (if consistency is 0 and followers < 500)
+### 7.5 ❌ Risk Label Duplication
+Risk uses both "Low/Medium/High" (types, badges, data) AND "Conservative/Moderate/Aggressive" (filter dropdowns, gemConfig). Both systems coexist.
 
-### 6.3 Est. Monthly Earnings
+### 7.6 ❌ Hardcoded Colors Instead of Design Tokens
+Gem colors (#E2E8F0, #3B82F6, #E11D48) and Tailwind classes (bg-slate-300/10, bg-blue-500/10, bg-rose-500/10) are hardcoded, not semantic tokens.
 
-```typescript
-creator_est_monthly_earnings_usd = allocated_amount_usd * 0.0025 / 12
-```
-Set statically in mock data. Not recalculated dynamically.
+### 7.7 ❌ Alpha Page Testimonials Don't Match Real Data
+Testimonial creator IDs (@alpha_m9x2, @alpha_k4p1, @alpha_q7r3) don't match actual portfolio creator IDs in mockStrategies.
 
-### 6.4 Portfolio Capacity Percentage
+### 7.8 ❌ StatusBadge Component Unused
+References `LegacyPortfolioStatus` ('Simulated'|'Live'|'Live (coming soon)') but never rendered anywhere.
 
-The `capacity_limit_usd` field exists on the Portfolio type but **is never displayed or used in any component**. No capacity percentage is calculated or shown anywhere.
+### 7.9 ❌ Index.tsx Is Dead Code
+Renders "Welcome to Your Blank App" but is never routed to.
 
-### 6.5 Benchmark Data
+### 7.10 ❌ Holdings Visibility Logic Incorrect
+Portfolio Detail hides all holdings from non-owners regardless of `visibility_mode`. Transparent mode portfolios should show holdings publicly but don't.
 
-**All benchmark data is 100% mock/random.** No API calls, no market data feeds.
+### 7.11 ❌ Dashboard Tab Overlap
+Ruby-872 appears in both "My Portfolios" and "Simulating" tabs.
 
-- **Dashboard benchmark chart:** `generateBenchmarkData()` creates random walk data with slight positive bias
-- **PerformanceChart component:** `generateChartData()` creates random walk with parameterized return target and ~8% annual S&P assumption, ~6.5% annual Dow assumption
-- **Simulation chart:** Real-time random deltas generated every 2 seconds
-- **S&P 500 mock assumption:** ~8% annualized return
-- **Dow Jones mock assumption:** ~6.5% annualized return
+### 7.12 ⚠️ Benchmark Data Is Random
+Dashboard and Simulation charts generate random walk data per render. Not deterministic.
 
----
+### 7.13 ⚠️ Unused Imports
+Alpha.tsx imports `Hexagon` and `Star` — Hexagon appears unused after gem system consolidation.
 
-## 7. KNOWN INCONSISTENCIES
+### 7.14 ⚠️ Edge Function Exists But Unused
+`supabase/functions/parse-strategy-response/index.ts` exists but app uses no backend.
 
-### ⚠️ CRITICAL: Knowledge File Contradiction on Fee Model
-
-**`knowledge://memory/branding/alpha-monetization-model`** states:  
-> "The platform charges a 1% annual fee on allocated capital, with Alphas receiving 20% of that fee"
-
-**Actual codebase** (as of latest changes) uses:
-> 0.25% AUM to Alpha + 0.25% AUM to platform (0.50% total)
-
-The knowledge file is **stale and contradicts the code**. The code is correct per the user's explicit instructions.
-
-### ✅ "ACME Trader" References
-
-All UI text now says "Alpha Trader." Only one non-user-facing CSS comment remains: `/* Alpha Trader - Dark Purple Fintech Design System */` (already fixed).
-
-### ✅ "20%" / Profit-Sharing Language
-
-All `creator_fee_pct` values are now `0.25`. The only "20%" reference in the codebase is in the questionnaire question: *"If your portfolio dropped 20% in a month, you would..."* — this is a risk tolerance question, not fee language.
-
-### ⚠️ Approval-Required vs Auto-Apply Default
-
-The `rebalancingMode` state defaults to `'auto'` (correct), but the `PendingUpdatesPanel` always renders Accept/Exit buttons regardless of the mode — meaning even in auto-apply mode, the UI shows manual approval prompts. **The auto-apply mode has no effect on the UI.**
-
-### ⚠️ Liquidation Disclosure Gaps
-
-- ✅ Marketplace cards: Warning banner present
-- ✅ Mock data: `auto_exit_on_liquidation: true` on all portfolios
-- ❌ StrategyDetail page: **No liquidation warning displayed** on the allocation form
-- ❌ Dashboard "Invested In" tab: **No liquidation warning** on invested portfolio rows
-
-### ⚠️ Disclaimer Text Inconsistencies
-
-| Location | Text | Matches Standard? |
-|---|---|---|
-| Footer (banner) | "Alpha Trader is not a registered investment adviser..." | ✅ Standard |
-| Footer (copyright) | Same text inline | ✅ Standard |
-| Signup checkbox | "I understand that Alpha Trader is not a registered..." | ✅ Standard |
-| Simulation page | "Alpha Trader is not a registered investment adviser..." | ✅ Standard |
-| Landing page | ❌ **No disclaimer on the landing page** | ❌ Missing |
-
-The Landing page has `showDisclaimer={false}` passed to `PageLayout`, meaning the footer disclaimer banner is hidden.
-
-### ⚠️ Broken/Dead Navigation Links
-
-| Link | Target | Status |
-|---|---|---|
-| "Become an Alpha" nav link | `/alpha` | ❌ **404 — no route exists** |
-| Footer "Dashboard" link | `/dashboard` | ⚠️ Works but requires auth |
-| Footer "Marketplace" link | `/explore` | ✅ Works |
-| Footer "Invest" link | `/invest` | ⚠️ Works but requires auth |
-| Footer "Become an Alpha" link | `/alpha` | ❌ **404 — no route exists** |
-
-### ⚠️ StrategyDetail Fee Display
-
-The fee display uses a locally computed `totalFee` and `creatorShare` that are independent of the `creator_fee_pct` field on the portfolio object. The portfolio type still carries `creator_fee_pct: 0.25` but `StrategyDetail` ignores it and hardcodes `0.005` (0.5% total).
-
-### ⚠️ Metric Label Inconsistency
-
-Per project knowledge, "Max Drawdown" should be renamed to "Worst Drop." The StrategyCard component still shows "Max Drawdown" as the label. The Simulation page correctly uses "Worst Drop."
+### 7.15 ⚠️ Supabase Connected But Empty
+Lovable Cloud connected with zero database tables. All data is mock/localStorage.
 
 ---
 
-## 8. MISSING FEATURES
-
-### Feature Implementation Status
-
-| Feature | Status | Notes |
-|---|---|---|
-| 7-day free trial enforcement | ❌ **Not implemented** | Timer exists cosmetically, no expiry logic |
-| Plan selection during signup | ⚠️ **Partial** | UI exists (Basic $19.99 / Pro $49.99), user selects a plan, but selection is not stored, not persisted, and has zero effect on feature access |
-| Alpha's own investment on marketplace cards | ✅ **Implemented** | Shows on every StrategyCard with tooltip |
-| Alpha reputation badge with score | ✅ **Implemented** | Crown + Star + score on every card (but scoring formula is too generous — nearly all are 5.0) |
-| Rebalancing mode toggle | ⚠️ **Partial** | Modal and toggle exist, but auto-apply mode doesn't actually suppress the approval UI |
-| Sector-relevant news feed tagging | ✅ **Implemented** | Dashboard shows 5 tagged news items (mock data, not real feeds) |
-| Gemstone color matching risk level | ✅ **Implemented** | Risk-based fallback: High→Ruby, Medium→Emerald, Low→Sapphire when no sector selected |
-| Follower auto-liquidation mirror | ⚠️ **Disclosure only** | Warning text on marketplace cards; no actual liquidation mechanism |
-| Dow Jones benchmark on dashboard chart | ✅ **Implemented** | Dashboard, Simulation, and PerformanceChart all show Dow Jones |
-| "Become an Alpha" page | ❌ **Not implemented** | Nav link exists, route does not. 404. |
-| Email/notification system | ❌ **Not implemented** | All notifications are ephemeral toasts |
-| Real market data integration | ❌ **Not implemented** | All data is random/mock |
-| Brokerage integration | ❌ **Not implemented** | All fund movement is prototype toasts |
-| User role differentiation (Investor vs Alpha) | ❌ **Not implemented** | Single user type with no roles |
-| Persistent portfolio storage | ❌ **Not implemented** | No database tables; all data is hardcoded mock |
-| Holdings visibility toggle (masked vs transparent) | ⚠️ **Partial** | Field exists in type, mock data has values, but the Invest page results always show full tickers with no toggle |
-| Portfolio capacity tracking | ❌ **Not implemented** | `capacity_limit_usd` field exists but is never displayed |
-| Tax reports (Pro feature) | ❌ **Not implemented** | Listed in plan features, no implementation |
-| Stress testing / advanced analytics (Pro feature) | ❌ **Not implemented** | Listed in plan features, no implementation |
-
----
-
-## Appendix: File Inventory
-
-### Pages (12)
-`Home`, `Landing`, `Dashboard`, `Explore`, `Invest`, `Simulation`, `StrategyDetail`, `PortfolioOwnerDetail`, `Signup`, `Login`, `Onboarding`, `Docs`, `NotFound`
-
-### Key Components (25+)
-`Navbar`, `Footer`, `PageLayout`, `ProtectedRoute`, `StrategyCard`, `PerformanceChart`, `PendingUpdatesPanel`, `AlphaSpotlight`, `HowAlphasEarn`, `AlphaEarningsCalculator`, `MetricCard`, `ExposureBreakdown`, `StrategyControls`, `StrategyRiskProfile`, `StrategyActivityLog`, `ValidationBadge`, `StatusBadge`, `PortfolioCard`, `PortfolioThumbnail`, `StrategyThumbnail`, `ConversationalQA`, `StrategyQuestionnaire`, `ParticleCrystallizationAnimation`, `GemStone`, `RiskSlider`, `ProfileSummary`, `QuestionCard`, `ChatInput`, `ChatMessage`, `QuickReplyButtons`, `VoiceInputButton`, `InvestmentInput`, `GemRefinementAnimation`, `GemWorker`, `Particle`
-
-### Data Layer
-`mockData.ts` (812 lines, 12 portfolio objects, aggregate stats), `types.ts`, `strategyProfile.ts`, `portfolioNaming.ts`, `nlpParser.ts`, `aiStrategyParser.ts`
-
-### Backend
-`supabase/functions/parse-strategy-response/index.ts` — Edge function for parsing AI strategy responses. Database has **zero tables** (empty schema).
+*End of specification.*
