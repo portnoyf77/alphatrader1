@@ -1,4 +1,4 @@
-import { Shield, TrendingUp, RefreshCw, Check, X } from 'lucide-react';
+import { Shield, TrendingUp, RefreshCw, AlertTriangle, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
