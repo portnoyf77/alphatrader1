@@ -93,7 +93,7 @@ export default function Dashboard() {
 
   const filteredMyPortfolios = showOnlyValidated 
     ? myPortfolios.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
-    : myPortfolios;
+    : myPortfolios.filter(s => s.status !== 'private');
 
   const validatedCount = myPortfolios.filter(s => s.status === 'validated_listed').length;
   const simulatingCount = myPortfolios.filter(s => s.status === 'private').length;
