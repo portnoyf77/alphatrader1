@@ -44,7 +44,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
               <Button asChild size="lg" className="glow-primary text-lg px-8 h-14">
                 <Link to="/signup">
-                  Start Investing
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -101,7 +101,7 @@ export default function Landing() {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs max-w-[200px]">
-                    Number of unique investors currently following portfolios
+                    Number of unique followers currently allocating to portfolios
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -287,7 +287,7 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold mb-1">Alpha Revenue Share</h4>
                     <p className="text-muted-foreground">
-                      Earn 0.25% of follower AUM annually when investors allocate to your published portfolios.
+                      Earn 0.25% of follower AUM annually when followers allocate to your published portfolios.
                     </p>
                   </div>
                 </div>

@@ -134,7 +134,7 @@ export default function Alpha() {
 
             <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
               Build a portfolio, prove it in simulation, then publish it to the marketplace.
-              When investors allocate to your portfolio, you earn{' '}
+              When followers allocate to your portfolio, you earn{' '}
               <span className="font-semibold text-primary">0.25% of their AUM annually</span>, paid monthly.
             </p>
 
@@ -167,7 +167,7 @@ export default function Alpha() {
           {[
             { icon: BarChart3, title: '1. Build & Simulate', description: 'Use our AI advisor or build manually. Run a free simulation to prove your portfolio works.' },
             { icon: Shield, title: '2. Invest & Validate', description: 'Put your own capital in — at least $1,000. After 30 days live, you can publish to the marketplace.' },
-            { icon: DollarSign, title: '3. Earn Passively', description: 'When investors allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly.' },
+            { icon: DollarSign, title: '3. Earn Passively', description: 'When followers allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly.' },
           ].map((step) => (
             <Card key={step.title} className="glass-card text-center">
               <CardContent className="pt-8 pb-6 px-6">

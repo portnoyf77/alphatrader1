@@ -82,7 +82,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
                     <div className="p-3 rounded-lg bg-secondary/50">
                       <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
                         <Users className="h-3 w-3" />
-                        Investors
+                        Followers
                       </div>
                       <p className="font-semibold">{strategy.followers_count.toLocaleString()}</p>
                     </div>

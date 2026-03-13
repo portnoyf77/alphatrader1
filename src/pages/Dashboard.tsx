@@ -14,7 +14,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { GemDot } from '@/components/GemDot';
 import { formatCurrency, formatPercent, mockStrategies, getStrategiesWithPendingUpdates } from '@/lib/mockData';
-import { cn } from '@/lib/utils';
+import { cn, riskDisplayLabel } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
 import { useCountUp } from '@/hooks/useCountUp';
 
@@ -503,7 +503,7 @@ export default function Dashboard() {
                               portfolio.risk_level === 'Medium' ? "bg-warning/20 text-warning" :
                               "bg-destructive/20 text-destructive"
                             )}>
-                              {portfolio.risk_level}
+                              {riskDisplayLabel(portfolio.risk_level)}
                             </span>
                           </TableCell>
                           <TableCell className="text-right w-8">

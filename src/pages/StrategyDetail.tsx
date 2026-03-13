@@ -18,7 +18,7 @@ import { StrategyRiskProfile } from '@/components/StrategyRiskProfile';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
 import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
@@ -249,7 +249,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">Total money from all investors combined</TooltipContent>
+                <TooltipContent className="text-xs max-w-[220px]">Total money from all followers combined</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -321,7 +321,7 @@ export default function StrategyDetail() {
                         {strategy.strategy_type}
                       </span>
                       <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.risk_level} Risk</span>
+                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)} Risk</span>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Portfolio Rationale</h4>

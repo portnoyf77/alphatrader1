@@ -173,7 +173,7 @@ export default function PortfolioOwnerDetail() {
     setShowMakePublicModal(false);
     toast({
       title: "Portfolio is now public",
-      description: "Your portfolio is visible in the marketplace. Investors can now allocate to it.",
+      description: "Your portfolio is visible in the marketplace. Followers can now allocate to it.",
     });
   };
 
@@ -265,7 +265,7 @@ export default function PortfolioOwnerDetail() {
               <>
                 <Card className="glass-card">
                   <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground mb-1">Investors</p>
+                    <p className="text-sm text-muted-foreground mb-1">Followers</p>
                     <p className="text-2xl font-bold flex items-center gap-2">
                       <Users className="h-5 w-5 text-muted-foreground" />
                       {portfolio.followers_count.toLocaleString()}
@@ -417,7 +417,7 @@ export default function PortfolioOwnerDetail() {
               <DialogHeader>
                 <DialogTitle>Execute Portfolio & Go Live</DialogTitle>
                 <DialogDescription>
-                  You're about to take your portfolio live. This will allow other investors to allocate to it.
+                  You're about to take your portfolio live. This will allow followers to allocate to it.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -467,7 +467,7 @@ export default function PortfolioOwnerDetail() {
               <DialogHeader>
                 <DialogTitle>Make Portfolio Public</DialogTitle>
                 <DialogDescription>
-                  Your portfolio will be visible in the marketplace. Other investors can discover and allocate to it.
+                  Your portfolio will be visible in the marketplace. Followers can discover and allocate to it.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4 space-y-4">
@@ -475,8 +475,8 @@ export default function PortfolioOwnerDetail() {
                   <h4 className="font-medium mb-2">What happens when you go public:</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Your portfolio appears in the Explore marketplace</li>
-                    <li>• Investors can view your performance and allocate capital</li>
-                    <li>• You earn fees from investor allocations</li>
+                    <li>• Followers can view your performance and allocate capital</li>
+                    <li>• You earn fees from follower allocations</li>
                     <li>• Your holdings remain protected (exposure-only view)</li>
                   </ul>
                 </div>

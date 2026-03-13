@@ -50,7 +50,7 @@ export function StrategyControls({
     toast({
       title: isPaused ? "Allocations resumed (prototype)" : "Allocations paused (prototype)",
       description: isPaused 
-        ? "New investors can now allocate to this portfolio."
+        ? "New followers can now allocate to this portfolio."
         : "New allocations are temporarily paused. Existing followers are unaffected.",
     });
   };
@@ -124,7 +124,7 @@ export function StrategyControls({
             </TooltipTrigger>
             <TooltipContent className="text-xs max-w-[200px]">
               {isPaused 
-               ? "Allow new investors to allocate to this portfolio"
+               ? "Allow new followers to allocate to this portfolio"
                  : "Temporarily stop accepting new allocations"}
             </TooltipContent>
           </Tooltip>

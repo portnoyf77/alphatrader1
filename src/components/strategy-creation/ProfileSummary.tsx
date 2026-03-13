@@ -9,7 +9,7 @@ import {
   deriveGemstone,
   questions 
 } from '@/lib/strategyProfile';
-import { cn } from '@/lib/utils';
+import { cn, riskDisplayLabel } from '@/lib/utils';
 
 interface ProfileSummaryProps {
   profile: StrategyProfile;
@@ -85,7 +85,7 @@ export function ProfileSummary({ profile, onGenerate, onBack }: ProfileSummaryPr
       <div className="grid grid-cols-3 gap-4 mb-8">
         <Card className="glass-card text-center p-4">
           <p className="text-sm text-muted-foreground mb-1">Risk Profile</p>
-          <p className={cn('text-xl font-bold', getRiskColor())}>{riskLevel}</p>
+          <p className={cn('text-xl font-bold', getRiskColor())}>{riskDisplayLabel(riskLevel)}</p>
         </Card>
         <Card className="glass-card text-center p-4">
           <p className="text-sm text-muted-foreground mb-1">Strategy Type</p>
