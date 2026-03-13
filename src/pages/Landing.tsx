@@ -176,7 +176,7 @@ export default function Landing() {
                   </p>
                   <p
                     className="mt-2 uppercase tracking-[0.05em] text-[0.65rem] sm:text-[0.8rem]"
-                    style={{ color: 'rgba(255,255,255,0.35)' }}
+                    style={{ color: 'rgba(255,255,255,0.5)' }}
                   >
                     {stat.label}
                   </p>
