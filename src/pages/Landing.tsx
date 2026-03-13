@@ -233,7 +233,7 @@ export default function Landing() {
       </section>
 
       {/* Alpha Spotlight Section */}
-      <AlphaSpotlight strategies={validatedStrategies} />
+      <AlphaSpotlight strategies={validatedPortfolios} />
 
       {/* How Alphas Earn Section */}
       <HowAlphasEarn />
