@@ -87,7 +87,7 @@ export function GemDot({ name, size = 16, className, showTooltip = true }: GemDo
         <TooltipTrigger asChild>
           {dot}
         </TooltipTrigger>
-        <TooltipContent className="text-xs max-w-[250px]">
+        <TooltipContent side="top" align="center" className="text-xs max-w-[250px]">
           {tooltipText}
         </TooltipContent>
       </Tooltip>
