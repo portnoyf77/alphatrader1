@@ -5,7 +5,7 @@ import { ValidationBadge } from './ValidationBadge';
 import { PortfolioThumbnail } from './PortfolioThumbnail';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemstoneForSector } from '@/lib/portfolioNaming';
+import { riskToGem } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';
 
@@ -18,7 +18,7 @@ interface PortfolioCardProps {
 export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: PortfolioCardProps) {
   const isPositive = portfolio.performance.return_30d >= 0;
   const isValidated = portfolio.validation_status === 'validated' && portfolio.validation_criteria_met;
-  const gemstone = portfolio.sectors[0] ? getGemstoneForSector(portfolio.sectors[0]) : 'Quartz';
+  const gemstone = riskToGem(portfolio.risk_level);
 
   return (
     <Link to={`/portfolio/${portfolio.id}`}>

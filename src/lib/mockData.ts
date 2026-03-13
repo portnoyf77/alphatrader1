@@ -121,7 +121,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '3',
-    name: 'Sapphire-872',
+    name: 'Ruby-872',
     creator_id: '@quant_trader',
     status: 'private',
     visibility_mode: 'transparent',
@@ -176,7 +176,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '4',
-    name: 'Amber-108',
+    name: 'Pearl-108',
     creator_id: '@div_hunter',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -235,7 +235,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '5',
-    name: 'Opal-412',
+    name: 'Ruby-412',
     creator_id: '@macro_edge',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -295,7 +295,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '6',
-    name: 'Peridot-756',
+    name: 'Sapphire-756',
     creator_id: '@green_alpha',
     status: 'private',
     visibility_mode: 'transparent',
@@ -351,7 +351,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '7',
-    name: 'Diamond-127',
+    name: 'Pearl-127',
     creator_id: '@steady_returns',
     status: 'validated_listed',
     visibility_mode: 'transparent',
@@ -410,7 +410,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '8',
-    name: 'Emerald-489',
+    name: 'Sapphire-489',
     creator_id: '@bio_investor',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -471,7 +471,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '9',
-    name: 'Citrine-385',
+    name: 'Pearl-385',
     creator_id: '@value_seeker',
     status: 'validated_listed',
     visibility_mode: 'masked',
@@ -645,7 +645,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '12',
-    name: 'Obsidian-333',
+    name: 'Sapphire-333',
     creator_id: '@retired_fund_mgr',
     status: 'inactive',
     visibility_mode: 'transparent',

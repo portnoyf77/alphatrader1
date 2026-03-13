@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PortfolioThumbnail } from '@/components/PortfolioThumbnail';
 import { formatCurrency } from '@/lib/mockData';
-import { getGemstoneForSector } from '@/lib/portfolioNaming';
+import { riskToGem } from '@/lib/portfolioNaming';
 import { Strategy } from '@/lib/types';
 
 interface AlphaSpotlightProps {
@@ -36,7 +36,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {topAlphas.map((strategy, index) => {
-            const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
+            const gemstone = riskToGem(strategy.risk_level);
             
             return (
               <Card 

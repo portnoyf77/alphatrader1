@@ -106,9 +106,9 @@ export default function Explore() {
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Risk Levels</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Low">Conservative (Pearl)</SelectItem>
+            <SelectItem value="Medium">Moderate (Sapphire)</SelectItem>
+            <SelectItem value="High">Aggressive (Ruby)</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -281,12 +281,12 @@ export default function Explore() {
               </div>
               <div className="hidden lg:flex gap-3">
                 <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
-                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
+                  <SelectTrigger className="w-[180px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Low">Conservative (Pearl)</SelectItem>
+                    <SelectItem value="Medium">Moderate (Sapphire)</SelectItem>
+                    <SelectItem value="High">Aggressive (Ruby)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>

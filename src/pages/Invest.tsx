@@ -227,14 +227,9 @@ export default function Create() {
               {(() => {
                 const gemName = generatedPortfolio.name.split('-')[0];
                 const explanations: Record<string, string> = {
-                  'Ruby': 'Ruby reflects your high-risk, high-growth approach',
-                  'Sapphire': 'Sapphire represents your balanced, growth-oriented outlook',
-                  'Emerald': 'Emerald signals your focus on sustainable, green investments',
-                  'Pearl': 'Pearl embodies your conservative, stability-first philosophy',
-                  'Amber': 'Amber captures your income-focused, dividend-driven style',
-                  'Diamond': 'Diamond represents your diversified, all-weather approach',
-                  'Opal': 'Opal reflects your unique, multi-faceted investment blend',
-                  'Topaz': 'Topaz signals your momentum-driven, trend-following style',
+                  'Ruby': 'Ruby reflects your high-risk, high-growth approach — bold and decisive.',
+                  'Sapphire': 'Sapphire represents your balanced, growth-oriented outlook — precision with purpose.',
+                  'Pearl': 'Pearl embodies your conservative, stability-first philosophy — smooth and secure.',
                 };
                 const explanation = explanations[gemName] || `${gemName} reflects your personalized investment approach`;
                 return (

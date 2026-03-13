@@ -7,7 +7,7 @@ interface GemStoneProps {
 }
 
 export function GemStone({ gemstoneType, phase, riskLevel }: GemStoneProps) {
-  const colors = gemstoneColors[gemstoneType] || gemstoneColors.Diamond;
+  const colors = gemstoneColors[gemstoneType] || gemstoneColors.Sapphire;
   
   const getBrilliance = () => {
     switch (riskLevel) {

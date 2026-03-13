@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Gauge, Eye, List, PieChart, BarChart3, History, MessageCircle, Gem, Hexagon, Diamond, Pentagon, Octagon, Circle, Triangle, Square as SquareIcon } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Gauge, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,20 +20,10 @@ import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/l
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 
-const gemstoneIcons: Record<string, React.ElementType> = {
-  'Sapphire': Gem,
-  'Emerald': Hexagon,
-  'Peridot': Pentagon,
-  'Amber': SquareIcon,
-  'Pearl': Circle,
-  'Opal': Octagon,
-  'Diamond': Diamond,
-  'Topaz': Triangle,
-  'Quartz': Gem,
-};
+// Removed old gemstone icon mapping — now uses GemDot component
 
 export default function StrategyDetail() {
   const { id } = useParams();
@@ -142,12 +132,11 @@ export default function StrategyDetail() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 {(() => {
-                  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
-                  const gemColors = getGemstoneColor(gemstone);
-                  const GemIcon = gemstoneIcons[gemstone] || Gem;
+                  const gemType = getGemFromName(strategy.name);
+                  const gemColors = getGemstoneColor(gemType);
                   return (
                     <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border", gemColors.bg, gemColors.border)}>
-                      <GemIcon className={cn("h-6 w-6", gemColors.text)} />
+                      <GemDot name={strategy.name} size={24} />
                     </div>
                   );
                 })()}

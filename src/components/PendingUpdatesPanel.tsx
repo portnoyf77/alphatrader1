@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { GemDot } from '@/components/GemDot';
+import { getGemHex } from '@/lib/portfolioNaming';
 import type { Portfolio } from '@/lib/types';
 
 interface PendingUpdatesPanelProps {
@@ -69,9 +70,7 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
           </p>
           
           {strategiesWithPending.map((strategy) => {
-            const gemPrefix = strategy.name.split('-')[0];
-            const gemColorMap: Record<string, string> = { 'Emerald': '#10B981', 'Citrine': '#F59E0B', 'Ruby': '#E11D48', 'Sapphire': '#3B82F6', 'Opal': '#EC4899', 'Diamond': '#A78BFA', 'Amber': '#D97706', 'Amethyst': '#8B5CF6', 'Topaz': '#06B6D4', 'Pearl': '#E2E8F0' };
-            const leftBorderColor = gemColorMap[gemPrefix] || '#7C3AED';
+            const leftBorderColor = getGemHex(strategy.name).color;
             return (
             <div key={strategy.id} className="p-4 rounded-lg bg-background border border-border" style={{ borderLeft: `3px solid ${leftBorderColor}` }}>
               <div className="flex items-start justify-between gap-4">
@@ -130,7 +129,6 @@ export function PendingUpdatesPanel({ strategies, rebalancingMode = 'auto', onAc
         </CardContent>
       </Card>
 
-      {/* Exit Confirmation Dialog */}
       <Dialog open={exitDialogOpen} onOpenChange={setExitDialogOpen}>
         <DialogContent className="glass-card">
           <DialogHeader>
