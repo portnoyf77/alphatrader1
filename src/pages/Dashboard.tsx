@@ -39,45 +39,6 @@ const userTotalReturn = 12.4;
 const sp500Return = 9.8;
 const vsSP500 = userTotalReturn - sp500Return;
 
-// Seeded random for deterministic chart data
-function seededRandom(seed: number) {
-  let s = seed;
-  return function() {
-    s = (s * 16807) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
-
-// Mock benchmark chart data (deterministic)
-function generateBenchmarkData(days: number) {
-  const random = seededRandom(days * 7 + 123);
-  const data = [];
-  let portfolio = 100000;
-  let sp500 = 100000;
-  let dow = 100000;
-  const now = new Date('2025-01-15');
-  for (let i = days; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    portfolio += portfolio * ((random() - 0.47) * 0.015);
-    sp500 += sp500 * ((random() - 0.48) * 0.012);
-    dow += dow * ((random() - 0.48) * 0.011);
-    data.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      'My Portfolio': Math.round(portfolio),
-      'S&P 500': Math.round(sp500),
-      'Dow Jones': Math.round(dow),
-    });
-  }
-  return data;
-}
-
-const benchmarkDataSets: Record<string, ReturnType<typeof generateBenchmarkData>> = {
-  '30D': generateBenchmarkData(30),
-  '90D': generateBenchmarkData(90),
-  'YTD': generateBenchmarkData(120),
-  '1Y': generateBenchmarkData(365),
-};
 
 // Mock news with thumbnail gradients per sector
 const sectorGradients: Record<string, string> = {
