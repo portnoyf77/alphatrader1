@@ -1,30 +1,25 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle, Briefcase, Handshake, FlaskConical, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle, Briefcase, Handshake, FlaskConical, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { PendingUpdatesPanel } from '@/components/PendingUpdatesPanel';
 import { GemDot } from '@/components/GemDot';
-import { formatCurrency, formatPercent, mockPortfolios, getPortfoliosWithPendingUpdates } from '@/lib/mockData';
+import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
-
 import { useCountUp } from '@/hooks/useCountUp';
 
 // My portfolios (ones I created)
 const myPortfolios = mockPortfolios.slice(0, 4);
 // Portfolios I've invested in — hardcoded values per portfolio
 const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
-  '5': { myAllocation: 38000, myReturn: -4.8 },  // Sapphire-412
-  '6': { myAllocation: 33000, myReturn: 0.0 },    // Ruby-756
-  '7': { myAllocation: 33000, myReturn: 5.0 },    // Pearl-127
+  '5': { myAllocation: 38000, myReturn: -4.8 },
+  '6': { myAllocation: 33000, myReturn: 0.0 },
+  '7': { myAllocation: 33000, myReturn: 5.0 },
 };
 const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
   ...p,
@@ -38,7 +33,6 @@ const simulatingPortfolios = myPortfolios.filter(p => p.status === 'private');
 const userTotalReturn = 12.4;
 const sp500Return = 9.8;
 const vsSP500 = userTotalReturn - sp500Return;
-
 
 // Mock news with thumbnail gradients per sector
 const sectorGradients: Record<string, string> = {
@@ -60,175 +54,76 @@ const mockNews = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showOnlyValidated, setShowOnlyValidated] = useState(false);
-  const [rebalancingMode, setRebalancingMode] = useState<'auto' | 'manual'>(() => {
-    const saved = localStorage.getItem('rebalancingMode');
-    return saved === 'manual' ? 'manual' : 'auto';
-  });
-  const [rebalancingModalOpen, setRebalancingModalOpen] = useState(false);
-  
 
   const filteredMyPortfolios = showOnlyValidated 
     ? myPortfolios.filter(s => s.validation_status === 'validated' && s.validation_criteria_met && s.status === 'validated_listed')
     : myPortfolios.filter(s => s.status !== 'private');
 
-  const validatedCount = myPortfolios.filter(s => s.status === 'validated_listed').length;
+  const liveCount = myPortfolios.filter(s => s.status !== 'private').length;
   const simulatingCount = myPortfolios.filter(s => s.status === 'private').length;
   const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
+  const totalValue = totalMyInvestment + totalInvestedInOthers;
 
-  // Count-up animations for stat tiles
-  const animPortfolioCount = useCountUp(myPortfolios.length, 800);
-  const animInvestedCount = useCountUp(investedPortfolios.length, 800);
+  // Count-up animations for summary bar
   const animMyInvestment = useCountUp(totalMyInvestment, 800);
-  const animTotalValue = useCountUp(totalMyInvestment + totalInvestedInOthers, 800);
+  const animTotalValue = useCountUp(totalValue, 800);
   const animVsSP500 = useCountUp(vsSP500, 800, 1);
-
-  const strategiesWithPending = getPortfoliosWithPendingUpdates();
 
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your portfolios and investments.</p>
         </div>
 
-        {/* Pending Updates Panel */}
-        {strategiesWithPending.length > 0 && (
-          <div className="mb-8 relative">
-            <div className="absolute top-4 right-4 z-10">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setRebalancingModalOpen(true)}
-                    className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-                  >
-                    <Settings className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[250px]">Configure rebalancing mode: auto-apply or require approval</TooltipContent>
-              </Tooltip>
-            </div>
-            <PendingUpdatesPanel strategies={strategiesWithPending} rebalancingMode={rebalancingMode} />
+        {/* Summary Bar */}
+        <div className="flex items-center gap-3 mb-8 flex-wrap">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-mono text-[1.5rem] font-bold text-foreground">{formatCurrency(animMyInvestment)}</span>
+            <span className="text-[0.875rem] text-[rgba(255,255,255,0.4)]">invested</span>
           </div>
-        )}
-
-        {/* Stats Overview — 5 tiles */}
-        <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple relative overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">My Portfolios</p>
-                    </div>
-                    <p className="text-3xl font-bold">{animPortfolioCount}</p>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                      <span className="text-success">{validatedCount} live</span>
-                      {simulatingCount > 0 && <span>• {simulatingCount} simulating</span>}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[250px]">
-                Number of portfolios you've created (live and simulating)
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-purple relative overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Wallet className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Invested in Others</p>
-                    </div>
-                    <p className="text-3xl font-bold">{animInvestedCount}</p>
-                    <p className="text-xs text-muted-foreground mt-2">{formatCurrency(totalInvestedInOthers)} allocated</p>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[250px]">
-                Number of Alpha portfolios you're following
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-green relative overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Shield className="h-4 w-4 text-success" />
-                      <p className="text-sm text-muted-foreground">My Investment</p>
-                    </div>
-                    <p className="text-3xl font-bold text-success">{formatCurrency(animMyInvestment)}</p>
-                    <p className="text-xs text-muted-foreground mt-2">In my own portfolios</p>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[250px]">
-                Total capital invested in your own portfolios
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-amber relative overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Total Value</p>
-                    </div>
-                    <p className="text-3xl font-bold">{formatCurrency(animTotalValue)}</p>
-                    <p className="text-xs text-muted-foreground mt-2">All investments</p>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[250px]">
-                Combined current value of all your investments
-              </TooltipContent>
-            </Tooltip>
-            {/* vs S&P 500 tile */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Card className={cn("glass-card cursor-help accent-bar-green relative overflow-hidden", vsSP500 >= 0 ? "" : "")}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      {vsSP500 >= 0 ? <TrendingUp className="h-4 w-4 text-success" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
-                      <p className="text-sm text-muted-foreground">vs S&P 500</p>
-                    </div>
-                    <p className={cn("text-3xl font-bold", vsSP500 >= 0 ? "text-success" : "text-destructive")}>
-                      {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      You: {formatPercent(userTotalReturn)} • S&P: {formatPercent(sp500Return)}
-                    </p>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[250px]">
-                Your total return compared to the S&P 500 index over the same period
-              </TooltipContent>
-            </Tooltip>
+          <span className="text-[rgba(255,255,255,0.15)] text-lg select-none">·</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-mono text-[1.5rem] font-bold text-foreground">{formatCurrency(animTotalValue)}</span>
+            <span className="text-[0.875rem] text-[rgba(255,255,255,0.4)]">total value</span>
           </div>
-        </TooltipProvider>
+          <span className="text-[rgba(255,255,255,0.15)] text-lg select-none">·</span>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-baseline gap-1.5 cursor-help">
+                  <span className={cn(
+                    "font-mono text-[1.5rem] font-bold",
+                    vsSP500 >= 0 ? "text-success" : "text-destructive"
+                  )}>
+                    {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
+                  </span>
+                  <span className="text-[0.875rem] text-[rgba(255,255,255,0.4)]">vs S&P 500</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs">
+                You: {formatPercent(userTotalReturn)} · S&P: {formatPercent(sp500Return)}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
-        {/* Tabbed Portfolio Lists — 3 tabs */}
+        {/* Tabbed Portfolio Lists — counts in tab labels */}
         <Tabs defaultValue="my-portfolios" className="mb-8">
           <TabsList className="mb-6">
             <TabsTrigger value="my-portfolios" className="flex items-center gap-1.5">
               <Briefcase className="h-3.5 w-3.5" />
-              My Portfolios
+              My Portfolios ({liveCount})
             </TabsTrigger>
             <TabsTrigger value="invested" className="flex items-center gap-1.5">
               <Handshake className="h-3.5 w-3.5" />
-              Invested In
+              Invested In ({investedPortfolios.length})
             </TabsTrigger>
             <TabsTrigger value="simulating" className="flex items-center gap-1.5">
               <FlaskConical className="h-3.5 w-3.5" />
-              Simulating
-              {simulatingCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning/20 text-warning text-xs font-medium">{simulatingCount}</span>
-              )}
+              Simulating ({simulatingCount})
             </TabsTrigger>
           </TabsList>
 
@@ -540,44 +435,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Rebalancing Mode Modal */}
-      <Dialog open={rebalancingModalOpen} onOpenChange={setRebalancingModalOpen}>
-        <DialogContent className="glass-card sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rebalancing Mode</DialogTitle>
-            <DialogDescription>
-              Choose how portfolio updates from Alphas you follow are handled.
-            </DialogDescription>
-          </DialogHeader>
-          <RadioGroup value={rebalancingMode} onValueChange={(v) => {
-            const mode = v as 'auto' | 'manual';
-            setRebalancingMode(mode);
-            localStorage.setItem('rebalancingMode', mode);
-          }} className="space-y-3 py-4">
-            <div className={cn("flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer", rebalancingMode === 'auto' ? "border-primary bg-primary/5" : "border-border")}>
-              <RadioGroupItem value="auto" id="auto" className="mt-0.5" />
-              <Label htmlFor="auto" className="cursor-pointer">
-                <p className="font-medium">Auto-apply and notify me</p>
-                <p className="text-xs text-muted-foreground mt-1">Rebalancing changes are applied automatically. You'll be notified after.</p>
-              </Label>
-            </div>
-            <div className={cn("flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer", rebalancingMode === 'manual' ? "border-primary bg-primary/5" : "border-border")}>
-              <RadioGroupItem value="manual" id="manual" className="mt-0.5" />
-              <Label htmlFor="manual" className="cursor-pointer">
-                <p className="font-medium">Require my approval</p>
-                <p className="text-xs text-muted-foreground mt-1">You must review and accept each update before it applies.</p>
-              </Label>
-            </div>
-          </RadioGroup>
-          <p className="text-xs text-muted-foreground border-t border-border pt-3">
-            By selecting Auto-apply, you authorize Alpha Trader to rebalance your portfolio automatically. This does not constitute investment advice.
-          </p>
-          <DialogFooter>
-            <Button onClick={() => setRebalancingModalOpen(false)}>Save Preference</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </PageLayout>
   );
 }

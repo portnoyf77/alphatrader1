@@ -82,6 +82,7 @@ export function Navbar() {
           )}
 
           <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated && <NotificationBell />}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
                 <TooltipProvider delayDuration={300}>
