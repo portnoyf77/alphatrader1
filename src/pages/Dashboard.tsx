@@ -154,7 +154,7 @@ export default function Dashboard() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="glass-card cursor-help accent-bar-blue relative overflow-hidden">
+                <Card className="glass-card cursor-help accent-bar-purple relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="h-4 w-4 text-muted-foreground" />
