@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Crown, Star, AlertTriangle } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Crown, Coins } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemHex, getGemstoneColor, getGemFromName } from '@/lib/portfolioNaming';
+import { getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
+import { calculateAlphaScore } from '@/lib/alphaScore';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
 
-// Map sectors to icons
+// Map sectors to monochrome Lucide icons
 const sectorIcons: Record<string, React.ElementType> = {
   'Technology': Laptop,
   'Semiconductors': Laptop,
@@ -21,8 +22,8 @@ const sectorIcons: Record<string, React.ElementType> = {
   'Clean Energy': Leaf,
   'Solar': Leaf,
   'Batteries': Zap,
-  'Dividend': DollarSign,
-  'Income': DollarSign,
+  'Dividend': Coins,
+  'Income': Coins,
   'REITs': DollarSign,
   'Bonds': Shield,
   'Long Bonds': Shield,
@@ -37,13 +38,8 @@ const sectorIcons: Record<string, React.ElementType> = {
   'Small Value': TrendingUp,
   'Momentum': TrendingUp,
   'Commodities': BarChart3,
-};
-
-const geoLabels: Record<GeoFocus, { label: string; flag: string; tooltip: string }> = {
-  'US': { label: 'US', flag: '🇺🇸', tooltip: 'Focused on United States markets' },
-  'Global': { label: 'Global', flag: '🌍', tooltip: 'Diversified across global markets' },
-  'Emerging Markets': { label: 'EM', flag: '🌏', tooltip: 'Focused on emerging market economies' },
-  'International': { label: 'Intl', flag: '🌐', tooltip: 'International developed markets excluding US' },
+  'Global': Globe,
+  'Consumer': BarChart3,
 };
 
 const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip: string }> = {
@@ -66,20 +62,11 @@ interface StrategyCardProps {
 export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const isPositive = strategy.performance.return_30d >= 0;
   const isPaused = strategy.new_allocations_paused;
-  const geoInfo = geoLabels[strategy.geo_focus];
   const riskInfo = riskConfig[strategy.risk_level];
-  const displaySectors = strategy.sectors.slice(0, 2);
+  const displaySectors = strategy.sectors.slice(0, 3);
   
-  const gemType = getGemFromName(strategy.name);
-  const gemColors = getGemstoneColor(gemType);
   const gemHex = getGemHex(strategy.name);
-
-  // Reputation score
-  const daysActive = Math.floor((Date.now() - new Date(strategy.created_date).getTime()) / (1000 * 60 * 60 * 24));
-  const baseScore = strategy.performance.consistency_score * 2.5;
-  const trackRecord = Math.min(daysActive / 365, 1) * 1.0;
-  const followerBonus = Math.min(strategy.followers_count / 1000, 1) * 0.5;
-  const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus).toFixed(1);
+  const reputationScore = calculateAlphaScore(strategy).toFixed(1);
 
   return (
     <Link to={`/portfolio/${strategy.id}`}>
@@ -88,14 +75,9 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
         style={{ borderLeft: `3px solid ${gemHex.color}` }}
       >
         <CardContent className="p-5">
+          {/* Header: Gem + Name + Score */}
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-start gap-3">
-              {rank && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-primary font-bold text-sm">
-                  #{rank}
-                </div>
-              )}
-              <div>
+            <div>
               <div className="flex items-center gap-2">
                 <GemDot name={strategy.name} />
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -105,19 +87,17 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-xs cursor-help shrink-0">
-                        <Crown className="h-3 w-3 text-primary" />
-                        <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        <span className="font-semibold text-primary">{reputationScore}</span>
+                        <Crown className="h-3.5 w-3.5 text-primary" />
+                        <span className="font-semibold text-primary font-mono">{reputationScore}</span>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="text-xs max-w-[200px]">
-                      Alpha reputation score based on track record, consistency, and follower count
+                      Alpha reputation score based on performance, consistency, track record, and follower count
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
-              </div>
             </div>
             <div className="flex items-center gap-2">
               {isPaused && (
@@ -126,26 +106,10 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   Paused
                 </div>
               )}
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg cursor-help shrink-0",
-                      gemColors.bg,
-                      gemColors.border,
-                      "border"
-                    )}>
-                      <GemDot name={strategy.name} size={20} />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    {gemType} — {riskInfo.label}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </div>
           </div>
 
+          {/* Tags: Sectors + Risk Level */}
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               {displaySectors.map((sector, idx) => {
@@ -164,18 +128,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </Tooltip>
                 );
               })}
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
-                    <span>{geoInfo.flag}</span>
-                    {geoInfo.label}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs">
-                  {geoInfo.tooltip}
-                </TooltipContent>
-              </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -187,27 +139,10 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   {riskInfo.tooltip}
                 </TooltipContent>
               </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
-                    {strategy.strategy_type === 'GenAI' ? (
-                      <Sparkles className="h-3 w-3" />
-                    ) : (
-                      <Wrench className="h-3 w-3" />
-                    )}
-                    {strategy.strategy_type}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs">
-                  {strategy.strategy_type === 'GenAI' 
-                    ? 'Built with AI-powered optimization' 
-                    : 'Manually constructed by creator'}
-                </TooltipContent>
-              </Tooltip>
             </div>
           </TooltipProvider>
 
+          {/* Stats grid */}
           <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-3 gap-4">
               <Tooltip>
@@ -261,6 +196,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             </div>
           </TooltipProvider>
 
+          {/* Bottom stats */}
           <TooltipProvider delayDuration={200}>
             <div className="mt-4 pt-4 border-t border-border/50 space-y-1">
               <Tooltip>
@@ -305,13 +241,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
               </Tooltip>
             </div>
           </TooltipProvider>
-
-          <div className="mt-3 p-2 flex items-start gap-1.5" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderLeft: '3px solid #EF4444', borderRadius: '8px' }}>
-            <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-destructive" />
-            <p className="text-[11px]" style={{ color: 'rgba(245, 158, 11, 0.8)' }}>
-              If this Alpha exits their position, your allocation will automatically follow.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </Link>

@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Users, DollarSign, Crown, Shield } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Crown, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { GemDot } from '@/components/GemDot';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { riskToGem } from '@/lib/portfolioNaming';
+import { getGemHex } from '@/lib/portfolioNaming';
+import { calculateAlphaScore } from '@/lib/alphaScore';
 import { cn } from '@/lib/utils';
 import { Strategy } from '@/lib/types';
 
@@ -37,20 +38,30 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {topAlphas.map((strategy) => {
-            const gemstone = riskToGem(strategy.risk_level);
+            const gemHex = getGemHex(strategy.name);
             const isPositive = strategy.performance.return_30d >= 0;
+            const reputationScore = calculateAlphaScore(strategy).toFixed(1);
 
             return (
               <Link key={strategy.id} to={`/portfolio/${strategy.id}`}>
-                <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+                <Card
+                  className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+                  style={{ borderLeft: `3px solid ${gemHex.color}` }}
+                >
                   <CardContent className="p-5">
-                    {/* Header: Gem + Name */}
+                    {/* Header: Gem + Name + Score */}
                     <div className="flex items-start gap-3 mb-4">
-                      <GemDot name={gemstone} size={16} showTooltip />
                       <div>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {strategy.name}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <GemDot name={strategy.name} size={16} showTooltip />
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            {strategy.name}
+                          </h3>
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-xs shrink-0">
+                            <Crown className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-semibold text-primary font-mono">{reputationScore}</span>
+                          </span>
+                        </div>
                         <p className="text-sm text-muted-foreground font-mono">{strategy.creator_id}</p>
                       </div>
                     </div>
@@ -72,7 +83,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
                       </div>
                     </TooltipProvider>
 
-                    {/* Stats grid — matches marketplace card */}
+                    {/* Stats grid */}
                     <TooltipProvider delayDuration={200}>
                       <div className="grid grid-cols-3 gap-4">
                         <Tooltip>
@@ -124,7 +135,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
                       </div>
                     </TooltipProvider>
 
-                    {/* Alpha Earnings — green highlight */}
+                    {/* Alpha Earnings */}
                     <div className="mt-4 pt-4 border-t border-border/50">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Alpha Earnings (monthly est.)</span>
@@ -144,7 +155,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
           <Button asChild size="lg" className="glow-primary">
             <Link to="/alpha">
               Become an Alpha
-              <TrendingUp className="ml-2 h-4 w-4" />
+              <Crown className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
