@@ -311,7 +311,7 @@ export default function Simulation() {
             label="Sharpe Ratio"
             value={(liveReturn / Math.max(Math.abs(liveDrawdown) * 2 || 1, 0.01)).toFixed(2)}
             icon={<BarChart3 className="h-4 w-4" />}
-            tooltip="Risk-adjusted return — higher is better (return divided by volatility)"
+            tooltip="Risk-adjusted return — higher is better. Above 1.0 is considered good."
           />
           <MetricCard
             label="vs S&P 500"
