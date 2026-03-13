@@ -18,7 +18,7 @@ import { StrategyRiskProfile } from '@/components/StrategyRiskProfile';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
 import { mockStrategies, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
