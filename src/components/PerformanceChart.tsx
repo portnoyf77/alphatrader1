@@ -36,7 +36,9 @@ export function PerformanceChart({ return30d, return90d, portfolioName }: Perfor
     'all': return90d * 4,
   };
   
-  const data = generateChartData(daysMap[timeframe], returnMap[timeframe]);
+  // Generate a deterministic seed from portfolio name + timeframe
+  const seed = portfolioName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) * 1000 + daysMap[timeframe];
+  const data = generateChartData(daysMap[timeframe], returnMap[timeframe], seed);
 
   return (
     <Card className="glass-card">
