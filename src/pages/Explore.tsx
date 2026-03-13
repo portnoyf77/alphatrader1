@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy, Crown, Star, Users, DollarSign, Clock } from 'lucide-react';
+import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy, Crown, Users, DollarSign, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,10 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StrategyCard } from '@/components/StrategyCard';
 import { GemDot } from '@/components/GemDot';
+import { MarketplaceHelpButton } from '@/components/MarketplaceHelpModal';
 import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
 import { getGemHex } from '@/lib/portfolioNaming';
+import { calculateAlphaScore } from '@/lib/alphaScore';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
@@ -22,40 +24,57 @@ type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
 type StrategyFilter = 'all' | 'GenAI' | 'Manual';
 type VisibilityFilter = 'all' | 'masked' | 'transparent';
 type TurnoverFilter = 'all' | 'low' | 'medium' | 'high';
+type ChartTimeframe = '30D' | '90D' | 'YTD' | '1Y';
+
+const timeframeLabels: Record<ChartTimeframe, string> = {
+  '30D': 'last 30 days',
+  '90D': 'last 90 days',
+  'YTD': 'year to date',
+  '1Y': 'last 12 months',
+};
 
 export default function Explore() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [objectiveFilter, setObjectiveFilter] = useState<ObjectiveFilter>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
   const [turnoverFilter, setTurnoverFilter] = useState<TurnoverFilter>('all');
+  const [chartTimeframe, setChartTimeframe] = useState<ChartTimeframe>('30D');
 
   const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
 
-  // Top 5 strategies by risk-adjusted returns for the leaderboard chart
+  // Return key based on timeframe
+  const getReturnForTimeframe = (strategy: any, tf: ChartTimeframe) => {
+    switch (tf) {
+      case '30D': return strategy.performance.return_30d;
+      case '90D': return strategy.performance.return_90d;
+      case 'YTD': return strategy.performance.return_90d * 1.2; // simulated
+      case '1Y': return strategy.performance.return_90d * 2.5; // simulated
+      default: return strategy.performance.return_30d;
+    }
+  };
+
+  // Top 5 strategies by return for selected timeframe
   const leaderboardData = useMemo(() => {
     return [...validatedStrategies]
-      .sort((a, b) => (b.performance.return_90d / b.performance.volatility) - (a.performance.return_90d / a.performance.volatility))
+      .sort((a, b) => getReturnForTimeframe(b, chartTimeframe) - getReturnForTimeframe(a, chartTimeframe))
       .slice(0, 5)
-      .map((strategy, index) => ({
+      .map((strategy) => ({
         name: strategy.name,
         id: strategy.id,
-        return30d: strategy.performance.return_30d,
+        returnValue: Number(getReturnForTimeframe(strategy, chartTimeframe).toFixed(1)),
         riskAdjusted: (strategy.performance.return_90d / strategy.performance.volatility).toFixed(2),
-        rank: index + 1,
       }));
-  }, [validatedStrategies]);
+  }, [validatedStrategies, chartTimeframe]);
 
   // Alpha leaderboard ranking by composite score
   const alphaLeaderboard = useMemo(() => {
     return [...validatedStrategies]
       .map((s) => {
         const trackRecordDays = Math.floor((Date.now() - new Date(s.created_date).getTime()) / (1000 * 60 * 60 * 24));
-        const baseScore = s.performance.consistency_score * 2.5;
-        const trackRecord = Math.min(trackRecordDays / 365, 1) * 1.0;
-        const followerBonus = Math.min(s.followers_count / 1000, 1) * 0.5;
-        const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus);
+        const reputationScore = calculateAlphaScore(s);
         return {
           ...s,
           trackRecordDays,
@@ -63,7 +82,6 @@ export default function Explore() {
         };
       })
       .sort((a, b) => {
-        // Composite: followers weight + allocated weight + earnings weight + track record weight
         const scoreA = a.followers_count * 0.3 + a.allocated_amount_usd * 0.0001 + a.creator_est_monthly_earnings_usd * 0.5 + a.trackRecordDays * 0.01;
         const scoreB = b.followers_count * 0.3 + b.allocated_amount_usd * 0.0001 + b.creator_est_monthly_earnings_usd * 0.5 + b.trackRecordDays * 0.01;
         return scoreB - scoreA;
@@ -170,7 +188,7 @@ export default function Explore() {
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="font-medium text-sm">{payload[0].payload.name}</p>
-          <p className="text-xs text-muted-foreground">30d Return: <span className="text-success font-medium">{payload[0].value.toFixed(1)}%</span></p>
+          <p className="text-xs text-muted-foreground">Return: <span className="text-success font-medium">{payload[0].value.toFixed(1)}%</span></p>
           <p className="text-xs text-muted-foreground">Risk-Adjusted: <span className="text-primary font-medium">{payload[0].payload.riskAdjusted}</span></p>
         </div>
       );
@@ -182,8 +200,11 @@ export default function Explore() {
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Marketplace</h1>
-          <div className="flex items-start gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <h1 className="text-3xl font-bold">Marketplace</h1>
+            <MarketplaceHelpButton />
+          </div>
+          <div className="flex items-start gap-2 mb-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
               <CheckCircle2 className="h-4 w-4" />
               All portfolios here are validated and eligible to accept allocations.
@@ -198,6 +219,14 @@ export default function Explore() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+          </div>
+          {/* Allocation mirroring info banner */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm">
+            <Info className="h-4 w-4 shrink-0" />
+            <span>
+              When you allocate to a portfolio, your position automatically mirrors the Alpha's actions, including exits.{' '}
+              <MarketplaceHelpInlineLink />
+            </span>
           </div>
         </div>
 
@@ -220,25 +249,41 @@ export default function Explore() {
                     <Trophy className="h-5 w-5 text-primary" />
                     <CardTitle className="text-lg">Top Performers</CardTitle>
                   </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="left" className="max-w-xs">
-                        <p className="text-sm">Ranked by risk-adjusted returns (return divided by volatility). Higher is better.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <div className="flex items-center gap-1">
+                    {(['30D', '90D', 'YTD', '1Y'] as ChartTimeframe[]).map((tf) => (
+                      <button
+                        key={tf}
+                        onClick={() => setChartTimeframe(tf)}
+                        className={cn(
+                          "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                          chartTimeframe === tf
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-secondary"
+                        )}
+                      >
+                        {tf}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">Top 5 portfolios by risk-adjusted performance</p>
+                <p className="text-sm text-muted-foreground">
+                  Top 5 portfolios by return — {timeframeLabels[chartTimeframe]}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={leaderboardData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart
+                      data={leaderboardData}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      onClick={(data) => {
+                        if (data?.activePayload?.[0]?.payload?.id) {
+                          navigate(`/portfolio/${data.activePayload[0].payload.id}`);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
                       <YAxis 
                         type="category" 
@@ -247,25 +292,46 @@ export default function Explore() {
                         stroke="hsl(var(--muted-foreground))" 
                         fontSize={12}
                         tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
+                        tick={({ x, y, payload }: any) => {
+                          const entry = leaderboardData.find(d => d.name === payload.value);
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              dy={4}
+                              textAnchor="end"
+                              fill="hsl(var(--muted-foreground))"
+                              fontSize={12}
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => entry && navigate(`/portfolio/${entry.id}`)}
+                            >
+                              {payload.value.length > 15 ? `${payload.value.slice(0, 15)}...` : payload.value}
+                            </text>
+                          );
+                        }}
                       />
                       <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
-                      <Bar dataKey="return30d" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="returnValue" radius={[0, 4, 4, 0]}>
                         {leaderboardData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={getBarColor(entry.name)} className="cursor-pointer" />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={getBarColor(entry.name)}
+                            className="cursor-pointer hover:brightness-115"
+                            style={{ filter: 'brightness(1)', transition: 'filter 0.2s' }}
+                          />
                         ))}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {leaderboardData.map((strategy, index) => (
+                  {leaderboardData.map((strategy) => (
                     <Link 
                       key={strategy.id}
                       to={`/portfolio/${strategy.id}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
                     >
                       <GemDot name={strategy.name} size={6} />
-                      <span className="font-bold text-primary">#{index + 1}</span>
                       <span className="text-foreground">{strategy.name}</span>
                     </Link>
                   ))}
@@ -351,7 +417,7 @@ export default function Explore() {
                       <TableHead className="w-12">#</TableHead>
                       <TableHead>Alpha</TableHead>
                       <TableHead className="text-center">
-                        <span className="flex items-center gap-1 justify-center"><Star className="h-3 w-3" /> Score</span>
+                        <span className="flex items-center gap-1 justify-center"><Crown className="h-3 w-3" /> Score</span>
                       </TableHead>
                       <TableHead className="text-right">
                         <span className="flex items-center gap-1 justify-end"><Users className="h-3 w-3" /> Followers</span>
@@ -391,8 +457,8 @@ export default function Explore() {
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-sm font-semibold"
                             style={{ backgroundColor: `${getGemHex(alpha.name).glow}`, color: getGemHex(alpha.name).color }}
                           >
-                            <Crown className="h-3 w-3" />
-                            {alpha.reputationScore}
+                            <Crown className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-mono">{alpha.reputationScore}</span>
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-medium">{alpha.followers_count.toLocaleString()}</TableCell>
@@ -409,5 +475,102 @@ export default function Explore() {
         </Tabs>
       </div>
     </PageLayout>
+  );
+}
+
+// Inline "Learn more" link that opens the help modal
+function MarketplaceHelpInlineLink() {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <>
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+        className="underline hover:text-blue-300 transition-colors"
+      >
+        Learn more
+      </button>
+      {open && <MarketplaceHelpInlineModal open={open} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+// Reuse the help modal content inline
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { GemDot as GemDotInline } from '@/components/GemDot';
+
+function MarketplaceHelpInlineModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="glass-elevated max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl">How the Marketplace Works</DialogTitle>
+          <DialogDescription className="sr-only">
+            Information about following portfolios, fees, risk levels, and rebalancing.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 text-sm">
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">Following a Portfolio</h4>
+            <p className="text-muted-foreground">
+              When you allocate capital to an Alpha's portfolio, your investment automatically mirrors their
+              holdings and any changes they make. You don't need to manage individual trades.
+            </p>
+          </section>
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">Fees</h4>
+            <ul className="text-muted-foreground space-y-1">
+              <li>• Alpha fee: 0.25% of your allocation annually (paid to the portfolio creator)</li>
+              <li>• Platform fee: 0.25% of your allocation annually</li>
+              <li>• Total cost: 0.50% annually</li>
+            </ul>
+          </section>
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">Risk Levels</h4>
+            <ul className="space-y-2 text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <GemDotInline name="Pearl-000" size={14} showTooltip={false} />
+                <span><strong className="text-foreground">Pearl — Conservative:</strong> focused on capital preservation and low volatility</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <GemDotInline name="Sapphire-000" size={14} showTooltip={false} />
+                <span><strong className="text-foreground">Sapphire — Moderate:</strong> balances growth and stability</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <GemDotInline name="Ruby-000" size={14} showTooltip={false} />
+                <span><strong className="text-foreground">Ruby — Aggressive:</strong> pursues maximum growth with higher risk</span>
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">What happens if the Alpha exits?</h4>
+            <p className="text-muted-foreground">
+              If an Alpha liquidates their portfolio, your allocation automatically exits as well.
+              You will be notified immediately. You may receive less than your initial investment.
+            </p>
+          </section>
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">Rebalancing</h4>
+            <p className="text-muted-foreground">
+              Alphas may periodically rebalance their portfolios. By default, minor changes apply
+              automatically and you are notified. You can change this to require your approval in
+              Dashboard settings.
+            </p>
+          </section>
+          <section>
+            <h4 className="font-semibold text-foreground mb-2">Validation Requirements</h4>
+            <p className="text-muted-foreground">
+              All portfolios listed on the marketplace have met minimum requirements: 30+ day track record,
+              maximum drawdown under 20%, at least 5 unique holdings, and verified creator.
+            </p>
+          </section>
+        </div>
+
+        <Button onClick={onClose} className="w-full mt-4">
+          Got it
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }
