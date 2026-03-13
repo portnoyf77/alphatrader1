@@ -356,7 +356,7 @@ export default function Landing() {
                     <GemDot name={portfolio.name} size={18} showTooltip={false} />
                     <span className="font-heading font-semibold" style={{ color }}>{portfolio.name}</span>
                   </div>
-                  <p className="text-xs font-mono mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <p className="text-xs font-mono mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     @{portfolio.creator_id}
                   </p>
 
