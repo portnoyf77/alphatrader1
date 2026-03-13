@@ -321,7 +321,18 @@ export default function Dashboard() {
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">My Investment</TableHead>
                       <TableHead className="text-right">30d Return</TableHead>
-                      <TableHead className="text-right">Capacity</TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[240px]">
+                              Percentage of maximum follower allocation reached for this portfolio.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
