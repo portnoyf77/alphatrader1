@@ -162,22 +162,21 @@ export default function Landing() {
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div className="container mx-auto px-4 py-14">
           <div className="flex justify-center">
-            <div className="grid grid-cols-3 gap-6 md:gap-20 max-w-3xl w-full">
+            <div className="grid grid-cols-3 gap-4 md:gap-20 max-w-3xl w-full">
               {[
-                { label: 'CAPITAL ALLOCATED', target: totalAllocated, prefix: '$', suffix: '', format: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
-                { label: 'ACTIVE FOLLOWERS', target: totalFollowers, prefix: '', suffix: '' },
-                { label: 'ALPHA EARNINGS', target: totalEarnings, prefix: '$', suffix: '/mo' },
+                { label: 'CAPITAL ALLOCATED', target: totalAllocated, formatFn: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
+                { label: 'ACTIVE FOLLOWERS', target: totalFollowers, formatFn: (v: number) => v.toLocaleString() },
+                { label: 'ALPHA EARNINGS', target: totalEarnings, formatFn: (v: number) => `$${v.toLocaleString()}/mo` },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p
-                    className="font-mono font-bold tabular-nums"
-                    style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                    className="font-mono font-bold tabular-nums text-xl sm:text-2xl md:text-[2.5rem]"
                   >
-                    <CountUpOnScroll target={stat.target} prefix={stat.prefix} suffix={stat.suffix} />
+                    <CountUpOnScroll target={stat.target} formatFn={stat.formatFn} />
                   </p>
                   <p
-                    className="mt-2 uppercase tracking-[0.05em]"
-                    style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}
+                    className="mt-2 uppercase tracking-[0.05em] text-[0.65rem] sm:text-[0.8rem]"
+                    style={{ color: 'rgba(255,255,255,0.35)' }}
                   >
                     {stat.label}
                   </p>
