@@ -91,7 +91,7 @@ export function PortfolioThumbnail({
   const geoInfo = geoLabels[geoFocus];
   
   // Get gemstone from first sector if not provided
-  const displayGemstone = gemstone || (sectors[0] ? getGemstoneForSector(sectors[0]) : 'Quartz');
+  const displayGemstone = gemstone || riskToGem(riskLevel);
   const gemstoneColors = getGemstoneColor(displayGemstone);
 
   const riskInfo = riskConfig[riskLevel];

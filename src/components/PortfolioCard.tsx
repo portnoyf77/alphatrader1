@@ -18,7 +18,7 @@ interface PortfolioCardProps {
 export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: PortfolioCardProps) {
   const isPositive = portfolio.performance.return_30d >= 0;
   const isValidated = portfolio.validation_status === 'validated' && portfolio.validation_criteria_met;
-  const gemstone = portfolio.sectors[0] ? getGemstoneForSector(portfolio.sectors[0]) : 'Quartz';
+  const gemstone = riskToGem(portfolio.risk_level);
 
   return (
     <Link to={`/portfolio/${portfolio.id}`}>

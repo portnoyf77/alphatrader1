@@ -36,7 +36,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {topAlphas.map((strategy, index) => {
-            const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
+            const gemstone = riskToGem(strategy.risk_level);
             
             return (
               <Card 
