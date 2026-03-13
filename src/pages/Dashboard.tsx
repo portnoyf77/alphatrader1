@@ -122,7 +122,7 @@ export default function Dashboard() {
   const animTotalValue = useCountUp(totalMyInvestment + totalInvestedInOthers, 800);
   const animVsSP500 = useCountUp(vsSP500, 800, 1);
 
-  const strategiesWithPending = getStrategiesWithPendingUpdates();
+  const strategiesWithPending = getPortfoliosWithPendingUpdates();
 
   return (
     <PageLayout>
