@@ -524,23 +524,34 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-lg">Market News</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             {mockNews.map((news, i) => (
               <a
                 key={i}
                 href={news.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start justify-between gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
+                className="flex items-center gap-4 py-3.5 px-4 rounded-lg hover:bg-[rgba(255,255,255,0.02)] transition-colors group"
+                style={{ borderBottom: i < mockNews.length - 1 ? '1px solid rgba(255, 255, 255, 0.04)' : undefined }}
               >
+                {/* Thumbnail */}
+                <div className="w-[72px] h-[48px] rounded-lg overflow-hidden shrink-0" style={{ background: sectorGradients[news.sector] || sectorGradients.Industrial }}>
+                  <img
+                    src={news.thumbnailUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+                {/* Text */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium group-hover:text-primary transition-colors">{news.headline}</p>
+                  <p className="text-sm font-semibold text-[rgba(255,255,255,0.92)] group-hover:text-white transition-colors truncate">{news.headline}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Tag className="h-3 w-3 text-primary" />
                     <span className="text-xs text-primary/80">{news.tag}</span>
                   </div>
                 </div>
-                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-primary transition-colors" />
+                <ExternalLink size={14} className="text-[rgba(255,255,255,0.25)] shrink-0" />
               </a>
             ))}
           </CardContent>
