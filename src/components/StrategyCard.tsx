@@ -47,9 +47,9 @@ const geoLabels: Record<GeoFocus, { label: string; flag: string; tooltip: string
 };
 
 const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip: string }> = {
-  'Low': { label: 'Low Risk', className: 'bg-slate-300/10 text-slate-300 border-slate-300/20', tooltip: 'Conservative portfolio focused on preserving your money' },
-  'Medium': { label: 'Med Risk', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
-  'High': { label: 'High Risk', className: 'bg-rose-500/10 text-rose-400 border-rose-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
+  'Low': { label: 'Conservative', className: 'bg-slate-300/10 text-slate-300 border-slate-300/20', tooltip: 'Conservative portfolio focused on preserving your money' },
+  'Medium': { label: 'Moderate', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
+  'High': { label: 'Aggressive', className: 'bg-rose-500/10 text-rose-400 border-rose-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
 };
 
 const turnoverTooltips: Record<string, string> = {
