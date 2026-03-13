@@ -171,10 +171,19 @@ export default function Simulation() {
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-[10px] h-[10px] rounded-full",
-                  simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
-                )} />
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "w-[10px] h-[10px] rounded-full cursor-help",
+                        simulationState === 'running' ? "bg-success live-pulse" : "bg-warning"
+                      )} />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      {simulationState === 'running' ? 'Simulation is running — receiving live market data' : 'Simulation is paused'}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div>
                   <p className="font-semibold">
                     {simulationState === 'running' ? 'Live Simulation' : 'Simulation Paused'}
@@ -184,14 +193,26 @@ export default function Simulation() {
                     </span>
                   </p>
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Timer className="h-3 w-3" />
-                      Elapsed: {formatElapsed(elapsedSeconds)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
-                    </span>
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            <Timer className="h-3 w-3" />
+                            Elapsed: {formatElapsed(elapsedSeconds)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">Time since simulation started</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            <Clock className="h-3 w-3" />
+                            Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">Time remaining in your free trial</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
