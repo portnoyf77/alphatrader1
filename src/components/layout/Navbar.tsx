@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
@@ -81,6 +82,7 @@ export function Navbar() {
           )}
 
           <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated && <NotificationBell />}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
                 <TooltipProvider delayDuration={300}>
