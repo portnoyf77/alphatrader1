@@ -4,7 +4,7 @@ import { RiskLevel } from './types';
  * Gem config — only 3 gem types, mapped to risk level
  */
 export const gemConfig: Record<string, { color: string; glow: string; risk: string }> = {
-  Pearl:    { color: '#E2E8F0', glow: 'rgba(226, 232, 240, 0.2)', risk: 'Conservative' },
+  Pearl:    { color: '#E2E8F0', glow: 'rgba(226, 232, 240, 0.35)', risk: 'Conservative' },
   Sapphire: { color: '#3B82F6', glow: 'rgba(59, 130, 246, 0.2)', risk: 'Moderate' },
   Ruby:     { color: '#E11D48', glow: 'rgba(225, 29, 72, 0.2)', risk: 'Aggressive' },
 };

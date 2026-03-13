@@ -18,15 +18,18 @@ export function GemDot({ name, size = 16, className, showTooltip = true }: GemDo
   const prefix = name.split('-')[0];
   const { color: c, glow: g } = getGemHex(name);
 
+  // Pearl gets boosted opacity for visibility on dark backgrounds
+  const isPearl = prefix === 'Pearl';
+
   const icons: Record<string, React.ReactNode> = {
     Pearl: (
       <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
         <circle cx="8" cy="8" r="6.5"
-          fill={c} fillOpacity={0.12}
-          stroke={c} strokeWidth="1.2"
+          fill={c} fillOpacity={0.2}
+          stroke={c} strokeWidth="1.2" strokeOpacity={1}
         />
         <ellipse cx="6.5" cy="6" rx="2.5" ry="2"
-          fill={c} fillOpacity={0.15}
+          fill={c} fillOpacity={0.25}
         />
       </svg>
     ),
@@ -72,7 +75,9 @@ export function GemDot({ name, size = 16, className, showTooltip = true }: GemDo
         height: size,
         verticalAlign: 'middle',
         flexShrink: 0,
-        filter: `drop-shadow(0 0 4px ${g})`,
+        filter: isPearl
+          ? `drop-shadow(0 0 6px rgba(226, 232, 240, 0.35))`
+          : `drop-shadow(0 0 4px ${g})`,
       }}
     >
       {icon}

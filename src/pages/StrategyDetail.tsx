@@ -14,7 +14,6 @@ import { PageLayout } from '@/components/layout/PageLayout';
 
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
-import { StrategyRiskProfile } from '@/components/StrategyRiskProfile';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
 import { mockPortfolios, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
@@ -23,15 +22,12 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 
-// Removed old gemstone icon mapping — now uses GemDot component
-
 export default function StrategyDetail() {
   const { id } = useParams();
   const location = useLocation();
   const { toast } = useToast();
   const { userPlan, selectPlan, user } = useMockAuth();
 
-  // Contextual breadcrumb
   const cameFromDashboard = useMemo(() => {
     const state = location.state as { from?: string } | null;
     return state?.from === 'dashboard';
@@ -57,12 +53,9 @@ export default function StrategyDetail() {
     );
   }
 
-  // Check if viewing user is the portfolio owner
-  // In the mock system, we compare the user's username to the creator_id
   const isOwner = user?.username === strategy.creator_id;
   const isPrivate = strategy.status === 'private';
 
-  // Inactive/liquidated strategy
   if (strategy.status === 'inactive') {
     return (
       <PageLayout>
@@ -79,7 +72,6 @@ export default function StrategyDetail() {
   }
 
   const isValidated = strategy.validation_status === 'validated' && strategy.validation_criteria_met;
-  const isPaused = strategy.new_allocations_paused;
   const hasPendingUpdate = strategy.pending_update !== undefined;
 
   const handleAllocate = () => {
@@ -91,8 +83,8 @@ export default function StrategyDetail() {
     });
   };
 
-  const alphaFeePct = strategy.creator_fee_pct; // 0.25% from portfolio data
-  const platformFeePct = 0.0025; // 0.25% platform fee
+  const alphaFeePct = strategy.creator_fee_pct;
+  const platformFeePct = 0.0025;
   const totalFeePct = alphaFeePct + platformFeePct;
   const amount = parseFloat(allocateAmount || '0');
   const totalFee = amount * totalFeePct;
@@ -249,7 +241,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[250px]">How consistently this portfolio follows its stated strategy (0-100)</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">How consistently this portfolio follows its stated strategy. Higher is more predictable. (0-100)</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -289,27 +281,60 @@ export default function StrategyDetail() {
               </TabsTrigger>
             </TabsList>
 
+            {/* MERGED OVERVIEW TAB — single full-width section */}
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid lg:grid-cols-2 gap-6">
-                <Card className="glass-card">
-                  <CardHeader><CardTitle>Portfolio Summary</CardTitle></CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-3">
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)}</span>
+              <Card className="glass-card">
+                <CardHeader><CardTitle>Portfolio Summary</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Badges row: Objective + Risk */}
+                  <div className="flex flex-wrap gap-3">
+                    <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
+                    <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)}</span>
+                  </div>
+
+                  {/* Portfolio Rationale */}
+                  <div>
+                    <h4 className="font-medium mb-2">Portfolio Rationale</h4>
+                    <p className="text-muted-foreground text-sm">{strategy.description_rationale}</p>
+                  </div>
+
+                  {/* Key Risks */}
+                  <div>
+                    <h4 className="font-medium mb-2">Key Risks</h4>
+                    <p className="text-muted-foreground text-sm">{strategy.risks}</p>
+                  </div>
+
+                  {/* Allowed Assets */}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Allowed Assets</p>
+                    <div className="flex flex-wrap gap-2">
+                      {strategy.allowed_assets.map((asset, idx) => (
+                        <span key={idx} className="px-2 py-1 rounded-md bg-secondary text-xs">
+                          {asset}
+                        </span>
+                      ))}
                     </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Portfolio Rationale</h4>
-                      <p className="text-muted-foreground text-sm">{strategy.description_rationale}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Key Risks</h4>
-                      <p className="text-muted-foreground text-sm">{strategy.risks}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <StrategyRiskProfile strategy={strategy} />
-              </div>
+                  </div>
+
+                  {/* Turnover inline */}
+                  <p className="text-sm text-muted-foreground">
+                    Turnover:{' '}
+                    <span className={cn(
+                      "font-medium capitalize",
+                      strategy.max_turnover === 'low' && "text-success",
+                      strategy.max_turnover === 'medium' && "text-warning",
+                      strategy.max_turnover === 'high' && "text-destructive"
+                    )}>
+                      {strategy.max_turnover}
+                    </span>
+                  </p>
+
+                  {/* Strategy type as small text */}
+                  <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
+                    Built with: {strategy.strategy_type === 'GenAI' ? 'AI-assisted strategy' : 'Manual strategy'}
+                  </p>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="holdings">
@@ -390,7 +415,6 @@ export default function StrategyDetail() {
                           </TableRow>
                         ))
                       ) : (
-                        // Group holdings by sector and sum weights for non-owners
                         Object.entries(
                           strategy.holdings.reduce<Record<string, number>>((acc, h) => {
                             const sector = h.sector || 'Other';
@@ -541,7 +565,7 @@ export default function StrategyDetail() {
             </TabsContent>
           </Tabs>
 
-          {/* Allocate Modal */}
+          {/* Follow Modal */}
           <Dialog open={showAllocateModal} onOpenChange={setShowAllocateModal}>
             <DialogContent className="glass-elevated">
               <DialogHeader>

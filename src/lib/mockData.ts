@@ -19,7 +19,6 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    capacity_limit_usd: 5000000,
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 35, sector: 'Broad Market' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 25, sector: 'Technology' },
@@ -79,7 +78,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'low',
-    capacity_limit_usd: 10000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 30, sector: 'Broad Market' },
       { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 30, sector: 'Bonds' },
@@ -136,7 +135,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 50,
     max_turnover: 'high',
-    capacity_limit_usd: 2000000,
+    
     holdings: [
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
       { ticker: 'SMH', name: 'VanEck Semiconductor ETF', weight: 25, sector: 'Semiconductors' },
@@ -192,7 +191,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'low',
-    capacity_limit_usd: 8000000,
+    
     holdings: [
       { ticker: 'SCHD', name: 'Schwab US Dividend Equity ETF', weight: 30, sector: 'Dividend' },
       { ticker: 'VYM', name: 'Vanguard High Dividend Yield ETF', weight: 25, sector: 'Dividend' },
@@ -251,7 +250,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'medium',
-    capacity_limit_usd: 15000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 25, sector: 'International' },
@@ -310,7 +309,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    capacity_limit_usd: 3000000,
+    
     holdings: [
       { ticker: 'ICLN', name: 'iShares Global Clean Energy ETF', weight: 30, sector: 'Clean Energy' },
       { ticker: 'TAN', name: 'Invesco Solar ETF', weight: 20, sector: 'Solar' },
@@ -367,7 +366,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 30,
     max_turnover: 'low',
-    capacity_limit_usd: 20000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 25, sector: 'Broad Market' },
       { ticker: 'TLT', name: 'iShares 20+ Year Treasury Bond ETF', weight: 25, sector: 'Long Bonds' },
@@ -426,7 +425,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    capacity_limit_usd: 6000000,
+    
     holdings: [
       { ticker: 'XLV', name: 'Health Care Select Sector SPDR', weight: 30, sector: 'Healthcare' },
       { ticker: 'IBB', name: 'iShares Biotechnology ETF', weight: 25, sector: 'Biotech' },
@@ -487,7 +486,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 35,
     max_turnover: 'medium',
-    capacity_limit_usd: 7000000,
+    
     holdings: [
       { ticker: 'VTV', name: 'Vanguard Value ETF', weight: 30, sector: 'Value' },
       { ticker: 'VOOV', name: 'Vanguard S&P 500 Value ETF', weight: 25, sector: 'Large Value' },
@@ -548,7 +547,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 60,
     max_turnover: 'low',
-    capacity_limit_usd: 50000000,
+    
     holdings: [
       { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 60, sector: 'Broad Market' },
       { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 40, sector: 'Bonds' },
@@ -602,7 +601,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 45,
     max_turnover: 'high',
-    capacity_limit_usd: 4500000,
+    
     holdings: [
       { ticker: 'MTUM', name: 'iShares MSCI USA Momentum Factor ETF', weight: 35, sector: 'Momentum' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
@@ -661,7 +660,7 @@ export const mockPortfolios: Portfolio[] = [
     leverage_allowed: false,
     max_single_sector_exposure_pct: 40,
     max_turnover: 'medium',
-    capacity_limit_usd: 5000000,
+    
     holdings: [],
     exposure_breakdown: [],
     top_themes: ['Liquidated'],
