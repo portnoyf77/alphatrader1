@@ -326,7 +326,7 @@ export default function Landing() {
                 Build and publish your first portfolio today.
               </p>
               <Button asChild size="lg" className="w-full glow-primary">
-                <Link to="/alpha">
+                <Link to="/signup">
                   Become an Alpha
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

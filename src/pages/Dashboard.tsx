@@ -589,7 +589,7 @@ export default function Dashboard() {
                             </Link>
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {Math.floor(Math.random() * 25) + 5} days
+                            19 days
                           </TableCell>
                           <TableCell className="text-right">
                             <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
