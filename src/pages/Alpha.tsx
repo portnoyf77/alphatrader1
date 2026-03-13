@@ -30,9 +30,9 @@ const mockTestimonials = [
     reputationScore: 4.8,
   },
   {
-    name: 'Emerald-512',
+    name: 'Pearl-512',
     creatorId: '@alpha_k4p1',
-    gemstone: 'Emerald',
+    gemstone: 'Pearl',
     sectors: ['Healthcare', 'Biotech'],
     followers: 2389,
     aum: 2450000,
