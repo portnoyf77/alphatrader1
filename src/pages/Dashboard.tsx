@@ -478,6 +478,9 @@ export default function Dashboard() {
                               {portfolio.risk_level}
                             </span>
                           </TableCell>
+                          <TableCell className="text-right w-8">
+                            <ChevronRight size={16} className="text-muted-foreground/30" />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
