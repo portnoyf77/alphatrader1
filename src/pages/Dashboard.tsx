@@ -183,8 +183,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Portfolios created by others that you've invested in
+              <TooltipContent className="text-xs max-w-[250px]">
+                Number of Alpha portfolios you're following
               </TooltipContent>
             </Tooltip>
             <Tooltip>
