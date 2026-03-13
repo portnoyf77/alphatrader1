@@ -235,7 +235,7 @@ export default function StrategyDetail() {
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[220px]">The creator's own money in this portfolio — shows they believe in it</TooltipContent>
+                <TooltipContent className="text-xs max-w-[250px]">How much of their own capital the Alpha has invested — their skin in the game</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
