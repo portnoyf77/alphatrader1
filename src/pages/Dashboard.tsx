@@ -336,17 +336,44 @@ export default function Dashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">My Investment</TableHead>
-                      <TableHead className="text-right">30d Return</TableHead>
+                      <TableHead>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Status</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Current portfolio status: Live, Simulating, or Inactive</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                       <TableHead className="text-right">
-                        <TooltipProvider delayDuration={200}>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">My Investment</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Capital you've invested in this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
                             </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[240px]">
-                              Percentage of maximum follower allocation reached for this portfolio.
+                            <TooltipContent className="text-xs max-w-[250px]">
+                              Percentage of maximum follower allocation reached
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
