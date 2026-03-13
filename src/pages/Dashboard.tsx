@@ -217,8 +217,8 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[220px]">
-                Combined value of all your investments
+              <TooltipContent className="text-xs max-w-[250px]">
+                Combined current value of all your investments
               </TooltipContent>
             </Tooltip>
             {/* vs S&P 500 tile */}
