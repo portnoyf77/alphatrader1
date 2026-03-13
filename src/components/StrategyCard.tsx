@@ -139,7 +139,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    {gemType} — {strategy.risk_level} risk
+                    {gemType} — {riskInfo.label}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
