@@ -409,7 +409,7 @@ export default function Landing() {
               }}
             >
               <h3 className="font-heading text-2xl font-bold mb-3">Ready to invest smarter?</h3>
-              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 Browse portfolios from proven Alphas and start following in minutes.
               </p>
               <Button asChild variant="outline" size="lg" className="w-full">
