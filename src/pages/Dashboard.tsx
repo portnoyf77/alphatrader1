@@ -373,6 +373,7 @@ export default function Dashboard() {
                     <TableRow>
                       <TableHead>Portfolio</TableHead>
                       <TableHead>Creator</TableHead>
+                      <TableHead className="text-right">30d Return</TableHead>
                       <TableHead className="text-right">My Allocation</TableHead>
                       <TableHead className="text-right">My Return</TableHead>
                     </TableRow>
@@ -399,6 +400,12 @@ export default function Dashboard() {
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", (portfolio.performance?.return_30d ?? 0) >= 0 ? "text-success" : "text-destructive")}>
+                            {(portfolio.performance?.return_30d ?? 0) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.performance?.return_30d ?? 0)}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
                         <TableCell className="text-right">
                           <span className={cn("flex items-center justify-end gap-1", portfolio.myReturn >= 0 ? "text-success" : "text-destructive")}>
