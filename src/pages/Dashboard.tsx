@@ -274,9 +274,9 @@ export default function Dashboard() {
                   <Legend />
                   <Area type="monotone" dataKey="My Portfolio" fill="url(#portfolioFill)" stroke="none" />
                   <Area type="monotone" dataKey="S&P 500" fill="url(#sp500Fill)" stroke="none" />
-                  <Line type="monotone" dataKey="My Portfolio" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} />
-                  <Line type="monotone" dataKey="S&P 500" stroke="hsl(var(--success))" strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
-                  <Line type="monotone" dataKey="Dow Jones" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} strokeDasharray="2 2" />
+                   <Line type="monotone" dataKey="My Portfolio" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
+                   <Line type="monotone" dataKey="S&P 500" stroke="hsl(var(--success))" strokeWidth={2.5} dot={false} strokeDasharray="4 4" />
+                   <Line type="monotone" dataKey="Dow Jones" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} strokeDasharray="2 2" opacity={0.5} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
