@@ -192,7 +192,7 @@ export default function Dashboard() {
                 )}>{label}</span>
               </div>
               <div className="font-mono text-[1.75rem] font-bold text-foreground mb-1">{count}</div>
-              <div className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>{detail}</div>
+              <div className="text-[0.85rem] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>{detail}</div>
             </button>
           ))}
         </div>
