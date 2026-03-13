@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, Gem, LucideIcon } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -9,7 +9,7 @@ const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/explore', label: 'Marketplace', icon: Store },
   { href: '/invest', label: 'Create', icon: Sparkles },
-  { href: '/alpha', label: 'Become an Alpha', icon: Gem },
+  { href: '/alpha', label: 'Become an Alpha', icon: Crown },
 ];
 
 export function Navbar() {
