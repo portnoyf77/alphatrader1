@@ -236,7 +236,7 @@ export default function Explore() {
           </TabsList>
 
           <TabsContent value="all-portfolios">
-            {/* Top Performers Bar Chart */}
+            {/* Top Performers Cards */}
             <Card className="mb-8 bg-card/50 border-border/50">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -250,9 +250,9 @@ export default function Explore() {
                         key={tf}
                         onClick={() => setChartTimeframe(tf)}
                         className={cn(
-                          "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                          "px-3 py-1 rounded-full text-xs font-medium transition-all",
                           chartTimeframe === tf
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-primary-foreground shadow-[0_2px_8px_rgba(124,58,237,0.3)]"
                             : "text-muted-foreground hover:bg-secondary"
                         )}
                       >
@@ -266,69 +266,16 @@ export default function Explore() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={leaderboardData}
-                      layout="vertical"
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.id) {
-                          navigate(`/portfolio/${data.activePayload[0].payload.id}`);
-                        }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <XAxis type="number" tickFormatter={(value) => `${value}%`} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        width={120} 
-                        stroke="hsl(var(--muted-foreground))" 
-                        fontSize={12}
-                        tickFormatter={(value) => value.length > 15 ? `${value.slice(0, 15)}...` : value}
-                        tick={({ x, y, payload }: any) => {
-                          const entry = leaderboardData.find(d => d.name === payload.value);
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              dy={4}
-                              textAnchor="end"
-                              fill="hsl(var(--muted-foreground))"
-                              fontSize={12}
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => entry && navigate(`/portfolio/${entry.id}`)}
-                            >
-                              {payload.value.length > 15 ? `${payload.value.slice(0, 15)}...` : payload.value}
-                            </text>
-                          );
-                        }}
-                      />
-                      <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
-                      <Bar dataKey="returnValue" radius={[0, 4, 4, 0]}>
-                        {leaderboardData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={getBarColor(entry.name)}
-                            className="cursor-pointer hover:brightness-115"
-                            style={{ filter: 'brightness(1)', transition: 'filter 0.2s' }}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {leaderboardData.map((strategy) => (
-                    <Link 
-                      key={strategy.id}
-                      to={`/portfolio/${strategy.id}`}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors text-xs"
-                    >
-                      <GemDot name={strategy.name} size={6} />
-                      <span className="text-foreground">{strategy.name}</span>
-                    </Link>
+                <div className="flex gap-3 overflow-x-auto pb-2 md:overflow-visible">
+                  {topPerformers.map((portfolio, index) => (
+                    <TopPerformerCard
+                      key={`${chartTimeframe}-${portfolio.id}`}
+                      portfolio={portfolio}
+                      rank={index + 1}
+                      returnValue={getReturnForTimeframe(portfolio, chartTimeframe)}
+                      timeLabel={timeLabels[chartTimeframe]}
+                      isAnimating
+                    />
                   ))}
                 </div>
               </CardContent>
