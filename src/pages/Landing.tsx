@@ -354,27 +354,36 @@ export default function Landing() {
                   {/* Name */}
                   <div className="flex items-center gap-2 mb-1">
                     <GemDot name={portfolio.name} size={18} showTooltip={false} />
-                    <span className="font-heading font-semibold" style={{ color }}>{portfolio.name}</span>
+                    <span
+                      className="font-heading font-semibold"
+                      style={{
+                        color: portfolio.name.toLowerCase().startsWith('pearl') ? '#F8FAFC' : color,
+                        textShadow: portfolio.name.toLowerCase().startsWith('pearl') ? '0 0 12px rgba(226,232,240,0.3)' : undefined,
+                      }}
+                    >
+                      {portfolio.name}
+                    </span>
                   </div>
-                  <p className="text-xs font-mono mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <p className="text-xs font-mono mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     @{portfolio.creator_id}
                   </p>
 
-                  {/* Stats row */}
-                  <div className="flex items-center gap-4 text-xs mb-4">
-                    <span className="flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3 text-success" />
-                      <span className="text-success font-mono font-medium">
-                        +{portfolio.performance.return_30d.toFixed(1)}%
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                      <Users className="h-3 w-3" />
-                      {portfolio.followers_count.toLocaleString()}
-                    </span>
-                    <span className="font-mono" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                      {formatCurrency(portfolio.allocated_amount_usd)}
-                    </span>
+                  {/* Stats — labeled columns */}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>30D Return</p>
+                      <p className={cn("font-mono text-[1.1rem] font-bold", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                        {portfolio.performance.return_30d >= 0 ? '+' : ''}{portfolio.performance.return_30d.toFixed(1)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Followers</p>
+                      <p className="font-mono text-[1.1rem] font-bold text-foreground">{portfolio.followers_count.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Allocated</p>
+                      <p className="font-mono text-[1.1rem] font-bold text-foreground">{formatCurrency(portfolio.allocated_amount_usd)}</p>
+                    </div>
                   </div>
 
                   {/* Earnings */}
