@@ -19,12 +19,17 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tool
 import { useCountUp } from '@/hooks/useCountUp';
 
 // My portfolios (ones I created)
-const myPortfolios = mockStrategies.slice(0, 4);
-// Portfolios I've invested in
-const investedPortfolios = mockStrategies.slice(4, 7).map(p => ({
+const myPortfolios = mockPortfolios.slice(0, 4);
+// Portfolios I've invested in — hardcoded values per portfolio
+const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
+  '5': { myAllocation: 38000, myReturn: -4.8 },  // Sapphire-412
+  '6': { myAllocation: 33000, myReturn: 0.0 },    // Ruby-756
+  '7': { myAllocation: 33000, myReturn: 5.0 },    // Pearl-127
+};
+const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
   ...p,
-  myAllocation: Math.round(Math.random() * 50000) + 5000,
-  myReturn: (Math.random() - 0.3) * 20,
+  myAllocation: investedPortfolioData[p.id]?.myAllocation ?? 25000,
+  myReturn: investedPortfolioData[p.id]?.myReturn ?? 0,
 }));
 // Simulating portfolios
 const simulatingPortfolios = myPortfolios.filter(p => p.status === 'private');
