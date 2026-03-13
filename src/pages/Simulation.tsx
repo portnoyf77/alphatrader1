@@ -16,7 +16,7 @@ import { useMockAuth } from '@/contexts/MockAuthContext';
 
 // Mock simulation data
 const simulatedPortfolio = {
-  name: 'Harborline Growth',
+  name: 'Ruby-872',
   performance: {
     return_30d: 4.2,
     return_90d: 12.8,
