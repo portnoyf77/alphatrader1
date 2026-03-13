@@ -410,7 +410,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '8',
-    name: 'Emerald-489',
+    name: 'Sapphire-489',
     creator_id: '@bio_investor',
     status: 'validated_listed',
     visibility_mode: 'masked',
