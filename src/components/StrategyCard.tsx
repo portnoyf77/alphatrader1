@@ -1,25 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Gem, Diamond, Hexagon, Pentagon, Octagon, Circle, Triangle, Square, Crown, Star, AlertTriangle } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Sparkles, Wrench, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Crown, Star, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency, formatPercent } from '@/lib/mockData';
-import { getGemstoneForSector, getGemstoneColor, getGemHex } from '@/lib/portfolioNaming';
+import { getGemHex, getGemstoneColor, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 import { cn } from '@/lib/utils';
 import type { Strategy, GeoFocus, RiskLevel } from '@/lib/types';
-
-// Map gemstones to unique icons
-const gemstoneIcons: Record<string, React.ElementType> = {
-  'Sapphire': Gem,
-  'Emerald': Hexagon,
-  'Peridot': Pentagon,
-  'Amber': Square,
-  'Pearl': Circle,
-  'Opal': Octagon,
-  'Diamond': Diamond,
-  'Topaz': Triangle,
-  'Quartz': Gem,
-};
 
 // Map sectors to icons
 const sectorIcons: Record<string, React.ElementType> = {
@@ -49,7 +36,7 @@ const sectorIcons: Record<string, React.ElementType> = {
   'Large Value': TrendingUp,
   'Small Value': TrendingUp,
   'Momentum': TrendingUp,
-  'Commodities': Gem,
+  'Commodities': BarChart3,
 };
 
 const geoLabels: Record<GeoFocus, { label: string; flag: string; tooltip: string }> = {
@@ -60,9 +47,9 @@ const geoLabels: Record<GeoFocus, { label: string; flag: string; tooltip: string
 };
 
 const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip: string }> = {
-  'Low': { label: 'Low Risk', className: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20', tooltip: 'Conservative portfolio focused on preserving your money' },
-  'Medium': { label: 'Med Risk', className: 'bg-violet-500/10 text-violet-400 border-violet-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
-  'High': { label: 'High Risk', className: 'bg-orange-500/10 text-orange-400 border-orange-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
+  'Low': { label: 'Low Risk', className: 'bg-slate-300/10 text-slate-300 border-slate-300/20', tooltip: 'Conservative portfolio focused on preserving your money' },
+  'Medium': { label: 'Med Risk', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
+  'High': { label: 'High Risk', className: 'bg-rose-500/10 text-rose-400 border-rose-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
 };
 
 const turnoverTooltips: Record<string, string> = {
@@ -83,19 +70,16 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const riskInfo = riskConfig[strategy.risk_level];
   const displaySectors = strategy.sectors.slice(0, 2);
   
-  // Get gemstone for visual indicator
-  const gemstone = strategy.sectors[0] ? getGemstoneForSector(strategy.sectors[0]) : 'Quartz';
-  const gemstoneColors = getGemstoneColor(gemstone);
-  const GemIcon = gemstoneIcons[gemstone] || Gem;
+  const gemType = getGemFromName(strategy.name);
+  const gemColors = getGemstoneColor(gemType);
+  const gemHex = getGemHex(strategy.name);
 
-  // Reputation score: consistency (0-2.5) + track record (0-1.0) + follower bonus (0-0.5)
+  // Reputation score
   const daysActive = Math.floor((Date.now() - new Date(strategy.created_date).getTime()) / (1000 * 60 * 60 * 24));
   const baseScore = strategy.performance.consistency_score * 2.5;
   const trackRecord = Math.min(daysActive / 365, 1) * 1.0;
   const followerBonus = Math.min(strategy.followers_count / 1000, 1) * 0.5;
   const reputationScore = Math.min(5.0, baseScore + trackRecord + followerBonus).toFixed(1);
-
-  const gemHex = getGemHex(strategy.name);
 
   return (
     <Link to={`/portfolio/${strategy.id}`}>
@@ -117,7 +101,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {strategy.name}
                 </h3>
-                {/* Alpha Reputation Badge */}
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -148,15 +131,15 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   <TooltipTrigger asChild>
                     <div className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-lg cursor-help shrink-0",
-                      gemstoneColors.bg,
-                      gemstoneColors.border,
+                      gemColors.bg,
+                      gemColors.border,
                       "border"
                     )}>
-                      <GemIcon className={cn("h-5 w-5", gemstoneColors.text)} />
+                      <GemDot name={strategy.name} size={20} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    {gemstone} — based on primary sector ({strategy.sectors[0] || 'Broad Market'})
+                    {gemType} — {strategy.risk_level} risk
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -165,7 +148,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
 
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-2 mb-4 flex-wrap">
-              {/* Sector icons */}
               {displaySectors.map((sector, idx) => {
                 const Icon = sectorIcons[sector] || BarChart3;
                 return (
@@ -183,7 +165,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 );
               })}
               
-              {/* Geo focus */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
@@ -196,7 +177,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 </TooltipContent>
               </Tooltip>
 
-              {/* Risk level */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className={cn("inline-flex items-center px-2 py-1 rounded-md text-xs border cursor-help", riskInfo.className)}>
@@ -208,7 +188,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 </TooltipContent>
               </Tooltip>
 
-              {/* Strategy type */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary text-xs text-muted-foreground cursor-help">
@@ -327,7 +306,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             </div>
           </TooltipProvider>
 
-          {/* Liquidation Warning */}
           <div className="mt-3 p-2 flex items-start gap-1.5" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderLeft: '3px solid #EF4444', borderRadius: '8px' }}>
             <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-destructive" />
             <p className="text-[11px]" style={{ color: 'rgba(245, 158, 11, 0.8)' }}>
