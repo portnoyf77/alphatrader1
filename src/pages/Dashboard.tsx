@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle, Briefcase, Handshake, FlaskConical } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Shield, Filter, Pause, BarChart3, Wallet, Settings, ExternalLink, Tag, AlertTriangle, Briefcase, Handshake, FlaskConical, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
@@ -441,6 +441,7 @@ export default function Dashboard() {
                         <TableHead className="text-right">Sim. Return</TableHead>
                         <TableHead className="text-right">Worst Drop</TableHead>
                         <TableHead className="text-right">Risk Level</TableHead>
+                        <TableHead className="w-8"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -476,6 +477,9 @@ export default function Dashboard() {
                             )}>
                               {portfolio.risk_level}
                             </span>
+                          </TableCell>
+                          <TableCell className="text-right w-8">
+                            <ChevronRight size={16} className="text-muted-foreground/30" />
                           </TableCell>
                         </TableRow>
                       ))}
