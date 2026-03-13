@@ -190,18 +190,6 @@ export default function Explore() {
     </div>
   );
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium text-sm">{payload[0].payload.name}</p>
-          <p className="text-xs text-muted-foreground">Return: <span className="text-success font-medium">{payload[0].value.toFixed(1)}%</span></p>
-          <p className="text-xs text-muted-foreground">Risk-Adjusted: <span className="text-primary font-medium">{payload[0].payload.riskAdjusted}</span></p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <PageLayout>
