@@ -645,7 +645,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '12',
-    name: 'Obsidian-333',
+    name: 'Sapphire-333',
     creator_id: '@retired_fund_mgr',
     status: 'inactive',
     visibility_mode: 'transparent',
