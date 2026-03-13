@@ -282,7 +282,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[220px]">
-                  Total money from all investors combined
+                  Total money from all followers combined
                 </TooltipContent>
               </Tooltip>
               <Tooltip>

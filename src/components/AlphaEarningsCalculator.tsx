@@ -5,7 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
 export function AlphaEarningsCalculator() {
-  const [investors, setInvestors] = useState([500]);
+  const [followers, setFollowers] = useState([500]);
   const [avgAllocation, setAvgAllocation] = useState([5000]);
 
   // Alpha earns 0.25% of follower AUM annually, platform takes 0.25%

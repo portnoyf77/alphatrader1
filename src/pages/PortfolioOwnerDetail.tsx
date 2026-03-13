@@ -475,8 +475,8 @@ export default function PortfolioOwnerDetail() {
                   <h4 className="font-medium mb-2">What happens when you go public:</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Your portfolio appears in the Explore marketplace</li>
-                    <li>• Investors can view your performance and allocate capital</li>
-                    <li>• You earn fees from investor allocations</li>
+                    <li>• Followers can view your performance and allocate capital</li>
+                    <li>• You earn fees from follower allocations</li>
                     <li>• Your holdings remain protected (exposure-only view)</li>
                   </ul>
                 </div>

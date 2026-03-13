@@ -503,7 +503,7 @@ export default function Dashboard() {
                               portfolio.risk_level === 'Medium' ? "bg-warning/20 text-warning" :
                               "bg-destructive/20 text-destructive"
                             )}>
-                              {portfolio.risk_level}
+                              {riskDisplayLabel(portfolio.risk_level)}
                             </span>
                           </TableCell>
                           <TableCell className="text-right w-8">

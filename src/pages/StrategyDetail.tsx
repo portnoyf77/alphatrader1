@@ -321,7 +321,7 @@ export default function StrategyDetail() {
                         {strategy.strategy_type}
                       </span>
                       <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.risk_level} Risk</span>
+                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)} Risk</span>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Portfolio Rationale</h4>
