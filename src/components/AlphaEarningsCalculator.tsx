@@ -23,20 +23,20 @@ export function AlphaEarningsCalculator() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Investors Slider */}
+        {/* Followers Slider */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Investors
+              Followers
             </Label>
             <span className="text-lg font-semibold text-primary">
-              {investors[0].toLocaleString()}
+              {followers[0].toLocaleString()}
             </span>
           </div>
           <Slider
-            value={investors}
-            onValueChange={setInvestors}
+            value={followers}
+            onValueChange={setFollowers}
             min={100}
             max={5000}
             step={100}
