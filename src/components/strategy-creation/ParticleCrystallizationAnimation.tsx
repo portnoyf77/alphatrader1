@@ -48,7 +48,7 @@ export function ParticleCrystallizationAnimation({
   const gemstoneType = deriveGemstone(profile);
   const strategyNumber = useMemo(() => generateStrategyNumber(riskLevel), [riskLevel]);
   const strategyName = `${gemstoneType}-${strategyNumber}`;
-  const colors = gemstoneColors[gemstoneType] || gemstoneColors.Diamond;
+  const colors = gemstoneColors[gemstoneType] || gemstoneColors.Sapphire;
   
   // Generate particle colors (variations of gem color)
   const particleColors = useMemo(() => {
