@@ -157,8 +157,8 @@ export default function StrategyDetail() {
             <div className="flex gap-3">
               {isValidated && !isPaused ? (
                 <Button onClick={() => setShowAllocateModal(true)} className="glow-primary">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Allocate to Portfolio
+                  <Users className="h-4 w-4 mr-2" />
+                  Follow Portfolio
                 </Button>
               ) : isPaused ? (
                 <TooltipProvider>
