@@ -125,8 +125,7 @@
     font-size: 0.9375rem;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.92);
-    background: linear-gradient(180deg, #0f0f1a 0%, #121220 50%, #0f0f1a 100%);
-    background-attachment: fixed;
+    background: #050508;
   }
 
   h1, h2, h3, h4, h5, h6 {
