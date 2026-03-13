@@ -107,8 +107,8 @@ export default function Landing() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="text-center cursor-help relative">
-                      <p className="text-3xl md:text-4xl font-bold text-primary font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${creatorStats.totalAlphaEarnings.toLocaleString()}</p>
-                      <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                      <p className="font-bold text-primary font-mono tabular-nums text-xl sm:text-2xl md:text-[2rem]" style={{ fontWeight: 700 }}>${creatorStats.totalAlphaEarnings.toLocaleString()}</p>
+                      <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1 text-xs sm:text-sm">
                         Alpha Earnings
                         <HelpCircle className="h-3 w-3" />
                       </p>
