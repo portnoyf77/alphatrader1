@@ -104,6 +104,10 @@ export default {
           "0%, 100%": { boxShadow: "0 0 20px -5px hsl(262 83% 58% / 0.4)" },
           "50%": { boxShadow: "0 0 30px -5px hsl(262 83% 58% / 0.6)" },
         },
+        "subtle-pulse": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.2)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

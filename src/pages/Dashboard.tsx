@@ -389,10 +389,10 @@ export default function Dashboard() {
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <AlertTriangle className="h-3.5 w-3.5 text-destructive/70 shrink-0" />
+                                  <AlertTriangle className="h-3.5 w-3.5 text-destructive/70 shrink-0 hover:animate-[subtle-pulse_0.6s_ease] cursor-help" />
                                 </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-[220px]">
-                                  If this Alpha liquidates, your position will automatically follow.
+                                <TooltipContent className="text-xs max-w-[240px]">
+                                  If this Alpha exits their position, your allocation will automatically follow. You may receive less than your initial investment.
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
