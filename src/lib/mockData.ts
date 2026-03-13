@@ -295,7 +295,7 @@ export const mockStrategies: Portfolio[] = [
   },
   {
     id: '6',
-    name: 'Peridot-756',
+    name: 'Sapphire-756',
     creator_id: '@green_alpha',
     status: 'private',
     visibility_mode: 'transparent',
