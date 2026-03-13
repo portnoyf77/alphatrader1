@@ -372,7 +372,7 @@ export default function Landing() {
                       <Users className="h-3 w-3" />
                       {portfolio.followers_count.toLocaleString()}
                     </span>
-                    <span className="font-mono" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span className="font-mono" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       {formatCurrency(portfolio.allocated_amount_usd)}
                     </span>
                   </div>
