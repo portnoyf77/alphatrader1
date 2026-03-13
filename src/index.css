@@ -22,7 +22,7 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 240 12% 10%;
-    --muted-foreground: 220 10% 55%;
+    --muted-foreground: 220 10% 65%;
 
     --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
@@ -85,7 +85,7 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 240 12% 10%;
-    --muted-foreground: 220 10% 55%;
+    --muted-foreground: 220 10% 65%;
 
     --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
@@ -177,7 +177,7 @@
     font-weight: 500;
     letter-spacing: 0.01em;
     text-transform: uppercase;
-    opacity: 0.6;
+    opacity: 0.7;
   }
 }
 

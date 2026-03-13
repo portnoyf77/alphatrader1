@@ -176,7 +176,7 @@ export default function Landing() {
                   </p>
                   <p
                     className="mt-2 uppercase tracking-[0.05em] text-[0.65rem] sm:text-[0.8rem]"
-                    style={{ color: 'rgba(255,255,255,0.35)' }}
+                    style={{ color: 'rgba(255,255,255,0.5)' }}
                   >
                     {stat.label}
                   </p>
@@ -197,7 +197,7 @@ export default function Landing() {
             >
               How it works
             </h2>
-            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
               From first question to first investment — in minutes.
             </p>
           </div>
@@ -280,7 +280,7 @@ export default function Landing() {
               <span style={{ color: '#E11D48' }}>see</span>{' '}
               at a glance
             </h2>
-            <p className="mt-4 text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Every portfolio is named after a gemstone that reflects its risk level. No jargon. No guesswork.
             </p>
           </div>
@@ -305,10 +305,10 @@ export default function Landing() {
                 <p className="font-heading font-bold text-2xl" style={{ color: gem.color }}>
                   {gem.name}
                 </p>
-                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                   {gem.risk}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {gem.desc}
                 </p>
               </div>
@@ -327,7 +327,7 @@ export default function Landing() {
             >
               Top earning Alphas
             </h2>
-            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Real portfolios. Real returns. Real earnings.
             </p>
           </div>
@@ -356,7 +356,7 @@ export default function Landing() {
                     <GemDot name={portfolio.name} size={18} showTooltip={false} />
                     <span className="font-heading font-semibold" style={{ color }}>{portfolio.name}</span>
                   </div>
-                  <p className="text-xs font-mono mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <p className="text-xs font-mono mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     @{portfolio.creator_id}
                   </p>
 
@@ -368,11 +368,11 @@ export default function Landing() {
                         +{portfolio.performance.return_30d.toFixed(1)}%
                       </span>
                     </span>
-                    <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       <Users className="h-3 w-3" />
                       {portfolio.followers_count.toLocaleString()}
                     </span>
-                    <span className="font-mono" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span className="font-mono" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       {formatCurrency(portfolio.allocated_amount_usd)}
                     </span>
                   </div>
@@ -409,7 +409,7 @@ export default function Landing() {
               }}
             >
               <h3 className="font-heading text-2xl font-bold mb-3">Ready to invest smarter?</h3>
-              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 Browse portfolios from proven Alphas and start following in minutes.
               </p>
               <Button asChild variant="outline" size="lg" className="w-full">
@@ -429,7 +429,7 @@ export default function Landing() {
               }}
             >
               <h3 className="font-heading text-2xl font-bold mb-3">Ready to earn as an Alpha?</h3>
-              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 Build and publish your portfolio. Earn 0.25% of follower AUM.
               </p>
               <Button asChild size="lg" className="w-full">

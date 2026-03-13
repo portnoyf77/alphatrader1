@@ -628,7 +628,7 @@ export default function Dashboard() {
                     <span className="text-xs text-primary/80">{news.tag}</span>
                   </div>
                 </div>
-                <ExternalLink size={14} className="text-[rgba(255,255,255,0.25)] shrink-0" />
+                <ExternalLink size={14} className="text-[rgba(255,255,255,0.4)] shrink-0" />
               </a>
             ))}
           </CardContent>
