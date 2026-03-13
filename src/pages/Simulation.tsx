@@ -8,6 +8,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { ValidationBadge } from '@/components/ValidationBadge';
 import { formatPercent } from '@/lib/mockData';
+import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
