@@ -157,8 +157,8 @@ export default function StrategyDetail() {
             <div className="flex gap-3">
               {isValidated && !isPaused ? (
                 <Button onClick={() => setShowAllocateModal(true)} className="glow-primary">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Allocate to Portfolio
+                  <Users className="h-4 w-4 mr-2" />
+                  Follow Portfolio
                 </Button>
               ) : isPaused ? (
                 <TooltipProvider>
@@ -268,13 +268,6 @@ export default function StrategyDetail() {
             </TooltipProvider>
           </div>
 
-          {/* Liquidation Warning */}
-          <div className="mb-6 flex items-start gap-3" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderLeft: '3px solid #EF4444', borderRadius: '12px', padding: '16px 20px', backdropFilter: 'blur(8px)' }}>
-            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-destructive">Important:</span> If this Alpha exits their position, your allocation will automatically mirror that exit. You may receive less than your initial investment. This does not constitute investment advice.
-            </p>
-          </div>
 
           {/* Tabs */}
           <Tabs defaultValue="overview">
@@ -316,12 +309,8 @@ export default function StrategyDetail() {
                   <CardHeader><CardTitle>Portfolio Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-3">
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-sm">
-                        {strategy.strategy_type === 'GenAI' ? <Sparkles className="h-4 w-4 text-primary" /> : <Wrench className="h-4 w-4" />}
-                        {strategy.strategy_type}
-                      </span>
                       <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{strategy.objective}</span>
-                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)} Risk</span>
+                      <span className="px-3 py-1.5 rounded-lg bg-secondary text-sm">{riskDisplayLabel(strategy.risk_level)}</span>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Portfolio Rationale</h4>
@@ -570,7 +559,7 @@ export default function StrategyDetail() {
           <Dialog open={showAllocateModal} onOpenChange={setShowAllocateModal}>
             <DialogContent className="glass-elevated">
               <DialogHeader>
-                <DialogTitle>Allocate to {strategy.name}</DialogTitle>
+                <DialogTitle>Follow {strategy.name}</DialogTitle>
                 <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">

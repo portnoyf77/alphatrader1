@@ -371,18 +371,6 @@ export default function Dashboard() {
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Capacity</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">
-                              Percentage of maximum follower allocation reached
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -414,24 +402,6 @@ export default function Dashboard() {
                             {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                             {formatPercent(portfolio.performance.return_30d)}
                           </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <TooltipProvider delayDuration={200}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center justify-end gap-2 cursor-help">
-                                  <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                                    <div className={cn("h-full rounded-full", (portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) > 0.9 ? "bg-destructive" : "bg-primary")} style={{ width: `${Math.min((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100, 100)}%` }} />
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{Math.round((portfolio.allocated_amount_usd / portfolio.capacity_limit_usd) * 100)}%</span>
-                                  {portfolio.new_allocations_paused && <Pause className="h-3 w-3 text-warning" />}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="text-xs">
-                                {formatCurrency(portfolio.allocated_amount_usd)} / {formatCurrency(portfolio.capacity_limit_usd)} allocated by followers
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
                         </TableCell>
                       </TableRow>
                     ))}
