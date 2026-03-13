@@ -287,7 +287,7 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold mb-1">Alpha Revenue Share</h4>
                     <p className="text-muted-foreground">
-                      Earn 0.25% of follower AUM annually when investors allocate to your published portfolios.
+                      Earn 0.25% of follower AUM annually when followers allocate to your published portfolios.
                     </p>
                   </div>
                 </div>
