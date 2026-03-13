@@ -267,37 +267,12 @@ export function deriveGeoFocus(profile: StrategyProfile): GeoFocus {
   }
 }
 
-// Gemstone mapping based on primary sector
-export const sectorGemstoneMap: Record<string, string> = {
-  'Technology': 'Sapphire',
-  'Healthcare': 'Emerald',
-  'Clean Energy': 'Peridot',
-  'Financials': 'Topaz',
-  'Consumer': 'Ruby',
-  'Industrial': 'Onyx',
-  'Real Estate': 'Amber',
-  'Broad Market': 'Diamond',
-  'Bonds': 'Pearl',
-  'International': 'Opal',
-};
-
-// Derive gemstone from profile — uses sector, then risk level for color warmth
+// Derive gemstone from profile — based on risk level only (3 gem types)
 export function deriveGemstone(profile: StrategyProfile): string {
-  if (profile.sectorEmphasis.length > 0) {
-    const primarySector = profile.sectorEmphasis[0];
-    return sectorGemstoneMap[primarySector] || 'Diamond';
-  }
-  
-  // If no sector preference, use geographic
-  if (profile.geographicPreference === 'emerging' || profile.geographicPreference === 'international') {
-    return 'Opal';
-  }
-  
-  // Fall back to risk-based gemstone: warm for high risk, cool for low
   const riskLevel = deriveRiskLevel(profile);
+  if (riskLevel === 'Low') return 'Pearl';
   if (riskLevel === 'High') return 'Ruby';
-  if (riskLevel === 'Low') return 'Sapphire';
-  return 'Emerald'; // Medium risk
+  return 'Sapphire';
 }
 
 // Generate strategy number based on risk level and unique ID
