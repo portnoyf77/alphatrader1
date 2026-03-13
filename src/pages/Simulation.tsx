@@ -298,7 +298,7 @@ export default function Simulation() {
             value={formatPercent(liveReturn)}
             icon={liveReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             trend={liveReturn >= 0 ? 'up' : 'down'}
-            tooltip="Simulated portfolio return since start"
+            tooltip="Percentage return since simulation started"
           />
           <MetricCard
             label="Worst Drop"
