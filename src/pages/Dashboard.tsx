@@ -397,43 +397,64 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Financial News Feed */}
-        <Card className="glass-card mb-8">
-          <CardHeader>
-            <CardTitle className="text-lg">Market News</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
+        {/* Market News — horizontal card tiles */}
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-4">Market News</h2>
+          <div
+            className="flex gap-4 overflow-x-auto pb-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style>{`.news-scroll::-webkit-scrollbar { display: none; }`}</style>
             {mockNews.map((news, i) => (
               <a
                 key={i}
                 href={news.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 py-3.5 px-4 rounded-lg hover:bg-[rgba(255,255,255,0.02)] transition-colors group"
-                style={{ borderBottom: i < mockNews.length - 1 ? '1px solid rgba(255, 255, 255, 0.04)' : undefined }}
+                className="news-scroll group flex-shrink-0 w-[200px] rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  backdropFilter: 'blur(12px)',
+                }}
               >
                 {/* Thumbnail */}
-                <div className="w-[72px] h-[48px] rounded-lg overflow-hidden shrink-0" style={{ background: sectorGradients[news.sector] || sectorGradients.Industrial }}>
+                <div
+                  className="w-full h-[120px] overflow-hidden"
+                  style={{
+                    borderRadius: '12px 12px 0 0',
+                    background: sectorGradients[news.sector] || sectorGradients.Industrial,
+                  }}
+                >
                   <img
                     src={news.thumbnailUrl}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                 </div>
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[rgba(255,255,255,0.92)] group-hover:text-white transition-colors truncate">{news.headline}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Tag className="h-3 w-3 text-primary" />
-                    <span className="text-xs text-primary/80">{news.tag}</span>
+                {/* Text content */}
+                <div className="p-3">
+                  <p
+                    className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {news.headline}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Tag className="h-3 w-3 text-primary shrink-0" />
+                    <span className="text-[0.75rem] text-primary/80 truncate">{news.tag}</span>
                   </div>
                 </div>
-                <ExternalLink size={14} className="text-[rgba(255,255,255,0.4)] shrink-0" />
               </a>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </PageLayout>
   );
