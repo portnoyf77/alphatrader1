@@ -134,7 +134,7 @@ export default function Alpha() {
 
             <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
               Build a portfolio, prove it in simulation, then publish it to the marketplace.
-              When investors allocate to your portfolio, you earn{' '}
+              When followers allocate to your portfolio, you earn{' '}
               <span className="font-semibold text-primary">0.25% of their AUM annually</span>, paid monthly.
             </p>
 
