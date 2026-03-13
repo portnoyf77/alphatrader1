@@ -305,7 +305,7 @@ export default function Landing() {
                 <p className="font-heading font-bold text-2xl" style={{ color: gem.color }}>
                   {gem.name}
                 </p>
-                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                   {gem.risk}
                 </p>
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
