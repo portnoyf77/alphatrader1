@@ -8,7 +8,7 @@ import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
 
-function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200 }: { target: number; prefix?: string; suffix?: string; duration?: number }) {
+function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200, formatFn }: { target: number; prefix?: string; suffix?: string; duration?: number; formatFn?: (v: number) => string }) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
@@ -31,7 +31,8 @@ function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200 }: 
     return () => obs.disconnect();
   }, [target, duration]);
 
-  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>;
+  const display = formatFn ? formatFn(val) : `${prefix}${val.toLocaleString()}${suffix}`;
+  return <span ref={ref}>{display}</span>;
 }
 
 export default function Landing() {
