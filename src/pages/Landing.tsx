@@ -1,12 +1,38 @@
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, ChevronDown, Users, TrendingUp, DollarSign } from 'lucide-react';
+import { ArrowRight, Sparkles, ChevronDown, Users, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { useCountUp } from '@/hooks/useCountUp';
 import { calculateAlphaScore } from '@/lib/alphaScore';
+
+function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200 }: { target: number; prefix?: string; suffix?: string; duration?: number }) {
+  const [val, setVal] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !started.current) {
+        started.current = true;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setVal(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [target, duration]);
+
+  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>;
+}
 
 export default function Landing() {
   const validatedPortfolios = mockPortfolios.filter(s => s.status === 'validated_listed');
@@ -19,10 +45,7 @@ export default function Landing() {
     .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
     .slice(0, 3);
 
-  // Count-up animations
-  const allocatedDisplay = useCountUp(totalAllocated, 800);
-  const followersDisplay = useCountUp(totalFollowers, 800);
-  const earningsDisplay = useCountUp(totalEarnings, 800);
+  const [hoveredAlpha, setHoveredAlpha] = useState<number | null>(null);
 
   return (
     <PageLayout showDisclaimer={true}>
@@ -107,8 +130,7 @@ export default function Landing() {
               animation: 'fadeUp 0.8s ease forwards 0.3s',
             }}
           >
-            Create portfolios with GenAI, prove them in simulation, then publish and earn
-            when others allocate. Turn your investing expertise into passive income.
+            Create portfolios with AI. Prove them in simulation. Publish to the marketplace and earn when others follow.
           </p>
 
           {/* Buttons */}
@@ -128,9 +150,10 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2" style={{ opacity: 0.3, animation: 'bounce 2s ease-in-out infinite' }}>
-          <ChevronDown className="h-6 w-6" />
+        {/* Scroll indicator — double chevron */}
+        <div className="absolute bottom-8 left-1/2" style={{ opacity: 0.3, animation: 'bounce 2s ease-in-out infinite' }}>
+          <ChevronDown className="h-5 w-5" />
+          <ChevronDown className="h-5 w-5 -mt-2" />
         </div>
       </section>
 
@@ -140,16 +163,16 @@ export default function Landing() {
           <div className="flex justify-center">
             <div className="grid grid-cols-3 gap-6 md:gap-20 max-w-3xl w-full">
               {[
-                { value: `$${(allocatedDisplay / 1e6).toFixed(1)}M`, label: 'CAPITAL ALLOCATED' },
-                { value: followersDisplay.toLocaleString(), label: 'ACTIVE FOLLOWERS' },
-                { value: `$${earningsDisplay.toLocaleString()}/mo`, label: 'ALPHA EARNINGS' },
+                { label: 'CAPITAL ALLOCATED', target: totalAllocated, prefix: '$', suffix: '', format: (v: number) => `$${(v / 1e6).toFixed(1)}M` },
+                { label: 'ACTIVE FOLLOWERS', target: totalFollowers, prefix: '', suffix: '' },
+                { label: 'ALPHA EARNINGS', target: totalEarnings, prefix: '$', suffix: '/mo' },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p
                     className="font-mono font-bold tabular-nums"
                     style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}
                   >
-                    {stat.value}
+                    <CountUpOnScroll target={stat.target} prefix={stat.prefix} suffix={stat.suffix} />
                   </p>
                   <p
                     className="mt-2 uppercase tracking-[0.05em]"
@@ -204,7 +227,7 @@ export default function Landing() {
                 key={step.num}
                 className="relative rounded-[20px] p-10 transition-all duration-300 hover:-translate-y-1 group cursor-default"
                 style={{
-                  background: `${step.color}11`,
+                  background: `${step.color}14`,
                   border: `1px solid ${step.color}22`,
                 }}
                 onMouseEnter={(e) => {
@@ -216,8 +239,8 @@ export default function Landing() {
               >
                 {/* Watermark number */}
                 <span
-                  className="absolute top-4 right-6 font-heading font-extrabold select-none pointer-events-none"
-                  style={{ fontSize: '4rem', color: `${step.color}0A` }}
+                  className="absolute top-3 right-5 font-heading font-extrabold select-none pointer-events-none"
+                  style={{ fontSize: '5rem', color: step.color, opacity: 0.07 }}
                 >
                   {step.num}
                 </span>
@@ -264,9 +287,9 @@ export default function Landing() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-12 sm:gap-16">
             {[
-              { name: 'Pearl', risk: 'Conservative', desc: 'Capital preservation · Low volatility', color: '#E2E8F0', glow: 'rgba(226,232,240,0.2)' },
-              { name: 'Sapphire', risk: 'Moderate', desc: 'Balanced growth · Standard risk', color: '#3B82F6', glow: 'rgba(59,130,246,0.2)' },
-              { name: 'Ruby', risk: 'Aggressive', desc: 'Maximum growth · Higher volatility', color: '#E11D48', glow: 'rgba(225,29,72,0.2)' },
+              { name: 'Pearl', risk: 'Conservative', desc: 'Capital preservation · Low volatility', color: '#E2E8F0', glow: 'rgba(226,232,240,0.3)' },
+              { name: 'Sapphire', risk: 'Moderate', desc: 'Balanced growth · Standard risk', color: '#3B82F6', glow: 'rgba(59,130,246,0.3)' },
+              { name: 'Ruby', risk: 'Aggressive', desc: 'Maximum growth · Higher volatility', color: '#E11D48', glow: 'rgba(225,29,72,0.3)' },
             ].map((gem) => (
               <div key={gem.name} className="flex flex-col items-center text-center">
                 {/* Halo + Gem */}
@@ -274,7 +297,7 @@ export default function Landing() {
                   className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
                   style={{
                     background: `radial-gradient(circle, ${gem.glow} 0%, transparent 70%)`,
-                    boxShadow: `0 0 30px ${gem.glow}`,
+                    boxShadow: `0 0 40px ${gem.glow}`,
                   }}
                 >
                   <GemDot name={`${gem.name}-000`} size={36} showTooltip={false} />
@@ -310,27 +333,23 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {topAlphas.map((portfolio) => {
+            {topAlphas.map((portfolio, i) => {
               const { color, glow } = getGemHex(portfolio.name);
               return (
                 <Link
                   key={portfolio.id}
                   to={`/portfolio/${portfolio.id}`}
-                  className="rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
+                  className="rounded-2xl transition-all duration-300 group cursor-pointer"
                   style={{
+                    padding: '28px 24px',
                     background: 'rgba(255,255,255,0.02)',
-                    border: `1px solid rgba(255,255,255,0.06)`,
+                    border: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
                     borderLeft: `3px solid ${color}`,
+                    transform: hoveredAlpha === i ? 'translateY(-2px)' : '',
+                    boxShadow: hoveredAlpha === i ? `0 8px 32px ${glow}` : 'none',
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = `${color}66`;
-                    (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${glow}`;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
-                    (e.currentTarget as HTMLElement).style.borderLeftColor = color;
-                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-                  }}
+                  onMouseEnter={() => setHoveredAlpha(i)}
+                  onMouseLeave={() => setHoveredAlpha(null)}
                 >
                   {/* Name */}
                   <div className="flex items-center gap-2 mb-1">
@@ -351,7 +370,7 @@ export default function Landing() {
                     </span>
                     <span className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       <Users className="h-3 w-3" />
-                      {portfolio.followers_count}
+                      {portfolio.followers_count.toLocaleString()}
                     </span>
                     <span className="font-mono" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       {formatCurrency(portfolio.allocated_amount_usd)}
@@ -367,7 +386,7 @@ export default function Landing() {
                       Monthly earnings
                     </p>
                     <p className="font-mono font-bold text-lg text-success earnings-glow">
-                      ${portfolio.creator_est_monthly_earnings_usd.toLocaleString()}
+                      ${portfolio.creator_est_monthly_earnings_usd.toLocaleString()}/mo
                     </p>
                   </div>
                 </Link>
