@@ -461,8 +461,12 @@ export default function Dashboard() {
                               {formatPercent(portfolio.performance.return_30d)}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right text-destructive">
-                            {formatPercent(portfolio.performance.max_drawdown, false)}
+                          <TableCell className="text-right">
+                            {(() => {
+                              const dd = Math.abs(portfolio.performance.max_drawdown);
+                              const color = dd >= 20 ? '#EF4444' : dd >= 18 ? '#F97316' : dd >= 15 ? '#F59E0B' : undefined;
+                              return <span style={color ? { color } : undefined}>{formatPercent(portfolio.performance.max_drawdown, false)}</span>;
+                            })()}
                           </TableCell>
                           <TableCell className="text-right">
                             <span className={cn("px-2 py-1 rounded text-xs",
