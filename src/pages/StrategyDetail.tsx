@@ -339,14 +339,14 @@ export default function StrategyDetail() {
 
             <TabsContent value="holdings">
               <Card className="glass-card">
-                {!isOwner && (
+                {!isOwner && strategy.visibility_mode !== 'transparent' && (
                   <div className="mx-6 mt-6 p-4 rounded-xl bg-violet-500/5 border border-violet-500/30">
                     <div className="flex items-start gap-3">
                       <ShieldCheck className="h-5 w-5 text-violet-400 shrink-0 mt-0.5" />
                       <div className="flex-1">
-                        <p className="font-medium text-violet-400">Protected Holdings</p>
+                        <p className="font-medium text-violet-400">IP-Protected Portfolio</p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Individual holdings are hidden to protect the Alpha's intellectual property. You can see sector allocations only.
+                          Exact holdings and weights are hidden to protect the creator's intellectual property. Below you'll find high-level exposure information.
                         </p>
                       </div>
                       <TooltipProvider delayDuration={200}>
@@ -362,14 +362,27 @@ export default function StrategyDetail() {
                     </div>
                   </div>
                 )}
+                {!isOwner && strategy.visibility_mode === 'transparent' && (
+                  <div className="mx-6 mt-6 p-4 rounded-xl bg-success/5 border border-success/30">
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="h-5 w-5 text-success shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="font-medium text-success">Transparent Portfolio</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          This Alpha shares their full holdings publicly.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <CardHeader>
-                  <CardTitle>{isOwner ? 'Holdings' : 'Sector Allocation'}</CardTitle>
+                  <CardTitle>{(isOwner || strategy.visibility_mode === 'transparent') ? 'Holdings' : 'Sector Allocation'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {isOwner ? (
+                        {(isOwner || strategy.visibility_mode === 'transparent') ? (
                           <>
                             <TableHead>Ticker</TableHead>
                             <TableHead>Name</TableHead>
@@ -385,7 +398,7 @@ export default function StrategyDetail() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {isOwner ? (
+                      {(isOwner || strategy.visibility_mode === 'transparent') ? (
                         strategy.holdings.map((holding) => (
                           <TableRow key={holding.ticker}>
                             <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
