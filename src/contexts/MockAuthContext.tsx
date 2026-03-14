@@ -98,6 +98,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const selectPlan = (plan: string) => {
     setUserPlan(plan);
     localStorage.setItem('userPlan', plan);
+    if (user) updateUsernameForPlan(plan, user);
   };
 
   const logout = () => {
