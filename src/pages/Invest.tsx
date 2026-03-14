@@ -12,7 +12,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
-import { StrategyProfile, initialProfile } from '@/lib/strategyProfile';
+import { StrategyProfile, initialProfile, deriveRiskLevel } from '@/lib/strategyProfile';
 
 interface GeneratedHolding {
   ticker: string;
