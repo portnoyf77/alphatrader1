@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Sparkles, Crown, SendHorizontal } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 // ── Types ──────────────────────────────────────────────────────────────
