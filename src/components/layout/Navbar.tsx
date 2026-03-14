@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useMarketStatus } from '@/hooks/useMarketStatus';
+import { useTour } from '@/contexts/TourContext';
 
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
