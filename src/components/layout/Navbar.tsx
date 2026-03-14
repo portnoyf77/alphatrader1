@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, HelpCircle, LucideIcon } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, HelpCircle, Settings, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -106,45 +107,45 @@ export function Navbar() {
             )}
             {isAuthenticated && <NotificationBell />}
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-2">
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 cursor-default">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-mono text-xs">{user.username}</span>
-                        {userPlan && (
-                          <span className={cn(
-                            "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                            userPlan === 'pro' 
-                              ? "bg-primary/20 text-primary border border-primary/30" 
-                              : "bg-secondary text-muted-foreground border border-border"
-                          )}>
-                            {userPlan}
-                          </span>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      {userPlan ? planTooltips[userPlan] || 'Your account' : 'Your account'}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleLogout}
-                        className="gap-1.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">Sign out of Alpha Trader</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-colors cursor-pointer outline-none">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-mono text-xs">{user.username}</span>
+                    {userPlan && (
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                        userPlan === 'pro' 
+                          ? "bg-primary/20 text-primary border border-primary/30" 
+                          : "bg-secondary text-muted-foreground border border-border"
+                      )}>
+                        {userPlan}
+                      </span>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.06)] shadow-xl"
+                >
+                  <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
+                    <HelpCircle className="h-4 w-4" />
+                    Help
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.06)]" />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="gap-2 cursor-pointer text-sm text-[rgba(239,68,68,0.7)] hover:text-[rgba(239,68,68,0.9)] focus:text-[rgba(239,68,68,0.9)] focus:bg-[rgba(239,68,68,0.06)]"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
                 <Link to="/login">

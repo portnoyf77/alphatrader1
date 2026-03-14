@@ -57,12 +57,26 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 
   const isTrialExpired = trialStartDate !== null && !userPlan && (Date.now() - trialStartDate > FREE_TRIAL_MS);
 
+  const updateUsernameForPlan = (plan: string | null, currentUser: MockUser) => {
+    let username = generateUserId();
+    if (plan === 'basic') username = '@alex_investor';
+    else if (plan === 'pro') username = '@sam_alpha';
+    const updated = { ...currentUser, username };
+    setUser(updated);
+    localStorage.setItem('mockUser', JSON.stringify(updated));
+  };
+
   const login = async (email: string, password: string) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
+    const storedPlan = localStorage.getItem('userPlan');
+    let username = generateUserId();
+    if (storedPlan === 'basic') username = '@alex_investor';
+    else if (storedPlan === 'pro') username = '@sam_alpha';
+
     const mockUser: MockUser = {
       id: crypto.randomUUID(),
-      username: generateUserId(),
+      username,
       email,
     };
     
@@ -84,6 +98,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const selectPlan = (plan: string) => {
     setUserPlan(plan);
     localStorage.setItem('userPlan', plan);
+    if (user) updateUsernameForPlan(plan, user);
   };
 
   const logout = () => {
