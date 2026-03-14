@@ -52,7 +52,7 @@ export function TrialExpiredModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-      <div className="w-full max-w-lg mx-4">
+      <div className="w-full max-w-lg mx-4 glass-card rounded-2xl p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <Crown className="h-8 w-8 text-destructive" />
