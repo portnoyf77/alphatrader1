@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, HelpCircle, Settings, LucideIcon } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, Sparkles, HelpCircle, Settings, LucideIcon, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -13,7 +13,6 @@ const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
   { href: '/alpha', label: 'Become an Alpha', icon: Crown, tooltip: 'Earn passive income from your portfolios' },
-  { href: '/faq', label: 'FAQ', icon: HelpCircle, tooltip: 'Frequently asked questions' },
 ];
 
 const planTooltips: Record<string, string> = {
@@ -32,7 +31,7 @@ export function Navbar() {
   };
 
   // Guest users only see FAQ link
-  const visibleLinks = isAuthenticated ? navLinks : navLinks.filter(l => l.href === '/faq');
+  const visibleLinks = isAuthenticated ? navLinks : [];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.7)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.04)]">
@@ -121,6 +120,7 @@ export function Navbar() {
                         {userPlan}
                       </span>
                     )}
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -131,10 +131,12 @@ export function Navbar() {
                     <Settings className="h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
-                    <HelpCircle className="h-4 w-4" />
-                    Help
-                  </DropdownMenuItem>
+                  <Link to="/faq">
+                    <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
+                      <HelpCircle className="h-4 w-4" />
+                      FAQ
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.06)]" />
                   <DropdownMenuItem
                     onClick={handleLogout}
