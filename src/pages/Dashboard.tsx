@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,12 @@ import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 
-// My portfolios (ones I created)
-const myPortfolios = mockPortfolios.slice(0, 4);
+function getUserCreatedPortfolios(): any[] {
+  try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
+}
+
+// My portfolios (ones I created) — merge mock + user-created
+const baseMy = mockPortfolios.slice(0, 4);
 // Portfolios I've invested in
 const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
   '5': { myAllocation: 38000, myReturn: -4.8 },
@@ -24,8 +28,6 @@ const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
   myAllocation: investedPortfolioData[p.id]?.myAllocation ?? 25000,
   myReturn: investedPortfolioData[p.id]?.myReturn ?? 0,
 }));
-// Simulating portfolios
-const simulatingPortfolios = myPortfolios.filter(p => p.status === 'private');
 
 // Mock user total return vs S&P 500
 const userTotalReturn = 12.4;
@@ -70,10 +72,25 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
 
-  const livePortfolios = myPortfolios.filter(s => s.status !== 'private');
+  // Merge mock + user-created portfolios
+  const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
+  const myPortfolios = useMemo(() => {
+    const normalized = userCreated.map((p: any) => ({
+      ...p,
+      performance: p.performance || { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+      creator_investment: p.creator_investment || 0,
+      risk_level: p.risk_level || 'Medium',
+    }));
+    return [...baseMy, ...normalized];
+  }, [userCreated]);
+
+  const simulatingPortfolios = useMemo(() =>
+    myPortfolios.filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
+
+  const livePortfolios = myPortfolios.filter((s: any) => s.status !== 'private' && s.status !== 'simulating');
   const liveCount = livePortfolios.length;
-  const simulatingCount = myPortfolios.filter(s => s.status === 'private').length;
-  const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
+  const simulatingCount = simulatingPortfolios.length;
+  const totalMyInvestment = myPortfolios.reduce((acc: number, s: any) => acc + (s.creator_investment || 0), 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
   const totalValue = totalMyInvestment + totalInvestedInOthers;
   const totalAllocatedInvested = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);

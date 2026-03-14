@@ -68,6 +68,13 @@ const timeRanges: TimeRange[] = ['1D', '1W', '1M', '3M', 'All'];
 // Key X-axis ticks for 1D view
 const INTRADAY_TICKS = ['4:00 AM', '9:30 AM', '12:00 PM', '4:00 PM', '8:00 PM'];
 
+function getUserCreatedPortfolio(id: string): any | null {
+  try {
+    const stored = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+    return stored.find((p: any) => p.id === id) || null;
+  } catch { return null; }
+}
+
 export default function Simulation() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -77,7 +84,22 @@ export default function Simulation() {
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
 
-  const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
+  const mockPortfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
+  const userPortfolio = useMemo(() => !mockPortfolio && id ? getUserCreatedPortfolio(id) : null, [id, mockPortfolio]);
+
+  // Normalize: user-created portfolios have a simpler shape
+  const portfolio = useMemo(() => {
+    if (mockPortfolio) return mockPortfolio;
+    if (userPortfolio) {
+      return {
+        ...userPortfolio,
+        status: 'private' as const,
+        performance: userPortfolio.performance || { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+        creator_investment: userPortfolio.creator_investment || 0,
+      };
+    }
+    return null;
+  }, [mockPortfolio, userPortfolio]);
 
   const lastDayOpenValue = fullData[fullData.length - 2]?.Portfolio ?? 100000;
   const sp500Base = fullData[fullData.length - 2]?.['S&P 500'] ?? 106500;
@@ -102,12 +124,12 @@ export default function Simulation() {
   useEffect(() => {
     if (!portfolio) {
       navigate('/dashboard', { replace: true });
-    } else if (portfolio.status !== 'private') {
+    } else if (portfolio.status !== 'private' && portfolio.status !== 'simulating') {
       navigate(`/portfolio/${portfolio.id}`, { replace: true });
     }
   }, [portfolio, navigate]);
 
-  if (!portfolio || portfolio.status !== 'private') return null;
+  if (!portfolio || (portfolio.status !== 'private' && portfolio.status !== 'simulating')) return null;
 
   const staticMetrics = metricsByRange[timeRange];
   const metrics = (timeRange === '1D' && liveMetrics) ? liveMetrics : staticMetrics;

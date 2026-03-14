@@ -12,7 +12,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
-import { StrategyProfile, initialProfile } from '@/lib/strategyProfile';
+import { StrategyProfile, initialProfile, deriveRiskLevel } from '@/lib/strategyProfile';
 
 interface GeneratedHolding {
   ticker: string;
@@ -124,7 +124,28 @@ export default function Create() {
     setEditOpen(false);
   };
 
-  // Edit holdings logic
+  const persistPortfolio = (portfolioId: string, status: 'live' | 'simulating') => {
+    const riskLevel = deriveRiskLevel(strategyProfile);
+    const newPortfolio = {
+      id: portfolioId,
+      name: generatedStrategyName,
+      creator_id: '@alex_investor',
+      status,
+      risk_level: riskLevel,
+      objective: strategyProfile.primaryGoal || 'accumulation',
+      performance: { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+      followers: 0,
+      allocated: 0,
+      creator_investment: 0,
+      holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
+      created_date: new Date().toISOString(),
+    };
+    const existing = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+    existing.push(newPortfolio);
+    localStorage.setItem('userCreatedPortfolios', JSON.stringify(existing));
+  };
+
+
   const totalWeight = editableHoldings.reduce((acc, h) => acc + h.weight, 0);
 
   const updateHoldingWeight = (id: string, weight: number) => {
@@ -375,6 +396,8 @@ export default function Create() {
               <div className="flex gap-3">
                 <Button
                   onClick={() => {
+                    const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    persistPortfolio(portfolioId, 'live');
                     toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
                     setTimeout(() => navigate('/dashboard'), 1000);
                   }}
@@ -388,8 +411,8 @@ export default function Create() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    // Use a mock portfolio ID based on the generated name
                     const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    persistPortfolio(portfolioId, 'simulating');
                     navigate(`/simulation/${portfolioId}`);
                   }}
                   className="flex-1 h-12 text-base"
