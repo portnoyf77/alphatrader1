@@ -309,7 +309,7 @@ export default function Landing() {
                 <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                   {gem.risk}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="text-xs mt-1 text-muted-foreground">
                   {gem.desc}
                 </p>
               </div>
