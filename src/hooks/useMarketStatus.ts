@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 // Demo time override: set to minutes-since-midnight (e.g. 600 = 10:00 AM) or null for real clock
 // Keep in sync with useLiveChartData.ts DEMO_TIME_MINUTES
-const DEMO_TIME_MINUTES: number | null = 600; // 10:00 AM ET
+const DEMO_TIME_MINUTES: number | null = null;
 
 export type MarketPhase = 'pre-market' | 'open' | 'after-hours' | 'closed';
 

@@ -18,7 +18,7 @@ interface LiveMetrics {
 }
 
 // Demo time override: set to a minutes-since-midnight value (e.g. 600 = 10:00 AM) to preview that time, or null for real clock
-const DEMO_TIME_MINUTES: number | null = 600; // 10:00 AM ET — set to null for production
+const DEMO_TIME_MINUTES: number | null = null;
 
 function getETNow(): Date {
   if (DEMO_TIME_MINUTES !== null) {
