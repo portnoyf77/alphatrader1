@@ -434,6 +434,7 @@ export default function Landing() {
 
             {/* Alpha CTA */}
             <div
+              data-tour="alpha-fee-text"
               className="text-center rounded-[20px] p-12"
               style={{
                 background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(225,29,72,0.05))',
