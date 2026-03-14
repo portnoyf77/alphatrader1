@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Crown } from "lucide-react";
+import { BackgroundOrbs } from "@/components/BackgroundOrbs";
 
 const NotFound = () => {
   const location = useLocation();
