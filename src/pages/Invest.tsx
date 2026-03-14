@@ -111,7 +111,7 @@ export default function Create() {
         { role: 'Bonds', percentage: 15 },
         { role: 'Commodities', percentage: 10 },
       ],
-      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. We balanced growth opportunities with stability for a portfolio that can grow without keeping you up at night.`,
+      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. Growth opportunities are balanced with stability for a portfolio that can grow without keeping you up at night.`,
       risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
     };
     setGeneratedPortfolio(portfolio);
