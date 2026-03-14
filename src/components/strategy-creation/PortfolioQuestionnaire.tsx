@@ -448,18 +448,22 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         />
       </div>
 
-      {/* ── Forming gem silhouette ── */}
+      {/* ── Forming gem silhouette (UnifiedGem — same shape as crystallization) ── */}
       {currentIndex >= 2 && (
         <div
           className="absolute top-1/2 left-1/2 pointer-events-none z-0"
           style={{
             transform: 'translate(-50%, -50%)',
-            opacity: gemVisuals.opacity,
-            filter: `blur(${gemVisuals.blur}px)`,
             transition: 'all 1.2s ease',
           }}
         >
-          <LargeGemIcon gem={gemType} size={gemVisuals.size} color={gemSolidColors[gemType]} />
+          <UnifiedGem
+            gemType={gemType}
+            size={gemVisuals.size}
+            opacity={gemVisuals.opacity}
+            detailLevel={gemVisuals.detailLevel}
+            glowIntensity={gemVisuals.glowIntensity}
+          />
         </div>
       )}
 
