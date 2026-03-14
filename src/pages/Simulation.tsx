@@ -130,7 +130,6 @@ export default function Simulation() {
     }
   }, [timeRange]);
 
-  const metrics = metricsByRange[timeRange];
 
   // Redirect if not found or not simulating
   useEffect(() => {
