@@ -66,10 +66,10 @@ export interface Portfolio {
   max_single_sector_exposure_pct: number;
   max_turnover: TurnoverLevel;
   
-  // Holdings (only shown if visibility_mode = 'transparent')
+  // Holdings (only visible to owner; non-owners see sector-level exposure)
   holdings: Holding[];
   
-  // Masked exposure (shown when visibility_mode = 'masked')
+  // Exposure breakdown (shown to non-owners)
   exposure_breakdown: ExposureBreakdown[];
   top_themes: string[];
   turnover_estimate: TurnoverLevel;
