@@ -49,12 +49,14 @@ const enhancedGeneratedHoldings: GeneratedHolding[] = [
 ];
 
 const roleColors: Record<GeneratedHolding['role'], string> = {
-  Core: 'bg-primary/20 text-primary border-primary/30',
-  Growth: 'bg-success/20 text-success border-success/30',
-  Stability: 'bg-muted text-muted-foreground border-muted-foreground/30',
-  Hedge: 'bg-warning/20 text-warning border-warning/30',
-  International: 'bg-accent/20 text-accent-foreground border-accent/30',
+  Core: 'border-[rgba(148,163,184,0.3)]',
+  Growth: 'border-[rgba(148,163,184,0.3)]',
+  Stability: 'border-[rgba(148,163,184,0.3)]',
+  Hedge: 'border-[rgba(148,163,184,0.3)]',
+  International: 'border-[rgba(148,163,184,0.3)]',
 };
+
+const sectorColors = ['#94A3B8', '#64748B', '#475569', '#334155', '#1E293B'];
 
 const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
   Core: <TrendingUp className="h-3 w-3" />,
