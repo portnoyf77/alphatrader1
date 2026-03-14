@@ -104,10 +104,9 @@ export default function Explore() {
       const matchesObjective = objectiveFilter === 'all' || strategy.objective === objectiveFilter;
       const matchesRisk = riskFilter === 'all' || strategy.risk_level === riskFilter;
       const matchesStrategy = strategyFilter === 'all' || strategy.strategy_type === strategyFilter;
-      const matchesVisibility = visibilityFilter === 'all' || strategy.visibility_mode === visibilityFilter;
       const matchesTurnover = turnoverFilter === 'all' || strategy.turnover_estimate === turnoverFilter;
 
-      return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesVisibility && matchesTurnover;
+      return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesTurnover;
     });
   }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, visibilityFilter, turnoverFilter]);
 
