@@ -416,11 +416,25 @@ export default function Explore() {
 
             {/* ═══ Portfolio Grid ═══ */}
             {filteredStrategies.length > 0 ? (
-              <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
-                {filteredStrategies.map((strategy) => (
-                  <StrategyCard key={strategy.id} strategy={strategy} />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+                  {filteredStrategies.map((strategy) => (
+                    <StrategyCard key={strategy.id} strategy={strategy} />
+                  ))}
+                </div>
+
+                {/* Build Your Own CTA */}
+                <div className="mt-12 text-center py-10 rounded-2xl border border-border/30" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <p className="text-muted-foreground mb-1">Don't see what you're looking for?</p>
+                  <p className="text-sm text-muted-foreground mb-4">Build your own portfolio with AI in minutes.</p>
+                  <Link to="/invest">
+                    <Button className="gap-2">
+                      Create Portfolio
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </>
             ) : (
               <div className="text-center py-20">
                 <p className="text-muted-foreground mb-2">No portfolios match your filters.</p>
