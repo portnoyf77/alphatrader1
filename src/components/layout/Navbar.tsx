@@ -95,8 +95,8 @@ export function Navbar() {
                       <span className={cn("text-[0.75rem] font-medium whitespace-nowrap", marketStatus.color)}>
                         {marketStatus.label}
                       </span>
-                      <span className="text-[0.75rem] text-muted-foreground/50">·</span>
-                      <span className="text-[0.75rem] text-muted-foreground/50 whitespace-nowrap">
+                      <span className="text-[0.75rem] text-muted-foreground">·</span>
+                      <span className="text-[0.75rem] text-muted-foreground whitespace-nowrap">
                         {marketStatus.etTimeString}
                       </span>
                     </div>
