@@ -104,7 +104,12 @@ export function AIAssistant() {
 
     const delay = 600 + Math.random() * 400;
     setTimeout(() => {
-      const result = getResponse(text, location.pathname, recentResponses.current);
+      // Collect recent user messages for conversation context
+      const recentUserMsgs = [...messages, userMsg]
+        .filter(m => m.role === 'user')
+        .map(m => m.content)
+        .slice(-5);
+      const result = getResponse(text, location.pathname, recentResponses.current, recentUserMsgs);
       const contextActions = getContextQuickActions(location.pathname, userMessageCount.current);
       
       // Track for anti-loop (keep last 3)
