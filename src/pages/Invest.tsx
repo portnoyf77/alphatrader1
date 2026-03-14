@@ -260,7 +260,7 @@ export default function Create() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`}>
+                          <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`} style={{ background: 'rgba(148,163,184,0.15)', color: '#94A3B8', borderColor: 'rgba(148,163,184,0.2)' }}>
                             {roleIcons[holding.role]}
                             {holding.role}
                           </Badge>
