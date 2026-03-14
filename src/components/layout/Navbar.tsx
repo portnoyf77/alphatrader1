@@ -22,6 +22,7 @@ const planTooltips: Record<string, string> = {
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
 
