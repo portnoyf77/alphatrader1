@@ -6,7 +6,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Sapphire-347',
     creator_id: '@inv_7x2k',
     status: 'validated_listed',
-    visibility_mode: 'transparent',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 60 days of real-market simulation with stable drawdown profile and consistent risk-adjusted returns.',
