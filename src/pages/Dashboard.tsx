@@ -152,7 +152,7 @@ export default function Dashboard() {
                     )}>
                       {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
                     </span>
-                    <span className="text-[0.9rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>vs S&P 500</span>
+                    <span className="text-[0.9rem] text-muted-foreground">vs S&P 500</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs">
