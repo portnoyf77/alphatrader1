@@ -277,10 +277,25 @@ export default function Simulation() {
         <Card className="glass-card mb-6">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Live Performance
-              </CardTitle>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Live Performance
+                </CardTitle>
+                {timeRange === '1D' && (
+                  marketOpen && simulationState === 'running' ? (
+                    <Badge className="bg-success/20 text-success border-success/30 gap-1.5 animate-fade-in">
+                      <span className="w-2 h-2 rounded-full bg-success live-pulse" />
+                      LIVE
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="bg-muted/50 text-muted-foreground border-border gap-1.5 animate-fade-in">
+                      <Radio className="h-3 w-3" />
+                      Market Closed
+                    </Badge>
+                  )
+                )}
+              </div>
               {/* Time Range Toggles */}
               <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 {timeRanges.map((range) => (
