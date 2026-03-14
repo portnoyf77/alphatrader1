@@ -1,26 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Wrench, Plus, Trash2, ArrowRight, Save, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw, DollarSign } from 'lucide-react';
+import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, RotateCcw, DollarSign, Scale, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
-import { ConversationalQA } from '@/components/strategy-creation/ConversationalQA';
+import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
 import { StrategyProfile, initialProfile } from '@/lib/strategyProfile';
-
-interface HoldingRow {
-  id: string;
-  ticker: string;
-  weight: number;
-}
 
 interface GeneratedHolding {
   ticker: string;
@@ -39,62 +31,19 @@ interface ExcludedHolding {
   reason: string;
 }
 
-const enhancedGeneratedHoldings: GeneratedHolding[] = [
-  { 
-    ticker: 'VTI', 
-    name: 'Vanguard Total Stock Market ETF', 
-    weight: 35,
-    role: 'Core',
-    explanation: 'VTI provides comprehensive exposure to the entire U.S. stock market, including large, mid, and small-cap stocks.',
-    alignment: 'Matches your growth objective while providing the broad diversification needed for medium-risk tolerance.',
-    characteristics: ['Ultra-low 0.03% expense ratio', 'High liquidity with $1T+ AUM', 'Covers 3,500+ U.S. stocks'],
-    tradeoff: 'Lower potential upside than concentrated sector bets, but significantly reduces single-stock risk.'
-  },
-  { 
-    ticker: 'VXUS', 
-    name: 'Vanguard Total Intl Stock ETF', 
-    weight: 20,
-    role: 'International',
-    explanation: 'VXUS delivers exposure to developed and emerging markets outside the U.S.',
-    alignment: 'Directly addresses your request for international exposure while maintaining a growth orientation.',
-    characteristics: ['0.07% expense ratio', '7,800+ international stocks', 'Covers 40+ countries'],
-    tradeoff: 'Introduces currency risk but provides valuable diversification when U.S. markets underperform.'
-  },
-  { 
-    ticker: 'QQQ', 
-    name: 'Invesco QQQ Trust', 
-    weight: 20,
-    role: 'Growth',
-    explanation: 'QQQ tracks the Nasdaq-100 Index, providing concentrated exposure to tech giants.',
-    alignment: 'Fulfills your tech sector focus requirement with exposure to market-leading innovation companies.',
-    characteristics: ['Heavy tech concentration (50%+)', 'Top 100 Nasdaq companies', 'Strong historical performance'],
-    tradeoff: 'Higher volatility than broad market ETFs but historically delivers outsized returns during bull markets.'
-  },
-  { 
-    ticker: 'BND', 
-    name: 'Vanguard Total Bond Market ETF', 
-    weight: 15,
-    role: 'Stability',
-    explanation: 'BND provides exposure to the entire U.S. investment-grade bond market.',
-    alignment: 'Addresses your medium-risk tolerance by adding a buffer against equity volatility.',
-    characteristics: ['0.03% expense ratio', '10,000+ bond holdings', 'Investment-grade focus'],
-    tradeoff: 'Lower returns than equities but provides crucial downside protection during market crashes.'
-  },
-  { 
-    ticker: 'GLD', 
-    name: 'SPDR Gold Shares', 
-    weight: 10,
-    role: 'Hedge',
-    explanation: 'GLD tracks the price of physical gold bullion, serving as an inflation hedge.',
-    alignment: 'Provides portfolio insurance against inflation and economic uncertainty.',
-    characteristics: ['Physical gold backing', 'High liquidity', 'Inflation protection'],
-    tradeoff: 'No dividend income but provides valuable protection during crises and inflationary periods.'
-  },
-];
+interface EditableHolding {
+  id: string;
+  ticker: string;
+  name: string;
+  weight: number;
+}
 
-const excludedHoldings: ExcludedHolding[] = [
-  { ticker: 'XLE', name: 'Energy Select Sector SPDR', reason: 'Excluded per your fossil fuel avoidance preference' },
-  { ticker: 'VDE', name: 'Vanguard Energy ETF', reason: 'Excluded per your fossil fuel avoidance preference' },
+const enhancedGeneratedHoldings: GeneratedHolding[] = [
+  { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 35, role: 'Core', explanation: 'VTI provides comprehensive exposure to the entire U.S. stock market.', alignment: 'Matches your growth objective while providing broad diversification.', characteristics: ['Ultra-low 0.03% expense ratio', 'High liquidity with $1T+ AUM', 'Covers 3,500+ U.S. stocks'], tradeoff: 'Lower potential upside than concentrated sector bets, but significantly reduces single-stock risk.' },
+  { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 20, role: 'International', explanation: 'VXUS delivers exposure to developed and emerging markets outside the U.S.', alignment: 'Directly addresses your request for international exposure.', characteristics: ['0.07% expense ratio', '7,800+ international stocks', 'Covers 40+ countries'], tradeoff: 'Introduces currency risk but provides valuable diversification.' },
+  { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 20, role: 'Growth', explanation: 'QQQ tracks the Nasdaq-100 Index, providing concentrated tech exposure.', alignment: 'Fulfills your tech sector focus requirement.', characteristics: ['Heavy tech concentration (50%+)', 'Top 100 Nasdaq companies', 'Strong historical performance'], tradeoff: 'Higher volatility but historically delivers outsized returns during bull markets.' },
+  { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 15, role: 'Stability', explanation: 'BND provides exposure to the entire U.S. investment-grade bond market.', alignment: 'Adds a buffer against equity volatility.', characteristics: ['0.03% expense ratio', '10,000+ bond holdings', 'Investment-grade focus'], tradeoff: 'Lower returns than equities but provides crucial downside protection.' },
+  { ticker: 'GLD', name: 'SPDR Gold Shares', weight: 10, role: 'Hedge', explanation: 'GLD tracks the price of physical gold bullion.', alignment: 'Provides portfolio insurance against inflation and uncertainty.', characteristics: ['Physical gold backing', 'High liquidity', 'Inflation protection'], tradeoff: 'No dividend income but provides valuable protection during crises.' },
 ];
 
 const roleColors: Record<GeneratedHolding['role'], string> = {
@@ -118,12 +67,10 @@ type CreationStep = 'questionnaire' | 'animation' | 'results';
 export default function Create() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('genai');
-  
-  // GenAI state - new questionnaire flow
+
   const [creationStep, setCreationStep] = useState<CreationStep>('questionnaire');
   const [strategyProfile, setStrategyProfile] = useState<StrategyProfile>(initialProfile);
-  const [generatedStrategyName, setGeneratedStrategyName] = useState<string>('');
+  const [generatedStrategyName, setGeneratedStrategyName] = useState('');
   const [generatedPortfolio, setGeneratedPortfolio] = useState<{
     name: string;
     holdings: GeneratedHolding[];
@@ -133,26 +80,21 @@ export default function Create() {
     risks: string;
   } | null>(null);
 
-  // Manual state
-  const [manualHoldings, setManualHoldings] = useState<HoldingRow[]>([
-    { id: '1', ticker: '', weight: 0 }
-  ]);
-  const [manualObjective, setManualObjective] = useState('');
-  const [manualRisk, setManualRisk] = useState('');
+  // Editable holdings state
+  const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
+  const [editOpen, setEditOpen] = useState(false);
 
   const handleQuestionnaireComplete = (profile: StrategyProfile) => {
     setStrategyProfile(profile);
     setCreationStep('animation');
   };
 
-  const handleAnimationComplete = (strategyName: string) => {
-    setGeneratedStrategyName(strategyName);
-    
-    // Generate portfolio based on profile
-    setGeneratedPortfolio({
-      name: strategyName,
+  const handleAnimationComplete = (name: string) => {
+    setGeneratedStrategyName(name);
+    const portfolio = {
+      name,
       holdings: enhancedGeneratedHoldings,
-      excluded: strategyProfile.restrictions.includes('fossil-fuels') ? excludedHoldings : [],
+      excluded: [] as ExcludedHolding[],
       strategyBreakdown: [
         { role: 'Core Equity', percentage: 35 },
         { role: 'Growth Accelerator', percentage: 20 },
@@ -160,10 +102,16 @@ export default function Create() {
         { role: 'Stability Buffer', percentage: 15 },
         { role: 'Inflation Hedge', percentage: 10 },
       ],
-      rationale: `We built this portfolio to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline} years. ${strategyProfile.riskStatement === 'maximum-growth' ? 'You said you\'re okay with bigger ups and downs to aim for higher returns, so we picked investments with more growth potential.' : strategyProfile.riskStatement === 'protect' ? 'Since protecting your money is important to you, we focused on steadier investments that won\'t swing as wildly.' : 'We balanced growth opportunities with stability, so you get a mix of investments that can grow but won\'t keep you up at night.'}`,
+      rationale: `We built this portfolio to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. We balanced growth opportunities with stability for a portfolio that can grow without keeping you up at night.`,
       risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
-    });
-    
+    };
+    setGeneratedPortfolio(portfolio);
+    setEditableHoldings(portfolio.holdings.map((h, i) => ({
+      id: String(i),
+      ticker: h.ticker,
+      name: h.name,
+      weight: h.weight,
+    })));
     setCreationStep('results');
   };
 
@@ -172,38 +120,33 @@ export default function Create() {
     setStrategyProfile(initialProfile);
     setGeneratedPortfolio(null);
     setGeneratedStrategyName('');
+    setEditableHoldings([]);
+    setEditOpen(false);
   };
 
-  const addManualRow = () => {
-    setManualHoldings([...manualHoldings, { id: Date.now().toString(), ticker: '', weight: 0 }]);
+  // Edit holdings logic
+  const totalWeight = editableHoldings.reduce((acc, h) => acc + h.weight, 0);
+
+  const updateHoldingWeight = (id: string, weight: number) => {
+    setEditableHoldings(prev => prev.map(h => h.id === id ? { ...h, weight } : h));
   };
 
-  const removeManualRow = (id: string) => {
-    if (manualHoldings.length > 1) {
-      setManualHoldings(manualHoldings.filter(h => h.id !== id));
-    }
+  const removeHolding = (id: string) => {
+    setEditableHoldings(prev => prev.filter(h => h.id !== id));
   };
 
-  const updateManualRow = (id: string, field: 'ticker' | 'weight', value: string | number) => {
-    setManualHoldings(manualHoldings.map(h => 
-      h.id === id ? { ...h, [field]: value } : h
-    ));
+  const addHolding = () => {
+    setEditableHoldings(prev => [...prev, { id: Date.now().toString(), ticker: '', name: '', weight: 0 }]);
   };
 
-  const totalWeight = manualHoldings.reduce((acc, h) => acc + (h.weight || 0), 0);
-
-  const handleSave = () => {
-    toast({
-      title: "Portfolio saved!",
-      description: "Your portfolio has been saved as a draft.",
-    });
+  const autoBalance = () => {
+    const count = editableHoldings.length;
+    if (count === 0) return;
+    const each = Math.floor(100 / count);
+    const remainder = 100 - each * count;
+    setEditableHoldings(prev => prev.map((h, i) => ({ ...h, weight: each + (i === 0 ? remainder : 0) })));
   };
 
-  const handleRunSimulation = () => {
-    navigate('/simulation/new');
-  };
-
-  // Render results content after animation completes
   const renderResultsContent = () => (
     <div className="space-y-6 animate-fade-in">
       {generatedPortfolio && (
@@ -223,7 +166,6 @@ export default function Create() {
                   </span>
                 </div>
               </CardTitle>
-              {/* Gemstone explanation */}
               {(() => {
                 const gemName = generatedPortfolio.name.split('-')[0];
                 const explanations: Record<string, string> = {
@@ -231,14 +173,10 @@ export default function Create() {
                   'Sapphire': 'Sapphire represents your balanced, growth-oriented outlook — precision with purpose.',
                   'Pearl': 'Pearl embodies your conservative, stability-first philosophy — smooth and secure.',
                 };
-                const explanation = explanations[gemName] || `${gemName} reflects your personalized investment approach`;
-                return (
-                  <p className="text-sm text-muted-foreground mt-1 italic">{explanation}</p>
-                );
+                return <p className="text-sm text-muted-foreground mt-1 italic">{explanations[gemName] || `${gemName} reflects your personalized investment approach`}</p>;
               })()}
             </CardHeader>
             <CardContent>
-              {/* Strategy Breakdown */}
               <div className="mb-6">
                 <h4 className="font-medium mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
@@ -246,16 +184,12 @@ export default function Create() {
                 </h4>
                 <div className="flex gap-1 h-8 rounded-lg overflow-hidden mb-3">
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
-                    <div 
+                    <div
                       key={item.role}
                       className="relative flex items-center justify-center text-xs font-medium"
-                      style={{ 
+                      style={{
                         width: `${item.percentage}%`,
-                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
-                                       idx === 1 ? 'hsl(var(--success))' : 
-                                       idx === 2 ? 'hsl(var(--accent))' : 
-                                       idx === 3 ? 'hsl(var(--muted))' : 
-                                       'hsl(var(--warning))',
+                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))',
                         color: idx === 3 ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))'
                       }}
                     >
@@ -266,16 +200,9 @@ export default function Create() {
                 <div className="flex flex-wrap gap-3 text-xs">
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
                     <div key={item.role} className="flex items-center gap-1.5">
-                      <div 
-                        className="w-3 h-3 rounded"
-                        style={{ 
-                          backgroundColor: idx === 0 ? 'hsl(var(--primary))' : 
-                                         idx === 1 ? 'hsl(var(--success))' : 
-                                         idx === 2 ? 'hsl(var(--accent))' : 
-                                         idx === 3 ? 'hsl(var(--muted))' : 
-                                         'hsl(var(--warning))'
-                        }}
-                      />
+                      <div className="w-3 h-3 rounded" style={{
+                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))'
+                      }} />
                       <span className="text-muted-foreground">{item.role}</span>
                     </div>
                   ))}
@@ -284,7 +211,7 @@ export default function Create() {
             </CardContent>
           </Card>
 
-          {/* Holdings with Explanations */}
+          {/* Holdings & Rationale */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-lg">Holdings & Rationale</CardTitle>
@@ -331,9 +258,7 @@ export default function Create() {
                           <h5 className="font-medium text-sm mb-2">Key Characteristics</h5>
                           <div className="flex flex-wrap gap-2">
                             {holding.characteristics.map((char, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {char}
-                              </Badge>
+                              <Badge key={idx} variant="secondary" className="text-xs">{char}</Badge>
                             ))}
                           </div>
                         </div>
@@ -352,38 +277,10 @@ export default function Create() {
             </CardContent>
           </Card>
 
-          {/* Excluded Holdings */}
-          {generatedPortfolio.excluded.length > 0 && (
-            <Card className="glass-card border-warning/30">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  Why Not These Funds?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {generatedPortfolio.excluded.map((item) => (
-                    <div key={item.ticker} className="flex items-start gap-3 text-sm">
-                      <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shrink-0">
-                        {item.ticker}
-                      </Badge>
-                      <span className="text-muted-foreground">{item.reason}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Overall Portfolio Rationale */}
+          {/* Portfolio Rationale */}
           <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-lg">Portfolio Rationale</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p>
-            </CardContent>
+            <CardHeader><CardTitle className="text-lg">Portfolio Rationale</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p></CardContent>
           </Card>
 
           {/* Key Risks */}
@@ -394,178 +291,65 @@ export default function Create() {
                 Key Risks
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{generatedPortfolio.risks}</p>
-            </CardContent>
+            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.risks}</p></CardContent>
           </Card>
 
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleSave} className="flex-1">
-              <Save className="h-4 w-4 mr-2" />
-              Save Draft
-            </Button>
-            <Button onClick={handleRunSimulation} className="flex-1 glow-primary">
-              Run Simulation
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                toast({
-                  title: "Invest Now (prototype)",
-                  description: "In a live product, this would take you directly to fund your portfolio.",
-                });
-              }} 
-              className="flex-1 border-success/50 text-success hover:bg-success/10"
-            >
-              <DollarSign className="h-4 w-4 mr-2" />
-              Invest Now
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground text-center">
-            💡 We recommend simulating first to understand risk before allocating real capital.
-          </p>
-        </>
-      )}
-    </div>
-  );
-
-  // Render GenAI tab content based on step
-  const renderGenAIContent = () => {
-    switch (creationStep) {
-      case 'questionnaire':
-        return (
-          <ConversationalQA
-            onComplete={handleQuestionnaireComplete}
-            onCancel={() => navigate(-1)}
-          />
-        );
-      
-      case 'animation':
-        return (
-          <ParticleCrystallizationAnimation
-            profile={strategyProfile}
-            onComplete={handleAnimationComplete}
-          />
-        );
-      
-      case 'results':
-        return renderResultsContent();
-    }
-  };
-
-  return (
-    <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
-            <p className="text-muted-foreground">
-              Build your portfolio with AI assistance or manually configure holdings.
-            </p>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="genai" className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                AI-Assisted
-              </TabsTrigger>
-              <TabsTrigger value="manual" className="flex items-center gap-2">
-                <Wrench className="h-4 w-4" />
-                Manual
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="genai" className="space-y-6">
-              {renderGenAIContent()}
-            </TabsContent>
-
-            <TabsContent value="manual" className="space-y-6">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Portfolio Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Investment Objective</Label>
-                      <Select value={manualObjective} onValueChange={setManualObjective}>
-                        <SelectTrigger className="bg-secondary">
-                          <SelectValue placeholder="Select objective" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="growth">Growth</SelectItem>
-                          <SelectItem value="income">Income</SelectItem>
-                          <SelectItem value="balanced">Balanced</SelectItem>
-                          <SelectItem value="low-volatility">Low Volatility</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Risk Level</Label>
-                      <Select value={manualRisk} onValueChange={setManualRisk}>
-                        <SelectTrigger className="bg-secondary">
-                          <SelectValue placeholder="Select risk level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
+          {/* Edit Holdings — collapsible */}
+          <Collapsible open={editOpen} onOpenChange={setEditOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/30 bg-secondary/20 hover:bg-secondary/40 transition-colors text-sm">
+                <span className="text-muted-foreground">Want to adjust? You can add, remove, or change holdings.</span>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${editOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
               <Card className="glass-card">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg">Holdings</CardTitle>
-                  <Button variant="outline" size="sm" onClick={addManualRow}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Row
-                  </Button>
+                  <CardTitle className="text-base">Edit Holdings</CardTitle>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={autoBalance}>
+                      <Scale className="h-3.5 w-3.5 mr-1.5" />
+                      Auto-Balance
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={addHolding}>
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      Add Holding
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Ticker</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead className="text-right">Weight (%)</TableHead>
-                        <TableHead className="w-12"></TableHead>
+                        <TableHead className="w-12" />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {manualHoldings.map((holding) => (
-                        <TableRow key={holding.id}>
+                      {editableHoldings.map((h) => (
+                        <TableRow key={h.id}>
                           <TableCell>
                             <Input
-                              placeholder="e.g., VTI"
-                              value={holding.ticker}
-                              onChange={(e) => updateManualRow(holding.id, 'ticker', e.target.value.toUpperCase())}
-                              className="bg-secondary"
+                              value={h.ticker}
+                              onChange={(e) => setEditableHoldings(prev => prev.map(x => x.id === h.id ? { ...x, ticker: e.target.value.toUpperCase() } : x))}
+                              className="bg-secondary w-20"
                             />
                           </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{h.name || '—'}</TableCell>
                           <TableCell>
                             <Input
                               type="number"
                               min="0"
                               max="100"
-                              placeholder="0"
-                              value={holding.weight || ''}
-                              onChange={(e) => updateManualRow(holding.id, 'weight', parseFloat(e.target.value) || 0)}
-                              className="bg-secondary text-right"
+                              value={h.weight || ''}
+                              onChange={(e) => updateHoldingWeight(h.id, parseFloat(e.target.value) || 0)}
+                              className="bg-secondary text-right w-20 ml-auto"
                             />
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeManualRow(holding.id)}
-                              disabled={manualHoldings.length === 1}
-                            >
+                            <Button variant="ghost" size="icon" onClick={() => removeHolding(h.id)} disabled={editableHoldings.length <= 1}>
                               <Trash2 className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </TableCell>
@@ -573,50 +357,84 @@ export default function Create() {
                       ))}
                     </TableBody>
                   </Table>
-                  
-                  <div className="mt-4 flex items-center justify-between text-sm">
+                  <div className="mt-3 flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Total Weight</span>
                     <span className={totalWeight === 100 ? 'text-success' : 'text-destructive'}>
-                      {totalWeight}% {totalWeight !== 100 && '(should equal 100%)'}
+                      {totalWeight}% {totalWeight !== 100 && '(must equal 100%)'}
                     </span>
                   </div>
                 </CardContent>
               </Card>
+            </CollapsibleContent>
+          </Collapsible>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handleSave} className="flex-1">
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Draft
-                </Button>
-                <Button 
-                  onClick={handleRunSimulation} 
-                  className="flex-1 glow-primary"
-                  disabled={totalWeight !== 100 || !manualObjective || !manualRisk}
-                >
-                  Run Simulation
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    toast({
-                      title: "Invest Now (prototype)",
-                      description: "In a live product, this would take you directly to fund your portfolio.",
-                    });
-                  }} 
-                  className="flex-1 border-success/50 text-success hover:bg-success/10"
-                  disabled={totalWeight !== 100 || !manualObjective || !manualRisk}
-                >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Invest Now
-                </Button>
+          {/* Bottom CTAs */}
+          <div className="space-y-4 pt-2">
+            <div className="flex gap-3">
+              <Button
+                onClick={() => toast({ title: "Invest Now (prototype)", description: "In a live product, this would take you directly to fund your portfolio." })}
+                className="flex-1 h-12 text-base font-semibold"
+                disabled={editOpen && totalWeight !== 100}
+              >
+                <DollarSign className="h-5 w-5 mr-2" />
+                Invest Now
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/simulation/new')}
+                className="flex-1 h-12 text-base"
+                disabled={editOpen && totalWeight !== 100}
+              >
+                Simulate First
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Simulation is optional. You can invest directly or test with live data first.
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              Platform fee: 0.25% annually on invested capital
+            </p>
+            <div className="text-center">
+              <button onClick={handleStartOver} className="text-sm text-muted-foreground hover:text-foreground underline transition-colors">
+                Start Over
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <PageLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          {creationStep === 'questionnaire' && (
+            <>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
+                <p className="text-muted-foreground">
+                  Answer a few questions and the AI will build a personalized portfolio for you.
+                </p>
               </div>
-
-              <p className="text-xs text-muted-foreground text-center">
-                💡 We recommend simulating first to understand risk before allocating real capital.
-              </p>
-            </TabsContent>
-          </Tabs>
+              <PortfolioQuestionnaire
+                onComplete={handleQuestionnaireComplete}
+                onCancel={() => navigate(-1)}
+              />
+            </>
+          )}
+          {creationStep === 'animation' && (
+            <ParticleCrystallizationAnimation
+              profile={strategyProfile}
+              onComplete={handleAnimationComplete}
+            />
+          )}
+          {creationStep === 'results' && (
+            <div className="space-y-6">
+              {renderResultsContent()}
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>

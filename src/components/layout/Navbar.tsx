@@ -12,7 +12,6 @@ import { useMarketStatus } from '@/hooks/useMarketStatus';
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
-  { href: '/invest', label: 'Create', icon: Sparkles, tooltip: 'Build a new portfolio with AI or manually' },
   { href: '/alpha', label: 'Become an Alpha', icon: Crown, tooltip: 'Earn passive income from your portfolios' },
   { href: '/faq', label: 'FAQ', icon: HelpCircle, tooltip: 'Frequently asked questions' },
 ];
