@@ -112,8 +112,8 @@ interface TourContextType {
 const TourContext = createContext<TourContextType | undefined>(undefined);
 
 export function TourProvider({ children }: { children: ReactNode }) {
-  const [isActive, setIsActive] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [isActive, setIsActive] = useState(() => localStorage.getItem('tourActive') === 'true');
+  const [currentStep, setCurrentStep] = useState(() => parseInt(localStorage.getItem('tourStep') || '0', 10));
   const [isPaused, setIsPaused] = useState(false);
 
   const startTour = useCallback(() => {
