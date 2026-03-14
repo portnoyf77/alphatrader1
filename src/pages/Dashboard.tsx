@@ -161,7 +161,7 @@ export default function Dashboard() {
               </Tooltip>
             </TooltipProvider>
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>You: +{userTotalReturn}% · S&P: +{sp500Return}%</span>
+              <span className="text-[0.8rem] text-muted-foreground">You: +{userTotalReturn}% · S&P: +{sp500Return}%</span>
             </div>
           </div>
         </div>
