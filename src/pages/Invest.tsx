@@ -375,6 +375,8 @@ export default function Create() {
               <div className="flex gap-3">
                 <Button
                   onClick={() => {
+                    const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    persistPortfolio(portfolioId, 'live');
                     toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
                     setTimeout(() => navigate('/dashboard'), 1000);
                   }}
@@ -388,8 +390,8 @@ export default function Create() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    // Use a mock portfolio ID based on the generated name
                     const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    persistPortfolio(portfolioId, 'simulating');
                     navigate(`/simulation/${portfolioId}`);
                   }}
                   className="flex-1 h-12 text-base"

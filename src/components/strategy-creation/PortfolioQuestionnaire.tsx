@@ -536,7 +536,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
           onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
         >
           <ArrowLeft className="h-4 w-4" />
-          {currentIndex === 0 ? 'Cancel' : 'Back'}
+          Back
         </button>
       </div>
     </div>

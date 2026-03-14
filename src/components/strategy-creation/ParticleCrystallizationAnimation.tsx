@@ -148,7 +148,7 @@ export function ParticleCrystallizationAnimation({
           />
         ))}
         
-        {/* Gem SVG - appears during reveal */}
+        {/* Gem SVG - appears during reveal, shape matches gem type */}
         {showGem && (
           <svg
             viewBox="0 0 100 100"
@@ -167,37 +167,50 @@ export function ParticleCrystallizationAnimation({
                 <stop offset="100%" stopColor={colors.secondary} />
               </linearGradient>
             </defs>
-            {/* Gem facets */}
-            <polygon 
-              points="50,5 95,35 80,95 20,95 5,35" 
-              fill="url(#gemGradient)"
-              className="animate-gem-appear"
-            />
-            <polygon 
-              points="50,5 50,50 95,35" 
-              fill={colors.glow}
-              fillOpacity={0.4}
-            />
-            <polygon 
-              points="50,50 95,35 80,95" 
-              fill={colors.primary}
-              fillOpacity={0.3}
-            />
-            <polygon 
-              points="50,50 80,95 20,95" 
-              fill={colors.secondary}
-              fillOpacity={0.3}
-            />
-            <polygon 
-              points="50,50 20,95 5,35" 
-              fill={colors.primary}
-              fillOpacity={0.4}
-            />
-            <polygon 
-              points="50,5 5,35 50,50" 
-              fill={colors.glow}
-              fillOpacity={0.5}
-            />
+
+            {/* Pearl — circle */}
+            {gemstoneType === 'Pearl' && (
+              <>
+                <circle cx="50" cy="50" r="42" fill="url(#gemGradient)" className="animate-gem-appear" />
+                <ellipse cx="40" cy="38" rx="14" ry="10" fill="white" fillOpacity={0.15} />
+                <circle cx="50" cy="50" r="28" fill={colors.glow} fillOpacity={0.08} />
+              </>
+            )}
+
+            {/* Sapphire — hexagon */}
+            {gemstoneType === 'Sapphire' && (
+              <>
+                <polygon
+                  points="50,5 90,25 90,75 50,95 10,75 10,25"
+                  fill="url(#gemGradient)"
+                  className="animate-gem-appear"
+                />
+                <polygon points="50,5 50,50 90,25" fill={colors.glow} fillOpacity={0.4} />
+                <polygon points="50,50 90,25 90,75" fill={colors.primary} fillOpacity={0.3} />
+                <polygon points="50,50 90,75 50,95" fill={colors.secondary} fillOpacity={0.3} />
+                <polygon points="50,50 50,95 10,75" fill={colors.primary} fillOpacity={0.3} />
+                <polygon points="50,50 10,75 10,25" fill={colors.secondary} fillOpacity={0.4} />
+                <polygon points="50,5 10,25 50,50" fill={colors.glow} fillOpacity={0.5} />
+                <polygon points="50,22 68,32 68,62 50,72 32,62 32,32" fill="white" fillOpacity={0.06} />
+              </>
+            )}
+
+            {/* Ruby — faceted diamond/gem */}
+            {gemstoneType === 'Ruby' && (
+              <>
+                <polygon
+                  points="25,10 75,10 90,35 50,95 10,35"
+                  fill="url(#gemGradient)"
+                  className="animate-gem-appear"
+                />
+                <line x1="10" y1="35" x2="90" y2="35" stroke="white" strokeWidth="0.8" strokeOpacity={0.2} />
+                <polygon points="25,10 50,35 10,35" fill={colors.glow} fillOpacity={0.5} />
+                <polygon points="75,10 90,35 50,35" fill={colors.glow} fillOpacity={0.4} />
+                <polygon points="25,10 75,10 50,35" fill={colors.secondary} fillOpacity={0.3} />
+                <polygon points="10,35 50,35 50,95" fill={colors.primary} fillOpacity={0.4} />
+                <polygon points="90,35 50,35 50,95" fill={colors.primary} fillOpacity={0.3} />
+              </>
+            )}
           </svg>
         )}
         
