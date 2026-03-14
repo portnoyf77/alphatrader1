@@ -64,7 +64,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Pearl-142',
     creator_id: '@alpha_99',
     status: 'validated_listed',
-    visibility_mode: 'masked',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 75 days with excellent consistency score and low volatility metrics.',
