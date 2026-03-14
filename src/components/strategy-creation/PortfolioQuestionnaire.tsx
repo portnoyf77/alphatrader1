@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { StrategyProfile, initialProfile, questions, Question } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
+import { UnifiedGem } from './UnifiedGem';
 
 // ── Risk score engine ──────────────────────────────────────────────────
 const goalWeights: Record<string, number> = {
