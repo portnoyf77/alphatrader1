@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Gauge, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -228,20 +228,6 @@ export default function StrategyDetail() {
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs max-w-[250px]">Total capital allocated by all followers</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                   <Card className="glass-card glass-tile cursor-help">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
-                        <Gauge className="h-3.5 w-3.5" />
-                        Consistency
-                      </p>
-                      <p className="text-2xl font-bold">{strategy.performance.consistency_score}/100</p>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[250px]">How consistently this portfolio follows its stated strategy. Higher is more predictable. (0-100)</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
