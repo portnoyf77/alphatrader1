@@ -148,17 +148,6 @@ export default function Explore() {
         </Select>
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Visibility</label>
-        <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-          <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="masked">Masked (IP-Protected)</SelectItem>
-            <SelectItem value="transparent">Transparent</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
         <label className="text-sm font-medium">Turnover</label>
         <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
