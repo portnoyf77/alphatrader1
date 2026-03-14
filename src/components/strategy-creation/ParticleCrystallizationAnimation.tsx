@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Particle } from './Particle';
+import { UnifiedGem } from './UnifiedGem';
 import { 
   StrategyProfile,
   deriveRiskLevel,
