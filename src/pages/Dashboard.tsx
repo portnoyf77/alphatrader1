@@ -212,78 +212,94 @@ export default function Dashboard() {
 
         {/* Tab Content */}
         {activeTab === 'my-portfolios' && (
-          <Card className="glass-card mb-8">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Portfolio</TableHead>
-                    <TableHead>
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help border-b border-dashed border-muted-foreground/40">Status</span>
-                          </TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Current portfolio status: Live, Simulating, or Inactive</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                    <TableHead className="text-right">
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help border-b border-dashed border-muted-foreground/40">My Investment</span>
-                          </TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Capital you've invested in this portfolio</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                    <TableHead className="text-right">
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span>
-                          </TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {livePortfolios.map((portfolio) => (
-                    <TableRow
-                      key={portfolio.id}
-                      className="cursor-pointer hover:bg-secondary/50 transition-all"
-                      style={{ borderLeft: '3px solid transparent' }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
-                      onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}
-                    >
-                      <TableCell>
-                        <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <GemDot name={portfolio.name} />
-                          {portfolio.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
-                          {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
-                          {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                          {formatPercent(portfolio.performance.return_30d)}
-                        </span>
-                      </TableCell>
+          livePortfolios.length === 0 ? (
+            <div className="rounded-2xl border border-border/30 py-16 px-8 text-center mb-8" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <Sparkles className="h-8 w-8 mx-auto mb-4 text-primary" />
+              <h3 className="text-lg font-semibold mb-2">You haven't created any portfolios yet</h3>
+              <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">
+                Let the AI build one for you in minutes. Answer a few questions and get a personalized portfolio.
+              </p>
+              <Link to="/invest">
+                <Button className="gap-2">
+                  Create Your First Portfolio
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Card className="glass-card mb-8">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Portfolio</TableHead>
+                      <TableHead>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Status</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Current portfolio status: Live, Simulating, or Inactive</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">My Investment</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Capital you've invested in this portfolio</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {livePortfolios.map((portfolio) => (
+                      <TableRow
+                        key={portfolio.id}
+                        className="cursor-pointer hover:bg-secondary/50 transition-all"
+                        style={{ borderLeft: '3px solid transparent' }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
+                        onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}
+                      >
+                        <TableCell>
+                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <GemDot name={portfolio.name} />
+                            {portfolio.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
+                            {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                            {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.performance.return_30d)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )
         )}
 
         {activeTab === 'invested' && (
