@@ -384,7 +384,7 @@ export default function Landing() {
                       <p className="font-mono text-[1.1rem] font-bold text-foreground">{portfolio.followers_count.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Allocated</p>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">Allocated</p>
                       <p className="font-mono text-[1.1rem] font-bold text-foreground">{formatCurrency(portfolio.allocated_amount_usd)}</p>
                     </div>
                   </div>
