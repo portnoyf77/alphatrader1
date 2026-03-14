@@ -120,24 +120,24 @@ export default function Dashboard() {
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-[2rem] font-bold text-foreground">{formatCurrency(animMyInvestment)}</span>
-              <span className="text-[0.9rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>invested</span>
+              <span className="text-[0.9rem] text-muted-foreground">invested</span>
             </div>
             <div className="flex items-center gap-1 mt-1">
               <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
               <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+3.2%</span>
-              <span className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.3)' }}>this month</span>
+              <span className="text-[0.8rem] text-muted-foreground">this month</span>
             </div>
           </div>
           {/* Total Value */}
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-[2rem] font-bold text-foreground">{formatCurrency(animTotalValue)}</span>
-              <span className="text-[0.9rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>total value</span>
+              <span className="text-[0.9rem] text-muted-foreground">total value</span>
             </div>
             <div className="flex items-center gap-1 mt-1">
               <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
               <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+8.1%</span>
-              <span className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.3)' }}>this month</span>
+              <span className="text-[0.8rem] text-muted-foreground">this month</span>
             </div>
           </div>
           {/* vs S&P 500 */}
@@ -152,7 +152,7 @@ export default function Dashboard() {
                     )}>
                       {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
                     </span>
-                    <span className="text-[0.9rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>vs S&P 500</span>
+                    <span className="text-[0.9rem] text-muted-foreground">vs S&P 500</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs">
@@ -161,7 +161,7 @@ export default function Dashboard() {
               </Tooltip>
             </TooltipProvider>
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>You: +{userTotalReturn}% · S&P: +{sp500Return}%</span>
+              <span className="text-[0.8rem] text-muted-foreground">You: +{userTotalReturn}% · S&P: +{sp500Return}%</span>
             </div>
           </div>
         </div>
@@ -525,8 +525,8 @@ export default function Dashboard() {
                   {/* Source & Date */}
                   <div className="flex items-center gap-1 text-[0.7rem]">
                     <span className="font-semibold text-foreground">{news.source}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
-                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>{news.date}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">{news.date}</span>
                   </div>
                 </div>
               </a>

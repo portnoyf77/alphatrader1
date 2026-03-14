@@ -309,7 +309,7 @@ export default function Landing() {
                 <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                   {gem.risk}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="text-xs mt-1 text-muted-foreground">
                   {gem.desc}
                 </p>
               </div>
@@ -374,17 +374,17 @@ export default function Landing() {
                   {/* Stats — labeled columns */}
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div>
-                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>30D Return</p>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">30D Return</p>
                       <p className={cn("font-mono text-[1.1rem] font-bold", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
                         {portfolio.performance.return_30d >= 0 ? '+' : ''}{portfolio.performance.return_30d.toFixed(1)}%
                       </p>
                     </div>
                     <div>
-                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Followers</p>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">Followers</p>
                       <p className="font-mono text-[1.1rem] font-bold text-foreground">{portfolio.followers_count.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Allocated</p>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">Allocated</p>
                       <p className="font-mono text-[1.1rem] font-bold text-foreground">{formatCurrency(portfolio.allocated_amount_usd)}</p>
                     </div>
                   </div>
@@ -394,7 +394,7 @@ export default function Landing() {
                     className="pt-4"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <p className="text-xs uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">
                       Monthly earnings
                     </p>
                     <p className="font-mono font-bold text-lg text-success earnings-glow">
