@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { NotificationBell } from '@/components/NotificationBell';
+import { useMarketStatus } from '@/hooks/useMarketStatus';
 
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
@@ -24,6 +25,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
+  const marketStatus = useMarketStatus();
 
   const handleLogout = () => {
     logout();
@@ -82,6 +84,26 @@ export function Navbar() {
           )}
 
           <div className="hidden md:flex items-center gap-3">
+            {/* Market Status — authenticated pages only */}
+            {isAuthenticated && (
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help px-2">
+                      <div className={cn("w-[6px] h-[6px] rounded-full flex-shrink-0", marketStatus.dotClass)} />
+                      <span className={cn("text-[0.75rem] font-medium whitespace-nowrap", marketStatus.color)}>
+                        {marketStatus.label}
+                      </span>
+                      <span className="text-[0.75rem] text-muted-foreground/50">·</span>
+                      <span className="text-[0.75rem] text-muted-foreground/50 whitespace-nowrap">
+                        {marketStatus.etTimeString}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs max-w-[250px]">{marketStatus.tooltipText}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             {isAuthenticated && <NotificationBell />}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
