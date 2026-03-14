@@ -111,7 +111,7 @@ export default function Create() {
         { role: 'Bonds', percentage: 15 },
         { role: 'Commodities', percentage: 10 },
       ],
-      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. We balanced growth opportunities with stability for a portfolio that can grow without keeping you up at night.`,
+      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. Growth opportunities are balanced with stability for a portfolio that can grow without keeping you up at night.`,
       risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
     };
     setGeneratedPortfolio(portfolio);
@@ -310,7 +310,7 @@ export default function Create() {
           {/* Portfolio Rationale */}
           <Card className="glass-card">
             <CardHeader><CardTitle className="text-lg">Portfolio Rationale</CardTitle></CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p></CardContent>
+            <CardContent><p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.rationale}</p></CardContent>
           </Card>
 
           {/* Key Risks */}
@@ -321,7 +321,7 @@ export default function Create() {
                 Key Risks
               </CardTitle>
             </CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.risks}</p></CardContent>
+            <CardContent><p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.risks}</p></CardContent>
           </Card>
 
           {/* Edit Holdings — collapsible */}
@@ -428,23 +428,20 @@ export default function Create() {
                   Simulate First
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Simulation is optional. You can invest directly or test with live data first.
               </p>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Platform fee: 0.25% annually on invested capital
               </p>
-            <div className="text-center">
-              <button
-                onClick={handleStartOver}
-                className="text-sm transition-colors inline-flex items-center gap-1.5"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-              >
-                ↺ Start Over
-              </button>
-            </div>
+              <div className="text-center">
+                <button
+                  onClick={handleStartOver}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+                >
+                  ↺ Start Over
+                </button>
+              </div>
           </div>
         </>
       )}
