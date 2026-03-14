@@ -221,7 +221,7 @@ export default function PortfolioOwnerDetail() {
                 {isSimulating ? 'Tweak & Resimulate' : 'Tweak Allocation'}
               </Button>
               {isSimulating && (
-                <Button onClick={() => setShowExecuteModal(true)} className="glow-primary">
+                <Button onClick={() => setShowExecuteModal(true)} className="glow-commit">
                   <Rocket className="h-4 w-4 mr-2" />
                   Execute & Go Live
                 </Button>

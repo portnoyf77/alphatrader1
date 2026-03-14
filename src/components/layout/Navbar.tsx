@@ -127,11 +127,6 @@ export function Navbar() {
                   align="end"
                   className="w-48 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.06)] shadow-xl"
                 >
-                  <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.06)]" />
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="gap-2 cursor-pointer text-sm text-[rgba(239,68,68,0.7)] hover:text-[rgba(239,68,68,0.9)] focus:text-[rgba(239,68,68,0.9)] focus:bg-[rgba(239,68,68,0.06)]"

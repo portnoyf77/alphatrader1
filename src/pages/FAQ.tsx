@@ -129,7 +129,7 @@ const faqSections: FaqSection[] = [
         question: 'How do I evaluate an Alpha before following?',
         answer: (
           <p>
-            Each portfolio shows: <strong>30-day return</strong>, the Alpha's own investment (their skin in the game), total follower count, total capital allocated, and a <strong>consistency score</strong>. You can also review the track record chart, activity log, and community discussion on the portfolio detail page.
+            Each portfolio shows: <strong>30-day return</strong>, the Alpha's own investment (their skin in the game), total follower count, total capital allocated, and the <strong>Alpha Score</strong> (shown with a Crown icon on marketplace cards). You can also review the track record chart, worst drawdown, sector exposure, activity log, and community discussion on the portfolio detail page.
           </p>
         ),
       },

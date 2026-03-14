@@ -596,10 +596,11 @@ export const mockPortfolios: Portfolio[] = [
     max_turnover: 'high',
     
     holdings: [
-      { ticker: 'MTUM', name: 'iShares MSCI USA Momentum Factor ETF', weight: 35, sector: 'Momentum' },
+      { ticker: 'MTUM', name: 'iShares MSCI USA Momentum Factor ETF', weight: 25, sector: 'Momentum' },
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
       { ticker: 'ARKK', name: 'ARK Innovation ETF', weight: 20, sector: 'Innovation' },
       { ticker: 'XLY', name: 'Consumer Discretionary Select SPDR', weight: 15, sector: 'Consumer' },
+      { ticker: 'ARKK', name: 'ARK Innovation ETF', weight: 10, sector: 'Innovation' },
     ],
     exposure_breakdown: [
       { label: 'Momentum Factor', percent: 35 },
