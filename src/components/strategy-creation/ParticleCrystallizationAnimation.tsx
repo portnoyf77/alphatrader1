@@ -15,14 +15,12 @@ interface ParticleCrystallizationAnimationProps {
   onComplete: (strategyName: string) => void;
 }
 
-type AnimationPhase = 'gathering' | 'condensing' | 'crystallizing' | 'reveal' | 'complete';
+type AnimationPhase = 'gathering' | 'crystallizing' | 'reveal';
 
 const PHASE_TIMINGS = {
   gathering: 3000,      // 0-3s
-  condensing: 4000,     // 3-7s
-  crystallizing: 4000,  // 7-11s
-  reveal: 3000,         // 11-14s
-  complete: 1000,       // 14-15s
+  crystallizing: 3000,  // 3-6s
+  reveal: 3000,         // 6-9s
 };
 
 const PROGRESS_MESSAGES = [
@@ -66,15 +64,10 @@ export function ParticleCrystallizationAnimation({
     const timers: ReturnType<typeof setTimeout>[] = [];
     let elapsed = 0;
     
-    // Gathering -> Condensing
-    timers.push(setTimeout(() => {
-      setPhase('condensing');
-    }, elapsed += PHASE_TIMINGS.gathering));
-    
-    // Condensing -> Crystallizing
+    // Gathering -> Crystallizing
     timers.push(setTimeout(() => {
       setPhase('crystallizing');
-    }, elapsed += PHASE_TIMINGS.condensing));
+    }, elapsed += PHASE_TIMINGS.gathering));
     
     // Crystallizing -> Reveal
     timers.push(setTimeout(() => {
@@ -82,25 +75,24 @@ export function ParticleCrystallizationAnimation({
       setShowGem(true);
     }, elapsed += PHASE_TIMINGS.crystallizing));
     
-    // Reveal -> Complete
+    // Show name
     timers.push(setTimeout(() => {
       setShowName(true);
-    }, elapsed += 1500));
+    }, elapsed + 1000));
     
     // Complete - trigger callback
     timers.push(setTimeout(() => {
-      setPhase('complete');
       onComplete(strategyName);
-    }, elapsed += PHASE_TIMINGS.reveal - 500));
+    }, elapsed + PHASE_TIMINGS.reveal));
     
     return () => timers.forEach(clearTimeout);
   }, [onComplete, strategyName]);
   
-  // Message rotation
+  // Message rotation every 2.5s
   useEffect(() => {
     const interval = setInterval(() => {
       setMessageIndex(prev => (prev + 1) % PROGRESS_MESSAGES.length);
-    }, 3500);
+    }, 2500);
     
     return () => clearInterval(interval);
   }, []);
@@ -108,11 +100,8 @@ export function ParticleCrystallizationAnimation({
   const getParticlePhase = () => {
     switch (phase) {
       case 'gathering': return 'gathering';
-      case 'condensing': return 'condensing';
-      case 'crystallizing': 
-      case 'reveal':
-      case 'complete':
-        return phase === 'crystallizing' ? 'crystallizing' : 'complete';
+      case 'crystallizing': return 'crystallizing';
+      case 'reveal': return 'complete';
       default: return 'gathering';
     }
   };
@@ -124,12 +113,12 @@ export function ParticleCrystallizationAnimation({
         className="absolute inset-0 transition-opacity duration-1000"
         style={{
           background: `radial-gradient(circle at center, ${colors.glow}15 0%, transparent 70%)`,
-          opacity: phase === 'complete' || phase === 'reveal' ? 1 : 0.3,
+          opacity: phase === 'reveal' ? 1 : 0.3,
         }}
       />
       
       {/* Light rays during crystallization */}
-      {(phase === 'crystallizing' || phase === 'reveal' || phase === 'complete') && (
+      {(phase === 'crystallizing' || phase === 'reveal') && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -259,27 +248,6 @@ export function ParticleCrystallizationAnimation({
         <p className="text-muted-foreground animate-pulse">
           {PROGRESS_MESSAGES[messageIndex]}
         </p>
-      </div>
-      
-      {/* Phase indicator dots */}
-      <div className="absolute bottom-8 flex gap-2">
-        {['gathering', 'condensing', 'crystallizing', 'reveal'].map((p, i) => {
-          const phases: AnimationPhase[] = ['gathering', 'condensing', 'crystallizing', 'reveal'];
-          const currentIndex = phases.indexOf(phase);
-          const isActive = phases.indexOf(p as AnimationPhase) === currentIndex;
-          const isComplete = phases.indexOf(p as AnimationPhase) < currentIndex;
-          
-          return (
-            <div
-              key={p}
-              className={cn(
-                'h-2 rounded-full transition-all duration-500',
-                isActive ? 'w-6 bg-primary' : 'w-2',
-                isComplete ? 'bg-primary' : 'bg-muted'
-              )}
-            />
-          );
-        })}
       </div>
     </div>
   );
