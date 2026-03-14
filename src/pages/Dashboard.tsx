@@ -250,7 +250,7 @@ export default function Dashboard() {
         )}
 
         {/* Tab Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div data-tour="tab-cards" className="grid grid-cols-3 gap-4 mb-6">
           {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
             <button
               key={key}
