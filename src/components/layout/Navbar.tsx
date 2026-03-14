@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useMarketStatus } from '@/hooks/useMarketStatus';
+import { useTour } from '@/contexts/TourContext';
 
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
@@ -25,6 +26,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
+  const { restartTour } = useTour();
 
   const handleLogout = () => {
     logout();
@@ -103,7 +105,7 @@ export function Navbar() {
                 </Tooltip>
               </TooltipProvider>
             )}
-            {isAuthenticated && <NotificationBell />}
+            {isAuthenticated && <div data-tour="notification-bell"><NotificationBell /></div>}
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -133,6 +135,13 @@ export function Navbar() {
                   >
                     <HelpCircle className="h-4 w-4" />
                     FAQ
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => { restartTour(); navigate('/dashboard'); }}
+                    className="gap-2 cursor-pointer text-sm"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Restart Tour
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -198,6 +207,13 @@ export function Navbar() {
                     <HelpCircle className="h-4 w-4" />
                     FAQ
                   </Link>
+                  <button
+                    onClick={() => { restartTour(); navigate('/dashboard'); setMobileMenuOpen(false); }}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent font-[var(--font-heading)]"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Restart Tour
+                  </button>
                   <div className="px-4 py-3 border-t border-border/50 mt-2">
                     <p className="text-xs text-muted-foreground">Signed in as</p>
                     <p className="text-sm font-mono">{user.username}</p>

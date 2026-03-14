@@ -221,7 +221,7 @@ export default function Alpha() {
       </section>
 
       {/* ═══════════ EARNINGS CALCULATOR ═══════════ */}
-      <section id="calculator" className="py-24">
+      <section data-tour="earnings-calculator" id="calculator" className="py-24">
         <div className="container mx-auto px-4">
           <h2
             className="font-heading font-extrabold text-center tracking-tight mb-16"
@@ -323,7 +323,7 @@ export default function Alpha() {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground text-center mt-6">
+            <p data-tour="fee-text" className="text-xs text-muted-foreground text-center mt-6">
               Your share: 0.25% of AUM annually · Platform fee: 0.25%
             </p>
           </div>

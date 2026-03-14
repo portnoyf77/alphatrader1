@@ -157,7 +157,7 @@ export default function Dashboard() {
         </div>
 
         {/* Hero Summary Bar */}
-        <div className="flex items-start justify-between gap-6 mb-10 flex-wrap">
+        <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">
           <div className="flex items-start gap-10 flex-wrap">
             {/* Invested */}
             <div className="flex flex-col">
@@ -250,7 +250,7 @@ export default function Dashboard() {
         )}
 
         {/* Tab Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div data-tour="tab-cards" className="grid grid-cols-3 gap-4 mb-6">
           {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
             <button
               key={key}
@@ -550,7 +550,7 @@ export default function Dashboard() {
         )}
 
         {/* Market News — horizontal carousel */}
-        <div className="mb-8">
+        <div data-tour="market-news" className="mb-8">
           <h2 className="text-lg font-bold mb-4">Market News</h2>
           <div
             className="flex gap-4 overflow-x-auto pb-2"

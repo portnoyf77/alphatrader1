@@ -240,6 +240,7 @@ export default function Explore() {
           <TabsContent value="all-portfolios">
             {/* ═══ SECTION 2: Top Performers ═══ */}
             <div
+              data-tour="top-performers"
               className="rounded-2xl mb-10 p-6"
               style={{
                 background: 'rgba(255,255,255,0.02)',
@@ -294,6 +295,7 @@ export default function Explore() {
 
             {/* ═══ SECTION 4: Sticky Filter Toolbar ═══ */}
             <div
+              data-tour="filter-toolbar"
               className="sticky top-16 z-30 mb-6 rounded-xl"
               style={{
                 background: 'rgba(5,5,8,0.85)',
