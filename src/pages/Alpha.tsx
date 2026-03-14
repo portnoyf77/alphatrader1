@@ -323,7 +323,7 @@ export default function Alpha() {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground text-center mt-6">
+            <p data-tour="fee-text" className="text-xs text-muted-foreground text-center mt-6">
               Your share: 0.25% of AUM annually · Platform fee: 0.25%
             </p>
           </div>

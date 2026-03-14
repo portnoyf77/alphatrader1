@@ -103,7 +103,7 @@ export function Navbar() {
                 </Tooltip>
               </TooltipProvider>
             )}
-            {isAuthenticated && <NotificationBell />}
+            {isAuthenticated && <div data-tour="notification-bell"><NotificationBell /></div>}
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -550,7 +550,7 @@ export default function Dashboard() {
         )}
 
         {/* Market News — horizontal carousel */}
-        <div className="mb-8">
+        <div data-tour="market-news" className="mb-8">
           <h2 className="text-lg font-bold mb-4">Market News</h2>
           <div
             className="flex gap-4 overflow-x-auto pb-2"

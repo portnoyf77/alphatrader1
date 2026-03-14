@@ -295,6 +295,7 @@ export default function Explore() {
 
             {/* ═══ SECTION 4: Sticky Filter Toolbar ═══ */}
             <div
+              data-tour="filter-toolbar"
               className="sticky top-16 z-30 mb-6 rounded-xl"
               style={{
                 background: 'rgba(5,5,8,0.85)',

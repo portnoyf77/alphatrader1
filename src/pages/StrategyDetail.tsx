@@ -148,7 +148,7 @@ export default function StrategyDetail() {
 
             <div className="flex gap-3">
               {isValidated ? (
-                <Button onClick={() => setShowAllocateModal(true)} className="glow-primary">
+                <Button data-tour="follow-button" onClick={() => setShowAllocateModal(true)} className="glow-primary">
                   <Users className="h-4 w-4 mr-2" />
                   Follow Portfolio
                 </Button>

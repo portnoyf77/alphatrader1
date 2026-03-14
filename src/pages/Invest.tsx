@@ -521,7 +521,7 @@ export default function Create() {
           {activeTab === 'ai' && (
             <>
               {creationStep === 'questionnaire' && (
-                <PortfolioQuestionnaire
+                <div data-tour="ai-wizard"><PortfolioQuestionnaire
                   onComplete={handleQuestionnaireComplete}
                   onCancel={() => navigate(-1)}
                 />
