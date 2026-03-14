@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,7 +12,6 @@ import { useMarketStatus } from '@/hooks/useMarketStatus';
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
-  { href: '/faq', label: 'FAQ', icon: HelpCircle, tooltip: 'Frequently asked questions' },
 ];
 
 const planTooltips: Record<string, string> = {
@@ -23,6 +22,7 @@ const planTooltips: Record<string, string> = {
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
 
@@ -128,6 +128,14 @@ export function Navbar() {
                   className="w-48 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.06)] shadow-xl"
                 >
                   <DropdownMenuItem
+                    onClick={() => navigate('/faq')}
+                    className="gap-2 cursor-pointer text-sm"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    FAQ
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
                     onClick={handleLogout}
                     className="gap-2 cursor-pointer text-sm text-[rgba(239,68,68,0.7)] hover:text-[rgba(239,68,68,0.9)] focus:text-[rgba(239,68,68,0.9)] focus:bg-[rgba(239,68,68,0.06)]"
                   >
@@ -182,6 +190,14 @@ export function Navbar() {
               
               {isAuthenticated && user ? (
                 <>
+                  <Link
+                    to="/faq"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent font-[var(--font-heading)]"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    FAQ
+                  </Link>
                   <div className="px-4 py-3 border-t border-border/50 mt-2">
                     <p className="text-xs text-muted-foreground">Signed in as</p>
                     <p className="text-sm font-mono">{user.username}</p>

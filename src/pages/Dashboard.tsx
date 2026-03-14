@@ -10,6 +10,7 @@ import { GemDot } from '@/components/GemDot';
 import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
@@ -70,6 +71,7 @@ const mockNews = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useMockAuth();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
   const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
 
@@ -129,19 +131,22 @@ export default function Dashboard() {
 
   // Check if any live portfolio qualifies for marketplace publishing
   const qualifyingPortfolio = useMemo(() => {
-    // Don't show if any portfolio is already "public" (mock: none are by default)
-    // Check if user has already published any portfolio (compare against creator_id)
-    const hasPublished = livePortfolios.some((p: any) => p.isPublic === true);
-    if (hasPublished || dismissedPublishPrompt) return null;
+    if (dismissedPublishPrompt) return null;
 
     return livePortfolios.find((p: any) => {
+      // Only show promotion if the authenticated user is the portfolio's creator
+      const isCreator = p.creator_id === `@${user?.username?.replace('@', '')}` || p.creator_id === user?.username;
+      if (!isCreator) return false;
+      // Don't show if already published
+      if (p.isPublic === true) return false;
+
       const created = new Date(p.created_date);
       const daysSinceCreation = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
       const drawdown = Math.abs(p.performance?.max_drawdown ?? 0);
       const holdingsCount = p.holdings?.length ?? 0;
       return daysSinceCreation >= 30 && drawdown < 20 && holdingsCount >= 5;
     });
-  }, [livePortfolios, dismissedPublishPrompt]);
+  }, [livePortfolios, dismissedPublishPrompt, user]);
 
   return (
     <PageLayout>

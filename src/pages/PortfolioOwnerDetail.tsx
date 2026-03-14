@@ -515,7 +515,7 @@ export default function PortfolioOwnerDetail() {
                 <Button 
                   onClick={handleExecute} 
                   disabled={!investmentAmount || parseFloat(investmentAmount) <= 0}
-                  className="glow-primary"
+                  className="glow-commit"
                 >
                   <Rocket className="h-4 w-4 mr-2" />
                   Go Live
