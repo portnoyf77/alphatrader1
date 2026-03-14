@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { StrategyProfile, initialProfile, questions, Question } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
+import { UnifiedGem } from './UnifiedGem';
 
 // ── Risk score engine ──────────────────────────────────────────────────
 const goalWeights: Record<string, number> = {
@@ -68,38 +69,15 @@ const sectorGlowColors: Record<string, string> = {
   'Real Estate': 'rgba(245,158,11,0.2)',
 };
 
-// ── Gem shape progression table ────────────────────────────────────────
+// ── Gem shape progression table (uses UnifiedGem now) ──────────────────
 function getGemVisuals(questionIndex: number) {
   // Q1-Q2 = hidden, Q3..Q6 = progressively visible
-  if (questionIndex < 2) return { opacity: 0, blur: 60, size: 180 };
-  if (questionIndex === 2) return { opacity: 0.03, blur: 40, size: 200 };
-  if (questionIndex === 3) return { opacity: 0.05, blur: 28, size: 220 };
-  if (questionIndex === 4) return { opacity: 0.08, blur: 18, size: 240 };
-  return { opacity: 0.12, blur: 10, size: 260 };
-}
-
-// ── Gem SVG at large size ──────────────────────────────────────────────
-function LargeGemIcon({ gem, size, color }: { gem: GemType; size: number; color: string }) {
-  if (gem === 'Pearl')
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="7" fill={color} />
-        <ellipse cx="6.5" cy="6" rx="2.5" ry="2" fill="white" fillOpacity={0.15} />
-      </svg>
-    );
-  if (gem === 'Sapphire')
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-        <polygon points="8,1 13.5,4 13.5,11.5 8,15 2.5,11.5 2.5,4" fill={color} strokeLinejoin="round" />
-        <polygon points="8,4 10.5,5.5 10.5,10 8,12 5.5,10 5.5,5.5" fill="white" fillOpacity={0.08} strokeLinejoin="round" />
-      </svg>
-    );
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path d="M4,2 L12,2 L14,6 L8,15 L2,6 Z" fill={color} strokeLinejoin="round" />
-      <line x1="2" y1="6" x2="14" y2="6" stroke="white" strokeWidth="0.5" strokeOpacity={0.15} />
-    </svg>
-  );
+  // opacity/detailLevel map to UnifiedGem props; size stays consistent
+  if (questionIndex < 2) return { opacity: 0, detailLevel: 0, glowIntensity: 0, size: 260 };
+  if (questionIndex === 2) return { opacity: 0.15, detailLevel: 0.1, glowIntensity: 0, size: 260 };
+  if (questionIndex === 3) return { opacity: 0.30, detailLevel: 0.3, glowIntensity: 2, size: 260 };
+  if (questionIndex === 4) return { opacity: 0.50, detailLevel: 0.55, glowIntensity: 5, size: 260 };
+  return { opacity: 0.70, detailLevel: 0.8, glowIntensity: 8, size: 260 };
 }
 
 // ── Visual accent per question ─────────────────────────────────────────
@@ -447,7 +425,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         </div>
         {/* Gem pulse */}
         <div className="qa-gem-pulse" style={{ opacity: 0.2 }}>
-          <LargeGemIcon gem={gemType} size={280} color={gemSolidColors[gemType]} />
+          <UnifiedGem gemType={gemType} size={280} opacity={0.9} detailLevel={0.9} glowIntensity={12} />
         </div>
       </div>
     );
@@ -470,18 +448,22 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         />
       </div>
 
-      {/* ── Forming gem silhouette ── */}
+      {/* ── Forming gem silhouette (UnifiedGem — same shape as crystallization) ── */}
       {currentIndex >= 2 && (
         <div
           className="absolute top-1/2 left-1/2 pointer-events-none z-0"
           style={{
             transform: 'translate(-50%, -50%)',
-            opacity: gemVisuals.opacity,
-            filter: `blur(${gemVisuals.blur}px)`,
             transition: 'all 1.2s ease',
           }}
         >
-          <LargeGemIcon gem={gemType} size={gemVisuals.size} color={gemSolidColors[gemType]} />
+          <UnifiedGem
+            gemType={gemType}
+            size={gemVisuals.size}
+            opacity={gemVisuals.opacity}
+            detailLevel={gemVisuals.detailLevel}
+            glowIntensity={gemVisuals.glowIntensity}
+          />
         </div>
       )}
 
