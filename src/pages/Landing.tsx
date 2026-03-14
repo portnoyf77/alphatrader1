@@ -409,7 +409,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════ DUAL CTA ═══════════ */}
-      <section className="py-24">
+      <section className="py-24" data-tour="alpha-cta">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Investor CTA */}
