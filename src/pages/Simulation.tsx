@@ -134,6 +134,10 @@ export default function Simulation() {
     }
   }, [timeRange, liveData]);
 
+  // Trial countdown
+  const effectiveTrialStart = trialStartDate ?? Date.now();
+  const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
+  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
 
   // Redirect if not found or not simulating
   useEffect(() => {
@@ -148,7 +152,9 @@ export default function Simulation() {
     return null;
   }
 
-  const metrics = metricsByRange[timeRange];
+  // Use live metrics when in 1D live mode, otherwise use static metrics
+  const staticMetrics = metricsByRange[timeRange];
+  const metrics = (timeRange === '1D' && liveMetrics) ? liveMetrics : staticMetrics;
 
   // Worst drop color coding
   const worstDropAbs = Math.abs(metrics.worstDrop);
