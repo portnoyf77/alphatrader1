@@ -31,7 +31,7 @@ export function Navbar() {
   };
 
   // Guest users only see FAQ link
-  const visibleLinks = isAuthenticated ? navLinks : navLinks.filter(l => l.href === '/faq');
+  const visibleLinks = isAuthenticated ? navLinks : [];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.7)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.04)]">
