@@ -132,7 +132,7 @@ export default function Dashboard() {
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-[2rem] font-bold text-foreground">{formatCurrency(animTotalValue)}</span>
-              <span className="text-[0.9rem]" style={{ color: 'rgba(255,255,255,0.4)' }}>total value</span>
+              <span className="text-[0.9rem] text-muted-foreground">total value</span>
             </div>
             <div className="flex items-center gap-1 mt-1">
               <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
