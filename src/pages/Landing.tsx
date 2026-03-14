@@ -374,7 +374,7 @@ export default function Landing() {
                   {/* Stats — labeled columns */}
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div>
-                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>30D Return</p>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">30D Return</p>
                       <p className={cn("font-mono text-[1.1rem] font-bold", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
                         {portfolio.performance.return_30d >= 0 ? '+' : ''}{portfolio.performance.return_30d.toFixed(1)}%
                       </p>
