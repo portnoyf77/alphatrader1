@@ -136,6 +136,13 @@ export function Navbar() {
                     <HelpCircle className="h-4 w-4" />
                     FAQ
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => { restartTour(); navigate('/dashboard'); }}
+                    className="gap-2 cursor-pointer text-sm"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Restart Tour
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
