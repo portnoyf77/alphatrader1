@@ -465,7 +465,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Sapphire-385',
     creator_id: '@value_seeker',
     status: 'validated_listed',
-    visibility_mode: 'masked',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 55 days with solid value-factor performance.',
