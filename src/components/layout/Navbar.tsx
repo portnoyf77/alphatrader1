@@ -190,6 +190,14 @@ export function Navbar() {
               
               {isAuthenticated && user ? (
                 <>
+                  <Link
+                    to="/faq"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent font-[var(--font-heading)]"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    FAQ
+                  </Link>
                   <div className="px-4 py-3 border-t border-border/50 mt-2">
                     <p className="text-xs text-muted-foreground">Signed in as</p>
                     <p className="text-sm font-mono">{user.username}</p>
