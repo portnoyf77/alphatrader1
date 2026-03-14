@@ -521,10 +521,12 @@ export default function Create() {
           {activeTab === 'ai' && (
             <>
               {creationStep === 'questionnaire' && (
-                <div data-tour="ai-wizard"><PortfolioQuestionnaire
-                  onComplete={handleQuestionnaireComplete}
-                  onCancel={() => navigate(-1)}
-                />
+                <div data-tour="ai-wizard">
+                  <PortfolioQuestionnaire
+                    onComplete={handleQuestionnaireComplete}
+                    onCancel={() => navigate(-1)}
+                  />
+                </div>
               )}
               {creationStep === 'animation' && (
                 <ParticleCrystallizationAnimation
