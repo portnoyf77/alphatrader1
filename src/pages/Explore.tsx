@@ -108,7 +108,7 @@ export default function Explore() {
 
       return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesTurnover;
     });
-  }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, visibilityFilter, turnoverFilter]);
+  }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, turnoverFilter]);
 
   const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || turnoverFilter !== 'all';
 
