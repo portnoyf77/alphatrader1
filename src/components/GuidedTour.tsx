@@ -16,125 +16,116 @@ export function GuidedTour() {
   const navigate = useNavigate();
   const location = useLocation();
   const [spotlight, setSpotlight] = useState<SpotlightRect | null>(null);
-  const [cardPosition, setCardPosition] = useState<{ top: number; left: number } | null>(null);
+  const [cardStyle, setCardStyle] = useState<React.CSSProperties>({});
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [ready, setReady] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
   const isFinalPage = step?.page === null;
 
-  // Navigate to correct page
+  // Navigate to correct page when step changes
   useEffect(() => {
     if (!isActive || isPaused || !step) return;
-    
+    setReady(false);
+    setIsTransitioning(true);
+
     if (step.page && location.pathname !== step.page) {
-      setIsTransitioning(true);
-      setReady(false);
       navigate(step.page);
-    } else {
-      // Already on right page, find element after short delay
-      setIsTransitioning(true);
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-        setReady(true);
-      }, 400);
-      return () => clearTimeout(timer);
     }
-  }, [isActive, isPaused, currentStep, step, location.pathname, navigate]);
 
-  // After navigation, wait for render
-  useEffect(() => {
-    if (!isActive || isPaused || !step) return;
-    if (step.page && location.pathname === step.page && !ready) {
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-        setReady(true);
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, isActive, isPaused, step, ready]);
+    // Wait for page render
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+      setReady(true);
+    }, step.page && location.pathname !== step.page ? 700 : 400);
 
-  // Find and spotlight the target element
+    return () => clearTimeout(timer);
+  }, [isActive, isPaused, currentStep]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Find and spotlight the target element (all coords are viewport-relative for fixed overlay)
   const updateSpotlight = useCallback(() => {
     if (!ready || !step) return;
-    
+
     if (!step.selector || isFinalPage) {
       setSpotlight(null);
-      setCardPosition(null);
+      setCardStyle({ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
       return;
     }
 
     const el = document.querySelector(step.selector);
     if (!el) {
       setSpotlight(null);
-      setCardPosition(null);
+      setCardStyle({ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
       return;
     }
 
-    // Scroll element into view
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Check if element is in a fixed container (navbar)
+    const isFixed = !!el.closest('nav[class*="fixed"]');
 
-    // Wait for scroll to settle
+    if (!isFixed) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     setTimeout(() => {
       const rect = el.getBoundingClientRect();
-      const padding = 8;
-      const newSpotlight = {
-        top: rect.top - padding + window.scrollY,
-        left: rect.left - padding,
-        width: rect.width + padding * 2,
-        height: rect.height + padding * 2,
-      };
-      setSpotlight(newSpotlight);
+      const pad = 8;
 
-      // Position card
-      const cardWidth = 380;
-      const cardHeight = 240;
-      const viewportW = window.innerWidth;
-      const viewportH = window.innerHeight;
-      const screenRect = {
-        top: rect.top - padding,
-        left: rect.left - padding,
-        width: rect.width + padding * 2,
-        height: rect.height + padding * 2,
+      // Spotlight in viewport coords (since we use position:fixed SVG)
+      const sl: SpotlightRect = {
+        top: rect.top - pad,
+        left: rect.left - pad,
+        width: rect.width + pad * 2,
+        height: rect.height + pad * 2,
       };
+      setSpotlight(sl);
+
+      // Position the annotation card
+      const cardW = 380;
+      const cardH = 260;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
 
       let top: number;
       let left: number;
 
-      // Mobile: bottom sheet style
-      if (viewportW < 640) {
-        top = Math.min(screenRect.top + screenRect.height + 16, viewportH - cardHeight - 16) + window.scrollY;
-        left = Math.max(8, (viewportW - Math.min(cardWidth, viewportW - 16)) / 2);
+      if (vw < 640) {
+        // Mobile: bottom area
+        top = Math.min(sl.top + sl.height + 16, vh - cardH - 16);
+        left = Math.max(8, (vw - Math.min(cardW, vw - 16)) / 2);
       } else {
-        // Try right
-        const rightSpace = viewportW - (screenRect.left + screenRect.width);
-        if (rightSpace > cardWidth + 24) {
-          left = screenRect.left + screenRect.width + 16;
-          top = screenRect.top + window.scrollY;
-        } else if (screenRect.left > cardWidth + 24) {
-          // Try left
-          left = screenRect.left - cardWidth - 16;
-          top = screenRect.top + window.scrollY;
+        const rightSpace = vw - (sl.left + sl.width);
+        const leftSpace = sl.left;
+        const bottomSpace = vh - (sl.top + sl.height);
+
+        if (rightSpace > cardW + 24) {
+          left = sl.left + sl.width + 16;
+          top = sl.top;
+        } else if (leftSpace > cardW + 24) {
+          left = sl.left - cardW - 16;
+          top = sl.top;
+        } else if (bottomSpace > cardH + 24) {
+          top = sl.top + sl.height + 16;
+          left = Math.max(16, Math.min(sl.left, vw - cardW - 16));
         } else {
-          // Below
-          top = screenRect.top + screenRect.height + 16 + window.scrollY;
-          left = Math.max(16, Math.min(screenRect.left, viewportW - cardWidth - 16));
+          // Above
+          top = sl.top - cardH - 16;
+          left = Math.max(16, Math.min(sl.left, vw - cardW - 16));
         }
 
-        // Clamp vertical
-        if (top - window.scrollY + cardHeight > viewportH - 16) {
-          top = viewportH - cardHeight - 16 + window.scrollY;
-        }
-        if (top - window.scrollY < 16) {
-          top = 16 + window.scrollY;
-        }
+        // Clamp
+        top = Math.max(16, Math.min(top, vh - cardH - 16));
+        left = Math.max(16, Math.min(left, vw - cardW - 16));
       }
 
-      setCardPosition({ top, left });
-    }, 350);
+      setCardStyle({
+        position: 'fixed',
+        top: `${top}px`,
+        left: `${left}px`,
+        transition: 'top 300ms ease, left 300ms ease',
+      });
+    }, isFixed ? 50 : 350);
   }, [ready, step, isFinalPage]);
 
   useEffect(() => {
@@ -143,43 +134,9 @@ export function GuidedTour() {
     return () => window.removeEventListener('resize', updateSpotlight);
   }, [updateSpotlight]);
 
-  // Pause tour if user navigates away from expected page
-  useEffect(() => {
-    if (!isActive || isPaused || !step || !ready) return;
-    if (step.page && location.pathname !== step.page) {
-      // User navigated away
-      const timer = setTimeout(() => {
-        if (location.pathname !== step.page) {
-          // They really did navigate away
-          resumeCheck();
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-    function resumeCheck() {
-      // Don't pause if we're transitioning
-      if (!isTransitioning) {
-        // pause
-      }
-    }
-  }, [isActive, isPaused, step, ready, location.pathname, isTransitioning]);
+  if (!isActive && !isPaused) return null;
 
-  if (!isActive) {
-    // Show resume pill if paused
-    if (isPaused) {
-      return (
-        <button
-          onClick={resumeTour}
-          className="fixed bottom-6 left-6 z-[9998] px-4 py-2 rounded-full glass-card border border-primary/30 text-sm font-medium text-primary hover:bg-primary/10 transition-colors animate-fade-in"
-        >
-          Resume Tour
-        </button>
-      );
-    }
-    return null;
-  }
-
-  if (isPaused) {
+  if (!isActive || isPaused) {
     return (
       <button
         onClick={resumeTour}
@@ -190,11 +147,10 @@ export function GuidedTour() {
     );
   }
 
-  // Build the SVG mask for the spotlight cutout
   const renderBackdrop = () => {
     if (!spotlight || isFinalPage || !step?.selector) {
       return (
-        <div 
+        <div
           className="fixed inset-0 z-[9998] transition-opacity duration-300"
           style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
         />
@@ -202,8 +158,8 @@ export function GuidedTour() {
     }
 
     return (
-      <div className="fixed inset-0 z-[9998]">
-        <svg width="100%" height="100%" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: `${document.documentElement.scrollHeight}px` }}>
+      <div className="fixed inset-0 z-[9998] pointer-events-none">
+        <svg width="100%" height="100%" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}>
           <defs>
             <mask id="tour-spotlight-mask">
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -226,6 +182,7 @@ export function GuidedTour() {
             height="100%"
             fill="rgba(0,0,0,0.6)"
             mask="url(#tour-spotlight-mask)"
+            style={{ pointerEvents: 'auto' }}
           />
         </svg>
       </div>
@@ -235,22 +192,8 @@ export function GuidedTour() {
   const renderCard = () => {
     if (isTransitioning && !ready) return null;
 
-    const isCentered = isFinalPage || !spotlight || !cardPosition;
-
     return (
-      <div
-        ref={cardRef}
-        className="fixed z-[9999] animate-fade-in"
-        style={isCentered ? {
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        } : {
-          top: cardPosition!.top,
-          left: cardPosition!.left,
-          transition: 'top 300ms ease, left 300ms ease',
-        }}
-      >
+      <div className="fixed z-[9999] animate-fade-in" style={cardStyle}>
         <div
           className="glass-card rounded-2xl p-6 border-l-[3px] border-l-primary"
           style={{ width: window.innerWidth < 640 ? 'calc(100vw - 32px)' : '380px', maxWidth: '380px' }}
