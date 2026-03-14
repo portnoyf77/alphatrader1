@@ -71,7 +71,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   return (
     <Link to={`/portfolio/${strategy.id}`}>
       <Card
-        className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+        className="group glass-card transition-all duration-300"
         style={{ borderLeft: `3px solid ${gemHex.color}` }}
       >
         <CardContent className="p-5">

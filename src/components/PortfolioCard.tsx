@@ -22,7 +22,7 @@ export function PortfolioCard({ portfolio, rank, showValidationBadge = false }: 
 
   return (
     <Link to={`/portfolio/${portfolio.id}`}>
-      <Card className="group glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+      <Card className="group glass-card transition-all duration-300">
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-start gap-3">

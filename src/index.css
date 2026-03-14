@@ -278,8 +278,16 @@ main > * {
 
 .group.glass-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.12);
+  border-right-color: rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Gem-bordered cards: brighten left border on hover */
+.group.glass-card[style*="border-left"]:hover,
+.group.glass-card[style*="borderLeft"]:hover {
+  filter: brightness(1.05);
 }
 
 /* Button press feedback */
