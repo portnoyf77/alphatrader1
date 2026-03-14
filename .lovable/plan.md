@@ -1,52 +1,20 @@
 
-# Create Downloadable Alpha Trader Documentation
 
-## Overview
-Create a comprehensive internal product document as a downloadable Markdown file, placed in the `public` folder so stakeholders can access it directly via URL.
+## Real-Time Market Status
 
-## Implementation
+The market status indicator currently uses a hardcoded demo time (`DEMO_TIME_MINUTES = 600`, fixed at 10:00 AM ET). The user wants it to reflect the actual current time and update live.
 
-### Step 1: Create Documentation File
-Create `public/docs/alpha-trader-internal-docs.md` with the complete product documentation including:
+### Changes
 
-- **Executive Summary** - Platform overview and value proposition
-- **Core Concepts** - Two-sided marketplace model (Alphas vs Investors)
-- **Key Terminology** - Definitions for Alpha, Allocation, Validation, Masked/Transparent modes
-- **Portfolio Lifecycle** - Status transitions and validation requirements
-- **Data Model** - Portfolio interface, metrics, and user entities
-- **Fee Structure** - 1% platform fee, 20% Alpha share breakdown
-- **Technical Architecture** - Stack overview (React, TypeScript, Vite, Tailwind)
-- **Route Structure** - Public and protected routes
-- **UI/Branding Guidelines** - Gemstone theming, Crown iconography
+**1. `src/hooks/useMarketStatus.ts`** — Set `DEMO_TIME_MINUTES` to `null` so `getETNow()` uses the real system clock converted to Eastern Time.
 
-### Step 2: Create Documentation Access Page (Optional Enhancement)
-Create a simple `/docs` page component that:
-- Displays a formatted preview of the documentation
-- Provides a download button for the Markdown file
-- Could include a "Copy to Clipboard" option
+**2. `src/hooks/useLiveChartData.ts`** — Set `DEMO_TIME_MINUTES` to `null` so chart data generation, market open/close detection, and live ticks all use the real clock.
 
-### Step 3: Add Download Link
-The file will be accessible at:
-- **Direct URL**: `/docs/alpha-trader-internal-docs.md`
-- Can be shared directly with stakeholders
+Both files already have the real-time logic implemented behind the `null` check — this is purely flipping the constant from `600` to `null` in two files.
 
----
+### Result
+- Navbar market indicator shows live phase (Pre-Market, Open, After-Hours, Closed) based on actual ET time
+- Countdown updates every 30 seconds
+- Simulation chart generates data up to the real current time and ticks live during market hours
+- Weekends correctly show "Market Closed"
 
-## Technical Notes
-
-- **Why Markdown?** - Universal format, easily converted to PDF via external tools, version-controllable, readable in any text editor
-- **Why public folder?** - Files in `public/` are served statically and accessible via direct URL without authentication
-- **PDF alternative** - Users can convert the Markdown to PDF using tools like VS Code, Notion, or online converters if needed
-
-## File Structure After Implementation
-```text
-public/
-  docs/
-    alpha-trader-internal-docs.md   <- New file
-  favicon.ico
-  placeholder.svg
-  robots.txt
-```
-
-## Deliverable
-A professionally formatted Markdown document (~150-200 lines) covering all aspects of the Alpha Trader platform, ready for stakeholder distribution.
