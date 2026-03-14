@@ -110,7 +110,7 @@ export default function Explore() {
     });
   }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, visibilityFilter, turnoverFilter]);
 
-  const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || visibilityFilter !== 'all' || turnoverFilter !== 'all';
+  const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || turnoverFilter !== 'all';
 
   const clearFilters = () => {
     setObjectiveFilter('all');
