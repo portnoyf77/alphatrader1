@@ -131,12 +131,6 @@ export function Navbar() {
                     <Settings className="h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
-                  <Link to="/faq">
-                    <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
-                      <HelpCircle className="h-4 w-4" />
-                      FAQ
-                    </DropdownMenuItem>
-                  </Link>
                   <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.06)]" />
                   <DropdownMenuItem
                     onClick={handleLogout}
