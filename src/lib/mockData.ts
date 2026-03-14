@@ -292,7 +292,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Ruby-756',
     creator_id: '@green_alpha',
     status: 'private',
-    visibility_mode: 'transparent',
     validation_status: 'in_validation',
     validation_criteria_met: false,
     created_date: '2025-12-15',
