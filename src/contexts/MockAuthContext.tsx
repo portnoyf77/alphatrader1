@@ -127,7 +127,19 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 export function useMockAuth() {
   const context = useContext(MockAuthContext);
   if (context === undefined) {
-    throw new Error('useMockAuth must be used within a MockAuthProvider');
+    // Return safe defaults when rendered outside MockAuthProvider (e.g. HMR boundary reset)
+    return {
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
+      login: async () => {},
+      signup: async () => {},
+      logout: () => {},
+      trialStartDate: null,
+      userPlan: null,
+      isTrialExpired: false,
+      selectPlan: () => {},
+    } as MockAuthContextType;
   }
   return context;
 }
