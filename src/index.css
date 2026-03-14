@@ -253,6 +253,24 @@
   .accent-bar-amber {
     border-top: 3px solid hsl(38 92% 50%);
   }
+
+  .glow-commit {
+    background: linear-gradient(135deg, #059669, #0D9488) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
+    border: none !important;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .glow-commit:hover {
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.5);
+    transform: translateY(-1px);
+  }
+  .glow-commit:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+    transform: none;
+  }
 }
 
 /* Page transition */

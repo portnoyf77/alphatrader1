@@ -213,7 +213,7 @@ export default function Explore() {
           </div>
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
-            <span>All portfolios here are validated and eligible to accept allocations.</span>
+            <span>All portfolios here are validated and eligible to follow.</span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

@@ -129,7 +129,7 @@ const faqSections: FaqSection[] = [
         question: 'How do I evaluate an Alpha before following?',
         answer: (
           <p>
-            Each portfolio shows: <strong>30-day return</strong>, the Alpha's own investment (their skin in the game), total follower count, total capital allocated, and a <strong>consistency score</strong>. You can also review the track record chart, activity log, and community discussion on the portfolio detail page.
+            Each portfolio shows: <strong>30-day return</strong>, the Alpha's own investment (their skin in the game), total follower count, total capital allocated, and the <strong>Alpha Score</strong> (shown with a Crown icon on marketplace cards). You can also review the track record chart, worst drawdown, sector exposure, activity log, and community discussion on the portfolio detail page.
           </p>
         ),
       },
@@ -191,7 +191,7 @@ const faqSections: FaqSection[] = [
         question: 'Can followers see my exact holdings?',
         answer: (
           <p>
-            You choose. When publishing, you can set your portfolio to <strong>"Transparent"</strong> (followers see all holdings) or <strong>"IP-Protected"</strong> (followers see only sector-level allocations). Either way, followers automatically mirror your trades.
+            All portfolios use <strong>IP-Protected</strong> visibility by default. Followers can see sector exposure, performance metrics, worst drawdown, and risk profile — but not exact holdings or weights. This protects your intellectual property while giving followers the information they need to make informed decisions. Followers automatically mirror your trades regardless of visibility.
           </p>
         ),
       },

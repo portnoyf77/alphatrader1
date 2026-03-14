@@ -3,6 +3,7 @@ import { Crown, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 
 interface DemoGateProps {
   onAccessGranted: () => void;
@@ -23,8 +24,9 @@ export function DemoGate({ onAccessGranted }: DemoGateProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background page-enter px-4">
-      <div className="w-full max-w-sm glass-elevated rounded-2xl p-8 text-center space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-background page-enter px-4 relative">
+      <BackgroundOrbs />
+      <div className="w-full max-w-sm glass-elevated rounded-2xl p-8 text-center space-y-6 relative z-10">
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-2.5 mb-4">
             <Crown

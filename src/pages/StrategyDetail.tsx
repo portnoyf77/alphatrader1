@@ -171,7 +171,7 @@ export default function StrategyDetail() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -317,7 +317,7 @@ export default function StrategyDetail() {
 
                   {/* Strategy type as small text */}
                   <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
-                    Built with: {strategy.strategy_type === 'GenAI' ? 'AI-assisted strategy' : 'Manual strategy'}
+                    Built with: {strategy.strategy_type === 'GenAI' ? 'AI-assisted' : 'Manual'}
                   </p>
                 </CardContent>
               </Card>
@@ -543,7 +543,7 @@ export default function StrategyDetail() {
             <DialogContent className="glass-elevated">
               <DialogHeader>
                 <DialogTitle>Follow {strategy.name}</DialogTitle>
-                <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
+                <DialogDescription>You are following a managed portfolio.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
@@ -573,7 +573,7 @@ export default function StrategyDetail() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAllocateModal(false)}>Cancel</Button>
-                <Button variant="success" onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms}>Confirm Allocation</Button>
+                <Button onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms} className="glow-commit">Confirm Follow</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

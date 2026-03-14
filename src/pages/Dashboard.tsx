@@ -130,7 +130,8 @@ export default function Dashboard() {
   // Check if any live portfolio qualifies for marketplace publishing
   const qualifyingPortfolio = useMemo(() => {
     // Don't show if any portfolio is already "public" (mock: none are by default)
-    const hasPublished = false; // In real app, check if user has published portfolios
+    // Check if user has already published any portfolio (compare against creator_id)
+    const hasPublished = livePortfolios.some((p: any) => p.isPublic === true);
     if (hasPublished || dismissedPublishPrompt) return null;
 
     return livePortfolios.find((p: any) => {

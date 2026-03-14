@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { formatPercent, mockPortfolios } from '@/lib/mockData';
@@ -83,6 +84,7 @@ export default function Simulation() {
   const marketStatus = useMarketStatus();
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
+  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
 
   const mockPortfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
   const userPortfolio = useMemo(() => !mockPortfolio && id ? getUserCreatedPortfolio(id) : null, [id, mockPortfolio]);
@@ -141,7 +143,19 @@ export default function Simulation() {
   };
 
   const handleInvestNow = () => {
-    toast({ title: 'Invest Now (prototype)', description: 'In a live product, this would take you to fund your portfolio.' });
+    setShowGoLiveModal(true);
+  };
+
+  const handleGoLiveConfirm = () => {
+    setShowGoLiveModal(false);
+    // Update user-created portfolio status in localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+      const updated = stored.map((p: any) => p.id === id ? { ...p, status: 'live' } : p);
+      localStorage.setItem('userCreatedPortfolios', JSON.stringify(updated));
+    } catch {}
+    toast({ title: `${portfolio.name} is now live`, description: 'Your portfolio has been activated with real capital.' });
+    navigate('/dashboard');
   };
 
   const startDateFormatted = SIM_START_DATE.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -438,6 +452,34 @@ export default function Simulation() {
           />
         </div>
       </div>
+
+      {/* Go Live Confirmation Modal */}
+      <Dialog open={showGoLiveModal} onOpenChange={setShowGoLiveModal}>
+        <DialogContent className="glass-elevated">
+          <DialogHeader>
+            <DialogTitle>Go Live with {portfolio.name}?</DialogTitle>
+            <DialogDescription>
+              This will end your simulation and commit real capital to this portfolio. This action cannot be reversed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <span className="text-sm text-muted-foreground">Portfolio Value</span>
+              <span className="font-mono font-bold">${metrics.value.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <span className="text-sm text-muted-foreground">Total Return</span>
+              <span className={cn("font-mono font-bold", metrics.return >= 0 ? "text-success" : "text-destructive")}>
+                {metrics.return >= 0 ? '+' : ''}{metrics.return.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoLiveModal(false)}>Cancel</Button>
+            <Button onClick={handleGoLiveConfirm} className="glow-commit">Go Live</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }

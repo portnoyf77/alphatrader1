@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Crown, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 import { Label } from '@/components/ui/label';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +37,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <BackgroundOrbs />
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4">
@@ -61,7 +63,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-8">
+          <div className="glass-card rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

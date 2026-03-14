@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 
 type Step = 'credentials' | 'plan';
 
@@ -87,7 +88,8 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <BackgroundOrbs />
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4">
