@@ -72,10 +72,25 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
 
-  const livePortfolios = myPortfolios.filter(s => s.status !== 'private');
+  // Merge mock + user-created portfolios
+  const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
+  const myPortfolios = useMemo(() => {
+    const normalized = userCreated.map((p: any) => ({
+      ...p,
+      performance: p.performance || { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+      creator_investment: p.creator_investment || 0,
+      risk_level: p.risk_level || 'Medium',
+    }));
+    return [...baseMy, ...normalized];
+  }, [userCreated]);
+
+  const simulatingPortfolios = useMemo(() =>
+    myPortfolios.filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
+
+  const livePortfolios = myPortfolios.filter((s: any) => s.status !== 'private' && s.status !== 'simulating');
   const liveCount = livePortfolios.length;
-  const simulatingCount = myPortfolios.filter(s => s.status === 'private').length;
-  const totalMyInvestment = myPortfolios.reduce((acc, s) => acc + s.creator_investment, 0);
+  const simulatingCount = simulatingPortfolios.length;
+  const totalMyInvestment = myPortfolios.reduce((acc: number, s: any) => acc + (s.creator_investment || 0), 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
   const totalValue = totalMyInvestment + totalInvestedInOthers;
   const totalAllocatedInvested = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
