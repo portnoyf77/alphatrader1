@@ -344,7 +344,7 @@ export default function PortfolioOwnerDetail() {
             const allMet = checks.every(c => c.met);
 
             return (
-              <div
+              <div data-tour="publish-checklist"
                 className="mb-8 rounded-xl p-6"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
@@ -378,6 +378,7 @@ export default function PortfolioOwnerDetail() {
                       ))}
                     </div>
                     <Button
+                      data-tour="publish-button"
                       onClick={() => setShowMakePublicModal(true)}
                       disabled={!allMet}
                       className={cn(!allMet && "opacity-50 cursor-not-allowed")}
