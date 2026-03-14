@@ -217,11 +217,10 @@ export default function Create() {
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
                     <div
                       key={item.role}
-                      className="relative flex items-center justify-center text-xs font-medium"
+                      className="relative flex items-center justify-center text-xs font-medium text-white"
                       style={{
                         width: `${item.percentage}%`,
-                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))',
-                        color: idx === 3 ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))'
+                        backgroundColor: sectorColors[idx % sectorColors.length],
                       }}
                     >
                       {item.percentage}%
@@ -232,9 +231,9 @@ export default function Create() {
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
                     <div key={item.role} className="flex items-center gap-1.5">
                       <div className="w-3 h-3 rounded" style={{
-                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))'
+                        backgroundColor: sectorColors[idx % sectorColors.length],
                       }} />
-                      <span className="text-muted-foreground">{item.role}</span>
+                      <span className="text-muted-foreground">{item.role} — {item.percentage}%</span>
                     </div>
                   ))}
                 </div>
