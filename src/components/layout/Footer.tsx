@@ -9,7 +9,7 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
   return (
     <footer className="border-t border-border/50 bg-card/50">
       <div className="container mx-auto px-4 py-8">
-        
+        {/* Row 1: Logo / Nav / Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
@@ -17,8 +17,8 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
             </div>
             <span className="font-semibold">Alpha Trader</span>
           </div>
-          
-          <div className="flex items-center gap-6 text-sm text-muted-foreground flex-wrap">
+
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link to="/dashboard" className="hover:text-foreground transition-colors whitespace-nowrap">
               Dashboard
             </Link>
@@ -29,11 +29,20 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
               FAQ
             </Link>
           </div>
-          
-          <p className="text-sm text-muted-foreground">
-            © 2026 Alpha Trader. All rights reserved. Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
+
+          <p className="text-sm text-muted-foreground whitespace-nowrap">
+            © 2026 Alpha Trader
           </p>
         </div>
+
+        {/* Row 2: Disclaimer */}
+        {showDisclaimer && (
+          <div className="mt-6 pt-4 border-t border-border/50">
+            <p className="text-xs text-muted-foreground/50 text-center max-w-2xl mx-auto">
+              Alpha Trader is not a registered investment adviser. This platform is for informational and educational purposes only. Past performance does not guarantee future results.
+            </p>
+          </div>
+        )}
       </div>
     </footer>
   );
