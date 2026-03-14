@@ -283,14 +283,6 @@ export default function Explore() {
                     <SelectItem value="High">Aggressive (Ruby)</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Visibility</SelectItem>
-                    <SelectItem value="masked">Masked</SelectItem>
-                    <SelectItem value="transparent">Transparent</SelectItem>
-                  </SelectContent>
-                </Select>
                 <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
                   <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
                   <SelectContent>
