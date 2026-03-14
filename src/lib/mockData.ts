@@ -578,7 +578,7 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Ruby-891',
     creator_id: '@momentum_pro',
     status: 'validated_listed',
-    visibility_mode: 'masked',
+    
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 60 days with strong momentum factor exposure.',
