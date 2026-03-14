@@ -240,6 +240,7 @@ export default function Explore() {
           <TabsContent value="all-portfolios">
             {/* ═══ SECTION 2: Top Performers ═══ */}
             <div
+              data-tour="top-performers"
               className="rounded-2xl mb-10 p-6"
               style={{
                 background: 'rgba(255,255,255,0.02)',
