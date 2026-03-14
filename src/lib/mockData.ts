@@ -637,7 +637,7 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Sapphire-333',
     creator_id: '@retired_fund_mgr',
     status: 'inactive',
-    visibility_mode: 'transparent',
+    
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Was validated for 90 days before liquidation.',
