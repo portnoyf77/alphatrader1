@@ -35,7 +35,6 @@ const timeReturns: Record<string, Record<ChartTimeframe, number>> = {
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
 type StrategyFilter = 'all' | 'GenAI' | 'Manual';
-type VisibilityFilter = 'all' | 'masked' | 'transparent';
 type TurnoverFilter = 'all' | 'low' | 'medium' | 'high';
 type ChartTimeframe = '30D' | '90D' | 'YTD' | '1Y';
 
@@ -52,7 +51,7 @@ export default function Explore() {
   const [objectiveFilter, setObjectiveFilter] = useState<ObjectiveFilter>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>('all');
-  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
+  
   const [turnoverFilter, setTurnoverFilter] = useState<TurnoverFilter>('all');
   const [chartTimeframe, setChartTimeframe] = useState<ChartTimeframe>('30D');
 
@@ -105,20 +104,18 @@ export default function Explore() {
       const matchesObjective = objectiveFilter === 'all' || strategy.objective === objectiveFilter;
       const matchesRisk = riskFilter === 'all' || strategy.risk_level === riskFilter;
       const matchesStrategy = strategyFilter === 'all' || strategy.strategy_type === strategyFilter;
-      const matchesVisibility = visibilityFilter === 'all' || strategy.visibility_mode === visibilityFilter;
       const matchesTurnover = turnoverFilter === 'all' || strategy.turnover_estimate === turnoverFilter;
 
-      return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesVisibility && matchesTurnover;
+      return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesTurnover;
     });
-  }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, visibilityFilter, turnoverFilter]);
+  }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, turnoverFilter]);
 
-  const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || visibilityFilter !== 'all' || turnoverFilter !== 'all';
+  const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || turnoverFilter !== 'all';
 
   const clearFilters = () => {
     setObjectiveFilter('all');
     setRiskFilter('all');
     setStrategyFilter('all');
-    setVisibilityFilter('all');
     setTurnoverFilter('all');
   };
 
@@ -147,17 +144,6 @@ export default function Explore() {
             <SelectItem value="Income">Income</SelectItem>
             <SelectItem value="Balanced">Balanced</SelectItem>
             <SelectItem value="Low volatility">Low Volatility</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Visibility</label>
-        <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-          <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="masked">Masked (IP-Protected)</SelectItem>
-            <SelectItem value="transparent">Transparent</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -295,14 +281,6 @@ export default function Explore() {
                     <SelectItem value="Low">Conservative (Pearl)</SelectItem>
                     <SelectItem value="Medium">Moderate (Sapphire)</SelectItem>
                     <SelectItem value="High">Aggressive (Ruby)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Visibility" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Visibility</SelectItem>
-                    <SelectItem value="masked">Masked</SelectItem>
-                    <SelectItem value="transparent">Transparent</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>

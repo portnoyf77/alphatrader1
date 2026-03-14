@@ -1,6 +1,6 @@
 // Portfolio status types
 export type PortfolioStatus = 'private' | 'validated_listed' | 'inactive';
-export type VisibilityMode = 'masked' | 'transparent';
+
 export type TurnoverLevel = 'low' | 'medium' | 'high';
 export type ActivityEventType = 'rebalance' | 'risk_alert' | 'paused_new_allocations' | 'unpaused' | 'inactive';
 
@@ -47,7 +47,6 @@ export interface Portfolio {
   
   // Status and visibility
   status: PortfolioStatus;
-  visibility_mode: VisibilityMode;
   validation_status: ValidationStatus;
   validation_criteria_met: boolean;
   validation_summary?: string;
@@ -67,10 +66,10 @@ export interface Portfolio {
   max_single_sector_exposure_pct: number;
   max_turnover: TurnoverLevel;
   
-  // Holdings (only shown if visibility_mode = 'transparent')
+  // Holdings (only visible to owner; non-owners see sector-level exposure)
   holdings: Holding[];
   
-  // Masked exposure (shown when visibility_mode = 'masked')
+  // Exposure breakdown (shown to non-owners)
   exposure_breakdown: ExposureBreakdown[];
   top_themes: string[];
   turnover_estimate: TurnoverLevel;
