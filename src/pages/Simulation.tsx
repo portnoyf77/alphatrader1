@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, AlertTriangle, DollarSign, Play, Square, Timer, Clock } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, AlertTriangle, DollarSign, Play, Square, Timer, Clock, Radio } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { formatPercent, mockPortfolios } from '@/lib/mockData';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { useLiveChartData } from '@/hooks/useLiveChartData';
 
 type SimulationState = 'running' | 'stopped';
 type TimeRange = '1D' | '1W' | '1M' | '3M' | 'All';
@@ -108,16 +110,18 @@ export default function Simulation() {
 
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
-  // Trial countdown
-  const effectiveTrialStart = trialStartDate ?? Date.now();
-  const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
-  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
+  // Live chart data for 1D view
+  const lastDayOpenValue = fullData[fullData.length - 2]?.Portfolio ?? 100000;
+  const sp500Base = fullData[fullData.length - 2]?.['S&P 500'] ?? 106500;
+  const dowBase = fullData[fullData.length - 2]?.['Dow Jones'] ?? 105500;
+  const isLive1D = timeRange === '1D' && simulationState === 'running';
+  const { liveData, liveMetrics, marketOpen } = useLiveChartData(isLive1D, lastDayOpenValue, sp500Base, dowBase);
 
   // Chart data based on time range
   const chartData = useMemo(() => {
     switch (timeRange) {
       case '1D':
-        return intradayData;
+        return liveData.length > 0 ? liveData : intradayData;
       case '1W':
         return fullData.slice(-7);
       case '1M':
@@ -128,8 +132,12 @@ export default function Simulation() {
       default:
         return fullData;
     }
-  }, [timeRange]);
+  }, [timeRange, liveData]);
 
+  // Trial countdown
+  const effectiveTrialStart = trialStartDate ?? Date.now();
+  const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
+  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
 
   // Redirect if not found or not simulating
   useEffect(() => {
@@ -144,7 +152,9 @@ export default function Simulation() {
     return null;
   }
 
-  const metrics = metricsByRange[timeRange];
+  // Use live metrics when in 1D live mode, otherwise use static metrics
+  const staticMetrics = metricsByRange[timeRange];
+  const metrics = (timeRange === '1D' && liveMetrics) ? liveMetrics : staticMetrics;
 
   // Worst drop color coding
   const worstDropAbs = Math.abs(metrics.worstDrop);
@@ -267,10 +277,25 @@ export default function Simulation() {
         <Card className="glass-card mb-6">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Live Performance
-              </CardTitle>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Live Performance
+                </CardTitle>
+                {timeRange === '1D' && (
+                  marketOpen && simulationState === 'running' ? (
+                    <Badge className="bg-success/20 text-success border-success/30 gap-1.5 animate-fade-in">
+                      <span className="w-2 h-2 rounded-full bg-success live-pulse" />
+                      LIVE
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="bg-muted/50 text-muted-foreground border-border gap-1.5 animate-fade-in">
+                      <Radio className="h-3 w-3" />
+                      Market Closed
+                    </Badge>
+                  )
+                )}
+              </div>
               {/* Time Range Toggles */}
               <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 {timeRanges.map((range) => (
@@ -325,9 +350,9 @@ export default function Simulation() {
                     formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
                   />
                   <Legend />
-                  <Area type="monotone" dataKey="Portfolio" fill="url(#simPortfolioFill)" stroke="none" isAnimationActive={false} />
+                  <Area type="monotone" dataKey="Portfolio" fill="url(#simPortfolioFill)" stroke="none" isAnimationActive={isLive1D && marketOpen} animationDuration={800} />
                   <Area type="monotone" dataKey="S&P 500" fill="url(#simSP500Fill)" stroke="none" isAnimationActive={false} />
-                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={false} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
+                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={isLive1D && marketOpen} animationDuration={800} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
                   <Line type="monotone" dataKey="S&P 500" stroke="#10B981" strokeWidth={1.5} dot={false} strokeDasharray="4 4" isAnimationActive={false} />
                   <Line type="monotone" dataKey="Dow Jones" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} dot={false} strokeDasharray="2 2" isAnimationActive={false} />
                 </LineChart>
