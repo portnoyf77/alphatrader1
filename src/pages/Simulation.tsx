@@ -106,7 +106,7 @@ export default function Simulation() {
   const { toast } = useToast();
   const { trialStartDate } = useMockAuth();
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
-  const [timeRange, setTimeRange] = useState<TimeRange>('All');
+  const [timeRange, setTimeRange] = useState<TimeRange>('1D');
 
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
