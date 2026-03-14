@@ -108,13 +108,6 @@ export default function Simulation() {
 
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
-  // Redirect if not found or not simulating
-  if (!portfolio || portfolio.status !== 'private') {
-    if (!portfolio) navigate('/dashboard', { replace: true });
-    else navigate(`/portfolio/${portfolio.id}`, { replace: true });
-    return null;
-  }
-
   // Trial countdown
   const effectiveTrialStart = trialStartDate ?? Date.now();
   const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
@@ -128,14 +121,29 @@ export default function Simulation() {
       case '1W':
         return fullData.slice(-7);
       case '1M':
-        return fullData; // only 19 days, show all
+        return fullData;
       case '3M':
-        return fullData; // only 19 days available
+        return fullData;
       case 'All':
       default:
         return fullData;
     }
   }, [timeRange]);
+
+  const metrics = metricsByRange[timeRange];
+
+  // Redirect if not found or not simulating
+  useEffect(() => {
+    if (!portfolio) {
+      navigate('/dashboard', { replace: true });
+    } else if (portfolio.status !== 'private') {
+      navigate(`/portfolio/${portfolio.id}`, { replace: true });
+    }
+  }, [portfolio, navigate]);
+
+  if (!portfolio || portfolio.status !== 'private') {
+    return null;
+  }
 
   const metrics = metricsByRange[timeRange];
 
