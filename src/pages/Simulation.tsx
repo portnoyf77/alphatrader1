@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, Share2, Lock, CheckCircle2, Clock, Loader2, AlertTriangle, DollarSign, Play, Square, Timer } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, AlertTriangle, DollarSign, Play, Square, Timer, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { formatPercent, mockPortfolios } from '@/lib/mockData';
@@ -12,115 +11,144 @@ import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
-import type { ValidationStatus } from '@/lib/types';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 
-type ValidationState = 'pending' | 'submitting' | 'in_progress' | 'validated';
 type SimulationState = 'running' | 'stopped';
+type TimeRange = '1D' | '1W' | '1M' | '3M' | 'All';
 
 const FREE_TRIAL_DAYS = 7;
+const SIM_ELAPSED_DAYS = 19;
+const SIM_START_DATE = new Date('2026-02-22'); // 19 days before Mar 13, 2026
 
-function formatElapsed(seconds: number): string {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (d > 0) return `${d}d ${h}h ${m}m`;
-  if (h > 0) return `${h}h ${m}m ${s}s`;
-  return `${m}m ${s}s`;
+// Seeded random for deterministic data
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
 }
 
-function formatCountdown(seconds: number): string {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${d}d ${h}h ${m}m`;
+// Generate deterministic daily chart data for the full simulation period
+function generateSimulationData() {
+  const rand = seededRandom(872); // Ruby-872 seed
+  const data: Array<{ date: Date; dateLabel: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }> = [];
+  
+  let portfolio = 100000;
+  let sp500 = 100000;
+  let dow = 100000;
+
+  for (let day = 0; day <= SIM_ELAPSED_DAYS; day++) {
+    const date = new Date(SIM_START_DATE);
+    date.setDate(date.getDate() + day);
+    const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    data.push({
+      date,
+      dateLabel: label,
+      Portfolio: Math.round(portfolio),
+      'S&P 500': Math.round(sp500),
+      'Dow Jones': Math.round(dow),
+    });
+
+    // Daily returns with slight upward bias for portfolio
+    portfolio *= 1 + (rand() - 0.43) * 0.025;
+    sp500 *= 1 + (rand() - 0.46) * 0.018;
+    dow *= 1 + (rand() - 0.46) * 0.016;
+  }
+
+  return data;
 }
+
+// Generate hourly data for the last day (1D view)
+function generateIntradayData(lastDayValue: number) {
+  const rand = seededRandom(1337);
+  const data: Array<{ dateLabel: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }> = [];
+  
+  let portfolio = lastDayValue * 0.998; // start slightly below
+  let sp500 = 100000 * 1.065; // approximate SP at day 18
+  let dow = 100000 * 1.055;
+
+  for (let hour = 9; hour <= 16; hour++) {
+    const label = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+    data.push({
+      dateLabel: label,
+      Portfolio: Math.round(portfolio),
+      'S&P 500': Math.round(sp500),
+      'Dow Jones': Math.round(dow),
+    });
+    portfolio *= 1 + (rand() - 0.45) * 0.004;
+    sp500 *= 1 + (rand() - 0.48) * 0.003;
+    dow *= 1 + (rand() - 0.48) * 0.0025;
+  }
+
+  return data;
+}
+
+const fullData = generateSimulationData();
+const intradayData = generateIntradayData(fullData[fullData.length - 2]?.Portfolio ?? 100000);
+
+const metricsByRange: Record<TimeRange, { value: number; return: number; worstDrop: number; sharpe: number; vsSP: number }> = {
+  '1D':  { value: fullData[fullData.length - 1].Portfolio, return: 0.3, worstDrop: -0.1, sharpe: 1.55, vsSP: 0.4 },
+  '1W':  { value: fullData[fullData.length - 1].Portfolio, return: 1.2, worstDrop: -0.8, sharpe: 1.82, vsSP: 0.9 },
+  '1M':  { value: fullData[fullData.length - 1].Portfolio, return: 4.8, worstDrop: -2.3, sharpe: 2.15, vsSP: 1.8 },
+  '3M':  { value: fullData[fullData.length - 1].Portfolio, return: 8.7, worstDrop: -5.1, sharpe: 2.45, vsSP: 2.9 },
+  'All': { value: fullData[fullData.length - 1].Portfolio, return: 8.7, worstDrop: -5.1, sharpe: 2.45, vsSP: 2.9 },
+};
+
+const timeRanges: TimeRange[] = ['1D', '1W', '1M', '3M', 'All'];
 
 export default function Simulation() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trialStartDate } = useMockAuth();
-  const [showPublishModal, setShowPublishModal] = useState(false);
-  const [validationState, setValidationState] = useState<ValidationState>('pending');
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
-  const [chartData, setChartData] = useState<Array<{ time: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }>>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>('All');
 
-  // Look up portfolio by :id param
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
-  // Redirect if portfolio not found, or not in simulating status
+  // Trial countdown
+  const effectiveTrialStart = trialStartDate ?? Date.now();
+  const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
+  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
+
+  // Chart data based on time range
+  const chartData = useMemo(() => {
+    switch (timeRange) {
+      case '1D':
+        return intradayData;
+      case '1W':
+        return fullData.slice(-7);
+      case '1M':
+        return fullData;
+      case '3M':
+        return fullData;
+      case 'All':
+      default:
+        return fullData;
+    }
+  }, [timeRange]);
+
+
+  // Redirect if not found or not simulating
   useEffect(() => {
     if (!portfolio) {
       navigate('/dashboard', { replace: true });
-      return;
-    }
-    if (portfolio.status !== 'private') {
+    } else if (portfolio.status !== 'private') {
       navigate(`/portfolio/${portfolio.id}`, { replace: true });
     }
   }, [portfolio, navigate]);
 
-  // Compute elapsed from trialStartDate (real time elapsed since signup)
-  const [now, setNow] = useState(Date.now());
-  const effectiveTrialStart = trialStartDate ?? Date.now();
-  const elapsedSeconds = Math.floor((now - effectiveTrialStart) / 1000);
-  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedSeconds;
-
-  // Tick clock every second for elapsed/countdown
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const startTime = useMemo(() => new Date(effectiveTrialStart), [effectiveTrialStart]);
-
-  // Live chart data generation
-  useEffect(() => {
-    if (simulationState !== 'running') return;
-
-    // Initial data point
-    if (chartData.length === 0) {
-      setChartData([{ time: '0s', Portfolio: 100000, 'S&P 500': 100000, 'Dow Jones': 100000 }]);
-    }
-
-    const interval = setInterval(() => {
-      setChartData(prev => {
-        const last = prev[prev.length - 1];
-        const portfolioDelta = last.Portfolio * ((Math.random() - 0.47) * 0.003);
-        const sp500Delta = last['S&P 500'] * ((Math.random() - 0.48) * 0.002);
-        const dowDelta = last['Dow Jones'] * ((Math.random() - 0.48) * 0.0018);
-        const elapsed = prev.length;
-        const timeLabel = elapsed < 60 ? `${elapsed}s` : `${Math.floor(elapsed / 60)}m${elapsed % 60}s`;
-
-        return [...prev, {
-          time: timeLabel,
-          Portfolio: Math.round(last.Portfolio + portfolioDelta),
-          'S&P 500': Math.round(last['S&P 500'] + sp500Delta),
-          'Dow Jones': Math.round(last['Dow Jones'] + dowDelta),
-        }].slice(-120);
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [simulationState, chartData.length]);
-
-  // If no portfolio found or wrong status, render nothing (redirect happens in useEffect)
   if (!portfolio || portfolio.status !== 'private') {
     return null;
   }
 
-  // Calculate live metrics from chart data
-  const currentPortfolioValue = chartData.length > 0 ? chartData[chartData.length - 1].Portfolio : 100000;
-  const liveReturn = ((currentPortfolioValue - 100000) / 100000) * 100;
-  const currentSP500 = chartData.length > 0 ? chartData[chartData.length - 1]['S&P 500'] : 100000;
-  const sp500Return = ((currentSP500 - 100000) / 100000) * 100;
+  const metrics = metricsByRange[timeRange];
 
-  // Track max drawdown
-  const maxValue = chartData.reduce((max, d) => Math.max(max, d.Portfolio), 100000);
-  const liveDrawdown = ((currentPortfolioValue - maxValue) / maxValue) * 100;
+  // Worst drop color coding
+  const worstDropAbs = Math.abs(metrics.worstDrop);
+  const worstDropColor = worstDropAbs >= 20 ? '#EF4444' : worstDropAbs >= 18 ? '#F97316' : worstDropAbs >= 15 ? '#F59E0B' : undefined;
 
   const handleStopSimulation = () => {
     setSimulationState('stopped');
@@ -131,27 +159,7 @@ export default function Simulation() {
     toast({ title: 'Invest Now (prototype)', description: 'In a live product, this would take you to fund your portfolio.' });
   };
 
-  const handleSubmitForValidation = async () => {
-    setValidationState('submitting');
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setValidationState('in_progress');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setValidationState('validated');
-    toast({ title: 'Validation complete!', description: 'Your portfolio has passed validation and can now be published.' });
-  };
-
-  const handlePublish = () => {
-    setShowPublishModal(false);
-    toast({ title: 'Portfolio published!', description: 'Your portfolio is now visible in the marketplace.' });
-    navigate('/dashboard');
-  };
-
-  const handleKeepPrivate = () => {
-    toast({ title: 'Portfolio saved privately', description: 'Only you can see this portfolio.' });
-    navigate('/dashboard');
-  };
-
-  const { performance } = portfolio;
+  const startDateFormatted = SIM_START_DATE.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
     <PageLayout>
@@ -164,14 +172,11 @@ export default function Simulation() {
               Back
             </Button>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold flex items-center gap-2"><GemDot name={portfolio.name} size={10} />{portfolio.name}</h1>
-              {/* ValidationBadge removed — using inline status */}
-              <span className={cn(
-                "px-2 py-1 rounded text-xs",
-                validationState === 'validated' ? "bg-success/20 text-success" : "bg-warning/20 text-warning"
-              )}>
-                {validationState === 'validated' ? 'Validated' : 'Simulating'}
-              </span>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <GemDot name={portfolio.name} size={10} />
+                {portfolio.name}
+              </h1>
+              <span className="px-2 py-1 rounded text-xs bg-warning/20 text-warning">Simulating</span>
             </div>
           </div>
         </div>
@@ -201,9 +206,7 @@ export default function Simulation() {
                   <p className="font-semibold">
                     {simulationState === 'running' ? 'Live Simulation' : 'Simulation Paused'}
                     {' — '}
-                    <span className="text-muted-foreground font-normal">
-                      started {startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <span className="text-muted-foreground font-normal">started {startDateFormatted}</span>
                   </p>
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                     <TooltipProvider delayDuration={300}>
@@ -211,16 +214,16 @@ export default function Simulation() {
                         <TooltipTrigger asChild>
                           <span className="flex items-center gap-1 cursor-help">
                             <Timer className="h-3 w-3" />
-                            Elapsed: {formatElapsed(elapsedSeconds)}
+                            Elapsed: {SIM_ELAPSED_DAYS} days
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent className="text-xs">Time since simulation started</TooltipContent>
+                        <TooltipContent className="text-xs">Simulated days since start</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span className="flex items-center gap-1 cursor-help">
                             <Clock className="h-3 w-3" />
-                            Free trial: {formatCountdown(Math.max(0, trialSecondsRemaining))} remaining
+                            Free trial: {Math.max(0, Math.floor(trialSecondsRemaining / 86400))}d remaining
                           </span>
                         </TooltipTrigger>
                         <TooltipContent className="text-xs">Time remaining in your free trial</TooltipContent>
@@ -241,7 +244,11 @@ export default function Simulation() {
                     Resume
                   </Button>
                 )}
-                <Button size="sm" className="bg-success hover:bg-success/90" onClick={handleInvestNow}>
+                <Button
+                  size="sm"
+                  onClick={handleInvestNow}
+                  className="bg-white text-[#050508] hover:bg-white/90 border-none font-bold rounded-xl"
+                >
                   <DollarSign className="h-3 w-3 mr-1.5" />
                   Invest Now
                 </Button>
@@ -259,10 +266,29 @@ export default function Simulation() {
         {/* Live Performance Chart */}
         <Card className="glass-card mb-6">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Live Performance
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                Live Performance
+              </CardTitle>
+              {/* Time Range Toggles */}
+              <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                {timeRanges.map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={cn(
+                      "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer",
+                      timeRange === range
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:bg-[rgba(255,255,255,0.05)]"
+                    )}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[320px]">
@@ -279,8 +305,20 @@ export default function Simulation() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="time" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveEnd" />
-                  <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <XAxis
+                    dataKey="dateLabel"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    domain={['dataMin - 2000', 'dataMax + 2000']}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+                  />
                   <RechartsTooltip
                     contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
@@ -298,127 +336,42 @@ export default function Simulation() {
           </CardContent>
         </Card>
 
-        {/* Live Metrics */}
+        {/* Metric Tiles */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <MetricCard
             label="Portfolio Value"
-            value={`$${currentPortfolioValue.toLocaleString()}`}
+            value={`$${metrics.value.toLocaleString()}`}
             icon={<DollarSign className="h-4 w-4" />}
             tooltip="Current simulated portfolio value"
           />
           <MetricCard
             label="Total Return"
-            value={formatPercent(liveReturn)}
-            icon={liveReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-            trend={liveReturn >= 0 ? 'up' : 'down'}
-            tooltip="Percentage return since simulation started"
+            value={formatPercent(metrics.return)}
+            icon={metrics.return >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+            trend={metrics.return >= 0 ? 'up' : 'down'}
+            tooltip={`Return for selected period (${timeRange})`}
           />
           <MetricCard
             label="Worst Drop"
-            value={formatPercent(liveDrawdown, false)}
+            value={formatPercent(metrics.worstDrop, false)}
             icon={<AlertTriangle className="h-4 w-4" />}
             trend="down"
-            tooltip="Largest peak-to-trough decline during simulation"
+            tooltip="Largest peak-to-trough decline during selected period"
           />
           <MetricCard
             label="Sharpe Ratio"
-            value={(liveReturn / Math.max(Math.abs(liveDrawdown) * 2 || 1, 0.01)).toFixed(2)}
+            value={metrics.sharpe.toFixed(2)}
             icon={<BarChart3 className="h-4 w-4" />}
             tooltip="Risk-adjusted return — higher is better. Above 1.0 is considered good."
           />
           <MetricCard
             label="vs S&P 500"
-            value={`${(liveReturn - sp500Return) >= 0 ? '+' : ''}${(liveReturn - sp500Return).toFixed(2)}%`}
+            value={`${metrics.vsSP >= 0 ? '+' : ''}${metrics.vsSP.toFixed(1)}%`}
             icon={<BarChart3 className="h-4 w-4" />}
-            trend={(liveReturn - sp500Return) >= 0 ? 'up' : 'down'}
+            trend={metrics.vsSP >= 0 ? 'up' : 'down'}
             tooltip="Your simulated return compared to S&P 500"
           />
         </div>
-
-        {/* Validation Section */}
-        <Card className="glass-card mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Validation & Publishing
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {validationState === 'pending' && (
-              <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border border-border">
-                <div>
-                  <p className="font-medium">Ready for validation</p>
-                  <p className="text-sm text-muted-foreground">Submit your simulation results for validation to publish to the marketplace.</p>
-                </div>
-                <Button onClick={handleSubmitForValidation}>
-                  Submit for Validation
-                </Button>
-              </div>
-            )}
-            {validationState === 'submitting' && (
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <Loader2 className="h-5 w-5 text-primary animate-spin" />
-                <p className="text-sm">Submitting for validation...</p>
-              </div>
-            )}
-            {validationState === 'in_progress' && (
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-warning/5 border border-warning/20">
-                <Clock className="h-5 w-5 text-warning" />
-                <div>
-                  <p className="font-medium">Validation in progress</p>
-                  <p className="text-sm text-muted-foreground">Analyzing performance consistency and risk metrics...</p>
-                </div>
-              </div>
-            )}
-            {validationState === 'validated' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-success/5 border border-success/20">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <div>
-                    <p className="font-medium text-success">Validated</p>
-                    <p className="text-sm text-muted-foreground">Your portfolio is eligible for the marketplace.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button onClick={() => setShowPublishModal(true)} className="flex-1">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Publish to Marketplace
-                  </Button>
-                  <Button variant="outline" onClick={handleKeepPrivate} className="flex-1">
-                    <Lock className="h-4 w-4 mr-2" />
-                    Keep Private
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Publish Confirmation Modal */}
-        <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
-          <DialogContent className="glass-card">
-            <DialogHeader>
-              <DialogTitle>Publish to Marketplace</DialogTitle>
-              <DialogDescription>
-                Your portfolio will be visible to all users. Followers can allocate capital to it, and you'll earn 0.25% of their AUM annually.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3 py-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success mt-0.5" />
-                <p className="text-sm">Your portfolio has passed validation requirements</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
-                <p className="text-sm text-muted-foreground">Publishing is permanent. You can unpublish later, but existing followers will need to be notified.</p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowPublishModal(false)}>Cancel</Button>
-              <Button onClick={handlePublish} className="glow-primary">Confirm & Publish</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </PageLayout>
   );
