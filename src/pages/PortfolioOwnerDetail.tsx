@@ -378,6 +378,7 @@ export default function PortfolioOwnerDetail() {
                       ))}
                     </div>
                     <Button
+                      data-tour="publish-button"
                       onClick={() => setShowMakePublicModal(true)}
                       disabled={!allMet}
                       className={cn(!allMet && "opacity-50 cursor-not-allowed")}
