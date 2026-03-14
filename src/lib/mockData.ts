@@ -233,7 +233,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Sapphire-412',
     creator_id: '@macro_edge',
     status: 'validated_listed',
-    visibility_mode: 'masked',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 45 days with balanced risk metrics across global asset classes.',
