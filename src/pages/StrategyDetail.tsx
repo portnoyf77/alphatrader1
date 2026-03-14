@@ -573,7 +573,7 @@ export default function StrategyDetail() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAllocateModal(false)}>Cancel</Button>
-                <Button variant="success" onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms}>Confirm Allocation</Button>
+                <Button onClick={handleAllocate} disabled={!allocateAmount || parseFloat(allocateAmount) <= 0 || !acknowledgeTerms} className="glow-commit">Confirm Follow</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
