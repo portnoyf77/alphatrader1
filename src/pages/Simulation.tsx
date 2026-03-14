@@ -143,7 +143,19 @@ export default function Simulation() {
   };
 
   const handleInvestNow = () => {
-    toast({ title: 'Invest Now (prototype)', description: 'In a live product, this would take you to fund your portfolio.' });
+    setShowGoLiveModal(true);
+  };
+
+  const handleGoLiveConfirm = () => {
+    setShowGoLiveModal(false);
+    // Update user-created portfolio status in localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+      const updated = stored.map((p: any) => p.id === id ? { ...p, status: 'live' } : p);
+      localStorage.setItem('userCreatedPortfolios', JSON.stringify(updated));
+    } catch {}
+    toast({ title: `${portfolio.name} is now live`, description: 'Your portfolio has been activated with real capital.' });
+    navigate('/dashboard');
   };
 
   const startDateFormatted = SIM_START_DATE.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
