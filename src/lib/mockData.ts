@@ -600,7 +600,7 @@ export const mockPortfolios: Portfolio[] = [
       { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 30, sector: 'Technology' },
       { ticker: 'ARKK', name: 'ARK Innovation ETF', weight: 20, sector: 'Innovation' },
       { ticker: 'XLY', name: 'Consumer Discretionary Select SPDR', weight: 15, sector: 'Consumer' },
-      { ticker: 'ARKK', name: 'ARK Innovation ETF', weight: 10, sector: 'Innovation' },
+      { ticker: 'SOXX', name: 'iShares Semiconductor ETF', weight: 10, sector: 'Semiconductors' },
     ],
     exposure_breakdown: [
       { label: 'Momentum Factor', percent: 35 },
