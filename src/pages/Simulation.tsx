@@ -452,6 +452,34 @@ export default function Simulation() {
           />
         </div>
       </div>
+
+      {/* Go Live Confirmation Modal */}
+      <Dialog open={showGoLiveModal} onOpenChange={setShowGoLiveModal}>
+        <DialogContent className="glass-elevated">
+          <DialogHeader>
+            <DialogTitle>Go Live with {portfolio.name}?</DialogTitle>
+            <DialogDescription>
+              This will end your simulation and commit real capital to this portfolio. This action cannot be reversed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <span className="text-sm text-muted-foreground">Portfolio Value</span>
+              <span className="font-mono font-bold">${metrics.value.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <span className="text-sm text-muted-foreground">Total Return</span>
+              <span className={cn("font-mono font-bold", metrics.return >= 0 ? "text-success" : "text-destructive")}>
+                {metrics.return >= 0 ? '+' : ''}{metrics.return.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoLiveModal(false)}>Cancel</Button>
+            <Button onClick={handleGoLiveConfirm} className="glow-commit">Go Live</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
