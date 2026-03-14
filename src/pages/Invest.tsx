@@ -398,8 +398,14 @@ export default function Create() {
               Platform fee: 0.25% annually on invested capital
             </p>
             <div className="text-center">
-              <button onClick={handleStartOver} className="text-sm text-muted-foreground hover:text-foreground underline transition-colors">
-                Start Over
+              <button
+                onClick={handleStartOver}
+                className="text-sm transition-colors inline-flex items-center gap-1.5"
+                style={{ color: 'rgba(255,255,255,0.4)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+              >
+                ↺ Start Over
               </button>
             </div>
           </div>
