@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -12,13 +12,36 @@ import type { Message, QuickAction } from './ai-assistant/types';
 let msgCounter = 0;
 const genId = () => `msg-${++msgCounter}`;
 
+function getPageName(pathname: string): string {
+  if (pathname === '/dashboard') return 'your Dashboard';
+  if (pathname === '/explore') return 'the Marketplace';
+  if (pathname.startsWith('/portfolio/')) return 'a portfolio detail page';
+  if (pathname.startsWith('/simulation/')) return 'a simulation';
+  if (pathname === '/invest') return 'the Create Portfolio page';
+  if (pathname === '/alpha') return 'the Become an Alpha page';
+  if (pathname === '/faq') return 'the FAQ';
+  return 'Alpha Trader';
+}
+
+function getWelcomePrompt(pathname: string): string {
+  if (pathname === '/dashboard') return 'Want to check on your portfolios, or explore something new?';
+  if (pathname === '/explore') return 'Looking for a portfolio to follow? I can help you filter and compare.';
+  if (pathname.startsWith('/portfolio/')) return 'Want to know more about this portfolio?';
+  if (pathname.startsWith('/simulation/')) return 'Want to check how your simulation is performing?';
+  if (pathname === '/invest') return 'Ready to build a portfolio? I can help you choose between AI-Assisted and Manual.';
+  if (pathname === '/alpha') return 'Interested in becoming an Alpha? I can walk you through the requirements and earnings.';
+  if (pathname === '/faq') return 'Have a question? Ask me anything — I might be faster than scrolling.';
+  return "I can help you with portfolios, risk levels, fees, or navigating the platform. What's on your mind?";
+}
+
 function buildWelcome(pathname: string): Message {
+  const pageName = getPageName(pathname);
+  const prompt = getWelcomePrompt(pathname);
   return {
     id: 'welcome',
     role: 'assistant',
-    content:
-      "Welcome! I'm your Alpha Advisor. I can help you with:\n\n• Understanding your portfolios and performance\n• Explaining investment concepts\n• Building a new portfolio\n• Navigating the platform\n\nWhat would you like to know?",
-    quickActions: getContextQuickActions(pathname),
+    content: `Hey! I see you're on ${pageName}. ${prompt}`,
+    quickActions: getContextQuickActions(pathname, 0),
   };
 }
 
@@ -32,6 +55,10 @@ export function AIAssistant() {
   const [isTyping, setIsTyping] = useState(false);
   const [hasPlayedPulse, setHasPlayedPulse] = useState(false);
   const isMobile = useIsMobile();
+  // Track recent assistant response content for anti-loop
+  const recentResponses = useRef<string[]>([]);
+  // Track user message count for quick action reduction
+  const userMessageCount = useRef(0);
 
   const hiddenPaths = ['/', '/login', '/signup'];
   const isHidden = !isAuthenticated || hiddenPaths.includes(location.pathname);
@@ -40,10 +67,9 @@ export function AIAssistant() {
   useEffect(() => {
     if (!isHidden) {
       setMessages(prev => {
-        // Update quick actions on the last assistant message if it has them
         const last = prev[prev.length - 1];
         if (last?.role === 'assistant') {
-          const contextActions = getContextQuickActions(location.pathname);
+          const contextActions = getContextQuickActions(location.pathname, userMessageCount.current);
           return [...prev.slice(0, -1), { ...last, quickActions: contextActions }];
         }
         return prev;
@@ -74,11 +100,16 @@ export function AIAssistant() {
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true);
+    userMessageCount.current += 1;
 
-    const delay = 800 + Math.random() * 400;
+    const delay = 600 + Math.random() * 400;
     setTimeout(() => {
-      const result = getResponse(text, location.pathname);
-      const contextActions = getContextQuickActions(location.pathname);
+      const result = getResponse(text, location.pathname, recentResponses.current);
+      const contextActions = getContextQuickActions(location.pathname, userMessageCount.current);
+      
+      // Track for anti-loop (keep last 3)
+      recentResponses.current = [...recentResponses.current.slice(-2), result.content];
+      
       const response: Message = {
         id: genId(),
         role: 'assistant',
@@ -93,11 +124,8 @@ export function AIAssistant() {
   const handleQuickAction = useCallback((action: QuickAction) => {
     if (action.navigateTo) {
       navigate(action.navigateTo);
-      // Also send as message for context
-      sendMessage(action.label);
-    } else {
-      sendMessage(action.label);
     }
+    sendMessage(action.label);
   }, [navigate, sendMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
