@@ -428,23 +428,20 @@ export default function Create() {
                   Simulate First
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Simulation is optional. You can invest directly or test with live data first.
               </p>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Platform fee: 0.25% annually on invested capital
               </p>
-            <div className="text-center">
-              <button
-                onClick={handleStartOver}
-                className="text-sm transition-colors inline-flex items-center gap-1.5"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-              >
-                ↺ Start Over
-              </button>
-            </div>
+              <div className="text-center">
+                <button
+                  onClick={handleStartOver}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+                >
+                  ↺ Start Over
+                </button>
+              </div>
           </div>
         </>
       )}
