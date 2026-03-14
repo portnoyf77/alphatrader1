@@ -20,7 +20,7 @@ import StrategyDetail from "./pages/StrategyDetail";
 import PortfolioOwnerDetail from "./pages/PortfolioOwnerDetail";
 import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
-import Alpha from "./pages/Alpha";
+
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 
