@@ -127,6 +127,21 @@ export default function Dashboard() {
 
   const hasPortfolios = myPortfolios.length > 0;
 
+  // Check if any live portfolio qualifies for marketplace publishing
+  const qualifyingPortfolio = useMemo(() => {
+    // Don't show if any portfolio is already "public" (mock: none are by default)
+    const hasPublished = false; // In real app, check if user has published portfolios
+    if (hasPublished || dismissedPublishPrompt) return null;
+
+    return livePortfolios.find((p: any) => {
+      const created = new Date(p.created_date);
+      const daysSinceCreation = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+      const drawdown = Math.abs(p.performance?.max_drawdown ?? 0);
+      const holdingsCount = p.holdings?.length ?? 0;
+      return daysSinceCreation >= 30 && drawdown < 20 && holdingsCount >= 5;
+    });
+  }, [livePortfolios, dismissedPublishPrompt]);
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
