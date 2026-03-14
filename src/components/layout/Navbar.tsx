@@ -25,6 +25,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
+  const marketStatus = useMarketStatus();
 
   const handleLogout = () => {
     logout();
