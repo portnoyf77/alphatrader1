@@ -317,7 +317,7 @@ export default function StrategyDetail() {
 
                   {/* Strategy type as small text */}
                   <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
-                    Built with: {strategy.strategy_type === 'GenAI' ? 'AI-assisted strategy' : 'Manual strategy'}
+                    Built with: {strategy.strategy_type === 'GenAI' ? 'AI-assisted' : 'Manual'}
                   </p>
                 </CardContent>
               </Card>
