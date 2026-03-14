@@ -71,6 +71,7 @@ const mockNews = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useMockAuth();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
   const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
 
