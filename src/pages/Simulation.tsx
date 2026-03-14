@@ -11,18 +11,21 @@ import { formatPercent, mockPortfolios } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, Area } from 'recharts';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  Tooltip as RechartsTooltip, Legend, Area, ReferenceLine, ReferenceArea
+} from 'recharts';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { useLiveChartData } from '@/hooks/useLiveChartData';
+import { useMarketStatus } from '@/hooks/useMarketStatus';
 
 type SimulationState = 'running' | 'stopped';
 type TimeRange = '1D' | '1W' | '1M' | '3M' | 'All';
 
 const FREE_TRIAL_DAYS = 7;
 const SIM_ELAPSED_DAYS = 19;
-const SIM_START_DATE = new Date('2026-02-22'); // 19 days before Mar 13, 2026
+const SIM_START_DATE = new Date('2026-02-22');
 
-// Seeded random for deterministic data
 function seededRandom(seed: number) {
   let s = seed;
   return () => {
@@ -31,11 +34,9 @@ function seededRandom(seed: number) {
   };
 }
 
-// Generate deterministic daily chart data for the full simulation period
 function generateSimulationData() {
-  const rand = seededRandom(872); // Ruby-872 seed
+  const rand = seededRandom(872);
   const data: Array<{ date: Date; dateLabel: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }> = [];
-  
   let portfolio = 100000;
   let sp500 = 100000;
   let dow = 100000;
@@ -44,51 +45,15 @@ function generateSimulationData() {
     const date = new Date(SIM_START_DATE);
     date.setDate(date.getDate() + day);
     const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    data.push({
-      date,
-      dateLabel: label,
-      Portfolio: Math.round(portfolio),
-      'S&P 500': Math.round(sp500),
-      'Dow Jones': Math.round(dow),
-    });
-
-    // Daily returns with slight upward bias for portfolio
+    data.push({ date, dateLabel: label, Portfolio: Math.round(portfolio), 'S&P 500': Math.round(sp500), 'Dow Jones': Math.round(dow) });
     portfolio *= 1 + (rand() - 0.43) * 0.025;
     sp500 *= 1 + (rand() - 0.46) * 0.018;
     dow *= 1 + (rand() - 0.46) * 0.016;
   }
-
-  return data;
-}
-
-// Generate hourly data for the last day (1D view)
-function generateIntradayData(lastDayValue: number) {
-  const rand = seededRandom(1337);
-  const data: Array<{ dateLabel: string; Portfolio: number; 'S&P 500': number; 'Dow Jones': number }> = [];
-  
-  let portfolio = lastDayValue * 0.998; // start slightly below
-  let sp500 = 100000 * 1.065; // approximate SP at day 18
-  let dow = 100000 * 1.055;
-
-  for (let hour = 9; hour <= 16; hour++) {
-    const label = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-    data.push({
-      dateLabel: label,
-      Portfolio: Math.round(portfolio),
-      'S&P 500': Math.round(sp500),
-      'Dow Jones': Math.round(dow),
-    });
-    portfolio *= 1 + (rand() - 0.45) * 0.004;
-    sp500 *= 1 + (rand() - 0.48) * 0.003;
-    dow *= 1 + (rand() - 0.48) * 0.0025;
-  }
-
   return data;
 }
 
 const fullData = generateSimulationData();
-const intradayData = generateIntradayData(fullData[fullData.length - 2]?.Portfolio ?? 100000);
 
 const metricsByRange: Record<TimeRange, { value: number; return: number; worstDrop: number; sharpe: number; vsSP: number }> = {
   '1D':  { value: fullData[fullData.length - 1].Portfolio, return: 0.3, worstDrop: -0.1, sharpe: 1.55, vsSP: 0.4 },
@@ -100,46 +65,40 @@ const metricsByRange: Record<TimeRange, { value: number; return: number; worstDr
 
 const timeRanges: TimeRange[] = ['1D', '1W', '1M', '3M', 'All'];
 
+// Key X-axis ticks for 1D view
+const INTRADAY_TICKS = ['4:00 AM', '9:30 AM', '12:00 PM', '4:00 PM', '8:00 PM'];
+
 export default function Simulation() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trialStartDate } = useMockAuth();
+  const marketStatus = useMarketStatus();
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
-  const [timeRange, setTimeRange] = useState<TimeRange>('1D');
+  const [timeRange, setTimeRange] = useState<TimeRange>('All');
 
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
-  // Live chart data for 1D view
   const lastDayOpenValue = fullData[fullData.length - 2]?.Portfolio ?? 100000;
   const sp500Base = fullData[fullData.length - 2]?.['S&P 500'] ?? 106500;
   const dowBase = fullData[fullData.length - 2]?.['Dow Jones'] ?? 105500;
   const isLive1D = timeRange === '1D' && simulationState === 'running';
   const { liveData, liveMetrics, marketOpen } = useLiveChartData(isLive1D, lastDayOpenValue, sp500Base, dowBase);
 
-  // Chart data based on time range
   const chartData = useMemo(() => {
     switch (timeRange) {
-      case '1D':
-        return liveData.length > 0 ? liveData : intradayData;
-      case '1W':
-        return fullData.slice(-7);
-      case '1M':
-        return fullData;
-      case '3M':
-        return fullData;
-      case 'All':
-      default:
-        return fullData;
+      case '1D': return liveData;
+      case '1W': return fullData.slice(-7);
+      case '1M': return fullData;
+      case '3M': return fullData;
+      case 'All': default: return fullData;
     }
   }, [timeRange, liveData]);
 
-  // Trial countdown
   const effectiveTrialStart = trialStartDate ?? Date.now();
   const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
   const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
 
-  // Redirect if not found or not simulating
   useEffect(() => {
     if (!portfolio) {
       navigate('/dashboard', { replace: true });
@@ -148,17 +107,11 @@ export default function Simulation() {
     }
   }, [portfolio, navigate]);
 
-  if (!portfolio || portfolio.status !== 'private') {
-    return null;
-  }
+  if (!portfolio || portfolio.status !== 'private') return null;
 
-  // Use live metrics when in 1D live mode, otherwise use static metrics
   const staticMetrics = metricsByRange[timeRange];
   const metrics = (timeRange === '1D' && liveMetrics) ? liveMetrics : staticMetrics;
-
-  // Worst drop color coding
   const worstDropAbs = Math.abs(metrics.worstDrop);
-  const worstDropColor = worstDropAbs >= 20 ? '#EF4444' : worstDropAbs >= 18 ? '#F97316' : worstDropAbs >= 15 ? '#F59E0B' : undefined;
 
   const handleStopSimulation = () => {
     setSimulationState('stopped');
@@ -170,6 +123,7 @@ export default function Simulation() {
   };
 
   const startDateFormatted = SIM_START_DATE.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const is1D = timeRange === '1D';
 
   return (
     <PageLayout>
@@ -242,26 +196,53 @@ export default function Simulation() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                {simulationState === 'running' ? (
-                  <Button variant="outline" size="sm" onClick={handleStopSimulation}>
-                    <Square className="h-3 w-3 mr-1.5" />
-                    Stop
+
+              {/* Right side: Market Status + Actions */}
+              <div className="flex items-center gap-4">
+                {/* Market Status Indicator */}
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex flex-col items-end gap-0.5 cursor-help">
+                        <div className="flex items-center gap-1.5">
+                          <div className={cn("w-[6px] h-[6px] rounded-full", marketStatus.dotClass)} />
+                          <span className={cn("text-xs font-semibold", marketStatus.color)}>
+                            {marketStatus.label}
+                          </span>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <span className="text-xs text-muted-foreground">{marketStatus.countdown}</span>
+                        </div>
+                        <span className="text-[0.65rem] text-muted-foreground/60">
+                          {marketStatus.etDateString} · {marketStatus.etTimeString}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs max-w-[250px]">{marketStatus.tooltipText}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {simulationState === 'running' ? (
+                    <Button variant="outline" size="sm" onClick={handleStopSimulation}>
+                      <Square className="h-3 w-3 mr-1.5" />
+                      Stop
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setSimulationState('running')}>
+                      <Play className="h-3 w-3 mr-1.5" />
+                      Resume
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={handleInvestNow}
+                    className="bg-white text-[#050508] hover:bg-white/90 border-none font-bold rounded-xl"
+                  >
+                    <DollarSign className="h-3 w-3 mr-1.5" />
+                    Invest Now
                   </Button>
-                ) : (
-                  <Button variant="outline" size="sm" onClick={() => setSimulationState('running')}>
-                    <Play className="h-3 w-3 mr-1.5" />
-                    Resume
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  onClick={handleInvestNow}
-                  className="bg-white text-[#050508] hover:bg-white/90 border-none font-bold rounded-xl"
-                >
-                  <DollarSign className="h-3 w-3 mr-1.5" />
-                  Invest Now
-                </Button>
+                </div>
               </div>
             </div>
             {trialSecondsRemaining <= 86400 && trialSecondsRemaining > 0 && (
@@ -282,7 +263,7 @@ export default function Simulation() {
                   <Activity className="h-5 w-5 text-primary" />
                   Live Performance
                 </CardTitle>
-                {timeRange === '1D' && (
+                {is1D && (
                   marketOpen && simulationState === 'running' ? (
                     <Badge className="bg-success/20 text-success border-success/30 gap-1.5 animate-fade-in">
                       <span className="w-2 h-2 rounded-full bg-success live-pulse" />
@@ -296,7 +277,6 @@ export default function Simulation() {
                   )
                 )}
               </div>
-              {/* Time Range Toggles */}
               <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 {timeRanges.map((range) => (
                   <button
@@ -330,12 +310,50 @@ export default function Simulation() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+
+                  {/* Pre-market shading (4:00 AM – 9:30 AM) */}
+                  {is1D && (
+                    <ReferenceArea
+                      x1="4:00 AM"
+                      x2="9:30 AM"
+                      fill="rgba(255,255,255,0.02)"
+                      fillOpacity={1}
+                    />
+                  )}
+                  {/* After-hours shading (4:00 PM – 8:00 PM) */}
+                  {is1D && (
+                    <ReferenceArea
+                      x1="4:00 PM"
+                      x2="8:00 PM"
+                      fill="rgba(255,255,255,0.02)"
+                      fillOpacity={1}
+                    />
+                  )}
+                  {/* Market open/close reference lines */}
+                  {is1D && (
+                    <ReferenceLine
+                      x="9:30 AM"
+                      stroke="rgba(255,255,255,0.15)"
+                      strokeDasharray="4 4"
+                      label={{ value: 'Open', position: 'top', fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
+                    />
+                  )}
+                  {is1D && (
+                    <ReferenceLine
+                      x="4:00 PM"
+                      stroke="rgba(255,255,255,0.15)"
+                      strokeDasharray="4 4"
+                      label={{ value: 'Close', position: 'top', fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
+                    />
+                  )}
+
                   <XAxis
                     dataKey="dateLabel"
                     tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                     tickLine={false}
                     axisLine={false}
                     interval="preserveStartEnd"
+                    {...(is1D ? { ticks: INTRADAY_TICKS } : {})}
                   />
                   <YAxis
                     domain={['dataMin - 2000', 'dataMax + 2000']}
@@ -347,14 +365,14 @@ export default function Simulation() {
                   <RechartsTooltip
                     contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
+                    formatter={(value: number | null) => value !== null ? [`$${value.toLocaleString()}`, undefined] : ['—', undefined]}
                   />
                   <Legend />
-                  <Area type="monotone" dataKey="Portfolio" fill="url(#simPortfolioFill)" stroke="none" isAnimationActive={isLive1D && marketOpen} animationDuration={800} />
-                  <Area type="monotone" dataKey="S&P 500" fill="url(#simSP500Fill)" stroke="none" isAnimationActive={false} />
-                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={isLive1D && marketOpen} animationDuration={800} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
-                  <Line type="monotone" dataKey="S&P 500" stroke="#10B981" strokeWidth={1.5} dot={false} strokeDasharray="4 4" isAnimationActive={false} />
-                  <Line type="monotone" dataKey="Dow Jones" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} dot={false} strokeDasharray="2 2" isAnimationActive={false} />
+                  <Area type="monotone" dataKey="Portfolio" fill="url(#simPortfolioFill)" stroke="none" isAnimationActive={isLive1D && marketOpen} animationDuration={800} connectNulls={false} />
+                  <Area type="monotone" dataKey="S&P 500" fill="url(#simSP500Fill)" stroke="none" isAnimationActive={false} connectNulls={false} />
+                  <Line type="monotone" dataKey="Portfolio" stroke="#7C3AED" strokeWidth={2.5} dot={false} isAnimationActive={isLive1D && marketOpen} animationDuration={800} connectNulls={false} style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
+                  <Line type="monotone" dataKey="S&P 500" stroke="#10B981" strokeWidth={1.5} dot={false} strokeDasharray="4 4" isAnimationActive={false} connectNulls={false} />
+                  <Line type="monotone" dataKey="Dow Jones" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} dot={false} strokeDasharray="2 2" isAnimationActive={false} connectNulls={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
