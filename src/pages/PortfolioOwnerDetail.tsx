@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp, Globe } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp, Globe, Crown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
