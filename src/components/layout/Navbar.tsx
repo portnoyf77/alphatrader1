@@ -12,7 +12,7 @@ import { useMarketStatus } from '@/hooks/useMarketStatus';
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
-  { href: '/alpha', label: 'Become an Alpha', icon: Crown, tooltip: 'Earn passive income from your portfolios' },
+  { href: '/faq', label: 'FAQ', icon: HelpCircle, tooltip: 'Frequently asked questions' },
 ];
 
 const planTooltips: Record<string, string> = {
@@ -131,12 +131,6 @@ export function Navbar() {
                     <Settings className="h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
-                  <Link to="/faq">
-                    <DropdownMenuItem className="gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-[rgba(255,255,255,0.04)]">
-                      <HelpCircle className="h-4 w-4" />
-                      FAQ
-                    </DropdownMenuItem>
-                  </Link>
                   <DropdownMenuSeparator className="bg-[rgba(255,255,255,0.06)]" />
                   <DropdownMenuItem
                     onClick={handleLogout}

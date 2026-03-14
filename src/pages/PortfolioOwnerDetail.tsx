@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp, Globe } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Settings, Clock, Rocket, Users, AlertTriangle, Info, History, ChevronDown, Sparkles, PenLine, Plus, Trash2, X, ChevronUp, Globe, Crown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -326,6 +326,69 @@ export default function PortfolioOwnerDetail() {
               portfolioName={portfolio.name} 
             />
           </div>
+
+          {/* Publish Readiness Section */}
+          {!isPublic && isLive && (() => {
+            const created = new Date(portfolio.created_date);
+            const daysSince = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+            const drawdown = Math.abs(portfolio.performance.max_drawdown);
+            const holdingsCount = portfolio.holdings.length;
+            const investment = portfolio.creator_investment;
+
+            const checks = [
+              { label: 'Live for 30+ days', met: daysSince >= 30 },
+              { label: 'Max drawdown under 20%', met: drawdown < 20 },
+              { label: '5+ holdings', met: holdingsCount >= 5 },
+              { label: '$1,000+ personal investment', met: investment >= 1000 },
+            ];
+            const allMet = checks.every(c => c.met);
+
+            return (
+              <div
+                className="mb-8 rounded-xl p-6"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderLeft: '3px solid',
+                  borderImage: 'linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary) / 0.3)) 1',
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  <Crown className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold mb-1">
+                      {allMet ? 'Ready to earn from this portfolio?' : 'Marketplace Requirements'}
+                    </h3>
+                    <p className={cn("text-sm mb-4", allMet ? "text-muted-foreground" : "text-muted-foreground/70")}>
+                      {allMet
+                        ? 'This portfolio meets all marketplace requirements. Publish it and earn 0.25% annually when followers allocate capital.'
+                        : 'Meet all requirements to publish.'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {checks.map((check) => (
+                        <div key={check.label} className="flex items-center gap-2 text-sm">
+                          {check.met ? (
+                            <Check className="h-4 w-4 text-success flex-shrink-0" />
+                          ) : (
+                            <X className="h-4 w-4 text-destructive flex-shrink-0" />
+                          )}
+                          <span className={check.met ? 'text-foreground' : 'text-muted-foreground'}>{check.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => setShowMakePublicModal(true)}
+                      disabled={!allMet}
+                      className={cn(!allMet && "opacity-50 cursor-not-allowed")}
+                    >
+                      Publish to Marketplace →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Holdings Table */}
           <Card className="glass-card mb-8">

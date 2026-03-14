@@ -25,12 +25,6 @@ export function Footer({ showDisclaimer = true }: FooterProps) {
             <Link to="/explore" className="hover:text-foreground transition-colors whitespace-nowrap">
               Marketplace
             </Link>
-            <Link to="/invest" className="hover:text-foreground transition-colors whitespace-nowrap">
-              Create
-            </Link>
-            <Link to="/alpha" className="hover:text-foreground transition-colors whitespace-nowrap">
-              Alpha
-            </Link>
             <Link to="/faq" className="hover:text-foreground transition-colors whitespace-nowrap">
               FAQ
             </Link>

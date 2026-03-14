@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -71,6 +71,7 @@ const mockNews = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
+  const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
 
   // Merge mock + user-created portfolios
   const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
@@ -125,6 +126,21 @@ export default function Dashboard() {
   ];
 
   const hasPortfolios = myPortfolios.length > 0;
+
+  // Check if any live portfolio qualifies for marketplace publishing
+  const qualifyingPortfolio = useMemo(() => {
+    // Don't show if any portfolio is already "public" (mock: none are by default)
+    const hasPublished = false; // In real app, check if user has published portfolios
+    if (hasPublished || dismissedPublishPrompt) return null;
+
+    return livePortfolios.find((p: any) => {
+      const created = new Date(p.created_date);
+      const daysSinceCreation = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+      const drawdown = Math.abs(p.performance?.max_drawdown ?? 0);
+      const holdingsCount = p.holdings?.length ?? 0;
+      return daysSinceCreation >= 30 && drawdown < 20 && holdingsCount >= 5;
+    });
+  }, [livePortfolios, dismissedPublishPrompt]);
 
   return (
     <PageLayout>
@@ -195,6 +211,37 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
+
+        {/* Contextual Alpha Promotion */}
+        {qualifyingPortfolio && (
+          <div
+            className="mb-6 rounded-xl p-4 flex items-center gap-4"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderLeft: '3px solid hsl(var(--primary))',
+            }}
+          >
+            <Crown className="h-5 w-5 flex-shrink-0 text-primary" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-foreground">
+                Your portfolio <span className="font-semibold">{qualifyingPortfolio.name}</span> qualifies for the marketplace. Publish it and start earning when others follow.
+              </p>
+            </div>
+            <Link to="/alpha">
+              <Button variant="outline" size="sm" className="whitespace-nowrap text-xs">
+                Learn How →
+              </Button>
+            </Link>
+            <button
+              onClick={() => setDismissedPublishPrompt(true)}
+              className="p-1 rounded hover:bg-secondary/50 transition-colors text-muted-foreground hover:text-foreground flex-shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         {/* Tab Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
