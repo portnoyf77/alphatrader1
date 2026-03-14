@@ -147,34 +147,36 @@ export default function Create() {
     setEditableHoldings(prev => prev.map((h, i) => ({ ...h, weight: each + (i === 0 ? remainder : 0) })));
   };
 
+  // Gem color helpers
+  const getGemColor = (name: string) => {
+    const gem = name.split('-')[0];
+    const colors: Record<string, string> = { Ruby: '#E11D48', Sapphire: '#3B82F6', Pearl: '#E2E8F0' };
+    return colors[gem] || '#7C3AED';
+  };
+
+  const getGemDescription = (name: string) => {
+    const gem = name.split('-')[0];
+    const descs: Record<string, string> = {
+      Pearl: 'Pearl embodies your conservative, stability-first philosophy — smooth and secure.',
+      Sapphire: 'Sapphire reflects your balanced approach — steady growth with measured risk.',
+      Ruby: 'Ruby captures your bold, growth-driven ambition — high energy, high potential.',
+    };
+    return descs[gem] || `${gem} reflects your personalized investment approach`;
+  };
+
   const renderResultsContent = () => (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 qa-reveal-stagger">
       {generatedPortfolio && (
         <>
           {/* Portfolio Header */}
-          <Card className="glass-card border-primary/50">
+          <Card className="glass-card" style={{ borderColor: `${getGemColor(generatedPortfolio.name)}30` }}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>{generatedPortfolio.name}</span>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={handleStartOver}>
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Start Over
-                  </Button>
-                  <span className="text-sm font-normal px-3 py-1 rounded-full bg-primary/20 text-primary">
-                    AI Generated
-                  </span>
-                </div>
+                <span style={{ color: getGemColor(generatedPortfolio.name), textShadow: `0 0 20px ${getGemColor(generatedPortfolio.name)}40` }}>
+                  {generatedPortfolio.name}
+                </span>
               </CardTitle>
-              {(() => {
-                const gemName = generatedPortfolio.name.split('-')[0];
-                const explanations: Record<string, string> = {
-                  'Ruby': 'Ruby reflects your high-risk, high-growth approach — bold and decisive.',
-                  'Sapphire': 'Sapphire represents your balanced, growth-oriented outlook — precision with purpose.',
-                  'Pearl': 'Pearl embodies your conservative, stability-first philosophy — smooth and secure.',
-                };
-                return <p className="text-sm text-muted-foreground mt-1 italic">{explanations[gemName] || `${gemName} reflects your personalized investment approach`}</p>;
-              })()}
+              <p className="text-sm text-muted-foreground mt-1 italic">{getGemDescription(generatedPortfolio.name)}</p>
             </CardHeader>
             <CardContent>
               <div className="mb-6">

@@ -696,3 +696,77 @@ table .font-mono {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50% { transform: translateX(-50%) translateY(8px); }
 }
+
+/* ── Create Portfolio Q&A Animations ── */
+
+/* Orb drift (reuses landing page pattern) */
+.qa-orb-drift {
+  animation: orbDrift1 20s ease-in-out infinite;
+}
+
+/* Slide transitions */
+@keyframes qaSlideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-40px); }
+}
+@keyframes qaSlideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
+@keyframes qaSlideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes qaSlideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.qa-slide-out-left { animation: qaSlideOutLeft 0.4s ease-out forwards; }
+.qa-slide-out-right { animation: qaSlideOutRight 0.4s ease-out forwards; }
+.qa-slide-in-right { animation: qaSlideInRight 0.4s ease-out forwards; }
+.qa-slide-in-left { animation: qaSlideInLeft 0.4s ease-out forwards; }
+
+/* Selection pulse */
+@keyframes qaSelectPulse {
+  0% { transform: scale(1); box-shadow: none; }
+  50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(124,58,237,0.25); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+.qa-select-pulse { animation: qaSelectPulse 0.3s ease; }
+
+/* Gem pulse for pre-crystallization */
+@keyframes qaGemPulse {
+  0% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.06); opacity: 0.25; }
+  100% { transform: scale(1); opacity: 0.15; }
+}
+.qa-gem-pulse { animation: qaGemPulse 0.8s ease-in-out; }
+
+/* Slider with colour track – make default track transparent */
+.qa-slider [data-orientation="horizontal"] > span:first-child {
+  background: rgba(255,255,255,0.08) !important;
+}
+.qa-slider [data-orientation="horizontal"] > span:first-child > span {
+  background: transparent !important;
+}
+
+/* Reveal stagger */
+@keyframes qaRevealUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.qa-reveal-stagger > * {
+  opacity: 0;
+  animation: qaRevealUp 0.5s ease-out forwards;
+}
+.qa-reveal-stagger > *:nth-child(1) { animation-delay: 0s; }
+.qa-reveal-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.qa-reveal-stagger > *:nth-child(3) { animation-delay: 0.2s; }
+.qa-reveal-stagger > *:nth-child(4) { animation-delay: 0.25s; }
+.qa-reveal-stagger > *:nth-child(5) { animation-delay: 0.3s; }
+.qa-reveal-stagger > *:nth-child(6) { animation-delay: 0.35s; }
+.qa-reveal-stagger > *:nth-child(7) { animation-delay: 0.4s; }
+.qa-reveal-stagger > *:nth-child(8) { animation-delay: 0.45s; }
+.qa-reveal-stagger > *:nth-child(9) { animation-delay: 0.5s; }
+.qa-reveal-stagger > *:nth-child(10) { animation-delay: 0.55s; }
