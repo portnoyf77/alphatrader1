@@ -1,27 +1,52 @@
 
+# Create Downloadable Alpha Trader Documentation
 
-## Assessment: Tour System Already Exists
+## Overview
+Create a comprehensive internal product document as a downloadable Markdown file, placed in the `public` folder so stakeholders can access it directly via URL.
 
-The entire guided tour system described in this prompt is **already fully implemented**:
+## Implementation
 
-- **TourWelcomeModal** + **TourWelcomeModalWrapper**: Welcome modal with Guided Tour / Explore Freely options ✅
-- **GuidedTour component**: SVG spotlight mask, annotation cards, auto-positioning, mobile bottom-sheet, smooth transitions ✅
-- **TourContext**: 14 steps, localStorage persistence, pause/resume, restart ✅
-- **App.tsx integration**: Welcome modal after demo gate, GuidedTour rendered globally ✅
-- **Navbar**: "Restart Tour" in user dropdown (desktop + mobile) ✅
-- **All `data-tour` selectors** on Dashboard, Explore, StrategyDetail, Invest, Simulation pages ✅
+### Step 1: Create Documentation File
+Create `public/docs/alpha-trader-internal-docs.md` with the complete product documentation including:
 
-### One Minor Fix Needed
+- **Executive Summary** - Platform overview and value proposition
+- **Core Concepts** - Two-sided marketplace model (Alphas vs Investors)
+- **Key Terminology** - Definitions for Alpha, Allocation, Validation, Masked/Transparent modes
+- **Portfolio Lifecycle** - Status transitions and validation requirements
+- **Data Model** - Portfolio interface, metrics, and user entities
+- **Fee Structure** - 1% platform fee, 20% Alpha share breakdown
+- **Technical Architecture** - Stack overview (React, TypeScript, Vite, Tailwind)
+- **Route Structure** - Public and protected routes
+- **UI/Branding Guidelines** - Gemstone theming, Crown iconography
 
-Steps 12 and 13 (Alpha Flywheel / Revenue Model) currently point to `/invest` with `[data-tour="create-header"]` — a fallback from when the `/alpha` route was removed. The prompt specifies these should target the **Landing page's dual CTA / Alpha section**.
+### Step 2: Create Documentation Access Page (Optional Enhancement)
+Create a simple `/docs` page component that:
+- Displays a formatted preview of the documentation
+- Provides a download button for the Markdown file
+- Could include a "Copy to Clipboard" option
 
-**Changes:**
+### Step 3: Add Download Link
+The file will be accessible at:
+- **Direct URL**: `/docs/alpha-trader-internal-docs.md`
+- Can be shared directly with stakeholders
 
-1. **`src/pages/Landing.tsx`** — Add `data-tour="alpha-cta"` to the dual CTA section wrapper (line ~412) and `data-tour="alpha-fee-text"` to the Alpha CTA card (line ~436)
+---
 
-2. **`src/contexts/TourContext.tsx`** — Update steps 12 and 13:
-   - Step 12: `page: '/'`, `selector: '[data-tour="alpha-cta"]'`, title/body unchanged (Alpha Flywheel)
-   - Step 13: `page: '/'`, `selector: '[data-tour="alpha-fee-text"]'`, title: "Revenue Model", body about aligned incentives and 0.25% + 0.25% fee structure
+## Technical Notes
 
-No other files need changes. The tour overlay, welcome modal, state management, spotlight system, and restart functionality are all working correctly.
+- **Why Markdown?** - Universal format, easily converted to PDF via external tools, version-controllable, readable in any text editor
+- **Why public folder?** - Files in `public/` are served statically and accessible via direct URL without authentication
+- **PDF alternative** - Users can convert the Markdown to PDF using tools like VS Code, Notion, or online converters if needed
 
+## File Structure After Implementation
+```text
+public/
+  docs/
+    alpha-trader-internal-docs.md   <- New file
+  favicon.ico
+  placeholder.svg
+  robots.txt
+```
+
+## Deliverable
+A professionally formatted Markdown document (~150-200 lines) covering all aspects of the Alpha Trader platform, ready for stakeholder distribution.
