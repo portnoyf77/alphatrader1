@@ -10,6 +10,7 @@ import { GemDot } from '@/components/GemDot';
 import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
