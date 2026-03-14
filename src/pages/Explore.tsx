@@ -35,7 +35,6 @@ const timeReturns: Record<string, Record<ChartTimeframe, number>> = {
 type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
 type StrategyFilter = 'all' | 'GenAI' | 'Manual';
-type VisibilityFilter = 'all' | 'masked' | 'transparent';
 type TurnoverFilter = 'all' | 'low' | 'medium' | 'high';
 type ChartTimeframe = '30D' | '90D' | 'YTD' | '1Y';
 
