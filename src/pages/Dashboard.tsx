@@ -71,6 +71,7 @@ const mockNews = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
+  const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
 
   // Merge mock + user-created portfolios
   const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
