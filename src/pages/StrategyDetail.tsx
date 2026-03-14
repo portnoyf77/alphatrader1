@@ -162,7 +162,7 @@ export default function StrategyDetail() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-xs">
-                      This portfolio must complete validation before it can accept allocations.
+                      This portfolio must complete validation before it can accept followers.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

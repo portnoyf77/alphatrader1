@@ -29,7 +29,7 @@ function getWelcomePrompt(pathname: string): string {
   if (pathname.startsWith('/portfolio/')) return 'Want to know more about this portfolio?';
   if (pathname.startsWith('/simulation/')) return 'Want to check how your simulation is performing?';
   if (pathname === '/invest') return 'Ready to build a portfolio? I can help you choose between AI-Assisted and Manual.';
-  if (pathname === '/alpha') return 'Interested in becoming an Alpha? I can walk you through the requirements and earnings.';
+  
   if (pathname === '/faq') return 'Have a question? Ask me anything — I might be faster than scrolling.';
   return "I can help you with portfolios, risk levels, fees, or navigating the platform. What's on your mind?";
 }

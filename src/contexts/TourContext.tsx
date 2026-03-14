@@ -75,16 +75,10 @@ const TOUR_STEPS: TourStep[] = [
     body: 'This is a key differentiator. Users can simulate any portfolio with paper money before committing real capital. They see real market performance in real time, so the decision to go live is informed, not impulsive.',
   },
   {
-    page: '/alpha',
-    selector: '[data-tour="earnings-calculator"]',
+    page: '/invest',
+    selector: '[data-tour="create-header"]',
     title: 'The Alpha Flywheel',
     body: "Experienced traders earn passive income from followers — 0.25% of AUM annually. 100 followers at $10K each = $25K/year in passive income. This incentivizes top traders to publish and maintain high-quality portfolios, which attracts more investors, which attracts more Alphas.",
-  },
-  {
-    page: '/alpha',
-    selector: '[data-tour="fee-text"]',
-    title: 'Revenue Model',
-    body: "Simple, aligned incentives. The platform earns 0.25% AUM, Alphas earn 0.25% AUM. No trading commissions, no hidden fees. Revenue scales directly with assets under management — as the platform grows, everyone benefits.",
   },
   {
     page: null as unknown as string,

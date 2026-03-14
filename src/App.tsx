@@ -67,9 +67,6 @@ const App = () => {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/faq" element={<FAQ />} />
-                <Route path="/alpha" element={
-                  <ProtectedRoute allowExpiredTrial><Alpha /></ProtectedRoute>
-                } />
                 
                 {/* Protected routes */}
                 <Route path="/invest" element={

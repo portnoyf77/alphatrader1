@@ -153,7 +153,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
 
         <div className="text-center">
           <Button asChild size="lg" className="glow-primary">
-            <Link to="/alpha">
+            <Link to="/invest">
               Become an Alpha
               <Crown className="ml-2 h-4 w-4" />
             </Link>
