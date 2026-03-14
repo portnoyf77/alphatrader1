@@ -175,7 +175,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Pearl-108',
     creator_id: '@div_hunter',
     status: 'validated_listed',
-    visibility_mode: 'transparent',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 90 days with strong income consistency and low drawdown profile.',
