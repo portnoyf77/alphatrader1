@@ -321,7 +321,7 @@ export default function Create() {
                 Key Risks
               </CardTitle>
             </CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.risks}</p></CardContent>
+            <CardContent><p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.risks}</p></CardContent>
           </Card>
 
           {/* Edit Holdings — collapsible */}
