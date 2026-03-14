@@ -84,6 +84,7 @@ export default function Simulation() {
   const marketStatus = useMarketStatus();
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
+  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
 
   const mockPortfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
   const userPortfolio = useMemo(() => !mockPortfolio && id ? getUserCreatedPortfolio(id) : null, [id, mockPortfolio]);
