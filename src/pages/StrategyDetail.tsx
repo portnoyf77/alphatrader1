@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Gauge, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
