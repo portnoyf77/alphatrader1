@@ -49,12 +49,14 @@ const enhancedGeneratedHoldings: GeneratedHolding[] = [
 ];
 
 const roleColors: Record<GeneratedHolding['role'], string> = {
-  Core: 'bg-primary/20 text-primary border-primary/30',
-  Growth: 'bg-success/20 text-success border-success/30',
-  Stability: 'bg-muted text-muted-foreground border-muted-foreground/30',
-  Hedge: 'bg-warning/20 text-warning border-warning/30',
-  International: 'bg-accent/20 text-accent-foreground border-accent/30',
+  Core: 'border-[rgba(148,163,184,0.3)]',
+  Growth: 'border-[rgba(148,163,184,0.3)]',
+  Stability: 'border-[rgba(148,163,184,0.3)]',
+  Hedge: 'border-[rgba(148,163,184,0.3)]',
+  International: 'border-[rgba(148,163,184,0.3)]',
 };
+
+const sectorColors = ['#94A3B8', '#64748B', '#475569', '#334155', '#1E293B'];
 
 const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
   Core: <TrendingUp className="h-3 w-3" />,
@@ -103,13 +105,13 @@ export default function Create() {
       holdings: enhancedGeneratedHoldings,
       excluded: [] as ExcludedHolding[],
       strategyBreakdown: [
-        { role: 'Core Equity', percentage: 35 },
-        { role: 'Growth Accelerator', percentage: 20 },
-        { role: 'International Diversification', percentage: 20 },
-        { role: 'Stability Buffer', percentage: 15 },
-        { role: 'Inflation Hedge', percentage: 10 },
+        { role: 'Broad Market', percentage: 35 },
+        { role: 'International', percentage: 20 },
+        { role: 'Technology', percentage: 20 },
+        { role: 'Bonds', percentage: 15 },
+        { role: 'Commodities', percentage: 10 },
       ],
-      rationale: `We built this portfolio to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. We balanced growth opportunities with stability for a portfolio that can grow without keeping you up at night.`,
+      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. We balanced growth opportunities with stability for a portfolio that can grow without keeping you up at night.`,
       risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
     };
     setGeneratedPortfolio(portfolio);
@@ -215,11 +217,10 @@ export default function Create() {
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
                     <div
                       key={item.role}
-                      className="relative flex items-center justify-center text-xs font-medium"
+                      className="relative flex items-center justify-center text-xs font-medium text-white"
                       style={{
                         width: `${item.percentage}%`,
-                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))',
-                        color: idx === 3 ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))'
+                        backgroundColor: sectorColors[idx % sectorColors.length],
                       }}
                     >
                       {item.percentage}%
@@ -230,9 +231,9 @@ export default function Create() {
                   {generatedPortfolio.strategyBreakdown.map((item, idx) => (
                     <div key={item.role} className="flex items-center gap-1.5">
                       <div className="w-3 h-3 rounded" style={{
-                        backgroundColor: idx === 0 ? 'hsl(var(--primary))' : idx === 1 ? 'hsl(var(--success))' : idx === 2 ? 'hsl(var(--accent))' : idx === 3 ? 'hsl(var(--muted))' : 'hsl(var(--warning))'
+                        backgroundColor: sectorColors[idx % sectorColors.length],
                       }} />
-                      <span className="text-muted-foreground">{item.role}</span>
+                      <span className="text-muted-foreground">{item.role} — {item.percentage}%</span>
                     </div>
                   ))}
                 </div>
@@ -259,7 +260,7 @@ export default function Create() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`}>
+                          <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`} style={{ background: 'rgba(148,163,184,0.15)', color: '#94A3B8', borderColor: 'rgba(148,163,184,0.2)' }}>
                             {roleIcons[holding.role]}
                             {holding.role}
                           </Badge>
