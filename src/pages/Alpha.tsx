@@ -221,7 +221,7 @@ export default function Alpha() {
       </section>
 
       {/* ═══════════ EARNINGS CALCULATOR ═══════════ */}
-      <section id="calculator" className="py-24">
+      <section data-tour="earnings-calculator" id="calculator" className="py-24">
         <div className="container mx-auto px-4">
           <h2
             className="font-heading font-extrabold text-center tracking-tight mb-16"
