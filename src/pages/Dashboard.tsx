@@ -137,7 +137,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-1 mt-1">
               <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
               <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+8.1%</span>
-              <span className="text-[0.8rem]" style={{ color: 'rgba(255,255,255,0.3)' }}>this month</span>
+              <span className="text-[0.8rem] text-muted-foreground">this month</span>
             </div>
           </div>
           {/* vs S&P 500 */}
