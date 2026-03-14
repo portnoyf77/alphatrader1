@@ -543,7 +543,7 @@ export default function StrategyDetail() {
             <DialogContent className="glass-elevated">
               <DialogHeader>
                 <DialogTitle>Follow {strategy.name}</DialogTitle>
-                <DialogDescription>You are allocating to a managed portfolio.</DialogDescription>
+                <DialogDescription>You are following a managed portfolio.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="p-3 rounded-lg bg-secondary/50 text-sm space-y-1">
