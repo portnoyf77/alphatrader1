@@ -58,9 +58,8 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const isTrialExpired = trialStartDate !== null && !userPlan && (Date.now() - trialStartDate > FREE_TRIAL_MS);
 
   const updateUsernameForPlan = (plan: string | null, currentUser: MockUser) => {
-    let username = generateUserId();
-    if (plan === 'basic') username = '@alex_investor';
-    else if (plan === 'pro') username = '@sam_alpha';
+    let username = '@alex_investor';
+    if (plan === 'pro') username = '@sam_alpha';
     const updated = { ...currentUser, username };
     setUser(updated);
     localStorage.setItem('mockUser', JSON.stringify(updated));
