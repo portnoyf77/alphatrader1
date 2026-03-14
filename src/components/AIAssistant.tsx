@@ -18,7 +18,7 @@ function getPageName(pathname: string): string {
   if (pathname.startsWith('/portfolio/')) return 'a portfolio detail page';
   if (pathname.startsWith('/simulation/')) return 'a simulation';
   if (pathname === '/invest') return 'the Create Portfolio page';
-  if (pathname === '/alpha') return 'the Become an Alpha page';
+  
   if (pathname === '/faq') return 'the FAQ';
   return 'Alpha Trader';
 }
