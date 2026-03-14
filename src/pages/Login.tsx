@@ -63,7 +63,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-8">
+          <div className="glass-card rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

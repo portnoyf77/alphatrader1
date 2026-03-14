@@ -14,7 +14,8 @@ const NotFound = () => {
 
   return (
     <PageLayout>
-      <div className="flex min-h-[60vh] items-center justify-center -mt-20">
+      <BackgroundOrbs />
+      <div className="flex min-h-[60vh] items-center justify-center -mt-20 relative z-10">
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20">
