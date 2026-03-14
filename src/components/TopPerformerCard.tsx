@@ -35,16 +35,12 @@ export function TopPerformerCard({ portfolio, rank, returnValue, timeLabel, isAn
     >
       <div
         className={cn(
-          "rounded-2xl border text-card-foreground h-full",
-          "bg-[rgba(22,22,40,0.6)] backdrop-blur-xl",
-          "border-[rgba(255,255,255,0.06)]",
-          "shadow-[0_4px_24px_rgba(0,0,0,0.2),inset_0_0_0_1px_rgba(255,255,255,0.03)]",
-          "cursor-pointer",
-          "hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300",
+          "rounded-2xl text-card-foreground h-full group glass-card",
+          "cursor-pointer transition-all duration-300",
         )}
         style={{
           borderLeft: `3px solid ${color}`,
-          ...(isFirst ? { boxShadow: `0 0 24px ${glow}, 0 4px 24px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.03)`, borderColor: `${color}40` } : {}),
+          ...(isFirst ? { boxShadow: `0 0 24px ${glow}, 0 4px 24px rgba(0,0,0,0.2)` } : {}),
         }}
       >
         <div className="p-4 flex flex-col gap-3">

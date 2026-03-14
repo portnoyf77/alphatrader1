@@ -471,7 +471,7 @@ export default function Dashboard() {
                 href={news.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
+                className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
                 style={{
                   minWidth: '220px',
                   maxWidth: '220px',
