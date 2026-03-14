@@ -110,16 +110,18 @@ export default function Simulation() {
 
   const portfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
 
-  // Trial countdown
-  const effectiveTrialStart = trialStartDate ?? Date.now();
-  const elapsedTrialSeconds = Math.floor((Date.now() - effectiveTrialStart) / 1000);
-  const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
+  // Live chart data for 1D view
+  const lastDayOpenValue = fullData[fullData.length - 2]?.Portfolio ?? 100000;
+  const sp500Base = fullData[fullData.length - 2]?.['S&P 500'] ?? 106500;
+  const dowBase = fullData[fullData.length - 2]?.['Dow Jones'] ?? 105500;
+  const isLive1D = timeRange === '1D' && simulationState === 'running';
+  const { liveData, liveMetrics, marketOpen } = useLiveChartData(isLive1D, lastDayOpenValue, sp500Base, dowBase);
 
   // Chart data based on time range
   const chartData = useMemo(() => {
     switch (timeRange) {
       case '1D':
-        return intradayData;
+        return liveData.length > 0 ? liveData : intradayData;
       case '1W':
         return fullData.slice(-7);
       case '1M':
@@ -130,7 +132,7 @@ export default function Simulation() {
       default:
         return fullData;
     }
-  }, [timeRange]);
+  }, [timeRange, liveData]);
 
 
   // Redirect if not found or not simulating
