@@ -70,9 +70,10 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     const storedPlan = localStorage.getItem('userPlan');
-    let username = generateUserId();
-    if (storedPlan === 'basic') username = '@alex_investor';
-    else if (storedPlan === 'pro') username = '@sam_alpha';
+    // Default to @alex_investor (basic persona) when no plan selected yet
+    let username = '@alex_investor';
+    if (storedPlan === 'pro') username = '@sam_alpha';
+    else if (storedPlan === 'basic') username = '@alex_investor';
 
     const mockUser: MockUser = {
       id: crypto.randomUUID(),
