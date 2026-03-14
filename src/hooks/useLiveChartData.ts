@@ -15,8 +15,19 @@ interface LiveMetrics {
   vsSP: number;
 }
 
+// Demo time override: set to a minutes-since-midnight value (e.g. 600 = 10:00 AM) to preview that time, or null for real clock
+const DEMO_TIME_MINUTES: number | null = 600; // 10:00 AM ET — set to null for production
+
 function getETNow(): Date {
-  // Convert current time to ET
+  if (DEMO_TIME_MINUTES !== null) {
+    const d = new Date();
+    // Force to a weekday (Wednesday)
+    const day = d.getDay();
+    if (day === 0) d.setDate(d.getDate() + 3);
+    if (day === 6) d.setDate(d.getDate() + 4);
+    d.setHours(Math.floor(DEMO_TIME_MINUTES / 60), DEMO_TIME_MINUTES % 60, 0, 0);
+    return d;
+  }
   const now = new Date();
   const etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
   return new Date(etString);
@@ -24,12 +35,11 @@ function getETNow(): Date {
 
 function isMarketOpen(): boolean {
   const et = getETNow();
-  const day = et.getDay(); // 0=Sun, 6=Sat
+  const day = et.getDay();
   if (day === 0 || day === 6) return false;
   const hours = et.getHours();
   const minutes = et.getMinutes();
   const timeInMinutes = hours * 60 + minutes;
-  // 9:30 AM = 570, 4:00 PM = 960
   return timeInMinutes >= 570 && timeInMinutes < 960;
 }
 
