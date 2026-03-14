@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MockAuthProvider } from "@/contexts/MockAuthContext";
+import { AIAssistant } from "@/components/AIAssistant";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
 import Home from "./pages/Home";
@@ -45,6 +46,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AIAssistant />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Home />} />

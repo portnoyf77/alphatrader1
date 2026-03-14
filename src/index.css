@@ -770,3 +770,32 @@ table .font-mono {
 .qa-reveal-stagger > *:nth-child(8) { animation-delay: 0.45s; }
 .qa-reveal-stagger > *:nth-child(9) { animation-delay: 0.5s; }
 .qa-reveal-stagger > *:nth-child(10) { animation-delay: 0.55s; }
+
+/* ── AI Assistant Animations ── */
+
+/* Floating button pulse (3 cycles) */
+@keyframes assistantPulse {
+  0%, 100% { box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 0 8px rgba(124,58,237,0.15); }
+}
+.assistant-pulse {
+  animation: assistantPulse 1.5s ease 3;
+}
+
+/* Panel slide-up entrance */
+@keyframes assistantPanelSlideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.assistant-panel-enter {
+  animation: assistantPanelSlideUp 0.25s ease-out;
+}
+
+/* Typing indicator dots */
+@keyframes typingDot {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.typing-dot-1 { animation: typingDot 1s ease infinite; }
+.typing-dot-2 { animation: typingDot 1s ease 0.2s infinite; }
+.typing-dot-3 { animation: typingDot 1s ease 0.4s infinite; }
