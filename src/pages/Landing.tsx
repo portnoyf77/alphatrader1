@@ -344,8 +344,10 @@ export default function Landing() {
                   style={{
                     padding: '28px 24px',
                     background: 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
-                    borderLeft: `3px solid ${color}`,
+                    borderTop: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderRight: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderBottom: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderLeft: `3px solid ${hoveredAlpha === i ? color : color}`,
                     transform: hoveredAlpha === i ? 'translateY(-2px)' : '',
                     boxShadow: hoveredAlpha === i ? `0 8px 32px ${glow}` : 'none',
                   }}
