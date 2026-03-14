@@ -310,7 +310,7 @@ export default function Create() {
           {/* Portfolio Rationale */}
           <Card className="glass-card">
             <CardHeader><CardTitle className="text-lg">Portfolio Rationale</CardTitle></CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground">{generatedPortfolio.rationale}</p></CardContent>
+            <CardContent><p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.rationale}</p></CardContent>
           </Card>
 
           {/* Key Risks */}
