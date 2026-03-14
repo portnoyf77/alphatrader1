@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,12 @@ import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 
-// My portfolios (ones I created)
-const myPortfolios = mockPortfolios.slice(0, 4);
+function getUserCreatedPortfolios(): any[] {
+  try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
+}
+
+// My portfolios (ones I created) — merge mock + user-created
+const baseMy = mockPortfolios.slice(0, 4);
 // Portfolios I've invested in
 const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
   '5': { myAllocation: 38000, myReturn: -4.8 },
@@ -24,8 +28,6 @@ const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
   myAllocation: investedPortfolioData[p.id]?.myAllocation ?? 25000,
   myReturn: investedPortfolioData[p.id]?.myReturn ?? 0,
 }));
-// Simulating portfolios
-const simulatingPortfolios = myPortfolios.filter(p => p.status === 'private');
 
 // Mock user total return vs S&P 500
 const userTotalReturn = 12.4;
