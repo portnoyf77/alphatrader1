@@ -235,7 +235,7 @@ export default function Dashboard() {
                 Your portfolio <span className="font-semibold">{qualifyingPortfolio.name}</span> qualifies for the marketplace. Publish it and start earning when others follow.
               </p>
             </div>
-            <Link to="/alpha">
+            <Link to="/invest">
               <Button variant="outline" size="sm" className="whitespace-nowrap text-xs">
                 Learn How →
               </Button>

@@ -20,7 +20,7 @@ import StrategyDetail from "./pages/StrategyDetail";
 import PortfolioOwnerDetail from "./pages/PortfolioOwnerDetail";
 import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
-import Alpha from "./pages/Alpha";
+
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 
@@ -67,9 +67,6 @@ const App = () => {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/faq" element={<FAQ />} />
-                <Route path="/alpha" element={
-                  <ProtectedRoute allowExpiredTrial><Alpha /></ProtectedRoute>
-                } />
                 
                 {/* Protected routes */}
                 <Route path="/invest" element={
