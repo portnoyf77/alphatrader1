@@ -9,7 +9,7 @@ import { TourProvider } from "@/contexts/TourContext";
 import { AIAssistant } from "@/components/AIAssistant";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
-import { TourWelcomeModal } from "@/components/TourWelcomeModal";
+import { TourWelcomeModalWrapper } from "@/components/TourWelcomeModalWrapper";
 import { GuidedTour } from "@/components/GuidedTour";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -40,7 +40,6 @@ const App = () => {
       <DemoGate onAccessGranted={() => {
         localStorage.setItem('demoAccessGranted', 'true');
         setAccessGranted(true);
-        // Show welcome modal after access granted (unless tour already completed)
         if (localStorage.getItem('tourCompleted') !== 'true') {
           setShowWelcomeModal(true);
         }
@@ -82,7 +81,6 @@ const App = () => {
                 <Route path="/portfolio/:id" element={
                   <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
                 } />
-                {/* Redirect /strategy/:id to /portfolio/:id for backwards compatibility */}
                 <Route path="/strategy/:id" element={<Navigate to={window.location.pathname.replace('/strategy/', '/portfolio/')} replace />} />
                 <Route path="/dashboard/portfolio/:id" element={
                   <ProtectedRoute><PortfolioOwnerDetail /></ProtectedRoute>
@@ -99,13 +97,5 @@ const App = () => {
     </QueryClientProvider>
   );
 };
-
-// Wrapper that auto-logs in and starts tour
-function TourWelcomeModalWrapper({ onDone }: { onDone: () => void }) {
-  // We need to use hooks from contexts, but this component is inside providers
-  // so we can use them
-  const { useTourStart } = require('@/components/TourWelcomeModalWrapper');
-  return useTourStart({ onDone });
-}
 
 export default App;
