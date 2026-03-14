@@ -34,11 +34,9 @@ const termDefinitions: Record<string, string> = {
 function getUserPortfolios(): { live: typeof mockPortfolios; simulating: typeof mockPortfolios } {
   const userCreated = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
   const allPortfolios = [...mockPortfolios, ...userCreated];
-  // Mock: user owns portfolios with creator_id matching their auth
   const storedUser = JSON.parse(localStorage.getItem('mockUser') || '{}');
   const userId = storedUser?.username || '@inv_7x2k';
   
-  // For demo: treat first 3 mock portfolios as "user's" (Sapphire-347, Pearl-142 invested in, Ruby-872 simulating)
   const myCreated = allPortfolios.filter(p => p.creator_id === userId);
   const live = myCreated.filter((p: any) => p.status === 'validated_listed' || p.status === 'live');
   const simulating = allPortfolios.filter((p: any) => p.status === 'private' && p.validation_status === 'simulated');
@@ -61,7 +59,6 @@ function getPageName(pathname: string): string {
   if (pathname.startsWith('/portfolio/')) return 'a Portfolio Detail page';
   if (pathname.startsWith('/simulation/')) return 'a Simulation page';
   if (pathname === '/invest') return 'the Create Portfolio page';
-  if (pathname === '/alpha') return 'the Become an Alpha page';
   if (pathname === '/faq') return 'the FAQ page';
   if (pathname.startsWith('/dashboard/portfolio/')) return 'your Portfolio Owner page';
   return 'Alpha Trader';
@@ -69,6 +66,40 @@ function getPageName(pathname: string): string {
 
 function getValidatedPortfolios() {
   return mockPortfolios.filter(p => p.status === 'validated_listed' && p.validation_criteria_met);
+}
+
+// ── Anti-loop helpers ──
+
+function normalizeText(text: string): string {
+  return text.toLowerCase().replace(/\*\*/g, '').replace(/[•\n\r#→]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function wordOverlap(a: string, b: string): number {
+  const wordsA = new Set(normalizeText(a).split(' ').filter(w => w.length > 3));
+  const wordsB = new Set(normalizeText(b).split(' ').filter(w => w.length > 3));
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+  let overlap = 0;
+  wordsA.forEach(w => { if (wordsB.has(w)) overlap++; });
+  return overlap / Math.min(wordsA.size, wordsB.size);
+}
+
+const antiLoopMessages = [
+  "I think I'm not quite answering what you're looking for. Could you tell me more specifically what you'd like to know?",
+  "Hmm, I may be going in circles. Let me try a different angle — what exactly are you trying to do right now?",
+  "I want to make sure I'm helpful. Can you rephrase what you need? I might be misunderstanding.",
+];
+
+// ── Conversation context helpers ──
+
+function detectUserGoal(userMessages: string[]): 'growth' | 'stability' | 'income' | 'balanced' | null {
+  for (let i = userMessages.length - 1; i >= 0; i--) {
+    const l = userMessages[i].toLowerCase();
+    if (l.includes('growth') || l.includes('aggressive') || l.includes('maximize') || l.includes('high return')) return 'growth';
+    if (l.includes('stability') || l.includes('safe') || l.includes('conservative') || l.includes('preserve') || l.includes('low risk')) return 'stability';
+    if (l.includes('income') || l.includes('dividend') || l.includes('yield')) return 'income';
+    if (l.includes('balanced') || l.includes('mix') || l.includes('moderate') || l.includes('middle')) return 'balanced';
+  }
+  return null;
 }
 
 // ── Intent Detection ──
@@ -99,72 +130,53 @@ type Intent =
 function detectIntent(input: string): Intent {
   const l = input.toLowerCase();
   
-  // Greetings
   if (/^(hi|hey|hello|yo|sup|what'?s up)\b/.test(l) && l.length < 30) return 'greeting';
   
-  // Portfolio status
   if ((l.includes('how') && (l.includes('portfolio') || l.includes('doing') || l.includes('performance'))) ||
       l.includes('my portfolios') || l.includes('how am i doing')) return 'portfolio_status';
   
-  // Build / create portfolio
   if (l.includes('build') || l.includes('create') || l.includes('new portfolio') || l.includes('make a portfolio') ||
       l.includes('start investing') || l.includes('what should i invest') || l.includes('help me invest') ||
       l.includes('help me build') || l.includes('help me create') || l.includes('want to invest') ||
       l.includes('how do i start') || l.includes('help me decide')) return 'build_portfolio';
   
-  // Risk levels
   if ((l.includes('risk') && (l.includes('level') || l.includes('explain') || l.includes('type') || l.includes('mean') || l.includes('right for me') || l.includes('what risk'))) ||
       l.includes('pearl mean') || l.includes('sapphire mean') || l.includes('ruby mean') ||
       l.includes('gem system') || l.includes('conservative') || l.includes('aggressive')) return 'risk_levels';
   
-  // Alpha
   if ((l.includes('what') && l.includes('alpha') && !l.includes('score')) ||
       l.includes('become alpha') || l.includes('become an alpha') ||
       (l.includes('how') && l.includes('earn') && l.includes('alpha')) ||
       l.includes('how do alphas') || l.includes('qualify') || l.includes('publishing requirement')) return 'what_is_alpha';
   
-  // Alpha score
   if (l.includes('alpha score') || (l.includes('score') && l.includes('mean')) || l.includes('reputation')) return 'alpha_score';
   
-  // Publishing
   if (l.includes('publish') || l.includes('ready to publish') || l.includes('publishing')) return 'publishing';
   
-  // Top performers
   if (l.includes('top performer') || l.includes('best') && (l.includes('portfolio') || l.includes('alpha') || l.includes('track record'))) return 'top_performers';
   
-  // Fees
   if (l.includes('fee') || l.includes('cost') || l.includes('how much') && (l.includes('charge') || l.includes('pay') || l.includes('cost'))) return 'fees';
   
-  // Plan info
   if (l.includes('plan') || l.includes('basic') || l.includes('pro ') || l.includes('subscription') || l.includes('trial') || l.includes('pricing')) return 'plan_info';
   
-  // Simulation
   if (l.includes('simulation') || l.includes('simulating') || l.includes('sim ') || l.includes('go live') || l.includes('invest now')) return 'simulation_info';
   
-  // Rebalancing
   if (l.includes('rebalanc') || l.includes('auto-apply') || l.includes('auto apply') || l.includes('require approval')) return 'rebalancing';
   
-  // IP protected / visibility
   if (l.includes('ip-protected') || l.includes('ip protected') || l.includes('see my holdings') || l.includes('see holdings') || l.includes('visibility')) return 'ip_protected';
   
-  // This portfolio / should I follow
   if (l.includes('this portfolio') || l.includes('tell me about') || l.includes('right for me')) return 'this_portfolio';
   if (l.includes('should i follow') || l.includes('is this worth') || l.includes('follow this')) return 'should_follow';
   
-  // Platform basics
   if (l.includes('what is alpha trader') || l.includes('how does this work') || l.includes('how does the platform') ||
       l.includes('what can i do') || l.includes('how does following')) return 'platform_basics';
   
-  // Navigation
   if (l.includes('where') || l.includes('how do i get') || l.includes('how do i find') || l.includes('take me to') || l.includes('navigate')) return 'navigation';
   
-  // Recommendations
   if (l.includes('what should') || l.includes('recommend') || l.includes('suggest') || l.includes('what next') || l.includes('help me') || l.includes('find me')) return 'recommendation';
   
-  // Term definitions
   if (l.includes('what does') || l.includes("what's") || l.includes('what is') || l.includes('explain') || l.includes('define') || l.includes('meaning')) return 'term_definition';
   
-  // Create help (on /invest page)
   if (l.includes('ai-assisted') || l.includes('ai assisted') || l.includes('manual') && (l.includes('tab') || l.includes('or'))) return 'create_help';
   
   return 'unknown';
@@ -172,21 +184,25 @@ function detectIntent(input: string): Intent {
 
 // ── Response Generation ──
 
-export function getResponse(input: string, pathname: string, recentResponses: string[] = []): AIResponse {
+let antiLoopIndex = 0;
+
+export function getResponse(input: string, pathname: string, recentResponses: string[] = [], userMessages: string[] = []): AIResponse {
   const intent = detectIntent(input);
-  let response = generateForIntent(intent, input, pathname);
+  let response = generateForIntent(intent, input, pathname, userMessages);
   
   // Anti-loop: check if response is too similar to recent ones
   if (recentResponses.length > 0) {
     const isDuplicate = recentResponses.some(prev => {
       if (!prev) return false;
-      // Check if content starts with same 80 chars
-      return prev.substring(0, 80) === response.content.substring(0, 80);
+      // Check word overlap > 60%
+      return wordOverlap(prev, response.content) > 0.6;
     });
     
     if (isDuplicate) {
+      const msg = antiLoopMessages[antiLoopIndex % antiLoopMessages.length];
+      antiLoopIndex++;
       response = {
-        content: "I think I'm not quite answering what you're looking for. Could you tell me more specifically what you'd like to know? I can help with portfolio performance, risk levels, fees, building a new portfolio, or navigating the platform.",
+        content: msg,
         quickActions: [
           { label: 'Show my portfolio stats' },
           { label: 'Explain something to me' },
@@ -199,7 +215,7 @@ export function getResponse(input: string, pathname: string, recentResponses: st
   return response;
 }
 
-function generateForIntent(intent: Intent, input: string, pathname: string): AIResponse {
+function generateForIntent(intent: Intent, input: string, pathname: string, userMessages: string[] = []): AIResponse {
   const lower = input.toLowerCase();
   
   switch (intent) {
@@ -214,7 +230,6 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
       const { live, simulating } = getUserPortfolios();
       const validated = getValidatedPortfolios();
       
-      // Mock user data (Sapphire-347 is theirs, following Pearl-142 and Pearl-108)
       const invested = [
         { name: 'Sapphire-347', return30d: 4.2, amount: 25000 },
         { name: 'Pearl-142', return30d: 1.8, amount: 50000 },
@@ -246,6 +261,46 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
     
     case 'build_portfolio': {
       if (pathname === '/invest') {
+        // Check if user already expressed a goal in prior messages
+        const goal = detectUserGoal(userMessages);
+        
+        if (goal === 'growth') {
+          return {
+            content: `Based on what you've told me, a **Ruby (Aggressive)** profile sounds like a good fit. Ruby portfolios target higher returns and are comfortable with bigger swings — best with a 5+ year time horizon.\n\nI'd suggest starting with the **AI-Assisted** tab — it'll ask a few more questions to fine-tune things and build a tailored portfolio. Go ahead and kick it off, and I'll be here if you have questions along the way.`,
+            quickActions: [
+              { label: 'What if I want less risk?' },
+              { label: 'How does simulation work?' },
+            ],
+          };
+        }
+        if (goal === 'stability') {
+          return {
+            content: `Sounds like a **Pearl (Conservative)** profile would suit you well. Pearl portfolios focus on capital preservation with lower volatility — steady and smooth.\n\nThe **AI-Assisted** tab will dial in the specifics for you. It takes about 2 minutes and you can simulate the result before committing any real money.`,
+            quickActions: [
+              { label: 'What if I want more growth?' },
+              { label: 'How does simulation work?' },
+            ],
+          };
+        }
+        if (goal === 'income') {
+          return {
+            content: `For income-focused investing, you'd likely land in the **Pearl** or **Sapphire** range — portfolios that emphasize steady returns and lower volatility.\n\nThe **AI-Assisted** tab will factor in your income preference and build something tailored. Give it a try — it only takes a couple of minutes.`,
+            quickActions: [
+              { label: 'Tell me more about Pearl vs Sapphire' },
+              { label: 'How does simulation work?' },
+            ],
+          };
+        }
+        if (goal === 'balanced') {
+          return {
+            content: `A balanced approach points to **Sapphire (Moderate)** — solid growth potential with manageable risk. It's the sweet spot for most people.\n\nTry the **AI-Assisted** tab to get a portfolio built around your preferences. You'll simulate it first, so there's no pressure.`,
+            quickActions: [
+              { label: 'What exactly is in a Sapphire portfolio?' },
+              { label: 'How does simulation work?' },
+            ],
+          };
+        }
+        
         return {
           content: `Great, you're in the right place! A couple of questions to point you in the right direction:\n\n**What are you looking to get out of investing?** Growth, stability, income, or a mix?\n\nOnce I know your goals and how much risk you're okay with, I can recommend whether Pearl (conservative), Sapphire (moderate), or Ruby (aggressive) fits you best.\n\nYou can use the **AI-Assisted** tab to answer 6 quick questions and get a tailored portfolio, or the **Manual** tab if you already know what you want to hold.`,
           quickActions: [
@@ -267,7 +322,6 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
     }
     
     case 'risk_levels': {
-      // If the user is asking what risk level they are (guidance)
       if (lower.includes('right for me') || lower.includes('what risk') || lower.includes('what level') || lower.includes('which')) {
         return {
           content: `Here's a quick way to think about it:\n\n⚪ **Pearl (Conservative)** — You prioritize not losing money. You're okay with slower growth if it means smoother rides. Good for shorter timelines or retirement savings.\n\n🔵 **Sapphire (Moderate)** — You want growth but can sleep at night with some ups and downs. The "balanced" choice for most people.\n\n🔴 **Ruby (Aggressive)** — You're comfortable with big swings because you're chasing bigger returns. Best with a long time horizon (5+ years).\n\nIf you're unsure, the AI-Assisted flow on the Create page will figure it out for you based on 6 questions.`,
@@ -288,8 +342,8 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
         return {
           content: `Alphas earn **0.25% annually** on every dollar followers allocate to their portfolio.\n\n**Example math:**\n• 100 followers × $10K average = $1M AUM\n• Annual earnings: $1M × 0.25% = $2,500/year (~$208/month)\n• Top Alphas on the platform manage $2-4M in follower capital\n\nTo qualify, you need to run a portfolio for 30+ days with less than 20% max drawdown, have 5+ holdings, and invest at least $1,000 of your own money.`,
           quickActions: [
-            { label: 'Learn more on Alpha page', navigateTo: '/alpha' },
             { label: 'What are the requirements?' },
+            { label: 'Create a portfolio', navigateTo: '/invest' },
           ],
         };
       }
@@ -299,7 +353,7 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
           content: `To publish a portfolio to the marketplace and become an Alpha, you need:\n\n✅ **30+ days** of live or simulated performance\n✅ **Max drawdown under 20%** (worst drop)\n✅ **5+ holdings** in the portfolio\n✅ **$1,000+ invested** of your own capital\n\nOnce you meet all four, a "Publish to Marketplace" section appears on your portfolio's owner page.`,
           quickActions: [
             { label: 'How much can I earn?' },
-            { label: 'Go to Alpha page', navigateTo: '/alpha' },
+            { label: 'Start building', navigateTo: '/invest' },
           ],
         };
       }
@@ -309,7 +363,7 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
         quickActions: [
           { label: 'How much can I earn?' },
           { label: 'What are the requirements?' },
-          { label: 'Go to Alpha page', navigateTo: '/alpha' },
+          { label: 'Create a portfolio', navigateTo: '/invest' },
         ],
       };
     }
@@ -491,11 +545,11 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
       if (lower.includes('dashboard')) return { content: 'Your Dashboard shows all your portfolios, investments, and market news.', quickActions: [{ label: 'Go to Dashboard', navigateTo: '/dashboard' }] };
       if (lower.includes('marketplace') || lower.includes('explore') || lower.includes('browse')) return { content: 'The Marketplace is where you browse and follow validated portfolios.', quickActions: [{ label: 'Go to Marketplace', navigateTo: '/explore' }] };
       if (lower.includes('create') || lower.includes('build') || lower.includes('invest')) return { content: 'The Create page lets you build a portfolio with AI-Assisted or Manual mode.', quickActions: [{ label: 'Go to Create', navigateTo: '/invest' }] };
-      if (lower.includes('alpha') || lower.includes('earn')) return { content: 'The Become an Alpha page explains how to publish and earn from followers.', quickActions: [{ label: 'Go to Alpha page', navigateTo: '/alpha' }] };
+      if (lower.includes('alpha') || lower.includes('earn')) return { content: 'You can learn about becoming an Alpha and start building on the Create page.', quickActions: [{ label: 'Create a portfolio', navigateTo: '/invest' }] };
       if (lower.includes('faq') || lower.includes('help') || lower.includes('question')) return { content: 'The FAQ covers common questions about the platform.', quickActions: [{ label: 'Go to FAQ', navigateTo: '/faq' }] };
       
       return {
-        content: `Here are the main sections:\n\n• **Dashboard** — Your portfolios and investments\n• **Marketplace** — Browse and follow Alphas\n• **Create** — Build your own portfolio\n• **Alpha** — Learn about earning from followers\n• **FAQ** — Common questions`,
+        content: `Here are the main sections:\n\n• **Dashboard** — Your portfolios and investments\n• **Marketplace** — Browse and follow Alphas\n• **Create** — Build your own portfolio\n• **FAQ** — Common questions`,
         quickActions: [
           { label: 'Dashboard', navigateTo: '/dashboard' },
           { label: 'Marketplace', navigateTo: '/explore' },
@@ -512,7 +566,6 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
           };
         }
       }
-      // No matching term
       return {
         content: `I'm not sure I know that term. Could you rephrase? I can explain concepts like Sharpe ratio, drawdown, volatility, AUM, ETFs, Alpha Score, rebalancing, or IP-Protected visibility.`,
       };
@@ -529,7 +582,6 @@ function generateForIntent(intent: Intent, input: string, pathname: string): AIR
     }
     
     default: {
-      // Fallback — be helpful, not generic
       return {
         content: `I'm not sure I follow — could you rephrase that? Here are some things I can help with:\n\n• Your portfolio performance and stats\n• Building a new portfolio\n• Explaining investment concepts (Sharpe ratio, drawdown, etc.)\n• How fees, following, and publishing work\n• Navigating to any page\n\nOr just ask me a specific question!`,
         quickActions: [

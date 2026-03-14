@@ -54,12 +54,6 @@ export function getContextQuickActions(pathname: string, messageCount: number = 
       { label: 'How do I become an Alpha?' },
       { label: 'What are the publishing requirements?' },
     ];
-  } else if (pathname === '/alpha') {
-    actions = [
-      { label: 'How much could I earn?' },
-      { label: 'What do I need to qualify?' },
-      { label: 'How does the 0.25% fee work?' },
-    ];
   } else if (pathname === '/faq') {
     actions = [
       { label: 'I have a question not covered here' },
