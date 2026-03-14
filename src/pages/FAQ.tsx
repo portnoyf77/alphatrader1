@@ -191,7 +191,7 @@ const faqSections: FaqSection[] = [
         question: 'Can followers see my exact holdings?',
         answer: (
           <p>
-            You choose. When publishing, you can set your portfolio to <strong>"Transparent"</strong> (followers see all holdings) or <strong>"IP-Protected"</strong> (followers see only sector-level allocations). Either way, followers automatically mirror your trades.
+            All portfolios use <strong>IP-Protected</strong> visibility by default. Followers can see sector exposure, performance metrics, worst drawdown, and risk profile — but not exact holdings or weights. This protects your intellectual property while giving followers the information they need to make informed decisions. Followers automatically mirror your trades regardless of visibility.
           </p>
         ),
       },
