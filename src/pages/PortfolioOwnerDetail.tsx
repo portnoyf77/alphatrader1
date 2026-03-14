@@ -192,7 +192,7 @@ export default function PortfolioOwnerDetail() {
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <GemDot name={portfolio.name} size={10} />
+                <GemDot name={portfolio.name} size={28} />
                 <h1 className="text-3xl font-bold" style={{ color: getGemHex(portfolio.name).color, textShadow: `0 0 24px ${getGemHex(portfolio.name).glow}` }}>{portfolio.name}</h1>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-sm font-medium",

@@ -173,7 +173,7 @@ export default function Simulation() {
             </Button>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold flex items-center gap-2">
-                <GemDot name={portfolio.name} size={10} />
+                <GemDot name={portfolio.name} size={28} />
                 {portfolio.name}
               </h1>
               <span className="px-2 py-1 rounded text-xs bg-warning/20 text-warning">Simulating</span>
