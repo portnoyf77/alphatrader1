@@ -1,435 +1,483 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Crown, DollarSign, Users, TrendingUp, CheckCircle2, XCircle, ArrowRight, Star, Shield, BarChart3 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Crown, ArrowRight, Rocket, DollarSign, Clock, Shield, List, AlertTriangle, Mail, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { GemDot } from '@/components/GemDot';
+import { getGemHex } from '@/lib/portfolioNaming';
+import { mockPortfolios, formatCurrency } from '@/lib/mockData';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 import { cn } from '@/lib/utils';
 
-// Mock: whether the current user meets Alpha requirements
-const userRequirements = {
-  hasLivePortfolio: false,
-  personalInvestment: 0,
-  portfolioAgeDays: 0,
-};
+const ALPHA_FEE_RATE = 0.0025;
 
-const ALPHA_FEE_RATE = 0.0025; // 0.25% annually
-
-const mockTestimonials = [
-  {
-    name: 'Ruby-891',
-    creatorId: '@momentum_pro',
-    gemstone: 'Ruby',
-    sectors: ['Momentum', 'Technology', 'Innovation'],
-    followers: 756,
-    aum: 4200000,
-    monthlyEarnings: 875,
-    quote: 'My high-conviction momentum portfolio speaks for itself. The earnings follow the performance.',
-    riskLevel: 'High' as const,
-    reputationScore: 4.6,
-  },
-  {
-    name: 'Pearl-142',
-    creatorId: '@alpha_99',
-    gemstone: 'Pearl',
-    sectors: ['Bonds', 'Broad Market', 'International'],
-    followers: 2389,
-    aum: 2450000,
-    monthlyEarnings: 510,
-    quote: 'The platform made it easy to validate my balanced thesis and attract followers with steady returns.',
-    riskLevel: 'Low' as const,
-    reputationScore: 4.9,
-  },
-  {
-    name: 'Sapphire-347',
-    creatorId: '@inv_7x2k',
-    gemstone: 'Sapphire',
-    sectors: ['Broad Market', 'Technology', 'International'],
-    followers: 1247,
-    aum: 1850000,
-    monthlyEarnings: 385,
-    quote: 'I built a tech-focused portfolio and now earn passive income while it runs on autopilot.',
-    riskLevel: 'Medium' as const,
-    reputationScore: 4.8,
-  },
-];
-const gemstoneColorMap: Record<string, { bg: string; text: string; border: string; icon: React.ElementType }> = {
-  Sapphire: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', icon: Crown },
-  Pearl: { bg: 'bg-slate-300/10', text: 'text-slate-300', border: 'border-slate-300/30', icon: Crown },
-  Ruby: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30', icon: Crown },
-};
+// Top 3 alphas by earnings
+const topAlphas = [...mockPortfolios]
+  .filter(s => s.status === 'validated_listed')
+  .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
+  .slice(0, 3);
 
 export default function Alpha() {
-  const navigate = useNavigate();
-  const [followers, setFollowers] = useState([50]);
+  const { isAuthenticated } = useMockAuth();
+  const [followers, setFollowers] = useState([100]);
   const [avgAllocation, setAvgAllocation] = useState([10000]);
+  const [hoveredAlpha, setHoveredAlpha] = useState<number | null>(null);
+  const [resultPulse, setResultPulse] = useState(false);
 
   const totalAUM = followers[0] * avgAllocation[0];
   const annualEarnings = totalAUM * ALPHA_FEE_RATE;
   const monthlyEarnings = annualEarnings / 12;
 
-  const meetsAll =
-    userRequirements.hasLivePortfolio &&
-    userRequirements.personalInvestment >= 1000 &&
-    userRequirements.portfolioAgeDays >= 30;
+  // Pulse animation on slider change
+  const handleFollowersChange = (v: number[]) => {
+    setFollowers(v);
+    setResultPulse(true);
+    setTimeout(() => setResultPulse(false), 200);
+  };
+  const handleAllocationChange = (v: number[]) => {
+    setAvgAllocation(v);
+    setResultPulse(true);
+    setTimeout(() => setResultPulse(false), 200);
+  };
+
+  // Determine best qualifying portfolio for authenticated user
+  const bestPortfolio = isAuthenticated
+    ? mockPortfolios.find(p => {
+        if (p.status !== 'validated_listed') return false;
+        const days = Math.floor((Date.now() - new Date(p.created_date).getTime()) / 86400000);
+        return days >= 30 && Math.abs(p.performance.max_drawdown) < 20 && p.holdings.length >= 5 && p.creator_investment >= 1000;
+      })
+    : null;
 
   const requirements = [
-    {
-      label: 'Live portfolio exists',
-      met: userRequirements.hasLivePortfolio,
-      description: 'You need at least one portfolio that has passed simulation and gone live.',
-    },
-    {
-      label: 'Minimum $1,000 personal investment',
-      met: userRequirements.personalInvestment >= 1000,
-      description: 'You must have at least $1,000 of your own capital invested — skin in the game.',
-    },
-    {
-      label: 'Portfolio live for at least 30 days',
-      met: userRequirements.portfolioAgeDays >= 30,
-      description: 'Your portfolio needs a 30-day live track record before it can be published.',
-    },
-    {
-      label: 'Max drawdown under 20%',
-      met: false,
-      description: 'Your portfolio must maintain a maximum drawdown under 20% during the validation period.',
-    },
-    {
-      label: 'Minimum 5 holdings',
-      met: false,
-      description: 'Your portfolio must contain at least 5 different holdings for adequate diversification.',
-    },
-    {
-      label: 'Risk disclosure acknowledged',
-      met: false,
-      description: 'You must acknowledge that followers rely on your portfolio decisions and accept the responsibility.',
-    },
-    {
-      label: 'Email verified',
-      met: true,
-      description: 'Your email address must be verified before publishing to the marketplace.',
-    },
+    { icon: Rocket, label: 'Live portfolio with real capital invested', met: !!bestPortfolio },
+    { icon: DollarSign, label: 'Minimum $1,000 personal investment', met: bestPortfolio ? bestPortfolio.creator_investment >= 1000 : false },
+    { icon: Clock, label: 'Portfolio live for at least 30 days', met: bestPortfolio ? Math.floor((Date.now() - new Date(bestPortfolio.created_date).getTime()) / 86400000) >= 30 : false },
+    { icon: Shield, label: 'Maximum drawdown under 20%', met: bestPortfolio ? Math.abs(bestPortfolio.performance.max_drawdown) < 20 : false },
+    { icon: List, label: 'Minimum 5 unique holdings', met: bestPortfolio ? bestPortfolio.holdings.length >= 5 : false },
+    { icon: AlertTriangle, label: 'Risk disclosure acknowledged', met: false },
+    { icon: Mail, label: 'Email verified', met: true },
   ];
 
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
-        <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-primary/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl" />
+      {/* ═══════════ HERO ═══════════ */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
+        {/* Animated orbs */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: '45vw', height: '45vw', top: '-5%', left: '-8%',
+            background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 60%)',
+            filter: 'blur(80px)',
+            animation: 'orbDrift1 18s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: '35vw', height: '35vw', bottom: '5%', right: '-5%',
+            background: 'radial-gradient(circle, rgba(225,29,72,0.05) 0%, transparent 60%)',
+            filter: 'blur(70px)',
+            animation: 'orbDrift2 22s ease-in-out infinite',
+          }}
+        />
 
-        <div className="container mx-auto px-4 py-20 md:py-28 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6 animate-fade-in">
-              <Crown className="h-4 w-4" />
-              Become an Alpha
-            </div>
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          {/* Badge */}
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-primary text-sm font-medium mb-8"
+            style={{
+              background: 'rgba(124,58,237,0.08)',
+              border: '1px solid rgba(124,58,237,0.2)',
+              animation: 'fadeUp 0.6s ease-out both',
+            }}
+          >
+            <Crown className="h-4 w-4" />
+            Become an Alpha
+          </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in leading-tight">
-              Turn your investing expertise into{' '}
-              <span className="gradient-text">passive income</span>
-            </h1>
+          {/* H1 */}
+          <h1
+            className="font-heading font-extrabold leading-[1.1] mb-6"
+            style={{
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              animation: 'fadeUp 0.6s ease-out 0.15s both',
+            }}
+          >
+            Turn your investing expertise into{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              passive income
+            </span>
+          </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto animate-fade-in">
-              Build a portfolio, prove it in simulation, then publish it to the marketplace.
-              When followers allocate to your portfolio, you earn{' '}
-              <TooltipProvider delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="font-semibold text-primary cursor-help border-b border-dashed border-primary/40">0.25% of their AUM annually</span>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs max-w-[250px]">You earn 0.25% of the total capital your followers allocate, calculated annually and paid monthly</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>, paid monthly.
-            </p>
+          {/* Subtitle */}
+          <p
+            className="text-lg md:text-xl mb-3 max-w-2xl mx-auto"
+            style={{ color: 'rgba(255,255,255,0.65)', animation: 'fadeUp 0.6s ease-out 0.3s both' }}
+          >
+            Build a portfolio, prove it in simulation, then publish it to the marketplace. When followers allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly.
+          </p>
+          <p
+            className="text-muted-foreground mb-10"
+            style={{ animation: 'fadeUp 0.6s ease-out 0.3s both' }}
+          >
+            The platform charges a separate 0.25% — simple, transparent, and aligned.
+          </p>
 
-            <p className="text-muted-foreground mb-10 animate-fade-in">
-              The platform charges a separate 0.25% — simple, transparent, and aligned.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
-              <Button asChild size="lg" className="glow-primary text-lg px-8 h-14">
-                <Link to="/invest">
-                  Create Your Portfolio
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-lg px-8 h-14">
-                <a href="#calculator">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  See Your Earnings Potential
-                </a>
-              </Button>
-            </div>
+          {/* CTAs */}
+          <div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={{ animation: 'fadeUp 0.6s ease-out 0.45s both' }}
+          >
+            <Button asChild size="lg" className="text-lg px-8 h-14">
+              <Link to="/invest">
+                Create Your Portfolio
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-lg px-8 h-14">
+              <a href="#calculator">See Your Earnings Potential</a>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {[
-            { icon: BarChart3, title: '1. Build & Simulate', description: 'Use our AI advisor or build manually. Run a free simulation to prove your portfolio works.' },
-            { icon: Shield, title: '2. Invest & Validate', description: 'Put your own capital in — at least $1,000. After 30 days live, you can publish to the marketplace.' },
-            { icon: DollarSign, title: '3. Earn Passively', description: 'When followers allocate to your portfolio, you earn 0.25% of their AUM annually, paid monthly.' },
-          ].map((step) => (
-            <Card key={step.title} className="glass-card text-center">
-              <CardContent className="pt-8 pb-6 px-6">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-                  <step.icon className="h-7 w-7 text-primary" />
+      {/* ═══════════ HOW IT WORKS ═══════════ */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <h2
+            className="font-heading font-extrabold text-center tracking-tight mb-16"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+          >
+            How It Works
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              {
+                step: '01',
+                title: 'Build & Simulate',
+                description: 'Create a portfolio with AI or manually. Test it in simulation with live market data to prove your approach.',
+                color: '#10B981',
+                bgColor: 'rgba(16,185,129,0.08)',
+                borderColor: 'rgba(16,185,129,0.13)',
+              },
+              {
+                step: '02',
+                title: 'Invest & Prove',
+                description: 'Invest your own capital and build a real track record. Minimum 30 days live with your money on the line.',
+                color: '#3B82F6',
+                bgColor: 'rgba(59,130,246,0.08)',
+                borderColor: 'rgba(59,130,246,0.13)',
+              },
+              {
+                step: '03',
+                title: 'Publish & Earn',
+                description: 'List your portfolio on the marketplace. Earn 0.25% annually on every dollar followers allocate to you.',
+                color: '#E11D48',
+                bgColor: 'rgba(225,29,72,0.08)',
+                borderColor: 'rgba(225,29,72,0.13)',
+              },
+            ].map((card) => (
+              <div
+                key={card.step}
+                className="relative rounded-[20px] transition-all duration-300 hover:-translate-y-1 group"
+                style={{
+                  padding: '40px 32px',
+                  background: card.bgColor,
+                  border: `1px solid ${card.borderColor}`,
+                }}
+              >
+                {/* Watermark step number */}
+                <span
+                  className="absolute top-4 right-6 font-heading font-extrabold pointer-events-none select-none"
+                  style={{ fontSize: '4rem', color: card.color, opacity: 0.07 }}
+                >
+                  {card.step}
+                </span>
+
+                {/* Icon dot */}
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-xl mb-5"
+                  style={{ background: card.color + '18', border: `1px solid ${card.color}30` }}
+                >
+                  <div className="w-3 h-3 rounded-full" style={{ background: card.color }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+
+                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{card.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Earnings Calculator */}
-      <section id="calculator" className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">Earnings Calculator</h2>
-          <p className="text-center text-muted-foreground mb-10">
-            See how much you could earn as an Alpha based on your follower count and their average investment.
-          </p>
+      {/* ═══════════ EARNINGS CALCULATOR ═══════════ */}
+      <section id="calculator" className="py-24">
+        <div className="container mx-auto px-4">
+          <h2
+            className="font-heading font-extrabold text-center tracking-tight mb-16"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+          >
+            Your Earnings Potential
+          </h2>
 
-          <Card className="glass-card">
-            <CardContent className="p-8 space-y-8">
-              {/* Followers slider */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <TooltipProvider delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-help border-b border-dashed border-muted-foreground/40">Number of Followers</span>
-                        </TooltipTrigger>
-                        <TooltipContent className="text-xs max-w-[250px]">Estimated number of followers for your portfolio</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </label>
-                  <span className="text-2xl font-bold text-primary">{followers[0]}</span>
-                </div>
-                <Slider
-                  value={followers}
-                  onValueChange={setFollowers}
-                  min={1}
-                  max={500}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>500</span>
-                </div>
+          <div
+            className="max-w-[700px] mx-auto rounded-2xl p-8 md:p-10"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.03)',
+            }}
+          >
+            {/* Followers slider */}
+            <div className="mb-10">
+              <div className="text-center mb-4">
+                <span className="font-mono text-[2.5rem] font-bold text-foreground">{followers[0]}</span>
+                <p className="text-[0.85rem] text-muted-foreground mt-1">Followers</p>
               </div>
+              <Slider
+                value={followers}
+                onValueChange={handleFollowersChange}
+                min={1}
+                max={500}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                <span>1</span>
+                <span>500</span>
+              </div>
+            </div>
 
-              {/* Avg Allocation slider */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <TooltipProvider delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-help border-b border-dashed border-muted-foreground/40">Avg. Allocation per Follower</span>
-                        </TooltipTrigger>
-                        <TooltipContent className="text-xs max-w-[250px]">Average capital each follower allocates to your portfolio</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </label>
-                  <span className="text-2xl font-bold text-primary">
-                    ${avgAllocation[0].toLocaleString()}
+            {/* Avg Allocation slider */}
+            <div className="mb-10">
+              <div className="text-center mb-4">
+                <span className="font-mono text-[2.5rem] font-bold text-foreground">${avgAllocation[0].toLocaleString()}</span>
+                <p className="text-[0.85rem] text-muted-foreground mt-1">Avg. Allocation per Follower</p>
+              </div>
+              <Slider
+                value={avgAllocation}
+                onValueChange={handleAllocationChange}
+                min={1000}
+                max={100000}
+                step={1000}
+                className="w-full"
+              />
+              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                <span>$1K</span>
+                <span>$100K</span>
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="grid grid-cols-3 gap-4 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">Total AUM</p>
+                <p
+                  className="font-mono font-bold text-foreground transition-transform duration-200"
+                  style={{
+                    fontSize: '1.75rem',
+                    transform: resultPulse ? 'scale(1.03)' : 'scale(1)',
+                  }}
+                >
+                  ${totalAUM.toLocaleString()}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">Monthly Earnings</p>
+                <p
+                  className="font-mono font-bold transition-transform duration-200"
+                  style={{
+                    fontSize: '2rem',
+                    color: '#10B981',
+                    textShadow: '0 0 16px rgba(16,185,129,0.3)',
+                    transform: resultPulse ? 'scale(1.03)' : 'scale(1)',
+                  }}
+                >
+                  ${Math.round(monthlyEarnings).toLocaleString()}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-2">Annual Earnings</p>
+                <p
+                  className="font-mono font-bold transition-transform duration-200"
+                  style={{
+                    fontSize: '1.75rem',
+                    color: '#10B981',
+                    textShadow: '0 0 16px rgba(16,185,129,0.3)',
+                    transform: resultPulse ? 'scale(1.03)' : 'scale(1)',
+                  }}
+                >
+                  ${Math.round(annualEarnings).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center mt-6">
+              Your share: 0.25% of AUM annually · Platform fee: 0.25%
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ PUBLISHING REQUIREMENTS ═══════════ */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2
+              className="font-heading font-extrabold tracking-tight"
+              style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+            >
+              Publishing Requirements
+            </h2>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Meet these criteria to list your portfolio on the marketplace.
+            </p>
+          </div>
+
+          <div
+            className="max-w-2xl mx-auto rounded-2xl p-8"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.03)',
+            }}
+          >
+            {requirements.map((req, i) => {
+              const Icon = req.icon;
+              return (
+                <div
+                  key={req.label}
+                  className="flex items-center gap-4 py-4"
+                  style={i < requirements.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.06)' } : undefined}
+                >
+                  <Icon className="h-[18px] w-[18px] flex-shrink-0 text-primary" />
+                  <span className="flex-1" style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)' }}>
+                    {req.label}
                   </span>
+                  {isAuthenticated && (
+                    req.met
+                      ? <Check className="h-4 w-4 text-success flex-shrink-0" />
+                      : <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  )}
                 </div>
-                <Slider
-                  value={avgAllocation}
-                  onValueChange={setAvgAllocation}
-                  min={1000}
-                  max={100000}
-                  step={1000}
-                  className="w-full"
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>$1K</span>
-                  <span>$100K</span>
-                </div>
-              </div>
-
-              {/* Results */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                <TooltipProvider delayDuration={300}>
-                  <div className="text-center">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Total AUM</p>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs max-w-[250px]">Assets Under Management — total capital allocated by all your followers</TooltipContent>
-                    </Tooltip>
-                    <p className="font-mono tabular-nums" style={{ fontSize: '2rem', fontWeight: 700 }}>${totalAUM.toLocaleString()}</p>
-                  </div>
-                  <div className="text-center">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Monthly Earnings</p>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs max-w-[250px]">Estimated monthly earnings based on 0.25% annual fee</TooltipContent>
-                    </Tooltip>
-                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(monthlyEarnings).toLocaleString()}</p>
-                  </div>
-                  <div className="text-center">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-xs text-muted-foreground mb-1 cursor-help border-b border-dashed border-muted-foreground/40 inline">Annual Earnings</p>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs max-w-[250px]">Estimated annual earnings based on 0.25% annual fee</TooltipContent>
-                    </Tooltip>
-                    <p className="font-mono tabular-nums text-success earnings-glow" style={{ fontSize: '2rem', fontWeight: 700 }}>${Math.round(annualEarnings).toLocaleString()}</p>
-                  </div>
-                </TooltipProvider>
-              </div>
-
-              <p className="text-xs text-muted-foreground text-center">
-                Based on 0.25% annual Alpha share of follower AUM. Actual earnings depend on allocation and retention.
-              </p>
-            </CardContent>
-          </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Publishing Requirements */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">Publishing Requirements</h2>
-          <p className="text-center text-muted-foreground mb-10">
-            To publish your portfolio to the marketplace, you must meet all of the following criteria.
-          </p>
+      {/* ═══════════ TOP EARNING ALPHAS ═══════════ */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2
+              className="font-heading font-extrabold tracking-tight"
+              style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+            >
+              Top Earning Alphas
+            </h2>
+            <p className="mt-4 text-lg" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Real portfolios. Real returns. Real earnings.
+            </p>
+          </div>
 
-          <Card className="glass-card">
-            <CardContent className="p-8 space-y-6">
-              {requirements.map((req) => (
-                <div key={req.label} className="flex items-start gap-4">
-                  <div className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full mt-0.5",
-                    req.met ? "bg-success/10" : "bg-muted"
-                  )}>
-                    {req.met ? (
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-muted-foreground" />
-                    )}
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {topAlphas.map((portfolio, i) => {
+              const { color, glow } = getGemHex(portfolio.name);
+              return (
+                <Link
+                  key={portfolio.id}
+                  to={`/portfolio/${portfolio.id}`}
+                  className="rounded-2xl transition-all duration-300 group cursor-pointer"
+                  style={{
+                    padding: '28px 24px',
+                    background: 'rgba(255,255,255,0.02)',
+                    borderTop: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderRight: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderBottom: `1px solid ${hoveredAlpha === i ? color + '40' : 'rgba(255,255,255,0.06)'}`,
+                    borderLeft: `3px solid ${color}`,
+                    transform: hoveredAlpha === i ? 'translateY(-2px)' : '',
+                    boxShadow: hoveredAlpha === i ? `0 8px 32px ${glow}` : 'none',
+                  }}
+                  onMouseEnter={() => setHoveredAlpha(i)}
+                  onMouseLeave={() => setHoveredAlpha(null)}
+                >
+                  {/* Name */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <GemDot name={portfolio.name} size={18} showTooltip={false} />
+                    <span
+                      className="font-heading font-semibold"
+                      style={{
+                        color: portfolio.name.toLowerCase().startsWith('pearl') ? '#F8FAFC' : color,
+                        textShadow: portfolio.name.toLowerCase().startsWith('pearl') ? '0 0 12px rgba(226,232,240,0.3)' : undefined,
+                      }}
+                    >
+                      {portfolio.name}
+                    </span>
                   </div>
-                  <div>
-                    <p className={cn(
-                      "font-medium",
-                      req.met ? "text-success" : "text-foreground"
-                    )}>
-                      {req.label}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{req.description}</p>
-                  </div>
-                </div>
-              ))}
-
-              <div className="pt-6 border-t border-border">
-                {meetsAll ? (
-                  <Button
-                    size="lg"
-                    className="w-full glow-primary"
-                    onClick={() => navigate('/dashboard')}
-                  >
-                    <Crown className="h-5 w-5 mr-2" />
-                    Publish Your Portfolio
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                ) : (
-                  <div className="text-center space-y-3">
-                    <p className="text-muted-foreground text-sm">
-                      You haven't met all requirements yet. Start by creating and funding a portfolio.
-                    </p>
-                    <Button asChild variant="outline" size="lg">
-                      <Link to="/invest">
-                        Start Building Your Portfolio
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Alpha Testimonials */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-2">Top Alphas on the Platform</h2>
-        <p className="text-center text-muted-foreground mb-10">
-          Real portfolios, real earnings, real skin in the game.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {mockTestimonials.map((alpha) => {
-            const colors = gemstoneColorMap[alpha.gemstone] || gemstoneColorMap.Sapphire;
-            const GemIcon = colors.icon;
-            return (
-              <Card key={alpha.name} className="glass-card">
-                <CardContent className="p-6">
-                  {/* Header */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-xl border",
-                      colors.bg, colors.border
-                    )}>
-                      <GemIcon className={cn("h-6 w-6", colors.text)} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{alpha.name}</h3>
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-primary/10 text-xs">
-                          <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                          <span className="font-semibold text-primary">{alpha.reputationScore}</span>
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground font-mono">{alpha.creatorId}</p>
-                    </div>
-                  </div>
-
-                  {/* Quote */}
-                  <p className="text-sm text-muted-foreground italic mb-5">"{alpha.quote}"</p>
+                  <p className="text-xs font-mono mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {portfolio.creator_id}
+                  </p>
 
                   {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-secondary/50">
-                      <p className="text-xs text-muted-foreground">Followers</p>
-                      <p className="font-semibold">{alpha.followers.toLocaleString()}</p>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">30D Return</p>
+                      <p className={cn("font-mono text-[1.1rem] font-bold", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                        {portfolio.performance.return_30d >= 0 ? '+' : ''}{portfolio.performance.return_30d.toFixed(1)}%
+                      </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-secondary/50">
-                      <p className="text-xs text-muted-foreground">Total AUM</p>
-                      <p className="font-semibold">${(alpha.aum / 1_000_000).toFixed(1)}M</p>
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">Followers</p>
+                      <p className="font-mono text-[1.1rem] font-bold text-foreground">{portfolio.followers_count.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-[0.7rem] uppercase tracking-wider font-medium mb-1 text-muted-foreground">Allocated</p>
+                      <p className="font-mono text-[1.1rem] font-bold text-foreground">{formatCurrency(portfolio.allocated_amount_usd)}</p>
                     </div>
                   </div>
 
-                  {/* Earnings highlight */}
-                  <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Monthly Earnings</p>
-                        <p className="text-lg font-bold text-primary">${alpha.monthlyEarnings.toLocaleString()}/mo</p>
-                      </div>
-                    </div>
+                  {/* Earnings */}
+                  <div className="pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Monthly earnings</p>
+                    <p className="font-mono font-bold text-lg text-success earnings-glow">
+                      ${portfolio.creator_est_monthly_earnings_usd.toLocaleString()}/mo
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ BOTTOM CTA ═══════════ */}
+      <section className="py-20" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="text-center">
+          <h2
+            className="font-heading font-extrabold tracking-tight mb-8"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+          >
+            Ready to start earning?
+          </h2>
+          <Button asChild size="lg" className="text-lg px-8 h-14">
+            <Link to="/invest">
+              Create Your Portfolio
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
         </div>
       </section>
     </PageLayout>
