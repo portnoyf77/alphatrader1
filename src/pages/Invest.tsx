@@ -371,32 +371,39 @@ export default function Create() {
           </Collapsible>
 
           {/* Bottom CTAs */}
-          <div className="space-y-4 pt-2">
-            <div className="flex gap-3">
-              <Button
-                onClick={() => toast({ title: "Invest Now (prototype)", description: "In a live product, this would take you directly to fund your portfolio." })}
-                className="flex-1 h-12 text-base font-semibold"
-                disabled={editOpen && totalWeight !== 100}
-              >
-                <DollarSign className="h-5 w-5 mr-2" />
-                Invest Now
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate('/simulation/new')}
-                className="flex-1 h-12 text-base"
-                disabled={editOpen && totalWeight !== 100}
-              >
-                Simulate First
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Simulation is optional. You can invest directly or test with live data first.
-            </p>
-            <p className="text-xs text-muted-foreground text-center">
-              Platform fee: 0.25% annually on invested capital
-            </p>
+            <div className="space-y-4 pt-2">
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
+                    setTimeout(() => navigate('/dashboard'), 1000);
+                  }}
+                  className="flex-1 h-12 text-base font-semibold"
+                  disabled={editOpen && totalWeight !== 100}
+                >
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  Invest Now
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Use a mock portfolio ID based on the generated name
+                    const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    navigate(`/simulation/${portfolioId}`);
+                  }}
+                  className="flex-1 h-12 text-base"
+                  disabled={editOpen && totalWeight !== 100}
+                >
+                  Simulate First
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Simulation is optional. You can invest directly or test with live data first.
+              </p>
+              <p className="text-xs text-muted-foreground text-center">
+                Platform fee: 0.25% annually on invested capital
+              </p>
             <div className="text-center">
               <button
                 onClick={handleStartOver}
