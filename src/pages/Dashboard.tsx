@@ -525,8 +525,8 @@ export default function Dashboard() {
                   {/* Source & Date */}
                   <div className="flex items-center gap-1 text-[0.7rem]">
                     <span className="font-semibold text-foreground">{news.source}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
-                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>{news.date}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">{news.date}</span>
                   </div>
                 </div>
               </a>

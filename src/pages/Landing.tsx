@@ -394,7 +394,7 @@ export default function Landing() {
                     className="pt-4"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <p className="text-xs uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">
                       Monthly earnings
                     </p>
                     <p className="font-mono font-bold text-lg text-success earnings-glow">
