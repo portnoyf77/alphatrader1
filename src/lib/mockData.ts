@@ -405,7 +405,6 @@ export const mockPortfolios: Portfolio[] = [
     name: 'Sapphire-489',
     creator_id: '@bio_investor',
     status: 'validated_listed',
-    visibility_mode: 'masked',
     validation_status: 'validated',
     validation_criteria_met: true,
     validation_summary: 'Validated after 80 days with solid risk-adjusted returns in healthcare sector.',
