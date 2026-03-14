@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown } from 'lucide-react';
+import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,9 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
+import { ManualPortfolioBuilder } from '@/components/strategy-creation/ManualPortfolioBuilder';
 import { StrategyProfile, initialProfile, deriveRiskLevel } from '@/lib/strategyProfile';
+import { cn } from '@/lib/utils';
 
 interface GeneratedHolding {
   ticker: string;
@@ -63,11 +65,13 @@ const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
 };
 
 type CreationStep = 'questionnaire' | 'animation' | 'results';
+type CreationTab = 'ai' | 'manual';
 
 export default function Create() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [activeTab, setActiveTab] = useState<CreationTab>('ai');
   const [creationStep, setCreationStep] = useState<CreationStep>('questionnaire');
   const [strategyProfile, setStrategyProfile] = useState<StrategyProfile>(initialProfile);
   const [generatedStrategyName, setGeneratedStrategyName] = useState('');
@@ -79,6 +83,9 @@ export default function Create() {
     rationale: string;
     risks: string;
   } | null>(null);
+
+  // Manual tab orb color
+  const [manualOrbColor, setManualOrbColor] = useState<string | null>(null);
 
   // Editable holdings state
   const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
@@ -144,7 +151,6 @@ export default function Create() {
     existing.push(newPortfolio);
     localStorage.setItem('userCreatedPortfolios', JSON.stringify(existing));
   };
-
 
   const totalWeight = editableHoldings.reduce((acc, h) => acc + h.weight, 0);
 
@@ -444,34 +450,99 @@ export default function Create() {
     </div>
   );
 
+  // Show tabs only during questionnaire step of AI flow (or always for manual)
+  const showTabs = activeTab === 'manual' || creationStep === 'questionnaire';
+
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-8">
+      {/* Manual tab background orb */}
+      {activeTab === 'manual' && manualOrbColor && (
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: '45vw',
+              height: '45vw',
+              top: '20%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: `radial-gradient(circle, ${manualOrbColor} 0%, transparent 60%)`,
+              filter: 'blur(80px)',
+              animation: 'orbDrift1 18s ease-in-out infinite',
+              transition: 'background 0.8s ease',
+            }}
+          />
+        </div>
+      )}
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-3xl mx-auto">
-          {creationStep === 'questionnaire' && (
+          {showTabs && (
             <>
-              <div className="text-center mb-8">
+              <div className="text-center mb-6">
                 <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
                 <p className="text-muted-foreground">
-                  Answer a few questions and the AI will build a personalized portfolio for you.
+                  {activeTab === 'ai'
+                    ? 'Answer a few questions and the AI will build a personalized portfolio for you.'
+                    : 'Build your portfolio manually by selecting holdings and allocations.'}
                 </p>
               </div>
-              <PortfolioQuestionnaire
-                onComplete={handleQuestionnaireComplete}
-                onCancel={() => navigate(-1)}
-              />
+
+              {/* Tab Switcher */}
+              <div className="flex items-center justify-center gap-1 mb-8 p-1 rounded-xl mx-auto w-fit" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <button
+                  onClick={() => setActiveTab('ai')}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    activeTab === 'ai'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(255,255,255,0.04)]'
+                  )}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  AI-Assisted
+                </button>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    activeTab === 'manual'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(255,255,255,0.04)]'
+                  )}
+                >
+                  <PenLine className="h-4 w-4" />
+                  Manual
+                </button>
+              </div>
             </>
           )}
-          {creationStep === 'animation' && (
-            <ParticleCrystallizationAnimation
-              profile={strategyProfile}
-              onComplete={handleAnimationComplete}
-            />
+
+          {/* AI-Assisted Flow */}
+          {activeTab === 'ai' && (
+            <>
+              {creationStep === 'questionnaire' && (
+                <PortfolioQuestionnaire
+                  onComplete={handleQuestionnaireComplete}
+                  onCancel={() => navigate(-1)}
+                />
+              )}
+              {creationStep === 'animation' && (
+                <ParticleCrystallizationAnimation
+                  profile={strategyProfile}
+                  onComplete={handleAnimationComplete}
+                />
+              )}
+              {creationStep === 'results' && (
+                <div className="space-y-6">
+                  {renderResultsContent()}
+                </div>
+              )}
+            </>
           )}
-          {creationStep === 'results' && (
-            <div className="space-y-6">
-              {renderResultsContent()}
-            </div>
+
+          {/* Manual Flow */}
+          {activeTab === 'manual' && (
+            <ManualPortfolioBuilder onOrbColorChange={setManualOrbColor} />
           )}
         </div>
       </div>
