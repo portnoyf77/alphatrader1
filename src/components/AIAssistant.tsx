@@ -56,6 +56,7 @@ export function AIAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasPlayedPulse, setHasPlayedPulse] = useState(false);
+  const isMobile = useIsMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
