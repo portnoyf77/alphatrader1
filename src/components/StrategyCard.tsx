@@ -71,8 +71,28 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   return (
     <Link to={`/portfolio/${strategy.id}`}>
       <Card
-        className="group glass-card transition-all duration-300"
-        style={{ borderLeft: `3px solid ${gemHex.color}` }}
+        className="group transition-all duration-300 cursor-pointer"
+        style={{
+          borderLeft: `3px solid ${gemHex.color}`,
+          background: 'rgba(255,255,255,0.02)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = `0 8px 32px ${gemHex.glow}`;
+          e.currentTarget.style.borderTopColor = gemHex.color + '40';
+          e.currentTarget.style.borderRightColor = gemHex.color + '40';
+          e.currentTarget.style.borderBottomColor = gemHex.color + '40';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = '';
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.borderTopColor = 'rgba(255,255,255,0.06)';
+          e.currentTarget.style.borderRightColor = 'rgba(255,255,255,0.06)';
+          e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.06)';
+        }}
       >
         <CardContent className="p-5">
           {/* Header: Gem + Name + Score */}
