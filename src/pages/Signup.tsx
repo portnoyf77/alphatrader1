@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 
 type Step = 'credentials' | 'plan';
 
