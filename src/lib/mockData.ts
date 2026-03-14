@@ -539,8 +539,11 @@ export const mockPortfolios: Portfolio[] = [
     max_turnover: 'low',
     
     holdings: [
-      { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 60, sector: 'Broad Market' },
-      { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 40, sector: 'Bonds' },
+      { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 35, sector: 'Broad Market' },
+      { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 25, sector: 'Bonds' },
+      { ticker: 'VTIP', name: 'Vanguard Short-Term Inflation-Protected Securities ETF', weight: 10, sector: 'Inflation Protected' },
+      { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 15, sector: 'International' },
+      { ticker: 'AGG', name: 'iShares Core U.S. Aggregate Bond ETF', weight: 15, sector: 'Bonds' },
     ],
     exposure_breakdown: [
       { label: 'US Equities', percent: 60 },
