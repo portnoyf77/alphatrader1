@@ -116,7 +116,6 @@ export default function Explore() {
     setObjectiveFilter('all');
     setRiskFilter('all');
     setStrategyFilter('all');
-    setVisibilityFilter('all');
     setTurnoverFilter('all');
   };
 
