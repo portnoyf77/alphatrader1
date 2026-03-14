@@ -26,6 +26,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
+  const { restartTour } = useTour();
 
   const handleLogout = () => {
     logout();
