@@ -42,17 +42,20 @@ const sectorIcons: Record<string, React.ElementType> = {
   'Consumer': BarChart3,
 };
 
-const riskConfig: Record<RiskLevel, { label: string; className: string; tooltip: string }> = {
-  'Low': { label: 'Conservative', className: 'bg-slate-300/10 text-slate-300 border-slate-300/20', tooltip: 'Conservative portfolio focused on preserving your money' },
-  'Medium': { label: 'Moderate', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20', tooltip: 'Balanced approach — some ups and downs expected' },
-  'High': { label: 'Aggressive', className: 'bg-rose-500/10 text-rose-400 border-rose-500/20', tooltip: 'Aggressive growth — bigger swings, bigger potential gains' },
-};
-
 const turnoverTooltips: Record<string, string> = {
   'low': 'Trades rarely — lower fees, more tax-efficient',
   'medium': 'Trades occasionally — moderate activity',
   'high': 'Trades often — may have higher fees and tax impact',
 };
+
+/** Returns a color for Worst Drop based on severity thresholds */
+function getWorstDropColor(drawdown: number): string {
+  const abs = Math.abs(drawdown);
+  if (abs >= 20) return 'text-[#EF4444]';      // red
+  if (abs >= 15) return 'text-[#F97316]';       // orange
+  if (abs >= 10) return 'text-[#F59E0B]';       // amber
+  return 'text-foreground';                      // default white
+}
 
 interface StrategyCardProps {
   strategy: Strategy;
@@ -62,7 +65,6 @@ interface StrategyCardProps {
 export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const isPositive = strategy.performance.return_30d >= 0;
   const isPaused = strategy.new_allocations_paused;
-  const riskInfo = riskConfig[strategy.risk_level];
   const displaySectors = strategy.sectors.slice(0, 3);
   
   const gemHex = getGemHex(strategy.name);
@@ -129,7 +131,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
             </div>
           </div>
 
-          {/* Tags: Sectors + Risk Level */}
+          {/* Tags: Sectors only (risk badge removed — communicated via gem icon) */}
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               {displaySectors.map((sector, idx) => {
@@ -148,17 +150,6 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                   </Tooltip>
                 );
               })}
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className={cn("inline-flex items-center px-2 py-1 rounded-md text-xs border cursor-help", riskInfo.className)}>
-                    {riskInfo.label}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs max-w-[200px]">
-                  {riskInfo.tooltip}
-                </TooltipContent>
-              </Tooltip>
             </div>
           </TooltipProvider>
 
@@ -190,7 +181,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
                 <TooltipTrigger asChild>
                   <div className="cursor-help flex flex-col justify-between h-10">
                     <p className="text-xs text-muted-foreground leading-none">Worst Drop</p>
-                    <p className="font-semibold text-destructive">
+                    <p className={cn("font-semibold", getWorstDropColor(strategy.performance.max_drawdown))}>
                       {formatPercent(strategy.performance.max_drawdown, false)}
                     </p>
                   </div>
@@ -218,7 +209,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
 
           {/* Bottom stats */}
           <TooltipProvider delayDuration={200}>
-            <div className="mt-4 pt-4 border-t border-border/50 space-y-1">
+            <div className="mt-4 pt-4 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center justify-between text-sm cursor-help">
