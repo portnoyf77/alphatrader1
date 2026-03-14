@@ -425,7 +425,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         </div>
         {/* Gem pulse */}
         <div className="qa-gem-pulse" style={{ opacity: 0.2 }}>
-          <LargeGemIcon gem={gemType} size={280} color={gemSolidColors[gemType]} />
+          <UnifiedGem gemType={gemType} size={280} opacity={0.9} detailLevel={0.9} glowIntensity={12} />
         </div>
       </div>
     );
