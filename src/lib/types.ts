@@ -1,6 +1,6 @@
 // Portfolio status types
 export type PortfolioStatus = 'private' | 'validated_listed' | 'inactive';
-export type VisibilityMode = 'masked' | 'transparent';
+
 export type TurnoverLevel = 'low' | 'medium' | 'high';
 export type ActivityEventType = 'rebalance' | 'risk_alert' | 'paused_new_allocations' | 'unpaused' | 'inactive';
 
