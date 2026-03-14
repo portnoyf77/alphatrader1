@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, CheckCircle2, Info, Trophy, Crown, Users, DollarSign, Clock } from 'lucide-react';
+import { Search, X, CheckCircle2, Info, Trophy, Crown, Users, DollarSign, Clock, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,10 +32,9 @@ const timeReturns: Record<string, Record<ChartTimeframe, number>> = {
   'Pearl-127':     { '30D': 0.8, '90D': 3.2,  'YTD': 6.8,  '1Y': 10.5 },
 };
 
-type ObjectiveFilter = 'all' | 'Growth' | 'Income' | 'Balanced' | 'Low volatility';
 type RiskFilter = 'all' | 'Low' | 'Medium' | 'High';
-type StrategyFilter = 'all' | 'GenAI' | 'Manual';
 type TurnoverFilter = 'all' | 'low' | 'medium' | 'high';
+type SortOption = '30d_return' | 'followers' | 'allocated' | 'alpha_score' | 'worst_drop' | 'creator_investment';
 type ChartTimeframe = '30D' | '90D' | 'YTD' | '1Y';
 
 const timeframeLabels: Record<ChartTimeframe, string> = {
@@ -45,26 +44,43 @@ const timeframeLabels: Record<ChartTimeframe, string> = {
   '1Y': 'last 12 months',
 };
 
+const sortLabels: Record<SortOption, string> = {
+  '30d_return': '30d Return',
+  'followers': 'Followers',
+  'allocated': 'Total Allocated',
+  'alpha_score': 'Alpha Score',
+  'worst_drop': 'Worst Drop',
+  'creator_investment': "Alpha's Investment",
+};
+
+const riskFilterLabels: Record<string, string> = {
+  'Low': 'Conservative (Pearl)',
+  'Medium': 'Moderate (Sapphire)',
+  'High': 'Aggressive (Ruby)',
+};
+
+const turnoverFilterLabels: Record<string, string> = {
+  'low': 'Low',
+  'medium': 'Medium',
+  'high': 'High',
+};
+
 export default function Explore() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [objectiveFilter, setObjectiveFilter] = useState<ObjectiveFilter>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
-  const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>('all');
-  
   const [turnoverFilter, setTurnoverFilter] = useState<TurnoverFilter>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('30d_return');
   const [chartTimeframe, setChartTimeframe] = useState<ChartTimeframe>('30D');
 
   const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
 
-  // Get return for a portfolio at the selected timeframe using hardcoded data
   const getReturnForTimeframe = (portfolio: any, tf: ChartTimeframe) => {
     const returns = timeReturns[portfolio.name];
     if (returns) return returns[tf];
     return portfolio.performance.return_30d;
   };
 
-  // Top 5 portfolios by return for selected timeframe
   const topPerformers = useMemo(() => {
     return [...validatedStrategies]
       .sort((a, b) => getReturnForTimeframe(b, chartTimeframe) - getReturnForTimeframe(a, chartTimeframe))
@@ -78,7 +94,6 @@ export default function Explore() {
     '1Y': '1Y return',
   };
 
-  // Alpha leaderboard ranking by composite score
   const alphaLeaderboard = useMemo(() => {
     return [...validatedStrategies]
       .map((s) => {
@@ -98,29 +113,50 @@ export default function Explore() {
   }, [validatedStrategies]);
 
   const filteredStrategies = useMemo(() => {
-    return validatedStrategies.filter(strategy => {
+    const filtered = validatedStrategies.filter(strategy => {
       const matchesSearch = strategy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         strategy.creator_id.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesObjective = objectiveFilter === 'all' || strategy.objective === objectiveFilter;
       const matchesRisk = riskFilter === 'all' || strategy.risk_level === riskFilter;
-      const matchesStrategy = strategyFilter === 'all' || strategy.strategy_type === strategyFilter;
       const matchesTurnover = turnoverFilter === 'all' || strategy.turnover_estimate === turnoverFilter;
-
-      return matchesSearch && matchesObjective && matchesRisk && matchesStrategy && matchesTurnover;
+      return matchesSearch && matchesRisk && matchesTurnover;
     });
-  }, [validatedStrategies, searchQuery, objectiveFilter, riskFilter, strategyFilter, turnoverFilter]);
 
-  const hasActiveFilters = objectiveFilter !== 'all' || riskFilter !== 'all' || strategyFilter !== 'all' || turnoverFilter !== 'all';
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case '30d_return':
+          return b.performance.return_30d - a.performance.return_30d;
+        case 'followers':
+          return b.followers_count - a.followers_count;
+        case 'allocated':
+          return b.allocated_amount_usd - a.allocated_amount_usd;
+        case 'alpha_score':
+          return calculateAlphaScore(b) - calculateAlphaScore(a);
+        case 'worst_drop':
+          // Least negative first (smallest drop = best)
+          return b.performance.max_drawdown - a.performance.max_drawdown;
+        case 'creator_investment':
+          return b.creator_investment - a.creator_investment;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [validatedStrategies, searchQuery, riskFilter, turnoverFilter, sortBy]);
+
+  const hasActiveFilters = riskFilter !== 'all' || turnoverFilter !== 'all' || sortBy !== '30d_return';
+  const hasActiveFiltersPure = riskFilter !== 'all' || turnoverFilter !== 'all';
 
   const clearFilters = () => {
-    setObjectiveFilter('all');
+    setSearchQuery('');
     setRiskFilter('all');
-    setStrategyFilter('all');
     setTurnoverFilter('all');
+    setSortBy('30d_return');
   };
 
-
-  const FilterContent = () => (
+  // Mobile filter content
+  const MobileFilterContent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium">Risk Profile</label>
@@ -135,24 +171,11 @@ export default function Explore() {
         </Select>
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Objective</label>
-        <Select value={objectiveFilter} onValueChange={(v) => setObjectiveFilter(v as ObjectiveFilter)}>
-          <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Objectives</SelectItem>
-            <SelectItem value="Growth">Growth</SelectItem>
-            <SelectItem value="Income">Income</SelectItem>
-            <SelectItem value="Balanced">Balanced</SelectItem>
-            <SelectItem value="Low volatility">Low Volatility</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
         <label className="text-sm font-medium">Turnover</label>
         <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">All Turnover</SelectItem>
             <SelectItem value="low">Low</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="high">High</SelectItem>
@@ -160,13 +183,16 @@ export default function Explore() {
         </Select>
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Portfolio Type</label>
-        <Select value={strategyFilter} onValueChange={(v) => setStrategyFilter(v as StrategyFilter)}>
+        <label className="text-sm font-medium">Sort by</label>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
           <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="GenAI">GenAI</SelectItem>
-            <SelectItem value="Manual">Manual</SelectItem>
+            <SelectItem value="30d_return">30d Return</SelectItem>
+            <SelectItem value="followers">Followers</SelectItem>
+            <SelectItem value="allocated">Total Allocated</SelectItem>
+            <SelectItem value="alpha_score">Alpha Score</SelectItem>
+            <SelectItem value="worst_drop">Worst Drop</SelectItem>
+            <SelectItem value="creator_investment">Alpha's Investment</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -176,24 +202,22 @@ export default function Explore() {
     </div>
   );
 
-
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8">
+        {/* ═══ SECTION 1: Page Header ═══ */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-3xl font-bold">Marketplace</h1>
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="font-heading text-[2rem] font-bold">Marketplace</h1>
             <MarketplaceHelpButton />
           </div>
-          <div className="flex items-start gap-2 mb-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
-              <CheckCircle2 className="h-4 w-4" />
-              All portfolios here are validated and eligible to accept allocations.
-            </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>All portfolios here are validated and eligible to accept allocations.</span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors"><Info className="h-4 w-4 text-muted-foreground" /></button>
+                  <button className="p-0.5 rounded hover:bg-success/20 transition-colors ml-1"><Info className="h-3.5 w-3.5" /></button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs">
                   <p className="text-sm">Only validated portfolios appear here. Portfolios must complete a validation period demonstrating consistent performance before being publicly listed.</p>
@@ -201,18 +225,10 @@ export default function Explore() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          {/* Allocation mirroring info banner */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm">
-            <Info className="h-4 w-4 shrink-0" />
-            <span>
-              When you allocate to a portfolio, your position automatically mirrors the Alpha's actions, including exits.{' '}
-              <MarketplaceHelpInlineLink />
-            </span>
-          </div>
         </div>
 
-        {/* Main Tabs: All Portfolios | Leaderboard */}
-        <Tabs defaultValue="all-portfolios" className="mb-8">
+        {/* Main Tabs */}
+        <Tabs defaultValue="all-portfolios">
           <TabsList className="mb-6">
             <TabsTrigger value="all-portfolios">All Portfolios</TabsTrigger>
             <TabsTrigger value="leaderboard">
@@ -222,60 +238,86 @@ export default function Explore() {
           </TabsList>
 
           <TabsContent value="all-portfolios">
-            {/* Top Performers Cards */}
-            <Card className="mb-8 bg-card/50 border-border/50">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Top Performers</CardTitle>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {(['30D', '90D', 'YTD', '1Y'] as ChartTimeframe[]).map((tf) => (
-                      <button
-                        key={tf}
-                        onClick={() => setChartTimeframe(tf)}
-                        className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium transition-all",
-                          chartTimeframe === tf
-                            ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-primary-foreground shadow-[0_2px_8px_rgba(124,58,237,0.3)]"
-                            : "text-muted-foreground hover:bg-secondary"
-                        )}
-                      >
-                        {tf}
-                      </button>
-                    ))}
-                  </div>
+            {/* ═══ SECTION 2: Top Performers ═══ */}
+            <div
+              className="rounded-2xl mb-10 p-6"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                backdropFilter: 'blur(12px)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  <h2 className="font-heading text-lg font-semibold">Top Performers</h2>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Top 5 portfolios by return — {timeframeLabels[chartTimeframe]}
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 overflow-x-auto pb-2 md:overflow-visible">
-                  {topPerformers.map((portfolio, index) => (
-                    <TopPerformerCard
-                      key={`${chartTimeframe}-${portfolio.id}`}
-                      portfolio={portfolio}
-                      rank={index + 1}
-                      returnValue={getReturnForTimeframe(portfolio, chartTimeframe)}
-                      timeLabel={timeLabels[chartTimeframe]}
-                      isAnimating
-                    />
+                <div className="flex items-center gap-1">
+                  {(['30D', '90D', 'YTD', '1Y'] as ChartTimeframe[]).map((tf) => (
+                    <button
+                      key={tf}
+                      onClick={() => setChartTimeframe(tf)}
+                      className={cn(
+                        "px-3 py-1 rounded-full text-xs font-medium transition-all",
+                        chartTimeframe === tf
+                          ? "bg-gradient-to-br from-primary to-[hsl(263,70%,50%)] text-primary-foreground shadow-[0_2px_8px_rgba(124,58,237,0.3)]"
+                          : "text-muted-foreground hover:bg-secondary"
+                      )}
+                    >
+                      {tf}
+                    </button>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search portfolios or creators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-secondary" />
               </div>
-              <div className="hidden lg:flex gap-3">
+              <p className="text-sm text-muted-foreground mb-4">
+                Top 5 portfolios by return — {timeframeLabels[chartTimeframe]}
+              </p>
+              <div className="flex gap-3 overflow-x-auto pb-2 md:overflow-visible">
+                {topPerformers.map((portfolio, index) => (
+                  <TopPerformerCard
+                    key={`${chartTimeframe}-${portfolio.id}`}
+                    portfolio={portfolio}
+                    rank={index + 1}
+                    returnValue={getReturnForTimeframe(portfolio, chartTimeframe)}
+                    timeLabel={timeLabels[chartTimeframe]}
+                    isAnimating
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* ═══ SECTION 3: Visual Divider ═══ */}
+            <div className="flex items-center gap-4 mb-6">
+              <h2 className="font-heading text-[1.25rem] font-semibold whitespace-nowrap">Browse All Portfolios</h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+            </div>
+
+            {/* ═══ SECTION 4: Sticky Filter Toolbar ═══ */}
+            <div
+              className="sticky top-16 z-30 mb-6 rounded-xl"
+              style={{
+                background: 'rgba(5,5,8,0.85)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                backdropFilter: 'blur(16px)',
+                padding: '12px 16px',
+              }}
+            >
+              {/* Desktop toolbar */}
+              <div className="hidden md:flex items-center gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search portfolios or creators..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-9 border-border/30"
+                    style={{ background: 'rgba(255,255,255,0.03)' }}
+                  />
+                </div>
                 <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskFilter)}>
-                  <SelectTrigger className="w-[180px] bg-secondary"><SelectValue placeholder="Risk" /></SelectTrigger>
+                  <SelectTrigger className="w-[180px] h-9 border-border/30" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <SelectValue placeholder="All Risk Levels" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Risk Levels</SelectItem>
                     <SelectItem value="Low">Conservative (Pearl)</SelectItem>
@@ -284,7 +326,9 @@ export default function Explore() {
                   </SelectContent>
                 </Select>
                 <Select value={turnoverFilter} onValueChange={(v) => setTurnoverFilter(v as TurnoverFilter)}>
-                  <SelectTrigger className="w-[140px] bg-secondary"><SelectValue placeholder="Turnover" /></SelectTrigger>
+                  <SelectTrigger className="w-[150px] h-9 border-border/30" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <SelectValue placeholder="All Turnover" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Turnover</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
@@ -292,35 +336,101 @@ export default function Explore() {
                     <SelectItem value="high">High</SelectItem>
                   </SelectContent>
                 </Select>
-                {hasActiveFilters && <Button variant="ghost" onClick={clearFilters} size="icon"><X className="h-4 w-4" /></Button>}
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-[190px] h-9 border-border/30" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30d_return">Sort by: 30d Return</SelectItem>
+                    <SelectItem value="followers">Sort by: Followers</SelectItem>
+                    <SelectItem value="allocated">Sort by: Total Allocated</SelectItem>
+                    <SelectItem value="alpha_score">Sort by: Alpha Score</SelectItem>
+                    <SelectItem value="worst_drop">Sort by: Worst Drop</SelectItem>
+                    <SelectItem value="creator_investment">Sort by: Alpha's Investment</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {filteredStrategies.length} portfolio{filteredStrategies.length !== 1 ? 's' : ''}
+                </span>
               </div>
-              <div className="lg:hidden">
+
+              {/* Mobile toolbar */}
+              <div className="md:hidden flex items-center gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-9 border-border/30"
+                    style={{ background: 'rgba(255,255,255,0.03)' }}
+                  />
+                </div>
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full md:w-auto">
-                      <SlidersHorizontal className="h-4 w-4 mr-2" />Filters
-                      {hasActiveFilters && <span className="ml-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">!</span>}
+                    <Button variant="outline" size="sm" className="h-9 shrink-0">
+                      <SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters
+                      {hasActiveFiltersPure && <span className="ml-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">!</span>}
                     </Button>
                   </SheetTrigger>
-                  <SheetContent><SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader><div className="mt-6"><FilterContent /></div></SheetContent>
+                  <SheetContent><SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader><div className="mt-6"><MobileFilterContent /></div></SheetContent>
                 </Sheet>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {filteredStrategies.length}
+                </span>
               </div>
+
+              {/* Active filter pills */}
+              {(hasActiveFiltersPure || sortBy !== '30d_return') && (
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  {riskFilter !== 'all' && (
+                    <button
+                      onClick={() => setRiskFilter('all')}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                    >
+                      Risk: {riskFilterLabels[riskFilter]}
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                  {turnoverFilter !== 'all' && (
+                    <button
+                      onClick={() => setTurnoverFilter('all')}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                    >
+                      Turnover: {turnoverFilterLabels[turnoverFilter]}
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                  {sortBy !== '30d_return' && (
+                    <button
+                      onClick={() => setSortBy('30d_return')}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                    >
+                      Sorted by: {sortLabels[sortBy]}
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
+            {/* ═══ Portfolio Grid ═══ */}
             {filteredStrategies.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
                 {filteredStrategies.map((strategy) => (
                   <StrategyCard key={strategy.id} strategy={strategy} />
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16">
-                <p className="text-muted-foreground mb-4">No portfolios match your filters.</p>
+              <div className="text-center py-20">
+                <p className="text-muted-foreground mb-2">No portfolios match your filters.</p>
+                <p className="text-sm text-muted-foreground mb-6">Try adjusting your search or filters.</p>
                 <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
               </div>
             )}
           </TabsContent>
 
+          {/* ═══ LEADERBOARD TAB ═══ */}
           <TabsContent value="leaderboard">
             <Card className="glass-card leaderboard-striped">
               <CardHeader>
