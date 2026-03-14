@@ -126,7 +126,8 @@ export function AIAssistant() {
           'fixed z-40 flex items-center justify-center rounded-full transition-all duration-200',
           'shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.4)]',
           'hover:scale-105 active:scale-95',
-          'w-14 h-14 md:w-14 md:h-14',
+          'w-14 h-14',
+          isMobile && 'w-12 h-12',
           !hasPlayedPulse && !open && 'assistant-pulse',
         )}
         style={{
@@ -137,7 +138,7 @@ export function AIAssistant() {
         }}
         aria-label={open ? 'Close assistant' : 'Open assistant'}
       >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        {open ? <X className={cn("h-6 w-6", isMobile && "h-5 w-5")} /> : <MessageCircle className={cn("h-6 w-6", isMobile && "h-5 w-5")} />}
       </button>
 
       {/* ── Panel ── */}
@@ -145,12 +146,12 @@ export function AIAssistant() {
         <div
           className="fixed z-[45] flex flex-col assistant-panel-enter"
           style={{
-            bottom: window.innerWidth < 768 ? 0 : 96,
-            right: window.innerWidth < 768 ? 0 : 24,
-            width: window.innerWidth < 768 ? '100%' : 400,
-            height: window.innerWidth < 768 ? 'calc(100vh - 80px)' : 560,
-            maxHeight: window.innerWidth < 768 ? undefined : 'calc(100vh - 120px)',
-            borderRadius: window.innerWidth < 768 ? '20px 20px 0 0' : 20,
+            bottom: isMobile ? 0 : 96,
+            right: isMobile ? 0 : 24,
+            width: isMobile ? '100%' : 400,
+            height: isMobile ? 'calc(100vh - 80px)' : 560,
+            maxHeight: isMobile ? undefined : 'calc(100vh - 120px)',
+            borderRadius: isMobile ? '20px 20px 0 0' : 20,
             background: 'rgba(5, 5, 8, 0.95)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
