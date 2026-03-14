@@ -157,7 +157,7 @@ export default function Dashboard() {
         </div>
 
         {/* Hero Summary Bar */}
-        <div className="flex items-start justify-between gap-6 mb-10 flex-wrap">
+        <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">
           <div className="flex items-start gap-10 flex-wrap">
             {/* Invested */}
             <div className="flex flex-col">
