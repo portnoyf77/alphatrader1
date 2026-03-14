@@ -51,7 +51,7 @@ export default function Explore() {
   const [objectiveFilter, setObjectiveFilter] = useState<ObjectiveFilter>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>('all');
-  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
+  
   const [turnoverFilter, setTurnoverFilter] = useState<TurnoverFilter>('all');
   const [chartTimeframe, setChartTimeframe] = useState<ChartTimeframe>('30D');
 
