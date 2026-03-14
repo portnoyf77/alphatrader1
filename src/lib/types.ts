@@ -47,7 +47,6 @@ export interface Portfolio {
   
   // Status and visibility
   status: PortfolioStatus;
-  visibility_mode: VisibilityMode;
   validation_status: ValidationStatus;
   validation_criteria_met: boolean;
   validation_summary?: string;
