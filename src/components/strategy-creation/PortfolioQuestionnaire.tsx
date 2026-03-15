@@ -69,16 +69,7 @@ const sectorGlowColors: Record<string, string> = {
   'Real Estate': 'rgba(245,158,11,0.2)',
 };
 
-// ── Gem shape progression table (uses UnifiedGem now) ──────────────────
-function getGemVisuals(questionIndex: number) {
-  // Q1-Q2 = hidden, Q3..Q6 = progressively visible
-  // opacity/detailLevel map to UnifiedGem props; size stays consistent
-  if (questionIndex < 2) return { opacity: 0, detailLevel: 0, glowIntensity: 0, size: 260 };
-  if (questionIndex === 2) return { opacity: 0.15, detailLevel: 0.1, glowIntensity: 0, size: 260 };
-  if (questionIndex === 3) return { opacity: 0.30, detailLevel: 0.3, glowIntensity: 2, size: 260 };
-  if (questionIndex === 4) return { opacity: 0.50, detailLevel: 0.55, glowIntensity: 5, size: 260 };
-  return { opacity: 0.70, detailLevel: 0.8, glowIntensity: 8, size: 260 };
-}
+// (Progressive gem reveal removed — gem only appears at crystallization)
 
 // ── Visual accent per question ─────────────────────────────────────────
 function QuestionAccent({ index }: { index: number }) {
