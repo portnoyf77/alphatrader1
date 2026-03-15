@@ -56,6 +56,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <PageViewTracker />
               <AIAssistant />
               <GuidedTour />
               {showWelcomeModal && (
