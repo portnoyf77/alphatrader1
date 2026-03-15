@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
