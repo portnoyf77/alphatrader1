@@ -398,25 +398,28 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     return '';
   };
 
-  // ── Pre-crystallization ──────────────────────────────────────────────
+  // ── Pre-crystallization: orb contracts → gem materializes ───────────
   if (preCrystallize) {
     return (
       <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Intensified orb */}
+        {/* Orb contracts and sharpens into gem halo */}
         <div
-          className="absolute inset-0 pointer-events-none flex items-center justify-center qa-orb-drift"
-          style={{ transition: 'all 1s ease' }}
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style={{ transition: 'all 1.2s ease' }}
         >
-          <div style={{
-            width: '50vw', height: '50vw', maxWidth: 600, maxHeight: 600,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${gemColors[gemType].replace('0.12', '0.25')} 0%, transparent 60%)`,
-            filter: 'blur(100px)',
-          }} />
+          <div
+            className="qa-orb-contract"
+            style={{
+              width: 280, height: 280,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${gemSolidColors[gemType]}50 0%, ${gemSolidColors[gemType]}15 40%, transparent 70%)`,
+              filter: 'blur(30px)',
+            }}
+          />
         </div>
-        {/* Gem pulse */}
-        <div className="qa-gem-pulse" style={{ opacity: 0.2 }}>
-          <UnifiedGem gemType={gemType} size={280} opacity={0.9} detailLevel={0.9} glowIntensity={12} />
+        {/* Gem materializes from nothing */}
+        <div className="qa-gem-materialize relative z-10">
+          <UnifiedGem gemType={gemType} size={200} opacity={1} detailLevel={1} glowIntensity={24} />
         </div>
       </div>
     );
