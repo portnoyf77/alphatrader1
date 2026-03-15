@@ -27,7 +27,7 @@ import FAQ from "./pages/FAQ";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const isLovablePreview = window.location.hostname.includes('lovable.app') || window.location.hostname.includes('lovableproject.com');
+  const isLovablePreview = window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('preview');
 
   const [accessGranted, setAccessGranted] = useState(
     () => isLovablePreview || localStorage.getItem('demoAccessGranted') === 'true'
