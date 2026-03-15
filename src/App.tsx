@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
 import { TourWelcomeModalWrapper } from "@/components/TourWelcomeModalWrapper";
 import { GuidedTour } from "@/components/GuidedTour";
+import { usePageView } from "@/hooks/usePageView";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -23,8 +24,14 @@ import Dashboard from "./pages/Dashboard";
 
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 const queryClient = new QueryClient();
+
+function PageViewTracker() {
+  usePageView();
+  return null;
+}
 
 const App = () => {
   const isLovablePreview = window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('preview');
@@ -55,6 +62,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <PageViewTracker />
               <AIAssistant />
               <GuidedTour />
               {showWelcomeModal && (
@@ -85,6 +93,7 @@ const App = () => {
                 <Route path="/dashboard" element={
                   <ProtectedRoute><Dashboard /></ProtectedRoute>
                 } />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
