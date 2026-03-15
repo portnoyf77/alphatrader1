@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
 import { TourWelcomeModalWrapper } from "@/components/TourWelcomeModalWrapper";
 import { GuidedTour } from "@/components/GuidedTour";
+import { usePageView } from "@/hooks/usePageView";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
