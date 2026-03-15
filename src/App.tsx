@@ -28,6 +28,11 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
+function PageViewTracker() {
+  usePageView();
+  return null;
+}
+
 const App = () => {
   const isLovablePreview = window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('preview');
 
