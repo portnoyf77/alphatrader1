@@ -186,10 +186,9 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     setTimeout(() => {
       setSelectedGlow(null);
       if (isLast) {
-        // Pre-crystallization pause
         pendingProfile.current = updatedProfile;
         setPreCrystallize(true);
-        setTimeout(() => onComplete(updatedProfile), 1200);
+        setTimeout(() => onComplete(updatedProfile), 3500);
       } else {
         transitionTo(currentIndex + 1, 'right');
       }
