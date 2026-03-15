@@ -198,7 +198,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const handleNext = useCallback(() => {
     if (isLast) {
       setPreCrystallize(true);
-      setTimeout(() => onComplete(profile), 1200);
+      setTimeout(() => onComplete(profile), 3500);
     } else {
       transitionTo(currentIndex + 1, 'right');
     }
