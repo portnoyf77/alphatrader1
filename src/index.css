@@ -753,13 +753,24 @@ table .font-mono {
 }
 .qa-select-pulse { animation: qaSelectPulse 0.3s ease; }
 
-/* Gem pulse for pre-crystallization */
-@keyframes qaGemPulse {
-  0% { transform: scale(1); opacity: 0.15; }
-  50% { transform: scale(1.06); opacity: 0.25; }
-  100% { transform: scale(1); opacity: 0.15; }
+/* Orb contracts into gem halo */
+@keyframes qaOrbContract {
+  0%   { transform: scale(1); filter: blur(30px); opacity: 0.6; }
+  60%  { transform: scale(0.5); filter: blur(10px); opacity: 0.9; }
+  100% { transform: scale(0.4); filter: blur(6px); opacity: 0.7; }
 }
-.qa-gem-pulse { animation: qaGemPulse 0.8s ease-in-out; }
+.qa-orb-contract { animation: qaOrbContract 1.8s ease-in-out forwards; }
+
+/* Gem materializes from nothing */
+@keyframes qaGemMaterialize {
+  0%   { transform: scale(0); opacity: 0; filter: blur(8px); }
+  50%  { transform: scale(1.05); opacity: 0.8; filter: blur(1px); }
+  75%  { transform: scale(0.98); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+.qa-gem-materialize {
+  animation: qaGemMaterialize 2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
 
 /* Slider with colour track – make default track transparent */
 .qa-slider [data-orientation="horizontal"] > span:first-child {

@@ -69,16 +69,7 @@ const sectorGlowColors: Record<string, string> = {
   'Real Estate': 'rgba(245,158,11,0.2)',
 };
 
-// ── Gem shape progression table (uses UnifiedGem now) ──────────────────
-function getGemVisuals(questionIndex: number) {
-  // Q1-Q2 = hidden, Q3..Q6 = progressively visible
-  // opacity/detailLevel map to UnifiedGem props; size stays consistent
-  if (questionIndex < 2) return { opacity: 0, detailLevel: 0, glowIntensity: 0, size: 260 };
-  if (questionIndex === 2) return { opacity: 0.15, detailLevel: 0.1, glowIntensity: 0, size: 260 };
-  if (questionIndex === 3) return { opacity: 0.30, detailLevel: 0.3, glowIntensity: 2, size: 260 };
-  if (questionIndex === 4) return { opacity: 0.50, detailLevel: 0.55, glowIntensity: 5, size: 260 };
-  return { opacity: 0.70, detailLevel: 0.8, glowIntensity: 8, size: 260 };
-}
+// (Progressive gem reveal removed — gem only appears at crystallization)
 
 // ── Visual accent per question ─────────────────────────────────────────
 function QuestionAccent({ index }: { index: number }) {
@@ -168,7 +159,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   // Risk score
   const riskScore = useMemo(() => computeRiskScore(profile), [profile]);
   const gemType = useMemo(() => getGemType(riskScore), [riskScore]);
-  const gemVisuals = useMemo(() => getGemVisuals(currentIndex), [currentIndex]);
+  
 
   const updateProfile = useCallback((questionId: keyof StrategyProfile, value: any) => {
     setProfile(prev => ({ ...prev, [questionId]: value }));
@@ -195,10 +186,9 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     setTimeout(() => {
       setSelectedGlow(null);
       if (isLast) {
-        // Pre-crystallization pause
         pendingProfile.current = updatedProfile;
         setPreCrystallize(true);
-        setTimeout(() => onComplete(updatedProfile), 1200);
+        setTimeout(() => onComplete(updatedProfile), 3500);
       } else {
         transitionTo(currentIndex + 1, 'right');
       }
@@ -208,7 +198,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const handleNext = useCallback(() => {
     if (isLast) {
       setPreCrystallize(true);
-      setTimeout(() => onComplete(profile), 1200);
+      setTimeout(() => onComplete(profile), 3500);
     } else {
       transitionTo(currentIndex + 1, 'right');
     }
@@ -407,25 +397,28 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     return '';
   };
 
-  // ── Pre-crystallization ──────────────────────────────────────────────
+  // ── Pre-crystallization: orb contracts → gem materializes ───────────
   if (preCrystallize) {
     return (
       <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Intensified orb */}
+        {/* Orb contracts and sharpens into gem halo */}
         <div
-          className="absolute inset-0 pointer-events-none flex items-center justify-center qa-orb-drift"
-          style={{ transition: 'all 1s ease' }}
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style={{ transition: 'all 1.2s ease' }}
         >
-          <div style={{
-            width: '50vw', height: '50vw', maxWidth: 600, maxHeight: 600,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${gemColors[gemType].replace('0.12', '0.25')} 0%, transparent 60%)`,
-            filter: 'blur(100px)',
-          }} />
+          <div
+            className="qa-orb-contract"
+            style={{
+              width: 280, height: 280,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${gemSolidColors[gemType]}50 0%, ${gemSolidColors[gemType]}15 40%, transparent 70%)`,
+              filter: 'blur(30px)',
+            }}
+          />
         </div>
-        {/* Gem pulse */}
-        <div className="qa-gem-pulse" style={{ opacity: 0.2 }}>
-          <UnifiedGem gemType={gemType} size={280} opacity={0.9} detailLevel={0.9} glowIntensity={12} />
+        {/* Gem materializes from nothing */}
+        <div className="qa-gem-materialize relative z-10">
+          <UnifiedGem gemType={gemType} size={200} opacity={1} detailLevel={1} glowIntensity={24} />
         </div>
       </div>
     );
@@ -448,24 +441,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         />
       </div>
 
-      {/* ── Forming gem silhouette (UnifiedGem — same shape as crystallization) ── */}
-      {currentIndex >= 2 && (
-        <div
-          className="absolute top-1/2 left-1/2 pointer-events-none z-0"
-          style={{
-            transform: 'translate(-50%, -50%)',
-            transition: 'all 1.2s ease',
-          }}
-        >
-          <UnifiedGem
-            gemType={gemType}
-            size={gemVisuals.size}
-            opacity={gemVisuals.opacity}
-            detailLevel={gemVisuals.detailLevel}
-            glowIntensity={gemVisuals.glowIntensity}
-          />
-        </div>
-      )}
+      {/* Gem silhouette removed — only background orb visible during wizard */}
 
       {/* ── Progress bar (full width thin) ── */}
       <div className="relative z-10 mb-6">
