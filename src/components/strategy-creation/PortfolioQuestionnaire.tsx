@@ -159,7 +159,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   // Risk score
   const riskScore = useMemo(() => computeRiskScore(profile), [profile]);
   const gemType = useMemo(() => getGemType(riskScore), [riskScore]);
-  const gemVisuals = useMemo(() => getGemVisuals(currentIndex), [currentIndex]);
+  
 
   const updateProfile = useCallback((questionId: keyof StrategyProfile, value: any) => {
     setProfile(prev => ({ ...prev, [questionId]: value }));
