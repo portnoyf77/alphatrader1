@@ -36,7 +36,10 @@ export function Navbar() {
   const visibleLinks = isAuthenticated ? navLinks : [];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.85)] backdrop-blur-[20px] border-b border-border/40 shadow-[0_1px_12px_0_hsl(var(--primary)/0.08)]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(5,5,8,0.85)] backdrop-blur-[20px]">
+      {/* Glowing bottom separator */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+      <div className="absolute bottom-0 left-[10%] right-[10%] h-[6px] bg-gradient-to-r from-transparent via-primary/20 to-transparent blur-sm" />
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <TooltipProvider delayDuration={300}>
