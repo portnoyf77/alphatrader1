@@ -7,7 +7,7 @@ interface FooterProps {
 
 export function Footer({ showDisclaimer = true }: FooterProps) {
   return (
-    <footer className="border-t border-border/50 bg-card/50">
+    <footer className="border-t border-border/60 bg-card/60 shadow-[0_-1px_16px_0_hsl(var(--primary)/0.06)]">
       <div className="container mx-auto px-4 py-8">
         {/* Row 1: Logo / Nav / Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
