@@ -195,10 +195,21 @@ export async function placeOrder(
   side: AlpacaOrderSide,
   type = "market",
   timeInForce = "day",
+  limitPrice?: number | string,
 ): Promise<AlpacaOrder> {
   const sym = symbol.trim().toUpperCase();
   if (!sym) {
     throw new Error("Symbol is required");
+  }
+  const body: Record<string, string> = {
+    symbol: sym,
+    qty: String(qty),
+    side,
+    type,
+    time_in_force: timeInForce,
+  };
+  if (type === "limit" && limitPrice !== undefined) {
+    body.limit_price = String(limitPrice);
   }
   const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/orders`, {
     method: "POST",
@@ -206,13 +217,7 @@ export async function placeOrder(
       ...authHeaders(),
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      symbol: sym,
-      qty: String(qty),
-      side,
-      type,
-      time_in_force: timeInForce,
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) await throwAlpacaError(res);
   return res.json() as Promise<AlpacaOrder>;
@@ -294,6 +299,34 @@ export async function cancelOrder(orderId: string): Promise<void> {
     headers: authHeaders(),
   });
   if (!res.ok && res.status !== 204) await throwAlpacaError(res);
+}
+
+/** Price bar from Alpaca bars endpoint. */
+export type AlpacaBar = {
+  t: string;   // timestamp
+  o: number;   // open
+  h: number;   // high
+  l: number;   // low
+  c: number;   // close
+  v: number;   // volume
+};
+
+/**
+ * GET /v2/stocks/{symbol}/bars - Historical price bars.
+ */
+export async function getBars(
+  symbol: string,
+  timeframe = '1Day',
+  limit = 30,
+): Promise<AlpacaBar[]> {
+  const sym = symbol.trim().toUpperCase();
+  const params = new URLSearchParams({ timeframe, limit: String(limit), sort: 'asc' });
+  const res = await fetch(`${DATA_PROXY_PREFIX}/v2/stocks/${encodeURIComponent(sym)}/bars?${params}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  const data = await res.json();
+  return (data.bars ?? []) as AlpacaBar[];
 }
 
 /** News article from Alpaca News API. */

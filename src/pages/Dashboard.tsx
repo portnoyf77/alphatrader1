@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock } from 'lucide-react';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
+import { useAlpacaNews } from '@/hooks/useAlpacaNews';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -46,31 +47,16 @@ function getGemBorderColor(name: string): string {
   return 'rgba(255,255,255,0.1)';
 }
 
-// Mock news with thumbnail gradients per sector
-const sectorGradients: Record<string, string> = {
-  Financials: 'linear-gradient(135deg, #1e3a5f 0%, #0f1f3a 100%)',
-  Technology: 'linear-gradient(135deg, #3b1f6e 0%, #1a0e3a 100%)',
-  'Clean Energy': 'linear-gradient(135deg, #0f4a2e 0%, #0a2618 100%)',
-  Healthcare: 'linear-gradient(135deg, #134e5e 0%, #0a2a30 100%)',
-  Industrial: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)',
-  Bonds: 'linear-gradient(135deg, #1a3a5f 0%, #0d1f33 100%)',
-  Energy: 'linear-gradient(135deg, #3d2b0f 0%, #1f1508 100%)',
-  Growth: 'linear-gradient(135deg, #1f3d1f 0%, #0f1f0f 100%)',
-  Policy: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
-};
-
-const mockNews = [
-  { headline: 'Fed Signals Potential Rate Pause in Q3', url: 'https://reuters.com', sector: 'Financials', tag: 'Relevant to your Financials holdings', source: 'Reuters', date: 'Mar 13, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&h=134&fit=crop' },
-  { headline: 'NVIDIA Reports Record Data Center Revenue', url: 'https://bloomberg.com', sector: 'Technology', tag: 'Relevant to your Tech holdings', source: 'Bloomberg', date: 'Mar 13, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=134&fit=crop' },
-  { headline: 'Treasury Yields Drop as Inflation Cools', url: 'https://reuters.com', sector: 'Bonds', tag: 'Relevant to your Bond holdings', source: 'Reuters', date: 'Mar 13, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=200&h=134&fit=crop' },
-  { headline: 'Apple Announces $100B Buyback Program', url: 'https://bloomberg.com', sector: 'Technology', tag: 'Relevant to your Tech holdings', source: 'Bloomberg', date: 'Mar 13, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=200&h=134&fit=crop' },
-  { headline: 'Renewable Energy Stocks Surge on Policy Update', url: 'https://reuters.com', sector: 'Clean Energy', tag: 'Relevant to your Clean Energy holdings', source: 'CNBC', date: 'Mar 12, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=200&h=134&fit=crop' },
-  { headline: 'Oil Prices Steady Amid OPEC Output Talks', url: 'https://cnbc.com', sector: 'Energy', tag: 'Market-wide impact', source: 'CNBC', date: 'Mar 12, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?w=200&h=134&fit=crop' },
-  { headline: 'Small-Cap Stocks Outperform in Q1', url: 'https://wsj.com', sector: 'Growth', tag: 'Relevant to your Growth holdings', source: 'WSJ', date: 'Mar 12, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=200&h=134&fit=crop' },
-  { headline: 'Healthcare M&A Activity Hits 2025 High', url: 'https://reuters.com', sector: 'Healthcare', tag: 'Relevant to your Healthcare holdings', source: 'Reuters', date: 'Mar 11, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=200&h=134&fit=crop' },
-  { headline: 'EU Carbon Tax Takes Effect Next Month', url: 'https://ft.com', sector: 'Policy', tag: 'Relevant to your Clean Energy holdings', source: 'Financial Times', date: 'Mar 11, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=200&h=134&fit=crop' },
-  { headline: 'Global Supply Chain Bottlenecks Easing', url: 'https://reuters.com', sector: 'Industrial', tag: 'Market-wide impact', source: 'Reuters', date: 'Mar 11, 2026', thumbnailUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=200&h=134&fit=crop' },
-];
+function timeSince(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -82,6 +68,14 @@ export default function Dashboard() {
   const { account, loading: accountLoading } = useAlpacaAccount();
   const { positions, totalMarketValue, totalUnrealizedPL, loading: positionsLoading } = useAlpacaPositions();
   const alpacaLoading = accountLoading || positionsLoading;
+
+  // Real news from Alpaca (filtered by position symbols + popular tickers)
+  const newsSymbols = useMemo(() => {
+    const syms = new Set(positions.map((p) => p.symbol));
+    ['SPY', 'QQQ', 'AAPL', 'MSFT', 'NVDA'].forEach((s) => syms.add(s));
+    return Array.from(syms);
+  }, [positions]);
+  const { articles: liveNews, loading: newsLoading } = useAlpacaNews(newsSymbols, 10);
 
   // Merge mock + user-created portfolios
   const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
@@ -675,88 +669,106 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {/* Market News — horizontal carousel */}
+        {/* Market News — real Alpaca news feed */}
         <div data-tour="market-news" className="mb-8">
-          <h2 className="text-lg font-bold mb-4">Market News</h2>
-          <div
-            className="flex gap-4 overflow-x-auto pb-2"
-            style={{
-              scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            <style>{`
-              .news-carousel::-webkit-scrollbar { height: 4px; }
-              .news-carousel::-webkit-scrollbar-track { background: transparent; }
-              .news-carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-            `}</style>
-            {mockNews.map((news, i) => (
-              <a
-                key={i}
-                href={news.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-                style={{
-                  minWidth: '220px',
-                  maxWidth: '220px',
-                  scrollSnapAlign: 'start',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                {/* Thumbnail */}
-                <div
-                  className="w-full h-[120px] overflow-hidden"
-                  style={{
-                    borderRadius: '12px 12px 0 0',
-                    background: sectorGradients[news.sector] || sectorGradients.Industrial,
-                  }}
-                >
-                  <img
-                    src={news.thumbnailUrl}
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                </div>
-                {/* Text content */}
-                <div className="p-3 flex flex-col gap-2">
-                  <p
-                    className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {news.headline}
-                  </p>
-                  {/* Relevance tag chip */}
-                  <span
-                    className="text-[0.75rem] truncate inline-block w-fit max-w-full"
-                    style={{
-                      background: 'rgba(124,58,237,0.08)',
-                      border: '1px solid rgba(124,58,237,0.15)',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      color: '#A78BFA',
-                    }}
-                  >
-                    {news.tag}
-                  </span>
-                  {/* Source & Date */}
-                  <div className="flex items-center gap-1 text-[0.7rem]">
-                    <span className="font-semibold text-foreground">{news.source}</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">{news.date}</span>
-                  </div>
-                </div>
-              </a>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-muted-foreground" />
+              Market News
+              <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
+            </h2>
+            <Link to="/research" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              Full research <ChevronRight className="h-3 w-3" />
+            </Link>
           </div>
+          {newsLoading && liveNews.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-6 text-center">Loading latest news...</div>
+          ) : liveNews.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-6 text-center">No recent news available.</div>
+          ) : (
+            <div
+              className="flex gap-4 overflow-x-auto pb-2"
+              style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+            >
+              <style>{`
+                .news-carousel::-webkit-scrollbar { height: 4px; }
+                .news-carousel::-webkit-scrollbar-track { background: transparent; }
+                .news-carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+              `}</style>
+              {liveNews.map((article) => {
+                const positionSymbols = positions.map((p) => p.symbol);
+                const relevantSymbols = article.symbols.filter((s) => positionSymbols.includes(s));
+                return (
+                  <a
+                    key={article.id}
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                    style={{
+                      minWidth: '260px',
+                      maxWidth: '260px',
+                      scrollSnapAlign: 'start',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      backdropFilter: 'blur(12px)',
+                    }}
+                  >
+                    <div className="p-4 flex flex-col gap-2.5 h-full">
+                      <p
+                        className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {article.headline}
+                      </p>
+                      {article.summary && (
+                        <p
+                          className="text-[0.75rem] text-muted-foreground leading-relaxed"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {article.summary}
+                        </p>
+                      )}
+                      {/* Symbol tags */}
+                      {article.symbols.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {article.symbols.slice(0, 4).map((sym) => (
+                            <span
+                              key={sym}
+                              className="text-[0.6rem] font-mono px-1.5 py-0.5 rounded"
+                              style={{
+                                background: relevantSymbols.includes(sym) ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)',
+                                color: relevantSymbols.includes(sym) ? '#A78BFA' : 'rgba(255,255,255,0.5)',
+                                border: `1px solid ${relevantSymbols.includes(sym) ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                              }}
+                            >
+                              {sym}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 text-[0.7rem] mt-auto">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="font-semibold text-foreground">{article.source}</span>
+                        <span className="text-muted-foreground">·</span>
+                        <span className="text-muted-foreground">{timeSince(article.created_at)}</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>

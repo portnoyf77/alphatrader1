@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw, BarChart3, Zap } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw, BarChart3, Zap, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -14,6 +14,7 @@ const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/portfolio-tracker', label: 'Portfolio', icon: BarChart3, tooltip: 'Live Alpaca positions & trades' },
   { href: '/research', label: 'Research', icon: Zap, tooltip: 'Market news & watchlist' },
+  { href: '/build', label: 'Build', icon: Sparkles, tooltip: 'AI Portfolio Builder' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
 ];
 

@@ -26,11 +26,13 @@ import {
   getOrders,
   getPositions,
   placeOrder,
+  cancelOrder,
   type AlpacaAccountInfo,
   type AlpacaOrder,
   type AlpacaOrderSide,
   type AlpacaPosition,
 } from "@/lib/alpacaClient";
+import { StockChart } from "@/components/StockChart";
 import { cn } from "@/lib/utils";
 
 const REFRESH_MS = 15_000;
@@ -63,7 +65,10 @@ export default function PaperTrading() {
   const [symbol, setSymbol] = useState("AAPL");
   const [quantity, setQuantity] = useState("1");
   const [side, setSide] = useState<AlpacaOrderSide>("buy");
+  const [orderType, setOrderType] = useState<"market" | "limit">("market");
+  const [limitPrice, setLimitPrice] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const loadAccount = useCallback(async () => {
     setAccountLoading(true);
@@ -116,10 +121,11 @@ export default function PaperTrading() {
     }
     setPlacing(true);
     try {
-      const order = await placeOrder(sym, qtyRaw, side);
+      const lp = orderType === "limit" && limitPrice.trim() ? parseFloat(limitPrice.trim()) : undefined;
+      const order = await placeOrder(sym, qtyRaw, side, orderType, "day", lp);
       toast({
         title: "Order placed",
-        description: `${order.side.toUpperCase()} ${order.qty} ${order.symbol} · ${order.type} · ${order.status} · ID ${order.id}`,
+        description: `${order.side.toUpperCase()} ${order.qty} ${order.symbol} · ${order.type} · ${order.status}`,
       });
       await loadPositionsAndOrders();
       await loadAccount();
@@ -177,10 +183,13 @@ export default function PaperTrading() {
           </CardContent>
         </Card>
 
+        {/* Price Chart */}
+        {symbol.trim() && <StockChart symbol={symbol.trim().toUpperCase()} />}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-heading">Place order</CardTitle>
-            <CardDescription>Market order, day time-in-force</CardDescription>
+            <CardDescription>{orderType === "market" ? "Market order" : "Limit order"}, day time-in-force</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -201,8 +210,26 @@ export default function PaperTrading() {
               >
                 Sell
               </Button>
+              <div className="ml-auto flex gap-1">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={orderType === "market" ? "default" : "outline"}
+                  onClick={() => setOrderType("market")}
+                >
+                  Market
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={orderType === "limit" ? "default" : "outline"}
+                  onClick={() => setOrderType("limit")}
+                >
+                  Limit
+                </Button>
+              </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className={cn("grid gap-4", orderType === "limit" ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
               <div className="space-y-2">
                 <Label htmlFor="pt-symbol">Symbol</Label>
                 <Input
@@ -223,6 +250,19 @@ export default function PaperTrading() {
                   className="tabular-nums"
                 />
               </div>
+              {orderType === "limit" && (
+                <div className="space-y-2">
+                  <Label htmlFor="pt-limit">Limit Price ($)</Label>
+                  <Input
+                    id="pt-limit"
+                    value={limitPrice}
+                    onChange={(e) => setLimitPrice(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="150.00"
+                    className="tabular-nums font-mono"
+                  />
+                </div>
+              )}
             </div>
             <Button type="button" onClick={handlePlaceOrder} disabled={placing}>
               {placing ? (
@@ -231,7 +271,7 @@ export default function PaperTrading() {
                   Placing…
                 </>
               ) : (
-                "Place order"
+                `Place ${orderType} order`
               )}
             </Button>
           </CardContent>
@@ -315,23 +355,55 @@ export default function PaperTrading() {
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Filled avg</TableHead>
                     <TableHead>Submitted</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((o) => (
-                    <TableRow key={o.id}>
-                      <TableCell className="font-mono font-medium">{o.symbol}</TableCell>
-                      <TableCell className="capitalize">{o.side}</TableCell>
-                      <TableCell className="text-right tabular-nums">{o.qty}</TableCell>
-                      <TableCell>{o.status}</TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {o.filled_avg_price != null ? formatUsd(o.filled_avg_price) : "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground tabular-nums text-sm">
-                        {formatSubmitted(o.submitted_at)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {orders.map((o) => {
+                    const cancellable = ['new', 'accepted', 'partially_filled', 'pending_new'].includes(o.status);
+                    return (
+                      <TableRow key={o.id}>
+                        <TableCell className="font-mono font-medium">{o.symbol}</TableCell>
+                        <TableCell>
+                          <span className={cn('text-xs font-medium px-2 py-0.5 rounded capitalize', o.side === 'buy' ? 'bg-emerald-400/15 text-emerald-400' : 'bg-red-400/15 text-red-400')}>
+                            {o.side}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{o.qty}</TableCell>
+                        <TableCell>
+                          <span className={cn('text-xs', o.status === 'filled' && 'text-emerald-400', cancellable && 'text-yellow-400', o.status === 'canceled' && 'text-muted-foreground')}>
+                            {o.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {o.filled_avg_price != null ? formatUsd(o.filled_avg_price) : "—"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground tabular-nums text-sm">
+                          {formatSubmitted(o.submitted_at)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {cancellable && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 h-7"
+                              disabled={cancellingId === o.id}
+                              onClick={async () => {
+                                setCancellingId(o.id);
+                                try {
+                                  await cancelOrder(o.id);
+                                  await loadPositionsAndOrders();
+                                } catch { /* swallow */ }
+                                finally { setCancellingId(null); }
+                              }}
+                            >
+                              {cancellingId === o.id ? 'Cancelling...' : 'Cancel'}
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}

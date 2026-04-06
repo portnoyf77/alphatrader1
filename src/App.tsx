@@ -29,6 +29,7 @@ import { AlpacaConnectionTest } from "@/components/AlpacaConnectionTest";
 import PaperTrading from "./pages/PaperTrading";
 import Portfolio from "./pages/Portfolio";
 import Research from "./pages/Research";
+import PortfolioBuilder from "./pages/PortfolioBuilder";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,14 @@ function GatedApp() {
           element={
             <ProtectedRoute>
               <Research />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/build"
+          element={
+            <ProtectedRoute>
+              <PortfolioBuilder />
             </ProtectedRoute>
           }
         />
