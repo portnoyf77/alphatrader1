@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Sparkles, ArrowRight, ShieldCheck, TrendingUp, Zap, RotateCcw, DollarSign, PieChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -115,18 +115,37 @@ export default function PortfolioBuilder() {
   const [investAmount, setInvestAmount] = useState('10000');
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
   const [executionResults, setExecutionResults] = useState<{ symbol: string; status: string; error?: string }[]>([]);
+  const [customWeights, setCustomWeights] = useState<Record<string, number>>({});
   const { account } = useAlpacaAccount();
 
   const profile = PROFILES[risk];
   const amount = parseFloat(investAmount) || 0;
 
+  // Initialize custom weights when profile changes
+  const initWeights = useCallback(() => {
+    const w: Record<string, number> = {};
+    profile.allocations.forEach((a) => { w[a.symbol] = a.weight; });
+    setCustomWeights(w);
+  }, [profile]);
+
+  // Reset custom weights when risk profile changes
+  useMemo(() => { initWeights(); }, [initWeights]);
+
+  const totalWeight = useMemo(() => {
+    return Object.values(customWeights).reduce((sum, w) => sum + w, 0);
+  }, [customWeights]);
+
   const orders = useMemo(() => {
     return profile.allocations.map((a) => {
-      const dollarAmount = amount * (a.weight / 100);
-      // We'll estimate qty based on a rough price (user will see actual before confirming)
-      return { ...a, dollarAmount };
+      const weight = customWeights[a.symbol] ?? a.weight;
+      const dollarAmount = amount * (weight / 100);
+      return { ...a, weight, dollarAmount };
     });
-  }, [profile, amount]);
+  }, [profile, amount, customWeights]);
+
+  const handleWeightChange = (symbol: string, newWeight: number) => {
+    setCustomWeights((prev) => ({ ...prev, [symbol]: Math.max(0, Math.min(100, newWeight)) }));
+  };
 
   const handleExecute = async () => {
     setStep('executing');
@@ -251,7 +270,7 @@ export default function PortfolioBuilder() {
               </div>
             </div>
 
-            {/* Allocation Table */}
+            {/* Allocation Table (editable weights) */}
             <div
               className="rounded-xl overflow-hidden"
               style={{ border: '1px solid rgba(255,255,255,0.06)' }}
@@ -274,7 +293,20 @@ export default function PortfolioBuilder() {
                         <div className="text-xs text-muted-foreground">{o.name}</div>
                       </td>
                       <td className="p-3 text-xs text-muted-foreground">{o.sector}</td>
-                      <td className="p-3 text-right font-mono text-foreground">{o.weight}%</td>
+                      <td className="p-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={o.weight}
+                            onChange={(e) => handleWeightChange(o.symbol, parseFloat(e.target.value) || 0)}
+                            className="w-14 h-7 rounded px-1.5 text-xs font-mono text-right bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                          <span className="text-xs text-muted-foreground">%</span>
+                        </div>
+                      </td>
                       <td className="p-3 text-right font-mono text-foreground">{formatCurrency(o.dollarAmount)}</td>
                       <td className="p-3 text-right">
                         <button
@@ -287,8 +319,34 @@ export default function PortfolioBuilder() {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <td colSpan={2} className="p-3 text-xs text-muted-foreground">
+                      <button onClick={initWeights} className="text-xs text-primary hover:text-primary/80">
+                        Reset to default
+                      </button>
+                    </td>
+                    <td className="p-3 text-right">
+                      <span className={cn(
+                        'text-xs font-mono font-semibold',
+                        Math.abs(totalWeight - 100) < 0.01 ? 'text-emerald-400' : 'text-amber-400'
+                      )}>
+                        {totalWeight.toFixed(0)}%
+                      </span>
+                    </td>
+                    <td className="p-3 text-right font-mono text-xs text-foreground">
+                      {formatCurrency(amount * (totalWeight / 100))}
+                    </td>
+                    <td />
+                  </tr>
+                </tfoot>
               </table>
             </div>
+            {Math.abs(totalWeight - 100) > 0.01 && (
+              <p className="text-xs text-amber-400">
+                Weights total {totalWeight.toFixed(0)}% instead of 100%. Adjust your allocations or reset to defaults.
+              </p>
+            )}
 
             {/* Inline Chart */}
             {selectedChart && (

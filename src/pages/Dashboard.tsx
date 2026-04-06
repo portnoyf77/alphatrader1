@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock } from 'lucide-react';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
@@ -15,6 +15,7 @@ import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { LiveTickerBar } from '@/components/LiveTickerBar';
+import { getPortfolioHistory, placeOrder, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
@@ -56,6 +57,178 @@ function timeSince(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+// ── Mini Equity Chart for Dashboard ──
+const PERIOD_OPTIONS = [
+  { label: '1W', period: '1W', timeframe: '1D' },
+  { label: '1M', period: '1M', timeframe: '1D' },
+  { label: '3M', period: '3M', timeframe: '1D' },
+  { label: '6M', period: '6M', timeframe: '1D' },
+  { label: '1Y', period: '1A', timeframe: '1D' },
+];
+
+function DashboardEquityChart() {
+  const [data, setData] = useState<AlpacaPortfolioHistoryPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activePeriod, setActivePeriod] = useState('1M');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    const opt = PERIOD_OPTIONS.find((o) => o.label === activePeriod) ?? PERIOD_OPTIONS[1];
+    getPortfolioHistory(opt.period, opt.timeframe)
+      .then((pts) => { if (!cancelled) setData(pts); })
+      .catch(() => { if (!cancelled) setData([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [activePeriod]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-44 text-muted-foreground text-sm">Loading chart...</div>
+    );
+  }
+  if (data.length < 2) {
+    return (
+      <div className="flex items-center justify-center h-44 text-muted-foreground text-sm">
+        Not enough data yet. Place some trades and check back.
+      </div>
+    );
+  }
+
+  const values = data.map((d) => d.equity);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const range = maxVal - minVal || 1;
+  const width = 600;
+  const height = 160;
+  const padding = 20;
+
+  const points = data.map((d, i) => {
+    const x = padding + (i / (data.length - 1)) * (width - 2 * padding);
+    const y = padding + (1 - (d.equity - minVal) / range) * (height - 2 * padding);
+    return `${x},${y}`;
+  });
+
+  const isPositive = data[data.length - 1].equity >= data[0].equity;
+  const strokeColor = isPositive ? '#10B981' : '#EF4444';
+  const changeValue = data[data.length - 1].equity - data[0].equity;
+  const changePct = data[0].equity > 0 ? (changeValue / data[0].equity) * 100 : 0;
+
+  const firstX = padding;
+  const lastX = padding + ((data.length - 1) / (data.length - 1)) * (width - 2 * padding);
+  const areaPath = `M${points[0]} ${points.slice(1).join(' ')} L${lastX},${height - padding} L${firstX},${height - padding} Z`;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-foreground">Equity History</span>
+          <span className="text-xs font-mono" style={{ color: strokeColor }}>
+            {changeValue >= 0 ? '+' : ''}{formatCurrency(changeValue)} ({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)
+          </span>
+        </div>
+        <div className="flex gap-1">
+          {PERIOD_OPTIONS.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => setActivePeriod(opt.label)}
+              className={cn(
+                'px-2.5 py-1 rounded text-[0.7rem] font-medium transition-colors',
+                activePeriod === opt.label
+                  ? 'bg-primary/15 text-primary border border-primary/25'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="dashEquityGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.15" />
+            <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#dashEquityGrad)" />
+        <polyline points={points.join(' ')} fill="none" stroke={strokeColor} strokeWidth="2" strokeLinejoin="round" />
+        <text x={padding} y={padding - 4} fill="#888" fontSize="10" textAnchor="start">{formatCurrency(maxVal)}</text>
+        <text x={padding} y={height - padding + 14} fill="#888" fontSize="10" textAnchor="start">{formatCurrency(minVal)}</text>
+      </svg>
+    </div>
+  );
+}
+
+// ── Quick Trade Widget for Dashboard ──
+function DashboardQuickTrade({ onComplete }: { onComplete: () => void }) {
+  const [symbol, setSymbol] = useState('');
+  const [qty, setQty] = useState('1');
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
+  const [status, setStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message?: string }>({ type: 'idle' });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!symbol.trim() || !qty) return;
+    setStatus({ type: 'loading' });
+    try {
+      const order = await placeOrder(symbol, Number(qty), side);
+      setStatus({ type: 'success', message: `${order.side.toUpperCase()} ${order.qty} ${order.symbol} - ${order.status}` });
+      setSymbol('');
+      setQty('1');
+      setTimeout(() => { setStatus({ type: 'idle' }); onComplete(); }, 2000);
+    } catch (err) {
+      setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Order failed' });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex items-end gap-2 flex-wrap">
+      <div className="flex flex-col gap-1">
+        <label className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">Symbol</label>
+        <input
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="AAPL"
+          className="h-8 w-20 rounded-lg px-2 text-xs font-mono bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">Qty</label>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          className="h-8 w-14 rounded-lg px-2 text-xs font-mono bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      <div className="flex gap-1">
+        <button
+          type="button"
+          onClick={() => setSide('buy')}
+          className={cn('h-8 px-3 rounded-lg text-xs font-medium transition-colors', side === 'buy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-secondary/50 text-muted-foreground border border-border')}
+        >Buy</button>
+        <button
+          type="button"
+          onClick={() => setSide('sell')}
+          className={cn('h-8 px-3 rounded-lg text-xs font-medium transition-colors', side === 'sell' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-secondary/50 text-muted-foreground border border-border')}
+        >Sell</button>
+      </div>
+      <button
+        type="submit"
+        disabled={status.type === 'loading' || !symbol.trim()}
+        className="h-8 px-4 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+      >
+        {status.type === 'loading' ? 'Placing...' : 'Place Order'}
+      </button>
+      {status.type === 'success' && <span className="text-xs text-emerald-400">{status.message}</span>}
+      {status.type === 'error' && <span className="text-xs text-red-400">{status.message}</span>}
+    </form>
+  );
 }
 
 export default function Dashboard() {
@@ -129,10 +302,32 @@ export default function Dashboard() {
   const displayCash = account ? account.cash : 0;
   const hasLiveData = !!account;
 
+  // Use real portfolio history to compute period return when live data is available
+  const [portfolioReturn, setPortfolioReturn] = useState<{ value: number; pct: number } | null>(null);
+  useEffect(() => {
+    if (!hasLiveData) return;
+    let cancelled = false;
+    getPortfolioHistory('1M', '1D')
+      .then((pts) => {
+        if (cancelled || pts.length < 2) return;
+        const start = pts[0].equity;
+        const end = pts[pts.length - 1].equity;
+        const pct = start > 0 ? ((end - start) / start) * 100 : 0;
+        setPortfolioReturn({ value: end - start, pct });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [hasLiveData]);
+
+  const handleTradeComplete = useCallback(() => {
+    // Trigger refetches after a quick trade
+  }, []);
+
   // Count-up animations
   const animEquity = useCountUp(displayEquity, 800);
   const animPortfolioValue = useCountUp(displayPortfolioValue, 800);
-  const animVsSP500 = useCountUp(vsSP500, 800, 1);
+  const realVsSP500 = portfolioReturn ? portfolioReturn.pct - sp500Return : vsSP500;
+  const animVsSP500 = useCountUp(realVsSP500, 800, 1);
 
   const tabCards = [
     {
@@ -188,6 +383,25 @@ export default function Dashboard() {
         </div>
 
         <LiveTickerBar holdings={liveTickerHoldings} />
+
+        {/* Equity Chart + Quick Trade (shown when live data available) */}
+        {hasLiveData && (
+          <div
+            className="mb-8 rounded-2xl p-5"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
+          >
+            <DashboardEquityChart />
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Trade</span>
+                <Link to="/portfolio-tracker" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Advanced trading &rarr;
+                </Link>
+              </div>
+              <DashboardQuickTrade onComplete={handleTradeComplete} />
+            </div>
+          </div>
+        )}
 
         {/* Hero Summary Bar */}
         <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">
@@ -257,20 +471,29 @@ export default function Dashboard() {
                     <div className="flex items-baseline gap-2 cursor-help">
                       <span className={cn(
                         "font-mono text-[2rem] font-bold",
-                        vsSP500 >= 0 ? "text-success" : "text-destructive"
+                        realVsSP500 >= 0 ? "text-success" : "text-destructive"
                       )}>
-                        {vsSP500 >= 0 ? '+' : ''}{animVsSP500}%
+                        {realVsSP500 >= 0 ? '+' : ''}{animVsSP500}%
                       </span>
                       <span className="text-[0.9rem] text-muted-foreground">vs S&P 500</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    You: {formatPercent(userTotalReturn)} · S&P: {formatPercent(sp500Return)}
+                    {portfolioReturn
+                      ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% (30d) · S&P: +${sp500Return}%`
+                      : `You: ${formatPercent(userTotalReturn)} · S&P: ${formatPercent(sp500Return)}`
+                    }
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <div className="flex items-center gap-1 mt-1">
-                <span className="text-[0.8rem] text-muted-foreground">You: +{userTotalReturn}% · S&P: +{sp500Return}%</span>
+                <span className="text-[0.8rem] text-muted-foreground">
+                  {portfolioReturn
+                    ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% · S&P: +${sp500Return}%`
+                    : `You: +${userTotalReturn}% · S&P: +${sp500Return}%`
+                  }
+                </span>
+                {portfolioReturn && <span className="text-[0.65rem] text-muted-foreground ml-1">(30d)</span>}
               </div>
             </div>
           </div>
@@ -326,7 +549,7 @@ export default function Dashboard() {
                   {positions.length} open
                 </span>
               </div>
-              <Link to="/paper-trading" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Link to="/portfolio-tracker" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                 View all <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
