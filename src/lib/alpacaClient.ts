@@ -337,6 +337,7 @@ export type AlpacaNewsArticle = {
   author: string;
   source: string;
   url: string;
+  images: { size: string; url: string }[];
   symbols: string[];
   created_at: string;
   updated_at: string;

@@ -925,35 +925,45 @@ export default function Dashboard() {
               {liveNews.map((article) => {
                 const positionSymbols = positions.map((p) => p.symbol);
                 const relevantSymbols = article.symbols.filter((s) => positionSymbols.includes(s));
+                const thumbImg = article.images?.find((img) => img.size === 'thumb') ?? article.images?.find((img) => img.size === 'small') ?? article.images?.[0];
                 return (
                   <a
                     key={article.id}
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden"
                     style={{
-                      minWidth: '260px',
-                      maxWidth: '260px',
+                      minWidth: '280px',
+                      maxWidth: '280px',
                       scrollSnapAlign: 'start',
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.06)',
                       backdropFilter: 'blur(12px)',
                     }}
                   >
-                    <div className="p-4 flex flex-col gap-2.5 h-full">
+                    {thumbImg?.url && (
+                      <div
+                        className="w-full h-36 bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url(${thumbImg.url})`,
+                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        }}
+                      />
+                    )}
+                    <div className="p-4 flex flex-col gap-2 h-full">
                       <p
                         className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
                         style={{
                           display: '-webkit-box',
-                          WebkitLineClamp: 3,
+                          WebkitLineClamp: thumbImg?.url ? 2 : 3,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
                         }}
                       >
                         {article.headline}
                       </p>
-                      {article.summary && (
+                      {!thumbImg?.url && article.summary && (
                         <p
                           className="text-[0.75rem] text-muted-foreground leading-relaxed"
                           style={{

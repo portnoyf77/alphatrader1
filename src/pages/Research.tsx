@@ -94,20 +94,30 @@ function timeSince(dateStr: string): string {
 
 function NewsCard({ article, watchlist }: { article: AlpacaNewsArticle; watchlist: string[] }) {
   const relevantSymbols = article.symbols.filter((s) => watchlist.includes(s));
+  const thumbImg = article.images?.find((img) => img.size === 'small') ?? article.images?.find((img) => img.size === 'thumb') ?? article.images?.[0];
 
   return (
     <a
       href={article.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block rounded-xl p-4 transition-colors hover:bg-white/[0.03] group"
+      className="block rounded-xl overflow-hidden transition-colors hover:bg-white/[0.03] group"
       style={{ border: '1px solid rgba(255,255,255,0.06)' }}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex gap-4 p-4">
+        {thumbImg?.url && (
+          <div
+            className="w-28 h-20 rounded-lg bg-cover bg-center flex-shrink-0"
+            style={{ backgroundImage: `url(${thumbImg.url})` }}
+          />
+        )}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-            {article.headline}
-          </h3>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              {article.headline}
+            </h3>
+            <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5" />
+          </div>
           {article.summary && (
             <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{article.summary}</p>
           )}
@@ -132,7 +142,6 @@ function NewsCard({ article, watchlist }: { article: AlpacaNewsArticle; watchlis
             )}
           </div>
         </div>
-        <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
     </a>
   );
