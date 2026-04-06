@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import { AlpacaConnectionTest } from "@/components/AlpacaConnectionTest";
+import PaperTrading from "./pages/PaperTrading";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,7 @@ const App = () => {
               <Routes>
                 {/* Bypasses DemoGate and all gated routes */}
                 <Route path="/test-alpaca" element={<AlpacaConnectionTest />} />
+                <Route path="/paper-trading" element={<PaperTrading />} />
                 <Route path="*" element={<GatedApp />} />
               </Routes>
             </BrowserRouter>

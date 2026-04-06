@@ -147,3 +147,87 @@ export async function getLatestQuote(symbol: string): Promise<AlpacaLatestQuote>
     timestamp: q.t,
   };
 }
+
+export type AlpacaOrderSide = "buy" | "sell";
+
+/** Subset of POST /v2/orders response; see Alpaca docs for full schema. */
+export type AlpacaOrder = {
+  id: string;
+  client_order_id: string;
+  symbol: string;
+  qty: string;
+  filled_qty: string;
+  side: string;
+  type: string;
+  time_in_force: string;
+  status: string;
+  filled_avg_price: string | null;
+  submitted_at: string;
+  [key: string]: unknown;
+};
+
+/** Open position from GET /v2/positions (subset of fields). */
+export type AlpacaPosition = {
+  symbol: string;
+  qty: string;
+  avg_entry_price: string;
+  current_price: string;
+  unrealized_pl: string;
+  market_value?: string;
+  [key: string]: unknown;
+};
+
+/**
+ * POST /v2/orders (paper trading API when using the dev proxy).
+ */
+export async function placeOrder(
+  symbol: string,
+  qty: number | string,
+  side: AlpacaOrderSide,
+  type = "market",
+  timeInForce = "day",
+): Promise<AlpacaOrder> {
+  const sym = symbol.trim().toUpperCase();
+  if (!sym) {
+    throw new Error("Symbol is required");
+  }
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/orders`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      symbol: sym,
+      qty: String(qty),
+      side,
+      type,
+      time_in_force: timeInForce,
+    }),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaOrder>;
+}
+
+/**
+ * GET /v2/positions.
+ */
+export async function getPositions(): Promise<AlpacaPosition[]> {
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/positions`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaPosition[]>;
+}
+
+/**
+ * GET /v2/orders (recent history; `status=all`, newest first per Alpaca default ordering).
+ */
+export async function getOrders(limit = 50): Promise<AlpacaOrder[]> {
+  const q = new URLSearchParams({ status: "all", limit: String(Math.min(limit, 500)) });
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/orders?${q}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaOrder[]>;
+}
