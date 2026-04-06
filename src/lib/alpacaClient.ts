@@ -7,6 +7,13 @@
 const TRADING_PROXY_PREFIX = "/api/alpaca";
 const DATA_PROXY_PREFIX = "/api/alpaca-data";
 
+/**
+ * In dev, Vite proxy forwards to Alpaca with client-side keys (VITE_ env vars).
+ * In production (Vercel), serverless functions at /api/alpaca handle auth server-side,
+ * so we send NO auth headers from the browser.
+ */
+const IS_DEV = import.meta.env.DEV;
+
 function getConfig() {
   const apiKey = import.meta.env.VITE_ALPACA_API_KEY;
   const secretKey = import.meta.env.VITE_ALPACA_SECRET_KEY;
@@ -17,6 +24,8 @@ function getConfig() {
 }
 
 function authHeaders(): HeadersInit {
+  // In production, serverless functions handle auth -- no keys in browser
+  if (!IS_DEV) return {};
   const { apiKey, secretKey } = getConfig();
   return {
     "APCA-API-KEY-ID": apiKey,
@@ -230,4 +239,102 @@ export async function getOrders(limit = 50): Promise<AlpacaOrder[]> {
   });
   if (!res.ok) await throwAlpacaError(res);
   return res.json() as Promise<AlpacaOrder[]>;
+}
+
+/** Portfolio history data point. */
+export type AlpacaPortfolioHistoryPoint = {
+  timestamp: number;
+  equity: number;
+  profit_loss: number;
+  profit_loss_pct: number;
+};
+
+/** Raw portfolio history response from Alpaca. */
+type AlpacaPortfolioHistoryJson = {
+  timestamp: number[];
+  equity: number[];
+  profit_loss: number[];
+  profit_loss_pct: number[];
+  base_value: number;
+  timeframe: string;
+};
+
+/**
+ * GET /v2/account/portfolio/history
+ * Returns equity curve data for charting.
+ */
+export async function getPortfolioHistory(
+  period = "1M",
+  timeframe = "1D",
+): Promise<AlpacaPortfolioHistoryPoint[]> {
+  const q = new URLSearchParams({ period, timeframe });
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/account/portfolio/history?${q}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  const data = (await res.json()) as AlpacaPortfolioHistoryJson;
+  const points: AlpacaPortfolioHistoryPoint[] = [];
+  for (let i = 0; i < data.timestamp.length; i++) {
+    points.push({
+      timestamp: data.timestamp[i],
+      equity: data.equity[i],
+      profit_loss: data.profit_loss[i],
+      profit_loss_pct: data.profit_loss_pct[i],
+    });
+  }
+  return points;
+}
+
+/**
+ * Cancel an open order.
+ */
+export async function cancelOrder(orderId: string): Promise<void> {
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/orders/${orderId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok && res.status !== 204) await throwAlpacaError(res);
+}
+
+/** News article from Alpaca News API. */
+export type AlpacaNewsArticle = {
+  id: number;
+  headline: string;
+  summary: string;
+  author: string;
+  source: string;
+  url: string;
+  symbols: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * GET /v1beta1/news - Fetch news articles.
+ * Optionally filter by symbols (comma-separated).
+ */
+export async function getNews(symbols?: string[], limit = 20): Promise<AlpacaNewsArticle[]> {
+  const params = new URLSearchParams({ limit: String(limit), sort: 'desc' });
+  if (symbols && symbols.length > 0) {
+    params.set('symbols', symbols.join(','));
+  }
+  const res = await fetch(`${DATA_PROXY_PREFIX}/v1beta1/news?${params}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  const data = await res.json();
+  return (data.news ?? data) as AlpacaNewsArticle[];
+}
+
+/**
+ * Close a position by symbol.
+ */
+export async function closePosition(symbol: string): Promise<AlpacaOrder> {
+  const sym = symbol.trim().toUpperCase();
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/positions/${encodeURIComponent(sym)}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaOrder>;
 }

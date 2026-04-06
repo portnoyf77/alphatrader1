@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw } from 'lucide-react';
+import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
+import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -76,6 +78,11 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
   const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
 
+  // Live Alpaca data
+  const { account, loading: accountLoading } = useAlpacaAccount();
+  const { positions, totalMarketValue, totalUnrealizedPL, loading: positionsLoading } = useAlpacaPositions();
+  const alpacaLoading = accountLoading || positionsLoading;
+
   // Merge mock + user-created portfolios
   const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
   const myPortfolios = useMemo(() => {
@@ -118,12 +125,19 @@ export default function Dashboard() {
   const simulatingCount = simulatingPortfolios.length;
   const totalMyInvestment = myPortfolios.reduce((acc: number, s: any) => acc + (s.creator_investment || 0), 0);
   const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
-  const totalValue = totalMyInvestment + totalInvestedInOthers;
   const totalAllocatedInvested = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
 
+  // Use live Alpaca data when available, fall back to mock
+  const displayEquity = account ? account.equity : totalMyInvestment + totalInvestedInOthers;
+  const displayPortfolioValue = account ? account.portfolioValue : displayEquity;
+  const displayDayPL = account ? account.dayPL : 0;
+  const displayDayPLPercent = account ? account.dayPLPercent : 3.2;
+  const displayCash = account ? account.cash : 0;
+  const hasLiveData = !!account;
+
   // Count-up animations
-  const animMyInvestment = useCountUp(totalMyInvestment, 800);
-  const animTotalValue = useCountUp(totalValue, 800);
+  const animEquity = useCountUp(displayEquity, 800);
+  const animPortfolioValue = useCountUp(displayPortfolioValue, 800);
   const animVsSP500 = useCountUp(vsSP500, 800, 1);
 
   const tabCards = [
@@ -184,29 +198,62 @@ export default function Dashboard() {
         {/* Hero Summary Bar */}
         <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">
           <div className="flex items-start gap-10 flex-wrap">
-            {/* Invested */}
+            {/* Account Equity */}
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[2rem] font-bold text-foreground">{formatCurrency(animMyInvestment)}</span>
-                <span className="text-[0.9rem] text-muted-foreground">invested</span>
+                <span className="font-mono text-[2rem] font-bold text-foreground">
+                  {alpacaLoading ? '...' : formatCurrency(animEquity)}
+                </span>
+                <span className="text-[0.9rem] text-muted-foreground">
+                  {hasLiveData ? 'equity' : 'invested'}
+                </span>
+                {hasLiveData && (
+                  <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
+                )}
               </div>
               <div className="flex items-center gap-1 mt-1">
-                <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+3.2%</span>
-                <span className="text-[0.8rem] text-muted-foreground">this month</span>
+                {displayDayPLPercent >= 0 ? (
+                  <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
+                ) : (
+                  <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
+                )}
+                <span className="text-[0.8rem] font-medium" style={{ color: displayDayPLPercent >= 0 ? '#10B981' : '#EF4444' }}>
+                  {displayDayPLPercent >= 0 ? '+' : ''}{displayDayPLPercent.toFixed(2)}%
+                </span>
+                <span className="text-[0.8rem] text-muted-foreground">
+                  {hasLiveData ? 'today' : 'this month'}
+                </span>
+                {hasLiveData && displayDayPL !== 0 && (
+                  <span className="text-[0.8rem] text-muted-foreground ml-1">
+                    ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(displayDayPL)})
+                  </span>
+                )}
               </div>
             </div>
             {/* Total Value */}
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[2rem] font-bold text-foreground">{formatCurrency(animTotalValue)}</span>
-                <span className="text-[0.9rem] text-muted-foreground">total value</span>
+                <span className="font-mono text-[2rem] font-bold text-foreground">
+                  {alpacaLoading ? '...' : formatCurrency(animPortfolioValue)}
+                </span>
+                <span className="text-[0.9rem] text-muted-foreground">
+                  {hasLiveData ? 'portfolio value' : 'total value'}
+                </span>
               </div>
-              <div className="flex items-center gap-1 mt-1">
-                <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+8.1%</span>
-                <span className="text-[0.8rem] text-muted-foreground">this month</span>
-              </div>
+              {hasLiveData ? (
+                <div className="flex items-center gap-1 mt-1">
+                  <Wallet className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-[0.8rem] text-muted-foreground">
+                    {formatCurrency(displayCash)} cash available
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 mt-1">
+                  <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
+                  <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+8.1%</span>
+                  <span className="text-[0.8rem] text-muted-foreground">this month</span>
+                </div>
+              )}
             </div>
             {/* vs S&P 500 */}
             <div className="flex flex-col">
@@ -271,6 +318,60 @@ export default function Dashboard() {
             >
               <X className="h-4 w-4" />
             </button>
+          </div>
+        )}
+
+        {/* Live Alpaca Positions */}
+        {hasLiveData && positions.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">Live Positions</h2>
+                <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>
+                  {positions.length} open
+                </span>
+              </div>
+              <Link to="/paper-trading" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                View all <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(positions.length, 4)}, minmax(0, 1fr))` }}>
+              {positions.slice(0, 8).map((pos) => (
+                <div
+                  key={pos.symbol}
+                  className="rounded-xl p-3"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${pos.unrealizedPL >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono font-semibold text-sm text-foreground">{pos.symbol}</span>
+                    <span className="text-xs text-muted-foreground">{pos.qty} shares</span>
+                  </div>
+                  <div className="font-mono text-sm text-foreground">{formatCurrency(pos.marketValue)}</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    {pos.unrealizedPL >= 0 ? (
+                      <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
+                    ) : (
+                      <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
+                    )}
+                    <span className="text-xs font-medium" style={{ color: pos.unrealizedPL >= 0 ? '#10B981' : '#EF4444' }}>
+                      {pos.unrealizedPL >= 0 ? '+' : ''}{formatCurrency(pos.unrealizedPL)} ({pos.unrealizedPLPercent >= 0 ? '+' : ''}{pos.unrealizedPLPercent.toFixed(2)}%)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {totalUnrealizedPL !== 0 && (
+              <div className="mt-2 text-right">
+                <span className="text-xs text-muted-foreground">Total unrealized P&L: </span>
+                <span className="text-xs font-mono font-medium" style={{ color: totalUnrealizedPL >= 0 ? '#10B981' : '#EF4444' }}>
+                  {totalUnrealizedPL >= 0 ? '+' : ''}{formatCurrency(totalUnrealizedPL)}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

@@ -88,43 +88,117 @@ export function AssistantPanel({
                 <div className="space-y-2" style={{ maxWidth: '85%' }}>
                   <div
                     className="text-[0.875rem] leading-relaxed whitespace-pre-line"
-                    style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      borderRadius: 12,
-                      padding: '12px 16px',
-                    }}
+                    style={
+                      msg.tradeResult?.success === true
+                        ? {
+                            background: 'rgba(5, 150, 105, 0.12)',
+                            border: '1px solid rgba(5, 150, 105, 0.4)',
+                            borderRadius: 12,
+                            padding: '12px 16px',
+                            boxShadow: '0 0 24px rgba(5, 150, 105, 0.15)',
+                          }
+                        : msg.tradeResult?.success === false
+                          ? {
+                              background: 'rgba(220, 38, 38, 0.1)',
+                              border: '1px solid rgba(220, 38, 38, 0.45)',
+                              borderRadius: 12,
+                              padding: '12px 16px',
+                              boxShadow: '0 0 20px rgba(220, 38, 38, 0.12)',
+                            }
+                          : {
+                              background: 'rgba(255,255,255,0.03)',
+                              border: '1px solid rgba(255,255,255,0.05)',
+                              borderRadius: 12,
+                              padding: '12px 16px',
+                            }
+                    }
                   >
                     {renderMarkdown(msg.content)}
                   </div>
+                  {msg.pendingTrade && (
+                    <div
+                      className="text-[0.8rem]"
+                      style={{
+                        border: '1px solid rgba(124, 58, 237, 0.45)',
+                        borderRadius: 12,
+                        padding: '12px 14px',
+                        background: 'rgba(15, 12, 25, 0.85)',
+                        boxShadow:
+                          '0 0 0 1px rgba(255,255,255,0.06) inset, 0 8px 32px rgba(0,0,0,0.35)',
+                      }}
+                    >
+                      <p
+                        className="text-[0.65rem] uppercase tracking-wider font-semibold mb-2.5"
+                        style={{ color: 'rgba(255,255,255,0.5)' }}
+                      >
+                        Market order preview
+                      </p>
+                      <dl
+                        className="grid grid-cols-[minmax(0,auto)_1fr] gap-x-3 gap-y-2"
+                        style={{ color: 'rgba(255,255,255,0.92)' }}
+                      >
+                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Symbol</dt>
+                        <dd className="font-mono font-semibold">{msg.pendingTrade.symbol}</dd>
+                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Quantity</dt>
+                        <dd>{msg.pendingTrade.qty}</dd>
+                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Side</dt>
+                        <dd className="capitalize">{msg.pendingTrade.side}</dd>
+                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Order type</dt>
+                        <dd>Market</dd>
+                      </dl>
+                    </div>
+                  )}
                   {msg.quickActions && msg.quickActions.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                      {msg.quickActions.map((action) => (
-                        <button
-                          key={action.label}
-                          onClick={() => onQuickAction(action)}
-                          className="text-left transition-all duration-150 hover:scale-[1.02]"
-                          style={{
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: 8,
-                            padding: '8px 16px',
-                            fontSize: '0.8rem',
-                            color: 'rgba(255,255,255,0.75)',
-                            cursor: 'pointer',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)';
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                          }}
-                        >
-                          {action.label}
-                        </button>
-                      ))}
+                      {msg.quickActions.map((action) => {
+                        const isConfirmTrade = action.tradeQuickAction === 'confirm';
+                        return (
+                          <button
+                            key={
+                              action.tradeQuickAction
+                                ? `${action.label}-${action.tradeQuickAction}`
+                                : action.label
+                            }
+                            type="button"
+                            onClick={() => onQuickAction(action)}
+                            className={cn(
+                              'text-left transition-all duration-150',
+                              isConfirmTrade
+                                ? 'glow-commit rounded-lg hover:scale-[1.02]'
+                                : 'hover:scale-[1.02]',
+                            )}
+                            style={
+                              isConfirmTrade
+                                ? {
+                                    padding: '8px 16px',
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                  }
+                                : {
+                                    background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: 8,
+                                    padding: '8px 16px',
+                                    fontSize: '0.8rem',
+                                    color: 'rgba(255,255,255,0.75)',
+                                    cursor: 'pointer',
+                                  }
+                            }
+                            onMouseEnter={(e) => {
+                              if (isConfirmTrade) return;
+                              e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)';
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                            }}
+                            onMouseLeave={(e) => {
+                              if (isConfirmTrade) return;
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                            }}
+                          >
+                            {action.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
