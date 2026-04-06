@@ -1,14 +1,10 @@
 /**
  * Vercel serverless proxy for Alpaca Market Data API.
  * Keeps API keys server-side (never exposed to the browser).
- * Matches any path under /api/alpaca-data/* and forwards to data.alpaca.markets.
  */
-type VercelRequest = { method?: string; query: Record<string, string | string[]>; body?: any };
-type VercelResponse = { status(code: number): VercelResponse; json(data: any): void; send(data: any): void; end(): void; setHeader(name: string, value: string): VercelResponse };
-
 const ALPACA_DATA_BASE = 'https://data.alpaca.markets';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   const apiKey = process.env.ALPACA_API_KEY;
   const secretKey = process.env.ALPACA_SECRET_KEY;
 
@@ -18,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { path } = req.query;
   const alpacaPath = Array.isArray(path) ? path.join('/') : path || '';
-  const url = new URL(`/${alpacaPath}`, ALPACA_DATA_BASE);
+  const url = new URL('/' + alpacaPath, ALPACA_DATA_BASE);
 
   for (const [key, value] of Object.entries(req.query)) {
     if (key === 'path') continue;
@@ -48,7 +44,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Content-Type', contentType);
     return res.status(alpacaRes.status).send(data);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Proxy error';
-    return res.status(502).json({ error: message });
+    return res.status(502).json({ error: err.message || 'Proxy error' });
   }
-}
+};

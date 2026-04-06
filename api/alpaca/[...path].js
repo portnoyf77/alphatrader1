@@ -1,14 +1,10 @@
 /**
  * Vercel serverless proxy for Alpaca Trading API.
  * Keeps API keys server-side (never exposed to the browser).
- * Matches any path under /api/alpaca/* and forwards to paper-api.alpaca.markets.
  */
-type VercelRequest = { method?: string; query: Record<string, string | string[]>; body?: any };
-type VercelResponse = { status(code: number): VercelResponse; json(data: any): void; send(data: any): void; end(): void; setHeader(name: string, value: string): VercelResponse };
-
 const ALPACA_BASE = 'https://paper-api.alpaca.markets';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   const apiKey = process.env.ALPACA_API_KEY;
   const secretKey = process.env.ALPACA_SECRET_KEY;
 
@@ -16,19 +12,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Alpaca API keys not configured on server' });
   }
 
-  // Extract the path after /api/alpaca/
   const { path } = req.query;
   const alpacaPath = Array.isArray(path) ? path.join('/') : path || '';
-  const url = new URL(`/${alpacaPath}`, ALPACA_BASE);
+  const url = new URL('/' + alpacaPath, ALPACA_BASE);
 
-  // Forward query params (except 'path' which is the catch-all)
   for (const [key, value] of Object.entries(req.query)) {
     if (key === 'path') continue;
     if (typeof value === 'string') url.searchParams.set(key, value);
   }
 
   try {
-    const headers: Record<string, string> = {
+    const headers = {
       'APCA-API-KEY-ID': apiKey,
       'APCA-API-SECRET-KEY': secretKey,
     };
@@ -47,7 +41,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const data = await alpacaRes.text();
 
-    // Forward status and CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -60,7 +53,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Content-Type', contentType);
     return res.status(alpacaRes.status).send(data);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Proxy error';
-    return res.status(502).json({ error: message });
+    return res.status(502).json({ error: err.message || 'Proxy error' });
   }
-}
+};
