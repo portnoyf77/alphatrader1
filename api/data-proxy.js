@@ -1,6 +1,6 @@
 const ALPACA_DATA_BASE = 'https://data.alpaca.markets';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const apiKey = process.env.ALPACA_API_KEY;
   const secretKey = process.env.ALPACA_SECRET_KEY;
 
