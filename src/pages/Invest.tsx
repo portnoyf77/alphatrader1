@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine } from 'lucide-react';
+import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
+import { generatePortfolio } from '@/lib/portfolioService';
+import type { QuestionnaireAnswers, GeneratePortfolioResponse } from '@/lib/portfolioTypes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,13 +42,59 @@ interface EditableHolding {
   weight: number;
 }
 
-const enhancedGeneratedHoldings: GeneratedHolding[] = [
-  { ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 35, role: 'Core', explanation: 'VTI provides comprehensive exposure to the entire U.S. stock market.', alignment: 'Matches your growth objective while providing broad diversification.', characteristics: ['Ultra-low 0.03% expense ratio', 'High liquidity with $1T+ AUM', 'Covers 3,500+ U.S. stocks'], tradeoff: 'Lower potential upside than concentrated sector bets, but significantly reduces single-stock risk.' },
-  { ticker: 'VXUS', name: 'Vanguard Total Intl Stock ETF', weight: 20, role: 'International', explanation: 'VXUS delivers exposure to developed and emerging markets outside the U.S.', alignment: 'Directly addresses your request for international exposure.', characteristics: ['0.07% expense ratio', '7,800+ international stocks', 'Covers 40+ countries'], tradeoff: 'Introduces currency risk but provides valuable diversification.' },
-  { ticker: 'QQQ', name: 'Invesco QQQ Trust', weight: 20, role: 'Growth', explanation: 'QQQ tracks the Nasdaq-100 Index, providing concentrated tech exposure.', alignment: 'Fulfills your tech sector focus requirement.', characteristics: ['Heavy tech concentration (50%+)', 'Top 100 Nasdaq companies', 'Strong historical performance'], tradeoff: 'Higher volatility but historically delivers outsized returns during bull markets.' },
-  { ticker: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 15, role: 'Stability', explanation: 'BND provides exposure to the entire U.S. investment-grade bond market.', alignment: 'Adds a buffer against equity volatility.', characteristics: ['0.03% expense ratio', '10,000+ bond holdings', 'Investment-grade focus'], tradeoff: 'Lower returns than equities but provides crucial downside protection.' },
-  { ticker: 'GLD', name: 'SPDR Gold Shares', weight: 10, role: 'Hedge', explanation: 'GLD tracks the price of physical gold bullion.', alignment: 'Provides portfolio insurance against inflation and uncertainty.', characteristics: ['Physical gold backing', 'High liquidity', 'Inflation protection'], tradeoff: 'No dividend income but provides valuable protection during crises.' },
-];
+// ── Convert StrategyProfile codes to readable strings for Claude ──
+const goalLabels: Record<string, string> = {
+  accumulation: 'Long-term wealth accumulation',
+  retirement: 'Retirement savings',
+  income: 'Income generation from dividends and interest',
+  preservation: 'Capital preservation',
+  aggressive: 'Aggressive growth, accepting higher risk',
+};
+const timelineLabels: Record<string, string> = {
+  '1-2': '1-2 years (short-term)',
+  '3-5': '3-5 years (medium-term)',
+  '5-10': '5-10 years (long-term)',
+  '10+': '10+ years (very long-term)',
+};
+const drawdownLabels: Record<string, string> = {
+  'sell-all': 'Very conservative - would sell everything on a 20% drop',
+  'sell-some': 'Cautious - would reduce exposure on a 20% drop',
+  hold: 'Moderate - would hold steady through a 20% drop',
+  'buy-more': 'Aggressive - would buy more on a 20% drop',
+};
+const geoLabels: Record<string, string> = {
+  us: 'Primarily US-focused',
+  global: 'Global diversification (US + international mix)',
+  emerging: 'Emerging markets focus (higher growth potential)',
+  international: 'International developed markets (Europe, Japan, Australia)',
+};
+
+function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
+  const sectors = profile.sectorEmphasis.length > 0
+    ? profile.sectorEmphasis.join(', ')
+    : 'No specific sector preference (broad diversification)';
+
+  return {
+    goal: goalLabels[profile.primaryGoal || ''] || 'Wealth accumulation',
+    timeline: timelineLabels[profile.timeline || ''] || '5-10 years',
+    risk: drawdownLabels[profile.drawdownReaction || ''] || 'Moderate',
+    sectors,
+    geography: geoLabels[profile.geographicPreference || ''] || 'US-focused',
+    volatility: `Comfortable with up to ${profile.volatilityTolerance}% portfolio swings`,
+  };
+}
+
+// ── Map AI holding type to a display role ──
+function typeToRole(type: string): GeneratedHolding['role'] {
+  const map: Record<string, GeneratedHolding['role']> = {
+    'ETF': 'Core',
+    'Stock': 'Growth',
+    'Bond ETF': 'Stability',
+    'Commodity ETF': 'Hedge',
+    'REIT': 'Growth',
+  };
+  return map[type] || 'Core';
+}
 
 const roleColors: Record<GeneratedHolding['role'], string> = {
   Core: 'border-[rgba(148,163,184,0.3)]',
@@ -93,27 +141,90 @@ export default function Create() {
   const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
   const [editOpen, setEditOpen] = useState(false);
 
+  // AI portfolio generation state
+  const aiResultRef = useRef<GeneratePortfolioResponse | null>(null);
+  const aiErrorRef = useRef<string | null>(null);
+  const [waitingForAI, setWaitingForAI] = useState(false);
+
   const handleQuestionnaireComplete = (profile: StrategyProfile) => {
     setStrategyProfile(profile);
     setCreationStep('animation');
+
+    // Fire AI generation in parallel with the animation
+    aiResultRef.current = null;
+    aiErrorRef.current = null;
+    const answers = profileToAnswers(profile);
+    generatePortfolio(answers)
+      .then((result) => { aiResultRef.current = result; })
+      .catch((err) => {
+        console.error('[Invest] AI portfolio generation failed:', err);
+        aiErrorRef.current = err instanceof Error ? err.message : 'Portfolio generation failed';
+      });
   };
 
-  const handleAnimationComplete = (name: string) => {
+  const handleAnimationComplete = async (name: string) => {
     setGeneratedStrategyName(name);
+
+    // If the AI call is still running, wait for it with a brief loading state
+    if (!aiResultRef.current && !aiErrorRef.current) {
+      setWaitingForAI(true);
+      // Poll until we get a result or error (max ~30s)
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        if (aiResultRef.current || aiErrorRef.current) break;
+      }
+      setWaitingForAI(false);
+    }
+
+    // If AI failed, show error and let user retry
+    if (aiErrorRef.current || !aiResultRef.current) {
+      const errorMsg = aiErrorRef.current || 'Portfolio generation timed out';
+      toast({
+        title: 'Portfolio generation failed',
+        description: `${errorMsg}. You can try again.`,
+        variant: 'destructive',
+      });
+      handleStartOver();
+      return;
+    }
+
+    // Use the AI-generated portfolio
+    const ai = aiResultRef.current;
+    const strategyName = ai.strategy?.name
+      ? `${name.split('-')[0]}-${name.split('-')[1]}` // Keep the gem-number format
+      : name;
+
+    const aiHoldings: GeneratedHolding[] = ai.holdings.map(h => ({
+      ticker: h.symbol,
+      name: h.name,
+      weight: h.allocation,
+      role: typeToRole(h.type),
+      explanation: h.reasoning,
+      alignment: h.reasoning, // AI provides one combined reasoning field
+      characteristics: [h.type],
+      tradeoff: '',
+    }));
+
+    // Build strategy breakdown from holdings
+    const breakdownMap = new Map<string, number>();
+    for (const h of ai.holdings) {
+      const existing = breakdownMap.get(h.type) || 0;
+      breakdownMap.set(h.type, existing + h.allocation);
+    }
+    const strategyBreakdown = Array.from(breakdownMap.entries()).map(([role, percentage]) => ({
+      role,
+      percentage,
+    }));
+
     const portfolio = {
-      name,
-      holdings: enhancedGeneratedHoldings,
+      name: strategyName,
+      holdings: aiHoldings,
       excluded: [] as ExcludedHolding[],
-      strategyBreakdown: [
-        { role: 'Broad Market', percentage: 35 },
-        { role: 'International', percentage: 20 },
-        { role: 'Technology', percentage: 20 },
-        { role: 'Bonds', percentage: 15 },
-        { role: 'Commodities', percentage: 10 },
-      ],
-      rationale: `This portfolio was built to help you ${strategyProfile.primaryGoal === 'accumulation' ? 'grow your money' : strategyProfile.primaryGoal === 'income' ? 'earn regular income' : 'protect what you have'} over ${strategyProfile.timeline || '5-10'} years. Growth opportunities are balanced with stability for a portfolio that can grow without keeping you up at night.`,
-      risks: 'This portfolio carries moderate equity risk with exposure to technology concentration, currency risk from international holdings, and interest rate sensitivity from bonds.',
+      strategyBreakdown,
+      rationale: ai.strategy?.description || 'AI-generated portfolio based on your preferences.',
+      risks: `Risk level: ${ai.strategy?.riskLevel || 'moderate'}. This portfolio was tailored to your questionnaire answers using live market data.`,
     };
+
     setGeneratedPortfolio(portfolio);
     setEditableHoldings(portfolio.holdings.map((h, i) => ({
       id: String(i),
@@ -527,10 +638,18 @@ export default function Create() {
                 </div>
               )}
               {creationStep === 'animation' && (
-                <ParticleCrystallizationAnimation
-                  profile={strategyProfile}
-                  onComplete={handleAnimationComplete}
-                />
+                waitingForAI ? (
+                  <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-muted-foreground">Finalizing your portfolio with live market data...</p>
+                    <p className="text-xs text-muted-foreground">Almost there</p>
+                  </div>
+                ) : (
+                  <ParticleCrystallizationAnimation
+                    profile={strategyProfile}
+                    onComplete={handleAnimationComplete}
+                  />
+                )
               )}
               {creationStep === 'results' && (
                 <div className="space-y-6">
