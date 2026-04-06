@@ -2,6 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/alpaca-data/:path*", "destination": "/api/data-proxy?path=:path*" },
+    { "source": "/api/alpaca/:path*", "destination": "/api/alpaca-proxy?path=:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

@@ -33,6 +33,7 @@ export function useAlpacaNews(symbols?: string[], limit = 20): UseAlpacaNewsResu
           setError(null);
         }
       } catch (err) {
+        console.warn('[useAlpacaNews] Failed to fetch news:', err instanceof Error ? err.message : err);
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Failed to load news');
         }

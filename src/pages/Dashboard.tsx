@@ -248,7 +248,7 @@ export default function Dashboard() {
     ['SPY', 'QQQ', 'AAPL', 'MSFT', 'NVDA'].forEach((s) => syms.add(s));
     return Array.from(syms);
   }, [positions]);
-  const { articles: liveNews, loading: newsLoading } = useAlpacaNews(newsSymbols, 10);
+  const { articles: liveNews, loading: newsLoading, error: newsError } = useAlpacaNews(newsSymbols, 10);
 
   // Merge mock + user-created portfolios
   const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
@@ -907,7 +907,11 @@ export default function Dashboard() {
           {newsLoading && liveNews.length === 0 ? (
             <div className="text-sm text-muted-foreground py-6 text-center">Loading latest news...</div>
           ) : liveNews.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">No recent news available.</div>
+            <div className="text-sm text-muted-foreground py-6 text-center">
+              {newsError
+                ? `News feed unavailable: ${newsError}`
+                : 'No recent news available.'}
+            </div>
           ) : (
             <div
               className="flex gap-4 overflow-x-auto pb-2"

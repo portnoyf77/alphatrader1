@@ -1,8 +1,4 @@
-/**
- * Vercel serverless proxy for Alpaca Trading API.
- * Keeps API keys server-side (never exposed to the browser).
- */
-const ALPACA_BASE = 'https://paper-api.alpaca.markets';
+const ALPACA_DATA_BASE = 'https://data.alpaca.markets';
 
 module.exports = async function handler(req, res) {
   const apiKey = process.env.ALPACA_API_KEY;
@@ -12,9 +8,8 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Alpaca API keys not configured on server' });
   }
 
-  const { path } = req.query;
-  const alpacaPath = Array.isArray(path) ? path.join('/') : path || '';
-  const url = new URL('/' + alpacaPath, ALPACA_BASE);
+  const alpacaPath = req.query.path || '';
+  const url = new URL('/' + alpacaPath, ALPACA_DATA_BASE);
 
   for (const [key, value] of Object.entries(req.query)) {
     if (key === 'path') continue;
@@ -22,27 +17,18 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const headers = {
-      'APCA-API-KEY-ID': apiKey,
-      'APCA-API-SECRET-KEY': secretKey,
-    };
-
-    if (req.body && req.method !== 'GET' && req.method !== 'HEAD') {
-      headers['Content-Type'] = 'application/json';
-    }
-
     const alpacaRes = await fetch(url.toString(), {
       method: req.method || 'GET',
-      headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' && req.body
-        ? JSON.stringify(req.body)
-        : undefined,
+      headers: {
+        'APCA-API-KEY-ID': apiKey,
+        'APCA-API-SECRET-KEY': secretKey,
+      },
     });
 
     const data = await alpacaRes.text();
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
