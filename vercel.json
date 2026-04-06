@@ -3,8 +3,6 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/alpaca/(.*)", "destination": "/api/alpaca/$1" },
-    { "source": "/api/alpaca-data/(.*)", "destination": "/api/alpaca-data/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
