@@ -25,6 +25,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import { AlpacaConnectionTest } from "@/components/AlpacaConnectionTest";
 
 const queryClient = new QueryClient();
 
@@ -33,27 +34,101 @@ function PageViewTracker() {
   return null;
 }
 
-const App = () => {
-  const isLovablePreview = window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('preview');
+/** Demo gate + main app routes (everything except `/test-alpaca`). */
+function GatedApp() {
+  const isLovablePreview =
+    window.location.hostname.includes("lovableproject.com") ||
+    window.location.hostname.includes("preview");
 
   const [accessGranted, setAccessGranted] = useState(
-    () => isLovablePreview || localStorage.getItem('demoAccessGranted') === 'true'
+    () => isLovablePreview || localStorage.getItem("demoAccessGranted") === "true",
   );
 
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   if (!accessGranted) {
     return (
-      <DemoGate onAccessGranted={() => {
-        localStorage.setItem('demoAccessGranted', 'true');
-        setAccessGranted(true);
-        if (localStorage.getItem('tourCompleted') !== 'true') {
-          setShowWelcomeModal(true);
-        }
-      }} />
+      <DemoGate
+        onAccessGranted={() => {
+          localStorage.setItem("demoAccessGranted", "true");
+          setAccessGranted(true);
+          if (localStorage.getItem("tourCompleted") !== "true") {
+            setShowWelcomeModal(true);
+          }
+        }}
+      />
     );
   }
 
+  return (
+    <>
+      <PageViewTracker />
+      <AIAssistant />
+      <GuidedTour />
+      {showWelcomeModal && (
+        <TourWelcomeModalWrapper onDone={() => setShowWelcomeModal(false)} />
+      )}
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/faq" element={<FAQ />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/invest"
+          element={
+            <ProtectedRoute>
+              <Invest />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/simulation/:id"
+          element={
+            <ProtectedRoute>
+              <Simulation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/portfolio/:id"
+          element={
+            <ProtectedRoute allowExpiredTrial>
+              <StrategyDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/strategy/:id"
+          element={<Navigate to={window.location.pathname.replace("/strategy/", "/portfolio/")} replace />}
+        />
+        <Route
+          path="/dashboard/portfolio/:id"
+          element={
+            <ProtectedRoute>
+              <PortfolioOwnerDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+}
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <MockAuthProvider>
@@ -62,39 +137,10 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <PageViewTracker />
-              <AIAssistant />
-              <GuidedTour />
-              {showWelcomeModal && (
-                <TourWelcomeModalWrapper onDone={() => setShowWelcomeModal(false)} />
-              )}
               <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/faq" element={<FAQ />} />
-                
-                {/* Protected routes */}
-                <Route path="/invest" element={
-                  <ProtectedRoute><Invest /></ProtectedRoute>
-                } />
-                <Route path="/simulation/:id" element={
-                  <ProtectedRoute><Simulation /></ProtectedRoute>
-                } />
-                <Route path="/portfolio/:id" element={
-                  <ProtectedRoute allowExpiredTrial><StrategyDetail /></ProtectedRoute>
-                } />
-                <Route path="/strategy/:id" element={<Navigate to={window.location.pathname.replace('/strategy/', '/portfolio/')} replace />} />
-                <Route path="/dashboard/portfolio/:id" element={
-                  <ProtectedRoute><PortfolioOwnerDetail /></ProtectedRoute>
-                } />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute><Dashboard /></ProtectedRoute>
-                } />
-                <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                <Route path="*" element={<NotFound />} />
+                {/* Bypasses DemoGate and all gated routes */}
+                <Route path="/test-alpaca" element={<AlpacaConnectionTest />} />
+                <Route path="*" element={<GatedApp />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>

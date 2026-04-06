@@ -11,6 +11,7 @@ import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { LiveTickerBar } from '@/components/LiveTickerBar';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
@@ -87,6 +88,28 @@ export default function Dashboard() {
     return [...baseMy, ...normalized];
   }, [userCreated]);
 
+  const liveTickerHoldings = useMemo(() => {
+    const seen = new Set<string>();
+    const list: { ticker: string; weight: number }[] = [];
+    for (const p of myPortfolios) {
+      for (const h of p.holdings ?? []) {
+        const t = (h.ticker ?? '').trim().toUpperCase();
+        if (!t || seen.has(t)) continue;
+        seen.add(t);
+        list.push({ ticker: h.ticker, weight: h.weight });
+      }
+    }
+    for (const p of investedPortfolios) {
+      for (const h of p.holdings ?? []) {
+        const t = (h.ticker ?? '').trim().toUpperCase();
+        if (!t || seen.has(t)) continue;
+        seen.add(t);
+        list.push({ ticker: h.ticker, weight: h.weight });
+      }
+    }
+    return list;
+  }, [myPortfolios]);
+
   const simulatingPortfolios = useMemo(() =>
     myPortfolios.filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
 
@@ -155,6 +178,8 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your portfolios and investments.</p>
         </div>
+
+        <LiveTickerBar holdings={liveTickerHoldings} />
 
         {/* Hero Summary Bar */}
         <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">

@@ -1,0 +1,149 @@
+/**
+ * Alpaca Trading (paper) + Market Data via `fetch`.
+ * In dev, Vite proxies `/api/alpaca` → paper API and `/api/alpaca-data` → data API (see `vite.config.ts`).
+ * Auth uses `VITE_ALPACA_API_KEY` and `VITE_ALPACA_SECRET_KEY`.
+ */
+
+const TRADING_PROXY_PREFIX = "/api/alpaca";
+const DATA_PROXY_PREFIX = "/api/alpaca-data";
+
+function getConfig() {
+  const apiKey = import.meta.env.VITE_ALPACA_API_KEY;
+  const secretKey = import.meta.env.VITE_ALPACA_SECRET_KEY;
+  if (!apiKey || !secretKey) {
+    throw new Error("Missing VITE_ALPACA_API_KEY or VITE_ALPACA_SECRET_KEY");
+  }
+  return { apiKey, secretKey };
+}
+
+function authHeaders(): HeadersInit {
+  const { apiKey, secretKey } = getConfig();
+  return {
+    "APCA-API-KEY-ID": apiKey,
+    "APCA-API-SECRET-KEY": secretKey,
+  };
+}
+
+async function throwAlpacaError(res: Response): Promise<never> {
+  let detail = res.statusText;
+  try {
+    const body: { message?: string | string[] } = await res.json();
+    if (typeof body.message === "string") detail = body.message;
+    else if (Array.isArray(body.message)) detail = body.message.join(", ");
+  } catch {
+    /* ignore */
+  }
+  throw new Error(`Alpaca API error (${res.status}): ${detail}`);
+}
+
+/** Response shape from GET /v2/account (subset of fields; see Alpaca docs for the full object). */
+export type AlpacaAccountInfo = {
+  id: string;
+  account_number: string;
+  status: string;
+  currency: string;
+  buying_power: string;
+  cash: string;
+  portfolio_value: string;
+  equity: string;
+  last_equity: string;
+  [key: string]: unknown;
+};
+
+/** Normalized latest NBBO-style quote from Market Data v2. */
+export type AlpacaLatestQuote = {
+  symbol: string;
+  bidPrice: number;
+  askPrice: number;
+  bidSize: number;
+  askSize: number;
+  timestamp: string;
+};
+
+/**
+ * GET /v2/account on the trading API (proxied to paper API in dev).
+ */
+export async function getAccountInfo(): Promise<AlpacaAccountInfo> {
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/account`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaAccountInfo>;
+}
+
+/** Raw quote object from Market Data (subset; see Alpaca `stock_quote` schema). */
+export type AlpacaStockQuoteJson = {
+  t: string;
+  bp: number;
+  ap: number;
+  bs: number;
+  as: number;
+};
+
+/** JSON from GET /v2/stocks/{symbol}/quotes/latest or batch-style `quotes` map. */
+export type AlpacaLatestQuoteJson =
+  | { symbol?: string; quote: AlpacaStockQuoteJson }
+  | { quotes: Record<string, AlpacaStockQuoteJson>; currency?: string };
+
+function pickQuoteFromJson(data: unknown, sym: string): { symbol: string; quote: AlpacaStockQuoteJson } {
+  if (typeof data !== "object" || data === null) {
+    throw new Error("Unexpected quote response from Alpaca");
+  }
+  const o = data as Record<string, unknown>;
+
+  if ("quote" in o && o.quote && typeof o.quote === "object") {
+    const q = o.quote as Record<string, unknown>;
+    const parsed = parseStockQuoteFields(q);
+    return { symbol: (typeof o.symbol === "string" ? o.symbol : sym).toUpperCase(), quote: parsed };
+  }
+
+  if ("quotes" in o && o.quotes && typeof o.quotes === "object" && o.quotes !== null) {
+    const quotes = o.quotes as Record<string, Record<string, unknown>>;
+    const q = quotes[sym] ?? quotes[sym.toUpperCase()] ?? Object.values(quotes)[0];
+    if (!q) throw new Error("Unexpected quote response from Alpaca");
+    return { symbol: sym, quote: parseStockQuoteFields(q) };
+  }
+
+  throw new Error("Unexpected quote response from Alpaca");
+}
+
+function parseStockQuoteFields(q: Record<string, unknown>): AlpacaStockQuoteJson {
+  const bp = q.bp;
+  const ap = q.ap;
+  const bs = q.bs;
+  const askSize = q["as"];
+  const t = q.t;
+  if (
+    typeof t !== "string" ||
+    typeof bp !== "number" ||
+    typeof ap !== "number" ||
+    typeof bs !== "number" ||
+    typeof askSize !== "number"
+  ) {
+    throw new Error("Unexpected quote response from Alpaca");
+  }
+  return { t, bp, ap, bs, as: askSize };
+}
+
+/**
+ * Latest stock quote from Market Data API v2 (GET /v2/stocks/{symbol}/quotes/latest).
+ */
+export async function getLatestQuote(symbol: string): Promise<AlpacaLatestQuote> {
+  const sym = symbol.trim().toUpperCase();
+  if (!sym) {
+    throw new Error("Symbol is required");
+  }
+  const url = `${DATA_PROXY_PREFIX}/v2/stocks/${encodeURIComponent(sym)}/quotes/latest`;
+  const res = await fetch(url, { headers: authHeaders() });
+  if (!res.ok) await throwAlpacaError(res);
+  const data = (await res.json()) as unknown;
+  const { symbol: outSym, quote: q } = pickQuoteFromJson(data, sym);
+  return {
+    symbol: outSym,
+    bidPrice: q.bp,
+    askPrice: q.ap,
+    bidSize: q.bs,
+    askSize: q.as,
+    timestamp: q.t,
+  };
+}
