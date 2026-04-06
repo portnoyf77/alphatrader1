@@ -3,7 +3,8 @@
  * Receives messages and account context, returns Claude's response.
  * Requires ANTHROPIC_API_KEY env var on Vercel.
  */
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+type VercelRequest = { method?: string; query: Record<string, string | string[]>; body?: any };
+type VercelResponse = { status(code: number): VercelResponse; json(data: any): void; send(data: any): void; end(): void; setHeader(name: string, value: string): VercelResponse };
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 

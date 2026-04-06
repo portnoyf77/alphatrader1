@@ -3,7 +3,8 @@
  * Keeps API keys server-side (never exposed to the browser).
  * Matches any path under /api/alpaca/* and forwards to paper-api.alpaca.markets.
  */
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+type VercelRequest = { method?: string; query: Record<string, string | string[]>; body?: any };
+type VercelResponse = { status(code: number): VercelResponse; json(data: any): void; send(data: any): void; end(): void; setHeader(name: string, value: string): VercelResponse };
 
 const ALPACA_BASE = 'https://paper-api.alpaca.markets';
 
