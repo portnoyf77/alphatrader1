@@ -932,10 +932,11 @@ export default function Dashboard() {
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden"
+                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col"
                     style={{
                       minWidth: '280px',
                       maxWidth: '280px',
+                      height: '280px',
                       scrollSnapAlign: 'start',
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.06)',
@@ -944,14 +945,15 @@ export default function Dashboard() {
                   >
                     {thumbImg?.url && (
                       <div
-                        className="w-full h-36 bg-cover bg-center"
+                        className="w-full flex-shrink-0 bg-cover bg-center"
                         style={{
+                          height: '140px',
                           backgroundImage: `url(${thumbImg.url})`,
                           borderBottom: '1px solid rgba(255,255,255,0.06)',
                         }}
                       />
                     )}
-                    <div className="p-4 flex flex-col gap-2 h-full">
+                    <div className="p-4 flex flex-col gap-2 flex-1 min-h-0">
                       <p
                         className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
                         style={{
@@ -965,10 +967,10 @@ export default function Dashboard() {
                       </p>
                       {!thumbImg?.url && article.summary && (
                         <p
-                          className="text-[0.75rem] text-muted-foreground leading-relaxed"
+                          className="text-[0.75rem] text-muted-foreground leading-relaxed flex-1"
                           style={{
                             display: '-webkit-box',
-                            WebkitLineClamp: 2,
+                            WebkitLineClamp: 4,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                           }}
