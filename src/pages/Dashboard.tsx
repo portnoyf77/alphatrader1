@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock, Bot } from 'lucide-react';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { useAlpacaNews } from '@/hooks/useAlpacaNews';
@@ -16,9 +16,7 @@ import { useMyPortfolios, useFollowedPortfolios } from '@/hooks/usePortfolios';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { LiveTickerBar } from '@/components/LiveTickerBar';
-import { RebalancerWidget } from '@/components/dashboard/RebalancerWidget';
-import { getPortfolioHistory, placeOrder, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
+import { getPortfolioHistory, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
@@ -118,7 +116,7 @@ function DashboardEquityChart() {
     <div>
       <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm font-medium text-foreground">Equity History</span>
+          <span className="text-sm font-medium text-foreground">Account Equity History</span>
           <span className="text-xs font-mono" style={{ color: strokeColor }}>
             {changeValue >= 0 ? '+' : ''}{formatCurrency(changeValue)} ({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)
           </span>
@@ -141,88 +139,26 @@ function DashboardEquityChart() {
           ))}
         </div>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="dashEquityGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.15" />
-            <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaPath} fill="url(#dashEquityGrad)" />
-        <polyline points={points.join(' ')} fill="none" stroke={strokeColor} strokeWidth="2" strokeLinejoin="round" />
-        <text x={padding} y={padding - 4} fill="#888" fontSize="10" textAnchor="start">{formatCurrency(maxVal)}</text>
-        <text x={padding} y={height - padding + 14} fill="#888" fontSize="10" textAnchor="start">{formatCurrency(minVal)}</text>
-      </svg>
+      <div className="relative">
+        {/* Y-axis labels outside SVG so they don't get distorted */}
+        <div className="flex justify-between text-[0.7rem] font-mono text-muted-foreground mb-1">
+          <span>{formatCurrency(maxVal)}</span>
+        </div>
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="dashEquityGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={strokeColor} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill="url(#dashEquityGrad)" />
+          <polyline points={points.join(' ')} fill="none" stroke={strokeColor} strokeWidth="2" strokeLinejoin="round" />
+        </svg>
+        <div className="flex justify-between text-[0.7rem] font-mono text-muted-foreground mt-1">
+          <span>{formatCurrency(minVal)}</span>
+        </div>
+      </div>
     </div>
-  );
-}
-
-// ── Quick Trade Widget for Dashboard ──
-function DashboardQuickTrade({ onComplete }: { onComplete: () => void }) {
-  const [symbol, setSymbol] = useState('');
-  const [qty, setQty] = useState('1');
-  const [side, setSide] = useState<'buy' | 'sell'>('buy');
-  const [status, setStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message?: string }>({ type: 'idle' });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!symbol.trim() || !qty) return;
-    setStatus({ type: 'loading' });
-    try {
-      const order = await placeOrder(symbol, Number(qty), side);
-      setStatus({ type: 'success', message: `${order.side.toUpperCase()} ${order.qty} ${order.symbol} - ${order.status}` });
-      setSymbol('');
-      setQty('1');
-      setTimeout(() => { setStatus({ type: 'idle' }); onComplete(); }, 2000);
-    } catch (err) {
-      setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Order failed' });
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2 flex-wrap">
-      <div className="flex flex-col gap-1">
-        <label className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">Symbol</label>
-        <input
-          type="text"
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-          placeholder="AAPL"
-          className="h-8 w-20 rounded-lg px-2 text-xs font-mono bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">Qty</label>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={qty}
-          onChange={(e) => setQty(e.target.value)}
-          className="h-8 w-14 rounded-lg px-2 text-xs font-mono bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
-      <div className="flex gap-1">
-        <button
-          type="button"
-          onClick={() => setSide('buy')}
-          className={cn('h-8 px-3 rounded-lg text-xs font-medium transition-colors', side === 'buy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-secondary/50 text-muted-foreground border border-border')}
-        >Buy</button>
-        <button
-          type="button"
-          onClick={() => setSide('sell')}
-          className={cn('h-8 px-3 rounded-lg text-xs font-medium transition-colors', side === 'sell' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-secondary/50 text-muted-foreground border border-border')}
-        >Sell</button>
-      </div>
-      <button
-        type="submit"
-        disabled={status.type === 'loading' || !symbol.trim()}
-        className="h-8 px-4 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-      >
-        {status.type === 'loading' ? 'Placing...' : 'Place Order'}
-      </button>
-      {status.type === 'success' && <span className="text-xs text-emerald-400">{status.message}</span>}
-      {status.type === 'error' && <span className="text-xs text-red-400">{status.message}</span>}
-    </form>
   );
 }
 
@@ -269,28 +205,6 @@ export default function Dashboard() {
     }));
   }, [followedData]);
 
-  const liveTickerHoldings = useMemo(() => {
-    const seen = new Set<string>();
-    const list: { ticker: string; weight: number }[] = [];
-    for (const p of myPortfolios) {
-      for (const h of p.holdings ?? []) {
-        const t = (h.ticker ?? '').trim().toUpperCase();
-        if (!t || seen.has(t)) continue;
-        seen.add(t);
-        list.push({ ticker: h.ticker, weight: h.weight });
-      }
-    }
-    for (const p of investedPortfolios) {
-      for (const h of p.holdings ?? []) {
-        const t = (h.ticker ?? '').trim().toUpperCase();
-        if (!t || seen.has(t)) continue;
-        seen.add(t);
-        list.push({ ticker: h.ticker, weight: h.weight });
-      }
-    }
-    return list;
-  }, [myPortfolios]);
-
   const simulatingPortfolios = useMemo(() =>
     myPortfolios.filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
 
@@ -325,10 +239,6 @@ export default function Dashboard() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, [hasLiveData]);
-
-  const handleTradeComplete = useCallback(() => {
-    // Trigger refetches after a quick trade
-  }, []);
 
   // Fetch real portfolio metrics (volatility, Sharpe, S&P 500 benchmark)
   const [metrics, setMetrics] = useState<{
@@ -405,167 +315,384 @@ export default function Dashboard() {
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your portfolios and investments.</p>
-        </div>
 
-        <LiveTickerBar holdings={liveTickerHoldings} />
-
-        {!portfoliosLoading && !hasPortfolios && (
-          <Card
-            className="glass-card border-border/30"
-            style={{ background: 'rgba(255,255,255,0.02)' }}
-          >
-            <CardContent className="flex flex-col items-center text-center p-6 py-12">
-              <Sparkles className="h-12 w-12 text-muted-foreground mb-4" aria-hidden />
-              <h3 className="text-lg font-semibold mb-4">You haven&apos;t created a portfolio yet</h3>
-              <p className="text-muted-foreground text-sm mb-6 max-w-md">
-                Build a personalized portfolio on the Invest flow and track it here alongside your live account.
-              </p>
-              <Link to="/invest">
-                <Button className="gap-2">
-                  Go to Invest
-                  <ChevronRight className="h-4 w-4" />
+        {/* ── Account Summary + AI Activity Log ── */}
+        <div data-tour="summary-stats" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Left: Account Value */}
+          <div className="lg:col-span-2">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:gap-10">
+                {/* Account Equity */}
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[2.5rem] font-bold text-foreground leading-tight">
+                      {alpacaLoading ? '...' : formatCurrency(animEquity)}
+                    </span>
+                    {hasLiveData && (
+                      <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
+                    )}
+                  </div>
+                  <span className="text-sm text-muted-foreground mt-1">
+                    {hasLiveData ? 'Total Account Equity' : 'Total Invested'}
+                  </span>
+                  <div className="flex items-center gap-1 mt-2">
+                    {displayDayPLPercent >= 0 ? (
+                      <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
+                    ) : (
+                      <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
+                    )}
+                    <span className="text-[0.8rem] font-medium" style={{ color: displayDayPLPercent >= 0 ? '#10B981' : '#EF4444' }}>
+                      {displayDayPLPercent >= 0 ? '+' : ''}{displayDayPLPercent.toFixed(2)}%
+                    </span>
+                    <span className="text-[0.8rem] text-muted-foreground">
+                      {hasLiveData ? 'today' : 'this month'}
+                    </span>
+                    {hasLiveData && displayDayPL !== 0 && (
+                      <span className="text-[0.8rem] text-muted-foreground ml-1">
+                        ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(displayDayPL)})
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Portfolio Value + Cash */}
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[1.5rem] font-bold text-foreground">
+                      {alpacaLoading ? '...' : formatCurrency(animPortfolioValue)}
+                    </span>
+                  </div>
+                  <span className="text-sm text-muted-foreground mt-1">
+                    {hasLiveData ? 'Portfolio Value' : 'Total Value'}
+                  </span>
+                  {hasLiveData && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <Wallet className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-[0.8rem] text-muted-foreground">
+                        {formatCurrency(displayCash)} cash available
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {/* vs S&P 500 */}
+                <div className="flex flex-col">
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-baseline gap-2 cursor-help">
+                          <span className={cn(
+                            "font-mono text-[1.5rem] font-bold",
+                            realVsSP500 >= 0 ? "text-success" : "text-destructive"
+                          )}>
+                            {realVsSP500 >= 0 ? '+' : ''}{animVsSP500}%
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        {portfolioReturn
+                          ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% (30d) · S&P: +${sp500Return}%`
+                          : `You: ${formatPercent(userTotalReturn)} · S&P: ${formatPercent(sp500Return)}`
+                        }
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <span className="text-sm text-muted-foreground mt-1">vs S&P 500</span>
+                  <div className="flex items-center gap-1 mt-2">
+                    <span className="text-[0.8rem] text-muted-foreground">
+                      {portfolioReturn
+                        ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% · S&P: +${sp500Return}%`
+                        : `You: +${userTotalReturn}% · S&P: +${sp500Return}%`
+                      }
+                    </span>
+                    {portfolioReturn && <span className="text-[0.65rem] text-muted-foreground ml-1">(30d)</span>}
+                  </div>
+                </div>
+              </div>
+              {/* Create New Portfolio Button */}
+              <Link to="/invest" className="shrink-0 sm:self-start">
+                <Button className="h-11 min-h-11 w-full gap-2 sm:w-auto md:h-10 md:min-h-10">
+                  <Plus className="h-4 w-4" />
+                  Create New Portfolio
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </div>
 
-        {/* Equity Chart + Quick Trade (shown when live data available) */}
+          {/* Right: AI Activity Log Placeholder */}
+          <div
+            className="rounded-2xl p-5 flex flex-col"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              minHeight: '180px',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Bot className="h-4 w-4 text-primary" />
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">AI Activity</span>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-muted-foreground">
+                Rebalance recommendations and agent actions will appear here.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Coming soon
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Portfolio Tab Cards ── */}
+        <div data-tour="tab-cards" className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={cn(
+                "min-h-[44px] rounded-2xl p-6 text-left transition-all duration-200 cursor-pointer outline-none touch-manipulation",
+                "backdrop-blur-xl",
+                "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                activeTab === key
+                  ? "border-2 shadow-[0_0_20px_rgba(124,58,237,0.1)]"
+                  : "border hover:border-[rgba(255,255,255,0.14)]"
+              )}
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                borderColor: activeTab === key ? '#7C3AED' : 'rgba(255,255,255,0.1)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Icon className="h-4 w-4" style={{ color: activeTab === key ? '#A78BFA' : 'rgba(255,255,255,0.55)' }} />
+                <span className={cn(
+                  "text-sm font-medium",
+                  activeTab === key ? "text-foreground" : "text-muted-foreground"
+                )}>{label}</span>
+              </div>
+              <div className="font-mono text-[1.75rem] font-bold text-foreground mb-1">{count}</div>
+              <div className="text-[0.85rem] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>{detail}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Tab Content ── */}
+        <div key={activeTab} className="animate-in fade-in duration-200">
+          {activeTab === 'my-portfolios' && (
+            !hasPortfolios ? (
+              <Card className="glass-card border-border/30" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <CardContent className="flex flex-col items-center text-center p-6 py-12">
+                  <Sparkles className="h-12 w-12 text-muted-foreground mb-4" aria-hidden />
+                  <h3 className="text-lg font-semibold mb-4">You haven&apos;t created a portfolio yet</h3>
+                  <p className="text-muted-foreground text-sm mb-6 max-w-md">
+                    Build a personalized portfolio on the Invest flow and track it here alongside your live account.
+                  </p>
+                  <Link to="/invest">
+                    <Button className="gap-2">
+                      Go to Invest
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : livePortfolios.length === 0 ? (
+              <div
+                className="rounded-2xl border border-border/30 py-10 px-8 text-center"
+                style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
+              >
+                <p className="text-muted-foreground text-sm mb-3">
+                  You don&apos;t have any live portfolios yet. Simulating or private portfolios stay under the Simulating tab.
+                </p>
+                <Link to="/invest">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    Create a portfolio
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <Card className="glass-card">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Portfolio</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">My Investment</TableHead>
+                        <TableHead className="text-right">30d Return</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {livePortfolios.map((portfolio) => (
+                        <TableRow
+                          key={portfolio.id}
+                          className="cursor-pointer hover:bg-secondary/50 transition-all"
+                          style={{ borderLeft: '3px solid transparent' }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
+                          onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}
+                        >
+                          <TableCell>
+                            <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <GemDot name={portfolio.name} />
+                              {portfolio.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
+                              {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
+                          <TableCell className="text-right">
+                            <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                              {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                              {formatPercent(portfolio.performance.return_30d)}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )
+          )}
+
+          {activeTab === 'invested' && (
+            <Card className="glass-card">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Portfolio</TableHead>
+                      <TableHead>Creator</TableHead>
+                      <TableHead className="text-right">30d Return</TableHead>
+                      <TableHead className="text-right">My Allocation</TableHead>
+                      <TableHead className="text-right">My Return</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {investedPortfolios.map((portfolio) => (
+                      <TableRow
+                        key={portfolio.id}
+                        className="cursor-pointer hover:bg-secondary/50 transition-all"
+                        style={{ borderLeft: '3px solid transparent' }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
+                      >
+                        <TableCell>
+                          <Link to={`/portfolio/${portfolio.id}`} state={{ from: 'dashboard' }} className="font-medium hover:text-primary transition-colors flex items-center gap-2">
+                            <GemDot name={portfolio.name} />
+                            {portfolio.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", (portfolio.performance?.return_30d ?? 0) >= 0 ? "text-success" : "text-destructive")}>
+                            {(portfolio.performance?.return_30d ?? 0) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.performance?.return_30d ?? 0)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={cn("flex items-center justify-end gap-1", portfolio.myReturn >= 0 ? "text-success" : "text-destructive")}>
+                            {portfolio.myReturn >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {formatPercent(portfolio.myReturn)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'simulating' && (
+            <Card className="glass-card">
+              <CardContent className="p-0">
+                {simulatingPortfolios.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p className="mb-2">No portfolios currently simulating.</p>
+                    <Link to="/invest" className="text-primary hover:underline text-sm">Create a new portfolio &rarr;</Link>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Portfolio</TableHead>
+                        <TableHead>Sim. Duration</TableHead>
+                        <TableHead className="text-right">Sim. Return</TableHead>
+                        <TableHead className="text-right">Worst Drop</TableHead>
+                        <TableHead className="text-right">Risk Level</TableHead>
+                        <TableHead className="w-8"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {simulatingPortfolios.map((portfolio) => (
+                        <TableRow
+                          key={portfolio.id}
+                          className="cursor-pointer hover:bg-secondary/50 transition-all"
+                          style={{ borderLeft: '3px solid transparent' }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
+                          onClick={() => navigate(`/simulation/${portfolio.id}`)}
+                        >
+                          <TableCell>
+                            <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <GemDot name={portfolio.name} />
+                              {portfolio.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">19 days</TableCell>
+                          <TableCell className="text-right">
+                            <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
+                              {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                              {formatPercent(portfolio.performance.return_30d)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {(() => {
+                              const dd = Math.abs(portfolio.performance.max_drawdown);
+                              const color = dd >= 20 ? '#EF4444' : dd >= 18 ? '#F97316' : dd >= 15 ? '#F59E0B' : undefined;
+                              return <span style={color ? { color } : undefined}>{formatPercent(portfolio.performance.max_drawdown, false)}</span>;
+                            })()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className={cn("px-2 py-1 rounded text-xs",
+                              portfolio.risk_level === 'Low' ? "bg-success/20 text-success" :
+                              portfolio.risk_level === 'Medium' ? "bg-warning/20 text-warning" :
+                              "bg-destructive/20 text-destructive"
+                            )}>
+                              {riskDisplayLabel(portfolio.risk_level)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right w-8">
+                            <ChevronRight size={16} className="text-muted-foreground/30" />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* ── Equity Chart (when live data available) ── */}
         {hasLiveData && (
           <div
             className="rounded-2xl p-6"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
           >
             <DashboardEquityChart />
-            <div className="mt-6 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Trade</span>
-                <Link to="/portfolio-tracker" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Advanced trading &rarr;
-                </Link>
-              </div>
-              <DashboardQuickTrade onComplete={handleTradeComplete} />
-            </div>
           </div>
         )}
 
-        {hasLiveData && (
-          <RebalancerWidget
-            positions={positions}
-            equity={account ? Number.parseFloat(String(account.equity)) || 0 : 0}
-            positionsLoading={positionsLoading}
-            onRefetchPositions={refetchPositions}
-          />
-        )}
-
-        {/* Hero Summary Bar */}
-        <div data-tour="summary-stats" className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div className="flex flex-col gap-8 sm:flex-row sm:flex-wrap sm:items-start sm:gap-10">
-            {/* Account Equity */}
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[2rem] font-bold text-foreground">
-                  {alpacaLoading ? '...' : formatCurrency(animEquity)}
-                </span>
-                <span className="text-[0.9rem] text-muted-foreground">
-                  {hasLiveData ? 'equity' : 'invested'}
-                </span>
-                {hasLiveData && (
-                  <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1 mt-1">
-                {displayDayPLPercent >= 0 ? (
-                  <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                ) : (
-                  <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
-                )}
-                <span className="text-[0.8rem] font-medium" style={{ color: displayDayPLPercent >= 0 ? '#10B981' : '#EF4444' }}>
-                  {displayDayPLPercent >= 0 ? '+' : ''}{displayDayPLPercent.toFixed(2)}%
-                </span>
-                <span className="text-[0.8rem] text-muted-foreground">
-                  {hasLiveData ? 'today' : 'this month'}
-                </span>
-                {hasLiveData && displayDayPL !== 0 && (
-                  <span className="text-[0.8rem] text-muted-foreground ml-1">
-                    ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(displayDayPL)})
-                  </span>
-                )}
-              </div>
-            </div>
-            {/* Total Value */}
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[2rem] font-bold text-foreground">
-                  {alpacaLoading ? '...' : formatCurrency(animPortfolioValue)}
-                </span>
-                <span className="text-[0.9rem] text-muted-foreground">
-                  {hasLiveData ? 'portfolio value' : 'total value'}
-                </span>
-              </div>
-              {hasLiveData ? (
-                <div className="flex items-center gap-1 mt-1">
-                  <Wallet className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-[0.8rem] text-muted-foreground">
-                    {formatCurrency(displayCash)} cash available
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 mt-1">
-                  <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                  <span className="text-[0.8rem] font-medium" style={{ color: '#10B981' }}>+8.1%</span>
-                  <span className="text-[0.8rem] text-muted-foreground">this month</span>
-                </div>
-              )}
-            </div>
-            {/* vs S&P 500 */}
-            <div className="flex flex-col">
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-baseline gap-2 cursor-help">
-                      <span className={cn(
-                        "font-mono text-[2rem] font-bold",
-                        realVsSP500 >= 0 ? "text-success" : "text-destructive"
-                      )}>
-                        {realVsSP500 >= 0 ? '+' : ''}{animVsSP500}%
-                      </span>
-                      <span className="text-[0.9rem] text-muted-foreground">vs S&P 500</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    {portfolioReturn
-                      ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% (30d) · S&P: +${sp500Return}%`
-                      : `You: ${formatPercent(userTotalReturn)} · S&P: ${formatPercent(sp500Return)}`
-                    }
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-[0.8rem] text-muted-foreground">
-                  {portfolioReturn
-                    ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% · S&P: +${sp500Return}%`
-                    : `You: +${userTotalReturn}% · S&P: +${sp500Return}%`
-                  }
-                </span>
-                {portfolioReturn && <span className="text-[0.65rem] text-muted-foreground ml-1">(30d)</span>}
-              </div>
-            </div>
-          </div>
-
-          {/* Create New Portfolio Button */}
-          <Link to="/invest" className="shrink-0 md:self-start">
-            <Button className="h-11 min-h-11 w-full gap-2 sm:w-auto md:h-10 md:min-h-10">
-              <Plus className="h-4 w-4" />
-              Create New Portfolio
-            </Button>
-          </Link>
-        </div>
-
-        {/* Risk Metrics (when live data + metrics available) */}
+        {/* ── Risk Metrics (when live data + metrics available) ── */}
         {hasLiveData && metrics && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
@@ -597,7 +724,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Contextual Alpha Promotion */}
+        {/* ── Contextual Alpha Promotion ── */}
         {qualifyingPortfolio && (
           <div
             className="flex flex-col gap-4 rounded-xl p-6 sm:flex-row sm:items-center"
@@ -617,7 +744,7 @@ export default function Dashboard() {
             </div>
             <Link to="/invest" className="w-full sm:w-auto">
               <Button variant="outline" size="sm" className="min-h-11 w-full whitespace-nowrap text-xs touch-manipulation sm:w-auto md:min-h-9">
-                Learn How →
+                Learn How &rarr;
               </Button>
             </Link>
             <button
@@ -631,7 +758,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Live Alpaca Positions */}
+        {/* ── Live Alpaca Positions ── */}
         {hasLiveData && positions.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -685,313 +812,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Tab Cards */}
-        <div data-tour="tab-cards" className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={cn(
-                "min-h-[44px] rounded-2xl p-6 text-left transition-all duration-200 cursor-pointer outline-none touch-manipulation",
-                "backdrop-blur-xl",
-                "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                activeTab === key
-                  ? "border-2 shadow-[0_0_20px_rgba(124,58,237,0.1)]"
-                  : "border hover:border-[rgba(255,255,255,0.14)]"
-              )}
-              style={{
-                background: 'rgba(255,255,255,0.02)',
-                borderColor: activeTab === key ? '#7C3AED' : 'rgba(255,255,255,0.1)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-              }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <Icon className="h-4 w-4" style={{ color: activeTab === key ? '#A78BFA' : 'rgba(255,255,255,0.55)' }} />
-                <span className={cn(
-                  "text-sm font-medium",
-                  activeTab === key ? "text-foreground" : "text-muted-foreground"
-                )}>{label}</span>
-              </div>
-              <div className="font-mono text-[1.75rem] font-bold text-foreground mb-1">{count}</div>
-              <div className="text-[0.85rem] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>{detail}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div key={activeTab} className="animate-in fade-in duration-200">
-        {activeTab === 'my-portfolios' && hasPortfolios && (
-          livePortfolios.length === 0 ? (
-            <div
-              className="rounded-2xl border border-border/30 py-10 px-8 text-center"
-              style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
-            >
-              <p className="text-muted-foreground text-sm mb-3">
-                You don&apos;t have any live portfolios yet. Simulating or private portfolios stay under the Simulating tab.
-              </p>
-              <Link to="/invest">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Create a portfolio
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <Card className="glass-card">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Portfolio</TableHead>
-                      <TableHead>
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">Status</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Current portfolio status: Live, Simulating, or Inactive</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">My Investment</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Capital you've invested in this portfolio</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {livePortfolios.map((portfolio) => (
-                      <TableRow
-                        key={portfolio.id}
-                        className="cursor-pointer hover:bg-secondary/50 transition-all"
-                        style={{ borderLeft: '3px solid transparent' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
-                        onClick={() => navigate(`/dashboard/portfolio/${portfolio.id}`)}
-                      >
-                        <TableCell>
-                          <Link to={`/dashboard/portfolio/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <GemDot name={portfolio.name} />
-                            {portfolio.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <span className={cn("px-2 py-1 rounded text-xs", portfolio.status === 'validated_listed' ? "bg-success/20 text-success" : portfolio.status === 'inactive' ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning")}>
-                            {portfolio.status === 'validated_listed' ? 'Live' : portfolio.status === 'inactive' ? 'Inactive' : 'Simulating'}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">{formatCurrency(portfolio.creator_investment)}</TableCell>
-                        <TableCell className="text-right">
-                          <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
-                            {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                            {formatPercent(portfolio.performance.return_30d)}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )
-        )}
-
-        {activeTab === 'invested' && (
-          <Card className="glass-card">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Portfolio</TableHead>
-                    <TableHead>
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Creator</span></TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">The Alpha who manages this portfolio</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                    <TableHead className="text-right">
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">30d Return</span></TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Portfolio return over the last 30 days</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                    <TableHead className="text-right">
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">My Allocation</span></TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Capital you've allocated to this portfolio</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                    <TableHead className="text-right">
-                      <TooltipProvider delayDuration={300}>
-                        <Tooltip>
-                          <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">My Return</span></TooltipTrigger>
-                          <TooltipContent className="text-xs max-w-[250px]">Your return since you started following this portfolio</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {investedPortfolios.map((portfolio) => (
-                    <TableRow
-                      key={portfolio.id}
-                      className="cursor-pointer hover:bg-secondary/50 transition-all"
-                      style={{ borderLeft: '3px solid transparent' }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
-                    >
-                      <TableCell>
-                        <Link to={`/portfolio/${portfolio.id}`} state={{ from: 'dashboard' }} className="font-medium hover:text-primary transition-colors flex items-center gap-2">
-                          <GemDot name={portfolio.name} />
-                          {portfolio.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground font-mono text-sm">{portfolio.creator_id}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={cn("flex items-center justify-end gap-1", (portfolio.performance?.return_30d ?? 0) >= 0 ? "text-success" : "text-destructive")}>
-                          {(portfolio.performance?.return_30d ?? 0) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                          {formatPercent(portfolio.performance?.return_30d ?? 0)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(portfolio.myAllocation)}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={cn("flex items-center justify-end gap-1", portfolio.myReturn >= 0 ? "text-success" : "text-destructive")}>
-                          {portfolio.myReturn >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                          {formatPercent(portfolio.myReturn)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'simulating' && (
-          <Card className="glass-card">
-            <CardContent className="p-0">
-              {simulatingPortfolios.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="mb-2">No portfolios currently simulating.</p>
-                  <Link to="/invest" className="text-primary hover:underline text-sm">Create a new portfolio →</Link>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Portfolio</TableHead>
-                      <TableHead>
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Sim. Duration</span></TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Number of days this simulation has been running</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Sim. Return</span></TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Simulated return since simulation started</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Worst Drop</span></TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Largest peak-to-trough decline during simulation</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="text-right">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild><span className="cursor-help border-b border-dashed border-muted-foreground/40">Risk Level</span></TooltipTrigger>
-                            <TooltipContent className="text-xs max-w-[250px]">Portfolio risk classification: Conservative, Moderate, or Aggressive</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableHead>
-                      <TableHead className="w-8"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {simulatingPortfolios.map((portfolio) => (
-                      <TableRow
-                        key={portfolio.id}
-                        className="cursor-pointer hover:bg-secondary/50 transition-all"
-                        style={{ borderLeft: '3px solid transparent' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = getGemBorderColor(portfolio.name); }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = 'transparent'; }}
-                        onClick={() => navigate(`/simulation/${portfolio.id}`)}
-                      >
-                        <TableCell>
-                          <Link to={`/simulation/${portfolio.id}`} className="font-medium hover:text-primary transition-colors flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <GemDot name={portfolio.name} />
-                            {portfolio.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">19 days</TableCell>
-                        <TableCell className="text-right">
-                          <span className={cn("flex items-center justify-end gap-1", portfolio.performance.return_30d >= 0 ? "text-success" : "text-destructive")}>
-                            {portfolio.performance.return_30d >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                            {formatPercent(portfolio.performance.return_30d)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {(() => {
-                            const dd = Math.abs(portfolio.performance.max_drawdown);
-                            const color = dd >= 20 ? '#EF4444' : dd >= 18 ? '#F97316' : dd >= 15 ? '#F59E0B' : undefined;
-                            return <span style={color ? { color } : undefined}>{formatPercent(portfolio.performance.max_drawdown, false)}</span>;
-                          })()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className={cn("px-2 py-1 rounded text-xs",
-                            portfolio.risk_level === 'Low' ? "bg-success/20 text-success" :
-                            portfolio.risk_level === 'Medium' ? "bg-warning/20 text-warning" :
-                            "bg-destructive/20 text-destructive"
-                          )}>
-                            {riskDisplayLabel(portfolio.risk_level)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right w-8">
-                          <ChevronRight size={16} className="text-muted-foreground/30" />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        )}
-        </div>
-
-        {/* Market News — real Alpaca news feed */}
+        {/* ── Market News ── */}
         <div data-tour="market-news">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold flex items-center gap-2">
@@ -1006,18 +827,13 @@ export default function Dashboard() {
           {newsLoading && liveNews.length === 0 ? (
             <div className="flex gap-4 overflow-x-auto pb-2 py-2">
               {[1, 2, 3].map((i) => (
-                <Skeleton
-                  key={i}
-                  className="h-[280px] min-w-[280px] max-w-[280px] shrink-0 rounded-xl"
-                />
+                <Skeleton key={i} className="h-[280px] min-w-[280px] max-w-[280px] shrink-0 rounded-xl" />
               ))}
             </div>
           ) : liveNews.length === 0 ? (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 py-6 px-2">
               <span className="text-sm text-muted-foreground text-center">
-                {newsError
-                  ? `News feed unavailable: ${newsError}`
-                  : 'No recent news available.'}
+                {newsError ? `News feed unavailable: ${newsError}` : 'No recent news available.'}
               </span>
               {newsError && (
                 <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => refetchNews()}>
@@ -1092,7 +908,6 @@ export default function Dashboard() {
                           {article.summary}
                         </p>
                       )}
-                      {/* Symbol tags */}
                       {article.symbols.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {article.symbols.slice(0, 4).map((sym) => (
@@ -1113,7 +928,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-1.5 text-[0.7rem] mt-auto">
                         <Clock className="h-3 w-3 text-muted-foreground" />
                         <span className="font-semibold text-foreground">{article.source}</span>
-                        <span className="text-muted-foreground">·</span>
+                        <span className="text-muted-foreground">&middot;</span>
                         <span className="text-muted-foreground">{timeSince(article.created_at)}</span>
                       </div>
                     </div>
