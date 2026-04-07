@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
-interface AppUser {
+export interface AppUser {
   id: string;
   username: string;
+  displayName: string;
   email: string;
+  needsProfileSetup: boolean;
 }
 
 interface AuthContextType {
@@ -15,6 +17,7 @@ interface AuthContextType {
   login: (email: string) => Promise<void>;
   signup: (email: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (username: string, displayName: string) => Promise<void>;
   trialStartDate: number | null;
   userPlan: string | null;
   isTrialExpired: boolean;
@@ -34,13 +37,36 @@ function generateUsername(userId: string): string {
   return `@inv_${short}`;
 }
 
-// Convert Supabase user to our app user shape
-function toAppUser(su: SupabaseUser): AppUser {
-  return {
+// Load profile from Supabase profiles table, falling back to auto-generated username
+async function loadAppUser(su: SupabaseUser): Promise<AppUser> {
+  const fallback: AppUser = {
     id: su.id,
     username: generateUsername(su.id),
+    displayName: '',
     email: su.email || '',
+    needsProfileSetup: true,
   };
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username, display_name')
+      .eq('id', su.id)
+      .single();
+
+    if (error || !data) return fallback;
+
+    const hasProfile = !!data.username && data.username.trim().length > 0;
+    return {
+      id: su.id,
+      username: hasProfile ? `@${data.username}` : generateUsername(su.id),
+      displayName: data.display_name || '',
+      email: su.email || '',
+      needsProfileSetup: !hasProfile,
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
@@ -58,9 +84,10 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     if (storedPlan) setUserPlan(storedPlan);
 
     // 2. Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser(toAppUser(session.user));
+        const appUser = await loadAppUser(session.user);
+        setUser(appUser);
         // Initialize trial if first session
         if (!localStorage.getItem('trialStartDate')) {
           const now = Date.now();
@@ -73,9 +100,10 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 
     // 3. Listen for sign-in / sign-out events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         if (session?.user) {
-          setUser(toAppUser(session.user));
+          const appUser = await loadAppUser(session.user);
+          setUser(appUser);
           // Initialize trial on first auth
           if (!localStorage.getItem('trialStartDate')) {
             const now = Date.now();
@@ -113,6 +141,29 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     await login(email);
   };
 
+  // Save username + display name to profiles table
+  const updateProfile = async (username: string, displayName: string) => {
+    if (!user) throw new Error('Not authenticated');
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        username: username.toLowerCase().replace(/^@/, ''),
+        display_name: displayName.trim(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    if (error) throw error;
+
+    // Update local state immediately
+    setUser({
+      ...user,
+      username: `@${username.toLowerCase().replace(/^@/, '')}`,
+      displayName: displayName.trim(),
+      needsProfileSetup: false,
+    });
+  };
+
   const selectPlan = (plan: string) => {
     setUserPlan(plan);
     localStorage.setItem('userPlan', plan);
@@ -134,6 +185,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         logout,
+        updateProfile,
         trialStartDate,
         userPlan,
         isTrialExpired,
@@ -155,6 +207,7 @@ export function useMockAuth() {
       login: async () => {},
       signup: async () => {},
       logout: () => {},
+      updateProfile: async () => {},
       trialStartDate: null,
       userPlan: null,
       isTrialExpired: false,

@@ -21,6 +21,7 @@ import StrategyDetail from "./pages/StrategyDetail";
 import PortfolioOwnerDetail from "./pages/PortfolioOwnerDetail";
 import Explore from "./pages/Explore";
 import Dashboard from "./pages/Dashboard";
+import ProfileSetup from "./pages/ProfileSetup";
 
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
@@ -40,12 +41,8 @@ function PageViewTracker() {
 
 /** Demo gate + main app routes (everything except `/test-alpaca`). */
 function GatedApp() {
-  const isLovablePreview =
-    window.location.hostname.includes("lovableproject.com") ||
-    window.location.hostname.includes("preview");
-
   const [accessGranted, setAccessGranted] = useState(
-    () => isLovablePreview || localStorage.getItem("demoAccessGranted") === "true",
+    () => localStorage.getItem("demoAccessGranted") === "true",
   );
 
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -79,6 +76,16 @@ function GatedApp() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/faq" element={<FAQ />} />
+
+        {/* Profile setup (protected but no profile-redirect loop) */}
+        <Route
+          path="/profile-setup"
+          element={
+            <ProtectedRoute skipProfileCheck>
+              <ProfileSetup />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected routes */}
         <Route

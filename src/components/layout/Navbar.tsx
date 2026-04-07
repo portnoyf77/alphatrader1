@@ -143,7 +143,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-colors cursor-pointer outline-none">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-mono text-xs">{user.username}</span>
+                    <span className="font-mono text-xs">{user.displayName || user.username}</span>
                     {userPlan && (
                       <span className={cn(
                         "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
@@ -281,7 +281,10 @@ export function Navbar() {
                     </button>
                     <div className="mt-2 border-t border-border/50 px-4 py-3">
                       <p className="text-xs text-muted-foreground">Signed in as</p>
-                      <p className="text-sm font-mono">{user.username}</p>
+                      <p className="text-sm font-semibold">{user.displayName || user.username}</p>
+                      {user.displayName && (
+                        <p className="text-xs font-mono text-muted-foreground">{user.username}</p>
+                      )}
                     </div>
                     <button
                       type="button"

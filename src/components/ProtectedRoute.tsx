@@ -6,10 +6,11 @@ import { TrialExpiredModal } from '@/components/TrialExpiredModal';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowExpiredTrial?: boolean;
+  skipProfileCheck?: boolean;
 }
 
-export function ProtectedRoute({ children, allowExpiredTrial = false }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, isTrialExpired } = useMockAuth();
+export function ProtectedRoute({ children, allowExpiredTrial = false, skipProfileCheck = false }: ProtectedRouteProps) {
+  const { user, isAuthenticated, isLoading, isTrialExpired } = useMockAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -28,6 +29,11 @@ export function ProtectedRoute({ children, allowExpiredTrial = false }: Protecte
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Redirect to profile setup if user hasn't chosen a username yet
+  if (!skipProfileCheck && user?.needsProfileSetup) {
+    return <Navigate to="/profile-setup" replace />;
   }
 
   // Show trial expired modal for gated pages
