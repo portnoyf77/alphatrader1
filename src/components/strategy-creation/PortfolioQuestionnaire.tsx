@@ -103,12 +103,16 @@ const ADVANCE_MS = 350 + 200 + 200 + 520;
 const PRE_CRYSTALLIZE_HANDOFF_MS = 1600;
 
 const sectorSparkPaths: Record<string, string> = {
-  Technology: 'M0 14 L3 12 L6 8 L9 10 L12 5 L15 7 L18 3 L20 4',
-  Healthcare: 'M0 10 L4 11 L8 9 L12 10 L16 7 L20 6',
-  'Clean Energy': 'M0 12 L5 8 L10 11 L15 5 L20 7',
+  'Information Technology': 'M0 14 L3 12 L6 8 L9 10 L12 5 L15 7 L18 3 L20 4',
+  'Health Care': 'M0 10 L4 11 L8 9 L12 10 L16 7 L20 6',
   Financials: 'M0 11 L4 9 L8 12 L12 8 L16 10 L20 9',
-  Consumer: 'M0 10 L5 12 L10 9 L15 11 L20 8',
-  Industrial: 'M0 11 L6 9 L12 12 L18 8 L20 10',
+  Energy: 'M0 12 L5 8 L10 11 L15 5 L20 7',
+  'Consumer Discretionary': 'M0 10 L5 12 L10 9 L15 11 L20 8',
+  'Consumer Staples': 'M0 10 L4 10 L8 9 L12 10 L16 9 L20 9',
+  Industrials: 'M0 11 L6 9 L12 12 L18 8 L20 10',
+  'Communication Services': 'M0 13 L4 10 L8 12 L12 7 L16 9 L20 5',
+  Materials: 'M0 11 L5 13 L10 10 L15 12 L20 9',
+  Utilities: 'M0 10 L5 10 L10 11 L15 10 L20 10',
   'Real Estate': 'M0 12 L5 10 L10 13 L15 9 L20 11',
 };
 
@@ -310,12 +314,16 @@ const gemSolidColors: Record<GemType, string> = {
 };
 
 const sectorGlowColors: Record<string, string> = {
-  Technology: 'rgba(59,130,246,0.3)',
-  Healthcare: 'rgba(225,29,72,0.25)',
-  'Clean Energy': 'rgba(34,197,94,0.3)',
+  'Information Technology': 'rgba(59,130,246,0.3)',
+  'Health Care': 'rgba(225,29,72,0.25)',
   Financials: 'rgba(245,158,11,0.25)',
-  Consumer: 'rgba(168,85,247,0.25)',
-  Industrial: 'rgba(156,163,175,0.25)',
+  Energy: 'rgba(234,179,8,0.3)',
+  'Consumer Discretionary': 'rgba(168,85,247,0.25)',
+  'Consumer Staples': 'rgba(34,197,94,0.25)',
+  Industrials: 'rgba(156,163,175,0.25)',
+  'Communication Services': 'rgba(99,102,241,0.3)',
+  Materials: 'rgba(217,119,6,0.25)',
+  Utilities: 'rgba(34,197,94,0.2)',
   'Real Estate': 'rgba(245,158,11,0.2)',
 };
 
