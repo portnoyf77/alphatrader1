@@ -14,11 +14,9 @@ export function TourWelcomeModalWrapper({ onDone }: Props) {
   const navigate = useNavigate();
 
   const handleStartTour = async () => {
-    // Auto-login as demo user
-    await login('demo@alphatrader.io', 'demo');
+    // Skip auth for tour demo -- just start the tour directly
     selectPlan('pro');
     onDone();
-    // Start tour and navigate to dashboard
     startTour();
     navigate('/dashboard');
   };

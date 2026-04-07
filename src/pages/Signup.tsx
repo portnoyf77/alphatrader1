@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Crown, Mail, Lock, ArrowRight, User, Check, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Crown, Mail, ArrowRight, Check, Sparkles, CheckCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 
-type Step = 'credentials' | 'plan';
+type Step = 'email' | 'plan' | 'sent';
 
 const plans = [
   {
@@ -44,21 +44,18 @@ const plans = [
 ] as const;
 
 export default function Signup() {
-  const [step, setStep] = useState<Step>('credentials');
+  const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signup, selectPlan: setUserPlan } = useMockAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password && password !== confirmPassword) {
-      toast({ title: "Passwords don't match", description: 'Please make sure your passwords match.', variant: 'destructive' });
+    if (!email.trim()) {
+      toast({ title: 'Email required', description: 'Please enter your email.', variant: 'destructive' });
       return;
     }
     setStep('plan');
@@ -76,12 +73,16 @@ export default function Signup() {
 
     setIsLoading(true);
     try {
-      await signup(email.trim(), password);
-      if (selectedPlan) setUserPlan(selectedPlan);
-      toast({ title: 'Account created!', description: 'Welcome to Alpha Trader. Your 7-day free trial has started.' });
-      navigate('/dashboard', { replace: true });
-    } catch {
-      toast({ title: 'Signup failed', description: 'Please try again.', variant: 'destructive' });
+      // Save plan choice before sending magic link
+      setUserPlan(selectedPlan);
+      await signup(email.trim());
+      setStep('sent');
+    } catch (error) {
+      toast({
+        title: 'Something went wrong',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -107,45 +108,48 @@ export default function Signup() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           {/* Step indicator */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className={cn(
-              "flex items-center gap-2 text-sm font-medium",
-              step === 'credentials' ? "text-primary" : "text-muted-foreground"
-            )}>
+          {step !== 'sent' && (
+            <div className="flex items-center justify-center gap-3 mb-8">
               <div className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold",
-                step === 'credentials' ? "bg-primary text-primary-foreground" : "bg-primary/20 text-primary"
+                "flex items-center gap-2 text-sm font-medium",
+                step === 'email' ? "text-primary" : "text-muted-foreground"
               )}>
-                {step === 'plan' ? <Check className="h-4 w-4" /> : '1'}
+                <div className={cn(
+                  "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold",
+                  step === 'email' ? "bg-primary text-primary-foreground" : "bg-primary/20 text-primary"
+                )}>
+                  {step === 'plan' ? <Check className="h-4 w-4" /> : '1'}
+                </div>
+                Email
               </div>
-              Account
-            </div>
-            <div className="w-8 h-px bg-border" />
-            <div className={cn(
-              "flex items-center gap-2 text-sm font-medium",
-              step === 'plan' ? "text-primary" : "text-muted-foreground"
-            )}>
+              <div className="w-8 h-px bg-border" />
               <div className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold",
-                step === 'plan' ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                "flex items-center gap-2 text-sm font-medium",
+                step === 'plan' ? "text-primary" : "text-muted-foreground"
               )}>
-                2
+                <div className={cn(
+                  "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold",
+                  step === 'plan' ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                )}>
+                  2
+                </div>
+                Plan
               </div>
-              Plan
             </div>
-          </div>
+          )}
 
-          {step === 'credentials' && (
+          {/* ── Step 1: Email ── */}
+          {step === 'email' && (
             <>
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-bold mb-2">Create your account</h1>
                 <p className="text-muted-foreground">
-                  Join Alpha Trader and start building your portfolio
+                  Enter your email to get started. We'll send you a sign-in link -- no password needed.
                 </p>
               </div>
 
               <div className="glass-card p-8">
-                <form onSubmit={handleCredentialsSubmit} className="space-y-6">
+                <form onSubmit={handleEmailSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
@@ -158,38 +162,7 @@ export default function Signup() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10"
                         maxLength={255}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
-                        maxLength={128}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="pl-10"
-                        maxLength={128}
+                        autoFocus
                       />
                     </div>
                   </div>
@@ -222,6 +195,7 @@ export default function Signup() {
             </>
           )}
 
+          {/* ── Step 2: Plan selection ── */}
           {step === 'plan' && (
             <>
               <div className="text-center mb-8">
@@ -240,9 +214,7 @@ export default function Signup() {
                       key={plan.id}
                       className={cn(
                         "cursor-pointer transition-all duration-200 relative overflow-hidden glass-card",
-                        isSelected
-                          ? "shadow-lg"
-                          : "hover:border-primary/40"
+                        isSelected ? "shadow-lg" : "hover:border-primary/40"
                       )}
                       style={isSelected ? { border: '2px solid #7C3AED', boxShadow: '0 0 20px rgba(124, 58, 237, 0.1)' } : undefined}
                       onClick={() => setSelectedPlan(plan.id)}
@@ -293,7 +265,7 @@ export default function Signup() {
                 })}
               </div>
 
-              {/* Disclaimer checkbox */}
+              {/* Disclaimer */}
               <div className="mt-6 p-4 rounded-xl bg-secondary/50 border border-border">
                 <div className="flex items-start gap-3">
                   <Checkbox
@@ -310,7 +282,7 @@ export default function Signup() {
 
               {/* Actions */}
               <div className="mt-6 flex gap-3">
-                <Button variant="outline" onClick={() => setStep('credentials')} className="flex-1">
+                <Button variant="outline" onClick={() => setStep('email')} className="flex-1">
                   Back
                 </Button>
                 <Button
@@ -319,7 +291,7 @@ export default function Signup() {
                   size="lg"
                   disabled={isLoading || !selectedPlan || !disclaimerAccepted}
                 >
-                  {isLoading ? 'Creating account...' : 'Start Free Trial'}
+                  {isLoading ? 'Sending link...' : 'Start Free Trial'}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -328,6 +300,34 @@ export default function Signup() {
                 No credit card required. Cancel anytime during your trial.
               </p>
             </>
+          )}
+
+          {/* ── Step 3: Magic link sent ── */}
+          {step === 'sent' && (
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="h-8 w-8 text-success" />
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold mb-3">Check your email</h1>
+              <p className="text-muted-foreground mb-2">
+                We sent a sign-in link to
+              </p>
+              <p className="text-foreground font-medium mb-6">{email}</p>
+              <p className="text-sm text-muted-foreground mb-8">
+                Click the link to activate your account and start your 7-day free trial.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setStep('email');
+                  setEmail('');
+                }}
+              >
+                Use a different email
+              </Button>
+            </div>
           )}
         </div>
       </div>

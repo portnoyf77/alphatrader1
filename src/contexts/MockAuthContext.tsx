@@ -1,17 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
-interface MockUser {
+interface AppUser {
   id: string;
   username: string;
   email: string;
 }
 
-interface MockAuthContextType {
-  user: MockUser | null;
+interface AuthContextType {
+  user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
+  login: (email: string) => Promise<void>;
+  signup: (email: string) => Promise<void>;
   logout: () => void;
   trialStartDate: number | null;
   userPlan: string | null;
@@ -19,106 +21,125 @@ interface MockAuthContextType {
   selectPlan: (plan: string) => void;
 }
 
-const MockAuthContext = createContext<MockAuthContextType | undefined>(undefined);
+// Keep the old name so all existing imports still work
+type MockAuthContextType = AuthContextType;
+
+const MockAuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_TRIAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-// Generate a random user ID like @inv_7x2k
-const generateUserId = () => {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `@inv_${result}`;
-};
+// Generate anonymous username from Supabase user ID
+function generateUsername(userId: string): string {
+  const short = userId.replace(/-/g, '').slice(0, 4);
+  return `@inv_${short}`;
+}
+
+// Convert Supabase user to our app user shape
+function toAppUser(su: SupabaseUser): AppUser {
+  return {
+    id: su.id,
+    username: generateUsername(su.id),
+    email: su.email || '',
+  };
+}
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trialStartDate, setTrialStartDate] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string | null>(null);
 
+  // Bootstrap: check existing session + listen for auth changes
   useEffect(() => {
-    const storedUser = localStorage.getItem('mockUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // 1. Load local plan / trial data
     const storedTrial = localStorage.getItem('trialStartDate');
-    if (storedTrial) {
-      setTrialStartDate(parseInt(storedTrial, 10));
-    }
+    if (storedTrial) setTrialStartDate(parseInt(storedTrial, 10));
     const storedPlan = localStorage.getItem('userPlan');
-    if (storedPlan) {
-      setUserPlan(storedPlan);
-    }
-    setIsLoading(false);
+    if (storedPlan) setUserPlan(storedPlan);
+
+    // 2. Get current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(toAppUser(session.user));
+        // Initialize trial if first session
+        if (!localStorage.getItem('trialStartDate')) {
+          const now = Date.now();
+          setTrialStartDate(now);
+          localStorage.setItem('trialStartDate', now.toString());
+        }
+      }
+      setIsLoading(false);
+    });
+
+    // 3. Listen for sign-in / sign-out events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          setUser(toAppUser(session.user));
+          // Initialize trial on first auth
+          if (!localStorage.getItem('trialStartDate')) {
+            const now = Date.now();
+            setTrialStartDate(now);
+            localStorage.setItem('trialStartDate', now.toString());
+          }
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const isTrialExpired = trialStartDate !== null && !userPlan && (Date.now() - trialStartDate > FREE_TRIAL_MS);
+  const isTrialExpired =
+    trialStartDate !== null && !userPlan && Date.now() - trialStartDate > FREE_TRIAL_MS;
 
-  const updateUsernameForPlan = (plan: string | null, currentUser: MockUser) => {
-    let username = '@alex_investor';
-    if (plan === 'pro') username = '@sam_alpha';
-    const updated = { ...currentUser, username };
-    setUser(updated);
-    localStorage.setItem('mockUser', JSON.stringify(updated));
-  };
-
-  const login = async (email: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const storedPlan = localStorage.getItem('userPlan');
-    // Default to @alex_investor (basic persona) when no plan selected yet
-    let username = '@alex_investor';
-    if (storedPlan === 'pro') username = '@sam_alpha';
-    else if (storedPlan === 'basic') username = '@alex_investor';
-
-    const mockUser: MockUser = {
-      id: crypto.randomUUID(),
-      username,
+  // Magic link sign-in (works for both new and existing users)
+  const login = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('mockUser', JSON.stringify(mockUser));
-
-    // Set trial start if not already set
-    if (!localStorage.getItem('trialStartDate')) {
-      const now = Date.now();
-      setTrialStartDate(now);
-      localStorage.setItem('trialStartDate', now.toString());
-    }
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+    if (error) throw error;
+    // After this, Supabase sends a magic link email.
+    // The user clicks it, gets redirected back, and onAuthStateChange fires.
   };
 
-  const signup = async (email: string, password: string) => {
-    await login(email, password);
+  // Signup is the same as login for magic link
+  const signup = async (email: string) => {
+    await login(email);
   };
 
   const selectPlan = (plan: string) => {
     setUserPlan(plan);
     localStorage.setItem('userPlan', plan);
-    if (user) updateUsernameForPlan(plan, user);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('mockUser');
+    localStorage.removeItem('trialStartDate');
+    localStorage.removeItem('userPlan');
   };
 
   return (
-    <MockAuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading,
-      login, 
-      signup, 
-      logout,
-      trialStartDate,
-      userPlan,
-      isTrialExpired,
-      selectPlan,
-    }}>
+    <MockAuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        signup,
+        logout,
+        trialStartDate,
+        userPlan,
+        isTrialExpired,
+        selectPlan,
+      }}
+    >
       {children}
     </MockAuthContext.Provider>
   );
@@ -127,7 +148,6 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 export function useMockAuth() {
   const context = useContext(MockAuthContext);
   if (context === undefined) {
-    // Return safe defaults when rendered outside MockAuthProvider (e.g. HMR boundary reset)
     return {
       user: null,
       isAuthenticated: false,
@@ -139,7 +159,7 @@ export function useMockAuth() {
       userPlan: null,
       isTrialExpired: false,
       selectPlan: () => {},
-    } as MockAuthContextType;
+    } as AuthContextType;
   }
   return context;
 }
