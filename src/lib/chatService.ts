@@ -1,6 +1,6 @@
 /**
- * Chat service that calls the /api/chat serverless endpoint (Claude API).
- * Falls back gracefully if the endpoint is unavailable.
+ * Chat service that calls the /api/chat serverless endpoint (Claude API with tool-use).
+ * Returns Claude's response text plus any trade proposals Claude made.
  */
 
 type ChatMessage = {
@@ -8,31 +8,30 @@ type ChatMessage = {
   content: string;
 };
 
-type AccountContext = {
-  equity?: number;
-  cash?: number;
-  positions?: { symbol: string; qty: number; unrealizedPL: number; currentPrice: number }[];
-  watchlist?: string[];
+export type TradeProposal = {
+  symbol: string;
+  qty: number;
+  side: 'buy' | 'sell';
+  reasoning: string;
 };
 
-type ChatResponse = {
+export type ChatResponse = {
   response: string;
-  usedAI: boolean;
+  tradeProposals?: TradeProposal[];
 };
 
 /**
  * Send a message to the Claude-powered chat endpoint.
- * Returns the AI response text, or null if the endpoint is unavailable.
+ * Returns the AI response, or null if the endpoint is unavailable.
  */
 export async function sendChatMessage(
   messages: ChatMessage[],
-  context?: AccountContext,
 ): Promise<ChatResponse | null> {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, context }),
+      body: JSON.stringify({ messages }),
     });
 
     if (!res.ok) {
@@ -42,11 +41,13 @@ export async function sendChatMessage(
 
     const data = await res.json();
     if (data.response) {
-      return { response: data.response, usedAI: true };
+      return {
+        response: data.response,
+        tradeProposals: data.tradeProposals,
+      };
     }
     return null;
   } catch (err) {
-    // Endpoint not available (dev mode or misconfigured)
     console.warn('[chatService] Chat endpoint unavailable, using fallback');
     return null;
   }

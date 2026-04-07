@@ -66,11 +66,31 @@ export const questions: Question[] = [
     question: 'What are you investing for?',
     subtitle: 'This shapes everything about your portfolio.',
     options: [
-      { value: 'accumulation', label: 'Wealth Accumulation', description: 'Grow my portfolio over time for future goals' },
-      { value: 'retirement', label: 'Retirement Savings', description: 'Build a nest egg for retirement' },
-      { value: 'income', label: 'Income Generation', description: 'Create regular income from dividends and interest' },
-      { value: 'preservation', label: 'Capital Preservation', description: 'Protect my wealth from losing value' },
-      { value: 'aggressive', label: 'Aggressive Growth', description: 'Maximize returns, accepting higher risk' },
+      {
+        value: 'accumulation',
+        label: 'Wealth accumulation',
+        description: 'Grow your nest egg over years, not weeks.\nLet compounding do the heavy lifting.',
+      },
+      {
+        value: 'retirement',
+        label: 'Retirement savings',
+        description: 'Fund the chapter when work becomes optional.\nTime horizon is your quiet superpower.',
+      },
+      {
+        value: 'income',
+        label: 'Income generation',
+        description: 'Prioritize dividends, interest, and cash flow.\nSteady payouts without chasing hype.',
+      },
+      {
+        value: 'preservation',
+        label: 'Capital preservation',
+        description: 'Sleep-well money—defense over hero shots.\nSmooth ride matters more than headlines.',
+      },
+      {
+        value: 'aggressive',
+        label: 'Aggressive growth',
+        description: 'Maximize upside and accept real drawdowns.\nBold only works if your timeline agrees.',
+      },
     ],
   },
   // Q2

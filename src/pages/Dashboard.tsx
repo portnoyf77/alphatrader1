@@ -15,6 +15,7 @@ import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { LiveTickerBar } from '@/components/LiveTickerBar';
+import { RebalancerWidget } from '@/components/dashboard/RebalancerWidget';
 import { getPortfolioHistory, placeOrder, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
 
 function getUserCreatedPortfolios(): any[] {
@@ -239,7 +240,7 @@ export default function Dashboard() {
 
   // Live Alpaca data
   const { account, loading: accountLoading } = useAlpacaAccount();
-  const { positions, totalMarketValue, totalUnrealizedPL, loading: positionsLoading } = useAlpacaPositions();
+  const { positions, totalMarketValue, totalUnrealizedPL, loading: positionsLoading, refetch: refetchPositions } = useAlpacaPositions();
   const alpacaLoading = accountLoading || positionsLoading;
 
   // Real news from Alpaca (filtered by position symbols + popular tickers)
@@ -401,6 +402,15 @@ export default function Dashboard() {
               <DashboardQuickTrade onComplete={handleTradeComplete} />
             </div>
           </div>
+        )}
+
+        {hasLiveData && (
+          <RebalancerWidget
+            positions={positions}
+            equity={account ? Number.parseFloat(String(account.equity)) || 0 : 0}
+            positionsLoading={positionsLoading}
+            onRefetchPositions={refetchPositions}
+          />
         )}
 
         {/* Hero Summary Bar */}
