@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Eye, List, PieChart, BarChart3, History, MessageCircle, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,7 +21,7 @@ import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
-import { usePortfolio } from '@/hooks/usePortfolios';
+import { usePortfolio, useClonePortfolio } from '@/hooks/usePortfolios';
 import { getPortfolioComments, type AppComment } from '@/lib/supabasePortfolioService';
 
 export default function StrategyDetail() {
@@ -40,7 +40,9 @@ export default function StrategyDetail() {
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
 
+  const navigate = useNavigate();
   const { data: strategy, loading: strategyLoading } = usePortfolio(id);
+  const { clone: clonePortfolio, loading: cloning } = useClonePortfolio();
   const [comments, setComments] = useState<AppComment[]>([]);
 
   // Fetch comments from Supabase
@@ -167,6 +169,23 @@ export default function StrategyDetail() {
             </div>
 
             <div className="flex gap-3">
+              <Button
+                variant="outline"
+                disabled={cloning}
+                onClick={async () => {
+                  if (!id) return;
+                  const newId = await clonePortfolio(id);
+                  if (newId) {
+                    toast({ title: 'Portfolio cloned!', description: 'You can now modify holdings and make it your own.' });
+                    navigate(`/simulation/${newId}`);
+                  } else {
+                    toast({ title: 'Clone failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                {cloning ? 'Cloning...' : 'Clone & Modify'}
+              </Button>
               {isValidated ? (
                 <Button data-tour="follow-button" onClick={() => setShowAllocateModal(true)} className="glow-primary">
                   <Users className="h-4 w-4 mr-2" />

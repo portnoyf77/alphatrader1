@@ -531,6 +531,164 @@ export async function updatePortfolioHoldings(
   }
 }
 
+/**
+ * Clone a portfolio with optional modifications to holdings.
+ * Creates a new private portfolio based on a source portfolio.
+ * Falls back to localStorage if Supabase fails.
+ */
+export async function clonePortfolio(
+  sourcePortfolioId: string,
+  modifications?: {
+    holdings?: { ticker: string; name: string; weight: number; sector?: string }[];
+  }
+): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  try {
+    // Fetch source portfolio
+    const { data: sourcePortfolio, error: fetchError } = await supabase
+      .from('portfolios')
+      .select('*')
+      .eq('id', sourcePortfolioId)
+      .single();
+
+    if (fetchError || !sourcePortfolio) {
+      throw new Error(`Failed to fetch source portfolio: ${fetchError?.message || 'Not found'}`);
+    }
+
+    // Fetch source holdings
+    const { data: sourceHoldings, error: holdingsError } = await supabase
+      .from('portfolio_holdings')
+      .select('*')
+      .eq('portfolio_id', sourcePortfolioId);
+
+    if (holdingsError) {
+      throw new Error(`Failed to fetch source holdings: ${holdingsError.message}`);
+    }
+
+    // Use provided modifications or source holdings
+    const holdingsToUse = modifications?.holdings || (sourceHoldings || []).map((h: any) => ({
+      ticker: h.ticker,
+      name: h.name,
+      weight: Number(h.weight),
+      sector: h.sector,
+    }));
+
+    // Generate new portfolio name with random suffix
+    const randomNum = Math.floor(Math.random() * 10000);
+    const newName = `${sourcePortfolio.name} (${randomNum})`;
+
+    // Create new portfolio
+    const { data: newPortfolio, error: createError } = await supabase
+      .from('portfolios')
+      .insert({
+        creator_id: user.id,
+        name: newName,
+        strategy_type: sourcePortfolio.strategy_type,
+        objective: sourcePortfolio.objective,
+        risk_level: sourcePortfolio.risk_level,
+        geo_focus: sourcePortfolio.geo_focus,
+        status: 'private',
+        validation_status: 'pending',
+        validation_criteria_met: false,
+        allowed_assets: sourcePortfolio.allowed_assets,
+        leverage_allowed: sourcePortfolio.leverage_allowed,
+        max_single_sector_exposure_pct: sourcePortfolio.max_single_sector_exposure_pct,
+        max_turnover: sourcePortfolio.max_turnover,
+        exposure_breakdown: sourcePortfolio.exposure_breakdown,
+        top_themes: sourcePortfolio.top_themes,
+        turnover_estimate: sourcePortfolio.turnover_estimate,
+        sectors: sourcePortfolio.sectors,
+        disclosure_text_public: sourcePortfolio.disclosure_text_public,
+        description_rationale: sourcePortfolio.description_rationale,
+        risks: sourcePortfolio.risks,
+        followers_count: 0,
+        allocated_amount_usd: 0,
+        new_allocations_paused: sourcePortfolio.new_allocations_paused,
+        creator_fee_pct: sourcePortfolio.creator_fee_pct,
+        creator_est_monthly_earnings_usd: 0,
+        creator_investment: sourcePortfolio.creator_investment,
+        requires_opt_in_for_structural_changes: sourcePortfolio.requires_opt_in_for_structural_changes,
+        exit_window_days: sourcePortfolio.exit_window_days,
+        auto_exit_on_liquidation: sourcePortfolio.auto_exit_on_liquidation,
+      })
+      .select('id')
+      .single();
+
+    if (createError || !newPortfolio) {
+      throw new Error(`Failed to create cloned portfolio: ${createError?.message}`);
+    }
+
+    // Insert holdings
+    if (holdingsToUse.length > 0) {
+      const holdingRows = holdingsToUse.map((h: any) => ({
+        portfolio_id: newPortfolio.id,
+        ticker: h.ticker,
+        name: h.name,
+        weight: h.weight,
+        sector: h.sector || null,
+      }));
+
+      const { error: holdingsInsertError } = await supabase
+        .from('portfolio_holdings')
+        .insert(holdingRows);
+
+      if (holdingsInsertError) {
+        console.error('Failed to insert cloned holdings:', holdingsInsertError);
+      }
+    }
+
+    // Insert initial performance snapshot
+    const { error: perfError } = await supabase
+      .from('portfolio_performance')
+      .insert({
+        portfolio_id: newPortfolio.id,
+        return_30d: 0,
+        return_90d: 0,
+        max_drawdown: 0,
+        volatility: 0,
+        consistency_score: 50,
+      });
+
+    if (perfError) {
+      console.error('Failed to insert initial performance for clone:', perfError);
+    }
+
+    return newPortfolio.id;
+  } catch (error) {
+    // Fallback to localStorage
+    console.warn('Supabase clone failed, falling back to localStorage:', error);
+
+    const localPortfolios = JSON.parse(localStorage.getItem('portfolios') || '{}');
+    if (!localPortfolios[sourcePortfolioId]) {
+      throw new Error('Source portfolio not found in localStorage fallback');
+    }
+
+    const sourcePortfolio = localPortfolios[sourcePortfolioId];
+    const newId = `portfolio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const randomNum = Math.floor(Math.random() * 10000);
+    const newName = `${sourcePortfolio.name} (${randomNum})`;
+
+    const newPortfolio = {
+      ...sourcePortfolio,
+      id: newId,
+      name: newName,
+      status: 'private',
+      validation_status: 'pending',
+      followers_count: 0,
+      allocated_amount_usd: 0,
+      created_date: new Date().toISOString().split('T')[0],
+      holdings: modifications?.holdings || sourcePortfolio.holdings,
+    };
+
+    localPortfolios[newId] = newPortfolio;
+    localStorage.setItem('portfolios', JSON.stringify(localPortfolios));
+
+    return newId;
+  }
+}
+
 // ── FOLLOW OPERATIONS ──────────────────────────────────────
 
 export async function followPortfolio(portfolioId: string, allocationUsd: number = 0) {

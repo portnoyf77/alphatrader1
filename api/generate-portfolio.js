@@ -108,6 +108,12 @@ Generate a personalised portfolio allocation based on the user's questionnaire a
 - Sector preferences: ${answers.sectors}
 - Geographic preference: ${answers.geography}
 - Volatility comfort: ${answers.volatility}
+${answers.income ? `- Annual income: ${answers.income}` : ''}
+${answers.experience ? `- Investment experience: ${answers.experience}` : ''}
+${answers.accountType ? `- Account type: ${answers.accountType}` : ''}
+${answers.portfolioSize ? `- Portfolio size: ${answers.portfolioSize}` : ''}
+${answers.ageRange ? `- Age range: ${answers.ageRange}` : ''}
+${answers.emergencyFund ? `- Emergency fund: ${answers.emergencyFund}` : ''}
 
 ## User's current account
 ${account}
@@ -131,8 +137,15 @@ Based on the questionnaire answers and data above:
    - Sector preferences -> directly influence holding selection
    - Geographic preference -> domestic vs. international weighting
    - Volatility comfort -> broad index ETFs vs. concentrated plays
-3. Use the live quotes above to pick from liquid, actively-traded securities
-4. Set allocation percentages that sum to exactly 100
+3. Factor in the investor's financial profile when provided:
+   - Income level: lower income = favor lower-cost ETFs, minimize turnover; higher income = more latitude
+   - Experience: beginners get simpler, well-known ETFs; advanced investors can handle individual stocks
+   - Account type: retirement accounts favor growth (tax-deferred); taxable accounts favor tax-efficient ETFs
+   - Portfolio size: smaller portfolios need fewer, broader holdings; larger portfolios can diversify more
+   - Age: younger investors can accept more equity/growth tilt; older investors need more bonds/income
+   - Emergency fund: no cushion = reduce risk level one notch (forced selling risk)
+4. Use the live quotes above to pick from liquid, actively-traded securities
+5. Set allocation percentages that sum to exactly 100
 
 ## Output format (CRITICAL -- follow this exactly)
 

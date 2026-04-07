@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
 import { ManualPortfolioBuilder } from '@/components/strategy-creation/ManualPortfolioBuilder';
-import { StrategyProfile, initialProfile, deriveRiskLevel } from '@/lib/strategyProfile';
+import { StrategyProfile, initialProfile, deriveRiskLevel, explainRiskScoring } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
 
 interface GeneratedHolding {
@@ -70,6 +70,46 @@ const geoLabels: Record<string, string> = {
   international: 'International developed markets (Europe, Japan, Australia)',
 };
 
+const incomeLabels: Record<string, string> = {
+  'under-50k': 'Under $50k/year',
+  '50k-100k': '$50k-$100k/year',
+  '100k-200k': '$100k-$200k/year',
+  '200k-500k': '$200k-$500k/year',
+  '500k-plus': '$500k+/year',
+};
+const experienceLabels: Record<string, string> = {
+  none: 'No investing experience',
+  beginner: 'Beginner (under 1 year)',
+  intermediate: 'Intermediate (a few years)',
+  advanced: 'Advanced (5+ years)',
+};
+const accountTypeLabels: Record<string, string> = {
+  taxable: 'Taxable brokerage account',
+  'retirement-ira': 'IRA (Traditional or Roth)',
+  'retirement-401k': '401(k) / 403(b)',
+  mixed: 'Multiple account types',
+};
+const portfolioSizeLabels: Record<string, string> = {
+  'under-10k': 'Under $10k',
+  '10k-50k': '$10k-$50k',
+  '50k-250k': '$50k-$250k',
+  '250k-1m': '$250k-$1M',
+  '1m-plus': '$1M+',
+};
+const ageRangeLabels: Record<string, string> = {
+  '18-29': 'Age 18-29',
+  '30-39': 'Age 30-39',
+  '40-49': 'Age 40-49',
+  '50-59': 'Age 50-59',
+  '60-plus': 'Age 60+',
+};
+const emergencyFundLabels: Record<string, string> = {
+  'yes-6mo': '6+ months of expenses saved',
+  'yes-3mo': '3-6 months saved',
+  building: 'Building emergency fund',
+  no: 'No emergency fund yet',
+};
+
 function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
   const sectors = profile.sectorEmphasis.length > 0
     ? profile.sectorEmphasis.join(', ')
@@ -82,6 +122,12 @@ function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
     sectors,
     geography: geoLabels[profile.geographicPreference || ''] || 'US-focused',
     volatility: `Comfortable with up to ${profile.volatilityTolerance}% portfolio swings`,
+    income: incomeLabels[profile.incomeRange || ''] || undefined,
+    experience: experienceLabels[profile.investmentExperience || ''] || undefined,
+    accountType: accountTypeLabels[profile.accountType || ''] || undefined,
+    portfolioSize: portfolioSizeLabels[profile.portfolioSize || ''] || undefined,
+    ageRange: ageRangeLabels[profile.ageRange || ''] || undefined,
+    emergencyFund: emergencyFundLabels[profile.hasEmergencyFund || ''] || undefined,
   };
 }
 
@@ -480,7 +526,63 @@ export default function Create() {
             <CardContent><p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.risks}</p></CardContent>
           </Card>
 
-          {/* Edit Holdings — collapsible */}
+          {/* How We Built Your Portfolio — methodology transparency */}
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-sm">
+                <span className="flex items-center gap-2 text-foreground font-medium">
+                  <Info className="h-4 w-4 text-primary" />
+                  How we built your portfolio
+                </span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
+              <Card className="glass-card border-primary/20">
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Risk Assessment</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Your risk level was determined by weighting three categories: behavioral factors (60%) like your drawdown reaction and volatility tolerance, capacity factors (25%) like your timeline and emergency fund status, and context factors (15%) like income and experience. Behavioral signals carry the most weight because research shows how you react under stress predicts whether you'll stick with your plan.
+                    </p>
+                  </div>
+                  {(() => {
+                    const scoring = explainRiskScoring(strategyProfile);
+                    return (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Key Factors</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {scoring.factors.map((f) => (
+                            <div key={f.label} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/30 text-sm">
+                              <span className="text-muted-foreground">{f.label}</span>
+                              <span className={cn(
+                                'font-medium',
+                                f.contribution === 'increases' && 'text-success',
+                                f.contribution === 'decreases' && 'text-warning',
+                              )}>
+                                {f.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Portfolio Construction</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Holdings were selected by an AI model (Claude) using your risk profile, sector preferences, geographic focus, and live market data from Alpaca. The AI evaluates current prices, your existing positions, and recent market news to pick 5-8 liquid, tradeable securities with allocations that sum to 100%. Every portfolio is unique to your answers -- there are no pre-built templates.
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-2 border-t border-border/30">
+                    This is a paper-trading portfolio for educational purposes. Past performance does not guarantee future results. Always consult a licensed financial advisor before making real investment decisions.
+                  </p>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Edit Holdings -- collapsible */}
           <Collapsible open={editOpen} onOpenChange={setEditOpen}>
             <CollapsibleTrigger asChild>
               <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/30 bg-secondary/20 hover:bg-secondary/40 transition-colors text-sm">

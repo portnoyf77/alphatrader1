@@ -318,14 +318,31 @@ export default function Dashboard() {
     // Trigger refetches after a quick trade
   }, []);
 
+  // Fetch real portfolio metrics (volatility, Sharpe, S&P 500 benchmark)
+  const [metrics, setMetrics] = useState<{
+    totalReturn: number; volatility: number; sharpeRatio: number;
+    maxDrawdown: number; sp500Return: number; alpha: number;
+  } | null>(null);
+  useEffect(() => {
+    if (!hasLiveData) return;
+    let cancelled = false;
+    fetch('/api/portfolio-metrics')
+      .then(r => r.json())
+      .then(data => {
+        if (cancelled || data.error) return;
+        setMetrics(data);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [hasLiveData]);
+
   // Count-up animations
   const animEquity = useCountUp(displayEquity, 800);
   const animPortfolioValue = useCountUp(displayPortfolioValue, 800);
-  // SP500 benchmark comparison - use live data when available
-  const sp500Return = 9.8; // TODO: fetch real S&P 500 benchmark from Alpaca
-  const userTotalReturn = portfolioReturn ? portfolioReturn.pct : 0;
-  const vsSP500 = userTotalReturn - sp500Return;
-  const realVsSP500 = portfolioReturn ? portfolioReturn.pct - sp500Return : vsSP500;
+  // SP500 benchmark comparison - use live metrics API when available
+  const sp500Return = metrics?.sp500Return ?? 9.8;
+  const userTotalReturn = metrics?.totalReturn ?? (portfolioReturn ? portfolioReturn.pct : 0);
+  const realVsSP500 = userTotalReturn - sp500Return;
   const animVsSP500 = useCountUp(realVsSP500, 800, 1);
 
   const tabCards = [
@@ -514,6 +531,38 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
+
+        {/* Risk Metrics (when live data + metrics available) */}
+        {hasLiveData && metrics && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Volatility</p>
+              <p className="font-mono text-lg font-semibold">{(metrics.volatility * 100).toFixed(1)}%</p>
+              <p className="text-[0.7rem] text-muted-foreground">annualized</p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Sharpe Ratio</p>
+              <p className={cn("font-mono text-lg font-semibold", metrics.sharpeRatio >= 1 ? 'text-success' : metrics.sharpeRatio >= 0 ? 'text-foreground' : 'text-destructive')}>
+                {metrics.sharpeRatio.toFixed(2)}
+              </p>
+              <p className="text-[0.7rem] text-muted-foreground">risk-adjusted</p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Max Drawdown</p>
+              <p className="font-mono text-lg font-semibold text-destructive">
+                {(metrics.maxDrawdown * 100).toFixed(1)}%
+              </p>
+              <p className="text-[0.7rem] text-muted-foreground">worst decline</p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Alpha</p>
+              <p className={cn("font-mono text-lg font-semibold", metrics.alpha >= 0 ? 'text-success' : 'text-destructive')}>
+                {metrics.alpha >= 0 ? '+' : ''}{(metrics.alpha * 100).toFixed(1)}%
+              </p>
+              <p className="text-[0.7rem] text-muted-foreground">vs S&P 500</p>
+            </div>
+          </div>
+        )}
 
         {/* Contextual Alpha Promotion */}
         {qualifyingPortfolio && (

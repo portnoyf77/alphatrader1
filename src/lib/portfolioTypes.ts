@@ -38,4 +38,11 @@ export interface QuestionnaireAnswers {
   sectors: string;
   geography: string;
   volatility: string;
+  // Phase 3: Financial Profile (optional for backward compat)
+  income?: string;
+  experience?: string;
+  accountType?: string;
+  portfolioSize?: string;
+  ageRange?: string;
+  emergencyFund?: string;
 }

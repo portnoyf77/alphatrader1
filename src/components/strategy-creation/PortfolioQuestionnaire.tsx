@@ -37,8 +37,47 @@ const CONTEXT_LINES: Partial<Record<keyof StrategyProfile, Record<string, string
   geographicPreference: {
     us: "Home bias is simple; we'll keep the story easy to follow.",
     global: 'Broad reach is a classic way to smooth country-specific shocks.',
-    emerging: 'Higher octane—we will expect more chop for potential upside.',
+    emerging: 'Higher octane--we will expect more chop for potential upside.',
     international: 'Developed markets abroad diversify without the wildest swings.',
+  },
+  incomeRange: {
+    'under-50k': "Every dollar counts more--we'll be thoughtful about fees and position sizes.",
+    '50k-100k': 'Solid footing. Enough room to build a meaningful allocation.',
+    '100k-200k': "Good capacity to weather market dips without touching your portfolio.",
+    '200k-500k': 'Strong earning power gives you real freedom in how aggressive you go.',
+    '500k-plus': "High capacity to absorb risk--but that doesn't mean you should.",
+  },
+  investmentExperience: {
+    none: "Starting fresh is fine--we'll keep things straightforward.",
+    beginner: "You've dipped your toes in. We'll build on that foundation.",
+    intermediate: "You know the basics. We can lean into more nuanced allocations.",
+    advanced: "Veteran hands. We'll skip the guardrails you don't need.",
+  },
+  accountType: {
+    taxable: 'Tax efficiency matters here--dividends and turnover affect your take-home.',
+    'retirement-ira': 'Tax-deferred growth changes the math on what belongs in here.',
+    'retirement-401k': 'Long-horizon retirement money can handle more volatility.',
+    mixed: "Multiple accounts means we can be strategic about what goes where.",
+  },
+  portfolioSize: {
+    'under-10k': "Small but mighty--we'll keep positions concentrated and meaningful.",
+    '10k-50k': 'Enough room for real diversification across asset classes.',
+    '50k-250k': 'Solid capital base. We can spread across sectors and geographies.',
+    '250k-1m': "Serious money. We'll use the full toolkit.",
+    '1m-plus': 'Institutional-grade design is on the table.',
+  },
+  ageRange: {
+    '18-29': 'Decades of compounding ahead--time is your biggest asset.',
+    '30-39': 'Peak accumulation years. Growth still makes a lot of sense.',
+    '40-49': "Halfway point--we'll balance growth with protection.",
+    '50-59': "Preservation starts to matter more. We'll reflect that.",
+    '60-plus': "Income and stability take priority now.",
+  },
+  hasEmergencyFund: {
+    'yes-6mo': "Strong buffer. You can invest without worrying about forced selling.",
+    'yes-3mo': "Decent cushion. We'll factor that confidence into the mix.",
+    building: "Smart to invest alongside building savings--we'll stay moderate.",
+    no: "Consider building one first. We'll err on the cautious side for now.",
   },
 };
 

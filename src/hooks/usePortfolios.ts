@@ -12,6 +12,7 @@ import {
   getPortfolioById,
   getPortfoliosWithPendingUpdates,
   getCreatorStats,
+  clonePortfolio,
 } from '@/lib/supabasePortfolioService';
 
 interface UseQueryResult<T> {
@@ -184,4 +185,38 @@ export function useCreatorStats() {
   }, []);
 
   return { data, loading };
+}
+
+/**
+ * Clone a portfolio with optional modifications.
+ * Returns the new portfolio ID on success.
+ */
+export function useClonePortfolio() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const clone = useCallback(
+    async (
+      sourceId: string,
+      modifications?: {
+        holdings?: { ticker: string; name: string; weight: number; sector?: string }[];
+      }
+    ): Promise<string | null> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const newId = await clonePortfolio(sourceId, modifications);
+        return newId;
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Clone failed';
+        setError(errorMsg);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return { clone, loading, error };
 }
