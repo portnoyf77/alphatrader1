@@ -726,7 +726,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
               width: 280,
               height: 280,
               borderRadius: '50%',
-              background: `radial-gradient(circle, ${gemSolidColors[gemType]}50 0%, ${gemSolidColors[gemType]}15 40%, transparent 70%)`,
+              background: `radial-gradient(circle, rgba(124,58,237,0.3) 0%, rgba(124,58,237,0.1) 40%, transparent 70%)`,
               filter: 'blur(30px)',
             }}
           />
