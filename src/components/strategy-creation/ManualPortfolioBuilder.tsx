@@ -10,6 +10,7 @@ import { GemDot } from '@/components/GemDot';
 import { cn } from '@/lib/utils';
 import { generateStrategyNumber } from '@/lib/strategyProfile';
 import type { RiskLevel } from '@/lib/types';
+import { createPortfolio } from '@/lib/supabasePortfolioService';
 
 // Ticker universe from mock data holdings
 const TICKER_UNIVERSE = [
@@ -134,12 +135,29 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
     setHoldings(prev => prev.map(h => h.id === id ? { ...h, weight: Math.min(100, Math.max(0, weight)) } : h));
   };
 
-  const persistAndNavigate = (status: 'live' | 'simulating') => {
-    const portfolioId = portfolioName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const persistAndNavigate = async (status: 'live' | 'simulating') => {
+    const fallbackId = portfolioName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+    let savedId = fallbackId;
+    try {
+      savedId = await createPortfolio({
+        name: portfolioName,
+        strategyType: 'Manual',
+        objective: 'Growth',
+        riskLevel: riskLevel,
+        status: 'private',
+        holdings: holdings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight, sector: h.sector })),
+        sectors: [...new Set(holdings.map(h => h.sector).filter(Boolean) as string[])],
+      });
+    } catch (err) {
+      console.error('Supabase save failed, falling back to localStorage:', err);
+    }
+
+    // Also save to localStorage as fallback
     const newPortfolio = {
-      id: portfolioId,
+      id: savedId,
       name: portfolioName,
-      creator_id: '@alex_investor',
+      creator_id: 'self',
       status,
       risk_level: riskLevel,
       strategy_type: 'Manual',
@@ -160,7 +178,7 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
       toast({ title: 'Portfolio created!', description: 'Redirecting to your dashboard...' });
       setTimeout(() => navigate('/dashboard'), 1000);
     } else {
-      navigate(`/simulation/${portfolioId}`);
+      navigate(`/simulation/${savedId}`);
     }
   };
 

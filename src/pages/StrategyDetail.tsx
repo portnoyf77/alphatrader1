@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users, User, DollarSign, TrendingUp, TrendingDown, Calendar, Sparkles, Wrench, Heart, MessageSquare, AlertTriangle, Clock, Lock, Info, ShieldCheck, Wallet, Eye, List, PieChart, BarChart3, History, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,13 +15,14 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
-import { mockPortfolios, mockComments } from '@/lib/mockData';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { useToast } from '@/hooks/use-toast';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { getGemstoneColor, getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
+import { usePortfolio } from '@/hooks/usePortfolios';
+import { getPortfolioComments, type AppComment } from '@/lib/supabasePortfolioService';
 
 export default function StrategyDetail() {
   const { id } = useParams();
@@ -39,9 +40,25 @@ export default function StrategyDetail() {
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
 
-  // TODO: Replace mockPortfolios.find() with usePortfolio(id) hook from '@/hooks/usePortfolios'
-  // TODO: Replace mockComments with getPortfolioComments from '@/lib/supabasePortfolioService' using useState/useEffect
-  const strategy = mockPortfolios.find(s => s.id === id);
+  const { data: strategy, loading: strategyLoading } = usePortfolio(id);
+  const [comments, setComments] = useState<AppComment[]>([]);
+
+  // Fetch comments from Supabase
+  useEffect(() => {
+    if (id) {
+      getPortfolioComments(id).then(setComments).catch(() => setComments([]));
+    }
+  }, [id]);
+
+  if (strategyLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">Loading portfolio...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!strategy) {
     return (
@@ -523,7 +540,7 @@ export default function StrategyDetail() {
                   <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" />Discussion</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockComments.map((comment) => (
+                  {comments.map((comment) => (
                     <div key={comment.id} className="p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">{comment.author}</span>

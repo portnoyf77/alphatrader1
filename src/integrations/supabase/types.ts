@@ -14,6 +14,334 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string
+          username: string | null
+          display_name: string | null
+          avatar_url: string | null
+          plan: string | null
+          trial_started_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          username?: string | null
+          display_name?: string | null
+          avatar_url?: string | null
+          plan?: string | null
+          trial_started_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          username?: string | null
+          display_name?: string | null
+          avatar_url?: string | null
+          plan?: string | null
+          trial_started_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolios: {
+        Row: {
+          id: string
+          creator_id: string
+          name: string
+          strategy_type: Database["public"]["Enums"]["strategy_type"]
+          objective: Database["public"]["Enums"]["objective_type"]
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          geo_focus: Database["public"]["Enums"]["geo_focus"]
+          status: Database["public"]["Enums"]["portfolio_status"]
+          validation_status: Database["public"]["Enums"]["validation_status"]
+          validation_criteria_met: boolean
+          validation_summary: string | null
+          allowed_assets: string[]
+          leverage_allowed: boolean
+          max_single_sector_exposure_pct: number
+          max_turnover: Database["public"]["Enums"]["turnover_level"]
+          exposure_breakdown: Json
+          top_themes: string[]
+          turnover_estimate: Database["public"]["Enums"]["turnover_level"]
+          sectors: string[]
+          disclosure_text_public: string
+          description_rationale: string | null
+          risks: string | null
+          followers_count: number
+          allocated_amount_usd: number
+          new_allocations_paused: boolean
+          creator_fee_pct: number
+          creator_est_monthly_earnings_usd: number
+          creator_investment: number
+          requires_opt_in_for_structural_changes: boolean
+          exit_window_days: number
+          auto_exit_on_liquidation: boolean
+          pending_update: string | null
+          pending_change_summary: string | null
+          created_at: string
+          updated_at: string
+          last_rebalanced_at: string | null
+        }
+        Insert: {
+          id?: string
+          creator_id: string
+          name: string
+          strategy_type?: Database["public"]["Enums"]["strategy_type"]
+          objective?: Database["public"]["Enums"]["objective_type"]
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          geo_focus?: Database["public"]["Enums"]["geo_focus"]
+          status?: Database["public"]["Enums"]["portfolio_status"]
+          validation_status?: Database["public"]["Enums"]["validation_status"]
+          validation_criteria_met?: boolean
+          validation_summary?: string | null
+          allowed_assets?: string[]
+          leverage_allowed?: boolean
+          max_single_sector_exposure_pct?: number
+          max_turnover?: Database["public"]["Enums"]["turnover_level"]
+          exposure_breakdown?: Json
+          top_themes?: string[]
+          turnover_estimate?: Database["public"]["Enums"]["turnover_level"]
+          sectors?: string[]
+          disclosure_text_public?: string
+          description_rationale?: string | null
+          risks?: string | null
+          followers_count?: number
+          allocated_amount_usd?: number
+          new_allocations_paused?: boolean
+          creator_fee_pct?: number
+          creator_est_monthly_earnings_usd?: number
+          creator_investment?: number
+          requires_opt_in_for_structural_changes?: boolean
+          exit_window_days?: number
+          auto_exit_on_liquidation?: boolean
+          pending_update?: string | null
+          pending_change_summary?: string | null
+          created_at?: string
+          updated_at?: string
+          last_rebalanced_at?: string | null
+        }
+        Update: {
+          id?: string
+          creator_id?: string
+          name?: string
+          strategy_type?: Database["public"]["Enums"]["strategy_type"]
+          objective?: Database["public"]["Enums"]["objective_type"]
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          geo_focus?: Database["public"]["Enums"]["geo_focus"]
+          status?: Database["public"]["Enums"]["portfolio_status"]
+          validation_status?: Database["public"]["Enums"]["validation_status"]
+          validation_criteria_met?: boolean
+          validation_summary?: string | null
+          allowed_assets?: string[]
+          leverage_allowed?: boolean
+          max_single_sector_exposure_pct?: number
+          max_turnover?: Database["public"]["Enums"]["turnover_level"]
+          exposure_breakdown?: Json
+          top_themes?: string[]
+          turnover_estimate?: Database["public"]["Enums"]["turnover_level"]
+          sectors?: string[]
+          disclosure_text_public?: string
+          description_rationale?: string | null
+          risks?: string | null
+          followers_count?: number
+          allocated_amount_usd?: number
+          new_allocations_paused?: boolean
+          creator_fee_pct?: number
+          creator_est_monthly_earnings_usd?: number
+          creator_investment?: number
+          requires_opt_in_for_structural_changes?: boolean
+          exit_window_days?: number
+          auto_exit_on_liquidation?: boolean
+          pending_update?: string | null
+          pending_change_summary?: string | null
+          created_at?: string
+          updated_at?: string
+          last_rebalanced_at?: string | null
+        }
+        Relationships: [{
+          foreignKeyName: "portfolios_creator_id_fkey"
+          columns: ["creator_id"]
+          referencedRelation: "profiles"
+          referencedColumns: ["id"]
+        }]
+      }
+      portfolio_holdings: {
+        Row: {
+          id: string
+          portfolio_id: string
+          ticker: string
+          name: string
+          weight: number
+          sector: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          portfolio_id: string
+          ticker: string
+          name: string
+          weight: number
+          sector?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          portfolio_id?: string
+          ticker?: string
+          name?: string
+          weight?: number
+          sector?: string | null
+          created_at?: string
+        }
+        Relationships: [{
+          foreignKeyName: "portfolio_holdings_portfolio_id_fkey"
+          columns: ["portfolio_id"]
+          referencedRelation: "portfolios"
+          referencedColumns: ["id"]
+        }]
+      }
+      portfolio_performance: {
+        Row: {
+          id: string
+          portfolio_id: string
+          recorded_at: string
+          return_30d: number | null
+          return_90d: number | null
+          max_drawdown: number | null
+          volatility: number | null
+          consistency_score: number | null
+        }
+        Insert: {
+          id?: string
+          portfolio_id: string
+          recorded_at?: string
+          return_30d?: number | null
+          return_90d?: number | null
+          max_drawdown?: number | null
+          volatility?: number | null
+          consistency_score?: number | null
+        }
+        Update: {
+          id?: string
+          portfolio_id?: string
+          recorded_at?: string
+          return_30d?: number | null
+          return_90d?: number | null
+          max_drawdown?: number | null
+          volatility?: number | null
+          consistency_score?: number | null
+        }
+        Relationships: [{
+          foreignKeyName: "portfolio_performance_portfolio_id_fkey"
+          columns: ["portfolio_id"]
+          referencedRelation: "portfolios"
+          referencedColumns: ["id"]
+        }]
+      }
+      portfolio_activity_log: {
+        Row: {
+          id: string
+          portfolio_id: string
+          event_type: Database["public"]["Enums"]["activity_event_type"]
+          summary: string
+          occurred_at: string
+        }
+        Insert: {
+          id?: string
+          portfolio_id: string
+          event_type: Database["public"]["Enums"]["activity_event_type"]
+          summary: string
+          occurred_at?: string
+        }
+        Update: {
+          id?: string
+          portfolio_id?: string
+          event_type?: Database["public"]["Enums"]["activity_event_type"]
+          summary?: string
+          occurred_at?: string
+        }
+        Relationships: [{
+          foreignKeyName: "portfolio_activity_log_portfolio_id_fkey"
+          columns: ["portfolio_id"]
+          referencedRelation: "portfolios"
+          referencedColumns: ["id"]
+        }]
+      }
+      followed_portfolios: {
+        Row: {
+          id: string
+          user_id: string
+          portfolio_id: string
+          allocation_usd: number
+          allocated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          portfolio_id: string
+          allocation_usd?: number
+          allocated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          portfolio_id?: string
+          allocation_usd?: number
+          allocated_at?: string
+        }
+        Relationships: [{
+          foreignKeyName: "followed_portfolios_user_id_fkey"
+          columns: ["user_id"]
+          referencedRelation: "profiles"
+          referencedColumns: ["id"]
+        }, {
+          foreignKeyName: "followed_portfolios_portfolio_id_fkey"
+          columns: ["portfolio_id"]
+          referencedRelation: "portfolios"
+          referencedColumns: ["id"]
+        }]
+      }
+      portfolio_comments: {
+        Row: {
+          id: string
+          portfolio_id: string
+          author_id: string
+          content: string
+          likes: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          portfolio_id: string
+          author_id: string
+          content: string
+          likes?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          portfolio_id?: string
+          author_id?: string
+          content?: string
+          likes?: number
+          created_at?: string
+        }
+        Relationships: [{
+          foreignKeyName: "portfolio_comments_portfolio_id_fkey"
+          columns: ["portfolio_id"]
+          referencedRelation: "portfolios"
+          referencedColumns: ["id"]
+        }, {
+          foreignKeyName: "portfolio_comments_author_id_fkey"
+          columns: ["author_id"]
+          referencedRelation: "profiles"
+          referencedColumns: ["id"]
+        }]
+      }
       page_views: {
         Row: {
           city: string | null
@@ -73,7 +401,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      strategy_type: "Manual" | "GenAI"
+      objective_type: "growth" | "income" | "preservation" | "speculation" | "balanced"
+      risk_level: "conservative" | "moderate" | "aggressive"
+      geo_focus: "US" | "Global" | "Emerging" | "Europe" | "Asia"
+      portfolio_status: "private" | "listed" | "inactive"
+      validation_status: "pending" | "in_progress" | "validated" | "rejected"
+      turnover_level: "low" | "medium" | "high"
+      activity_event_type: "rebalance" | "holding_added" | "holding_removed" | "weight_change" | "status_change" | "comment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -200,6 +535,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      strategy_type: ["Manual", "GenAI"] as const,
+      objective_type: ["growth", "income", "preservation", "speculation", "balanced"] as const,
+      risk_level: ["conservative", "moderate", "aggressive"] as const,
+      geo_focus: ["US", "Global", "Emerging", "Europe", "Asia"] as const,
+      portfolio_status: ["private", "listed", "inactive"] as const,
+      validation_status: ["pending", "in_progress", "validated", "rejected"] as const,
+      turnover_level: ["low", "medium", "high"] as const,
+      activity_event_type: ["rebalance", "holding_added", "holding_removed", "weight_change", "status_change", "comment"] as const,
+    },
   },
 } as const

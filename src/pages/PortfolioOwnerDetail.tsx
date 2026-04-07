@@ -15,8 +15,8 @@ import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { StrategyControls } from '@/components/StrategyControls';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { mockPortfolios } from '@/lib/mockData';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { usePortfolio } from '@/hooks/usePortfolios';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -58,8 +58,17 @@ export default function PortfolioOwnerDetail() {
     }
   };
 
-  // TODO: Replace mockPortfolios.find() with usePortfolio(id) hook from '@/hooks/usePortfolios'
-  const portfolio = mockPortfolios.find(s => s.id === id);
+  const { data: portfolio, loading: portfolioLoading } = usePortfolio(id);
+
+  if (portfolioLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">Loading portfolio...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!portfolio) {
     return (

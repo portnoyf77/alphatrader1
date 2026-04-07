@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
-import { mockPortfolios } from '@/lib/mockData';
 import { formatPercent } from '@/lib/formatters';
+import { usePortfolio } from '@/hooks/usePortfolios';
 import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -87,13 +87,13 @@ export default function Simulation() {
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
   const [showGoLiveModal, setShowGoLiveModal] = useState(false);
 
-  // TODO: Replace mockPortfolios.find() with usePortfolio(id) hook, keep localStorage fallback for user-created portfolios
-  const mockPortfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
-  const userPortfolio = useMemo(() => !mockPortfolio && id ? getUserCreatedPortfolio(id) : null, [id, mockPortfolio]);
+  // Fetch from Supabase first, fall back to localStorage for user-created portfolios
+  const { data: supabasePortfolio, loading: supabaseLoading } = usePortfolio(id);
+  const userPortfolio = useMemo(() => !supabasePortfolio && !supabaseLoading && id ? getUserCreatedPortfolio(id) : null, [id, supabasePortfolio, supabaseLoading]);
 
   // Normalize: user-created portfolios have a simpler shape
   const portfolio = useMemo(() => {
-    if (mockPortfolio) return mockPortfolio;
+    if (supabasePortfolio) return supabasePortfolio;
     if (userPortfolio) {
       return {
         ...userPortfolio,
@@ -103,7 +103,7 @@ export default function Simulation() {
       };
     }
     return null;
-  }, [mockPortfolio, userPortfolio]);
+  }, [supabasePortfolio, userPortfolio]);
 
   const lastDayOpenValue = fullData[fullData.length - 2]?.Portfolio ?? 100000;
   const sp500Base = fullData[fullData.length - 2]?.['S&P 500'] ?? 106500;

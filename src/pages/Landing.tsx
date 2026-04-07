@@ -4,7 +4,6 @@ import { ArrowRight, Sparkles, ChevronDown, Users, TrendingUp } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { formatCurrency } from '@/lib/formatters';
-import { mockPortfolios, creatorStats } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
@@ -38,16 +37,47 @@ function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200, fo
 }
 
 export default function Landing() {
-  // TODO: Replace mockPortfolios and creatorStats with public Supabase query (no auth required) or static showcase data
-  const validatedPortfolios = mockPortfolios.filter(s => s.status === 'validated_listed');
-  const totalAllocated = validatedPortfolios.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
-  const totalFollowers = validatedPortfolios.reduce((acc, s) => acc + s.followers_count, 0);
-  const totalEarnings = creatorStats.totalAlphaEarnings;
+  // Static showcase data for the landing page (public, no auth required)
+  // These will be replaced with real aggregates once we add a public Supabase endpoint
+  const totalAllocated = 10060000;
+  const totalFollowers = 11122;
+  const totalEarnings = 20496;
 
-  // Top 3 alphas by earnings
-  const topAlphas = [...validatedPortfolios]
-    .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
-    .slice(0, 3);
+  const topAlphas = [
+    {
+      id: 'showcase-1',
+      name: 'Ruby-891',
+      risk_level: 'High' as const,
+      performance: { return_30d: 6.2, return_90d: 18.5, max_drawdown: -15.3, volatility: 24.2, consistency_score: 62 },
+      followers_count: 756,
+      allocated_amount_usd: 4200000,
+      creator_est_monthly_earnings_usd: 875,
+      creator_investment: 45000,
+      creator_id: '@momentum_pro',
+    },
+    {
+      id: 'showcase-2',
+      name: 'Pearl-142',
+      risk_level: 'Low' as const,
+      performance: { return_30d: 1.8, return_90d: 5.4, max_drawdown: -3.2, volatility: 8.1, consistency_score: 92 },
+      followers_count: 2389,
+      allocated_amount_usd: 2450000,
+      creator_est_monthly_earnings_usd: 510,
+      creator_investment: 50000,
+      creator_id: '@alpha_99',
+    },
+    {
+      id: 'showcase-3',
+      name: 'Pearl-217',
+      risk_level: 'Low' as const,
+      performance: { return_30d: 1.5, return_90d: 4.8, max_drawdown: -5.2, volatility: 9.8, consistency_score: 85 },
+      followers_count: 2156,
+      allocated_amount_usd: 2100000,
+      creator_est_monthly_earnings_usd: 438,
+      creator_investment: 75000,
+      creator_id: '@simple_60_40',
+    },
+  ];
 
   const [hoveredAlpha, setHoveredAlpha] = useState<number | null>(null);
 

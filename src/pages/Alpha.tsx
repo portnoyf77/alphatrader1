@@ -6,22 +6,22 @@ import { Slider } from '@/components/ui/slider';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { mockPortfolios } from '@/lib/mockData';
 import { formatCurrency } from '@/lib/formatters';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { cn } from '@/lib/utils';
+import { useValidatedPortfolios, useMyPortfolios } from '@/hooks/usePortfolios';
 
 const ALPHA_FEE_RATE = 0.0025;
 
-// TODO: Replace mockPortfolios with useValidatedPortfolios hook
-// Top 3 alphas by earnings
-const topAlphas = [...mockPortfolios]
-  .filter(s => s.status === 'validated_listed')
-  .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
-  .slice(0, 3);
-
 export default function Alpha() {
   const { isAuthenticated } = useMockAuth();
+  const { data: validatedPortfolios } = useValidatedPortfolios();
+  const { data: myPortfolios } = useMyPortfolios();
+
+  // Top 3 alphas by earnings
+  const topAlphas = [...validatedPortfolios]
+    .sort((a, b) => b.creator_est_monthly_earnings_usd - a.creator_est_monthly_earnings_usd)
+    .slice(0, 3);
   const [followers, setFollowers] = useState([100]);
   const [avgAllocation, setAvgAllocation] = useState([10000]);
   const [hoveredAlpha, setHoveredAlpha] = useState<number | null>(null);
@@ -43,14 +43,13 @@ export default function Alpha() {
     setTimeout(() => setResultPulse(false), 200);
   };
 
-  // TODO: Replace mockPortfolios.find() with useMyPortfolios hook to check best qualifying portfolio
   // Determine best qualifying portfolio for authenticated user
   const bestPortfolio = isAuthenticated
-    ? mockPortfolios.find(p => {
+    ? myPortfolios.find(p => {
         if (p.status !== 'validated_listed') return false;
         const days = Math.floor((Date.now() - new Date(p.created_date).getTime()) / 86400000);
         return days >= 30 && Math.abs(p.performance.max_drawdown) < 20 && p.holdings.length >= 5 && p.creator_investment >= 1000;
-      })
+      }) || null
     : null;
 
   const requirements = [
