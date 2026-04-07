@@ -15,7 +15,35 @@ const STEPS = [
   'Personal Info',
   'Investor Profile',
   'Goals',
+  'Plan',
   'Agreements',
+] as const;
+
+const PLAN_OPTIONS = [
+  {
+    id: 'basic' as const,
+    name: 'Basic',
+    price: '$19.99',
+    period: '/month',
+    features: [
+      'Unlimited AI portfolio creation',
+      'Live simulations',
+      'Marketplace access',
+      'Auto-rebalancing with notifications',
+    ],
+  },
+  {
+    id: 'pro' as const,
+    name: 'Pro',
+    price: '$49.99',
+    period: '/month',
+    features: [
+      'Everything in Basic',
+      'Advanced risk analytics (volatility, stress testing, correlation)',
+      'Priority marketplace access',
+      'Downloadable tax reports',
+    ],
+  },
 ] as const;
 
 const COUNTRIES = [
@@ -131,11 +159,12 @@ const cardShell =
   'rounded-xl border p-4 text-left transition-all cursor-pointer';
 
 export default function ProfileSetup() {
-  const { user, completeOnboarding } = useMockAuth();
+  const { user, completeOnboarding, selectPlan } = useMockAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<OnboardingData>(initialForm);
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState('');
   const [usernameStatus, setUsernameStatus] = useState<
     'idle' | 'checking' | 'available' | 'taken'
   >('idle');
@@ -217,7 +246,9 @@ export default function ProfileSetup() {
     !!formData.timeHorizon &&
     !!formData.riskTolerance;
 
-  const step3Valid =
+  const stepPlanValid = selectedPlan.trim().length > 0;
+
+  const agreementsValid =
     agreements.terms && agreements.risk && agreements.comms;
 
   const canContinue = (() => {
@@ -229,7 +260,7 @@ export default function ProfileSetup() {
       case 2:
         return step2Valid;
       case 3:
-        return step3Valid && !saving;
+        return stepPlanValid;
       default:
         return false;
     }
@@ -242,7 +273,7 @@ export default function ProfileSetup() {
   };
 
   const goNext = () => {
-    if (currentStep < 3 && canContinue) {
+    if (currentStep < 4 && canContinue) {
       setCurrentStep((s) => s + 1);
       setSubmitError('');
     }
@@ -258,10 +289,11 @@ export default function ProfileSetup() {
   };
 
   const handleComplete = async () => {
-    if (!step3Valid || saving) return;
+    if (!agreementsValid || saving || !stepPlanValid) return;
     setSaving(true);
     setSubmitError('');
     try {
+      selectPlan(selectedPlan);
       await completeOnboarding(formData);
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
@@ -291,6 +323,18 @@ export default function ProfileSetup() {
       : {
           borderColor: 'rgba(255,255,255,0.1)',
           background: 'rgba(255,255,255,0.02)',
+        };
+
+  const planCardStyle = (selected: boolean): CSSProperties =>
+    selected
+      ? {
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid #7C3AED',
+          boxShadow: '0 0 20px rgba(124, 58, 237, 0.15)',
+        }
+      : {
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.1)',
         };
 
   return (
@@ -335,7 +379,7 @@ export default function ProfileSetup() {
               const done = i < currentStep;
               const active = i === currentStep;
               return (
-                <div key={label} className="relative z-10 flex flex-col items-center w-[22%] min-w-0">
+                <div key={label} className="relative z-10 flex flex-col items-center flex-1 min-w-0">
                   <div
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors"
                     style={{
@@ -686,6 +730,70 @@ export default function ProfileSetup() {
           {currentStep === 3 && (
             <div className="space-y-5">
               <div>
+                <h1 className="text-xl font-bold text-white mb-1">Choose your plan</h1>
+                <p className="text-sm text-muted-foreground">
+                  Pick the tier that fits how you trade. You can change later.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {PLAN_OPTIONS.map((plan) => {
+                  const selected = selectedPlan === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedPlan(plan.id);
+                        setSubmitError('');
+                      }}
+                      className="relative rounded-xl p-4 text-left transition-all cursor-pointer"
+                      style={planCardStyle(selected)}
+                    >
+                      {plan.id === 'pro' && (
+                        <span
+                          className="absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+                          style={{
+                            background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
+                            boxShadow: '0 2px 12px rgba(124, 58, 237, 0.35)',
+                          }}
+                        >
+                          Most Popular
+                        </span>
+                      )}
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <span className="text-lg font-bold text-white">{plan.name}</span>
+                        <span className="text-2xl font-bold text-white">{plan.price}</span>
+                        <span className="text-sm text-muted-foreground">{plan.period}</span>
+                      </div>
+                      <div className="mt-3 inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
+                        7-day free trial
+                      </div>
+                      <ul className="mt-4 space-y-2.5">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex gap-2 text-sm text-white/85">
+                            <Check
+                              className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5"
+                              strokeWidth={2.5}
+                            />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="text-center text-xs text-muted-foreground">
+                No credit card required
+              </p>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-5">
+              <div>
                 <h1 className="text-xl font-bold text-white mb-1">Agreements</h1>
                 <p className="text-sm text-muted-foreground">
                   Please review and accept to finish setup.
@@ -743,7 +851,7 @@ export default function ProfileSetup() {
           )}
 
           <div className="flex items-center justify-between gap-3 mt-8 pt-2">
-            {currentStep < 3 ? (
+            {currentStep < 4 ? (
               <button
                 type="button"
                 onClick={goBack}
@@ -756,7 +864,7 @@ export default function ProfileSetup() {
               <div />
             )}
 
-            {currentStep < 3 ? (
+            {currentStep < 4 ? (
               <button
                 type="button"
                 onClick={goNext}
@@ -771,9 +879,9 @@ export default function ProfileSetup() {
               <button
                 type="button"
                 onClick={handleComplete}
-                disabled={!step3Valid || saving}
+                disabled={!agreementsValid || saving || !stepPlanValid}
                 className={primaryBtn}
-                style={primaryBtnStyle(step3Valid && !saving)}
+                style={primaryBtnStyle(agreementsValid && !saving && stepPlanValid)}
               >
                 {saving ? (
                   <>
