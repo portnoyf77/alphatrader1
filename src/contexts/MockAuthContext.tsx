@@ -37,36 +37,15 @@ function generateUsername(userId: string): string {
   return `@inv_${short}`;
 }
 
-// Load profile from Supabase profiles table, falling back to auto-generated username
-async function loadAppUser(su: SupabaseUser): Promise<AppUser> {
-  const fallback: AppUser = {
+// Quick synchronous user object -- never blocks auth flow
+function toAppUser(su: SupabaseUser): AppUser {
+  return {
     id: su.id,
     username: generateUsername(su.id),
     displayName: '',
     email: su.email || '',
-    needsProfileSetup: true,
+    needsProfileSetup: true, // assume true until profile loads
   };
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('username, display_name')
-      .eq('id', su.id)
-      .single();
-
-    if (error || !data) return fallback;
-
-    const hasProfile = !!data.username && data.username.trim().length > 0;
-    return {
-      id: su.id,
-      username: hasProfile ? `@${data.username}` : generateUsername(su.id),
-      displayName: data.display_name || '',
-      email: su.email || '',
-      needsProfileSetup: !hasProfile,
-    };
-  } catch {
-    return fallback;
-  }
 }
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
@@ -84,10 +63,9 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     if (storedPlan) setUserPlan(storedPlan);
 
     // 2. Get current session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        const appUser = await loadAppUser(session.user);
-        setUser(appUser);
+        setUser(toAppUser(session.user));
         // Initialize trial if first session
         if (!localStorage.getItem('trialStartDate')) {
           const now = Date.now();
@@ -100,10 +78,9 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 
     // 3. Listen for sign-in / sign-out events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         if (session?.user) {
-          const appUser = await loadAppUser(session.user);
-          setUser(appUser);
+          setUser(toAppUser(session.user));
           // Initialize trial on first auth
           if (!localStorage.getItem('trialStartDate')) {
             const now = Date.now();
@@ -119,6 +96,43 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // After auth resolves, load profile from Supabase in the background
+  useEffect(() => {
+    if (!user || !user.needsProfileSetup) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username, display_name')
+          .eq('id', user.id)
+          .single();
+
+        if (cancelled) return;
+
+        if (!error && data && data.username && data.username.trim().length > 0) {
+          setUser((prev) =>
+            prev && prev.id === user.id
+              ? {
+                  ...prev,
+                  username: `@${data.username}`,
+                  displayName: data.display_name || '',
+                  needsProfileSetup: false,
+                }
+              : prev
+          );
+        }
+      } catch {
+        // Profile fetch failed -- needsProfileSetup stays true, user
+        // will land on the profile setup page (safe fallback)
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const isTrialExpired =
     trialStartDate !== null && !userPlan && Date.now() - trialStartDate > FREE_TRIAL_MS;
