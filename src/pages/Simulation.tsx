@@ -129,13 +129,16 @@ export default function Simulation() {
   const trialSecondsRemaining = FREE_TRIAL_DAYS * 86400 - elapsedTrialSeconds;
 
   useEffect(() => {
+    // Wait for Supabase to finish loading before deciding to redirect
+    if (supabaseLoading) return;
     if (!portfolio) {
       navigate('/dashboard', { replace: true });
     } else if (portfolio.status !== 'private' && portfolio.status !== 'simulating') {
       navigate(`/portfolio/${portfolio.id}`, { replace: true });
     }
-  }, [portfolio, navigate]);
+  }, [portfolio, supabaseLoading, navigate]);
 
+  if (supabaseLoading) return null;
   if (!portfolio || (portfolio.status !== 'private' && portfolio.status !== 'simulating')) return null;
 
   const staticMetrics = metricsByRange[timeRange];

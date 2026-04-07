@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
 import { generatePortfolio } from '@/lib/portfolioService';
@@ -109,6 +109,14 @@ const emergencyFundLabels: Record<string, string> = {
   building: 'Building emergency fund',
   no: 'No emergency fund yet',
 };
+const investmentAmountLabels: Record<string, string> = {
+  '1k': '$1,000',
+  '5k': '$5,000',
+  '10k': '$10,000',
+  '25k': '$25,000',
+  '50k': '$50,000',
+  '100k-plus': '$100,000+',
+};
 
 function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
   const sectors = profile.sectorEmphasis.length > 0
@@ -181,6 +189,10 @@ export default function Create() {
     risks: string;
   } | null>(null);
 
+  // Live prices for generated holdings
+  const [holdingPrices, setHoldingPrices] = useState<Record<string, { price: number; change: number; changePercent: number }>>({});
+  const [pricesLoading, setPricesLoading] = useState(false);
+
   // Manual tab orb color
   const [manualOrbColor, setManualOrbColor] = useState<string | null>(null);
 
@@ -192,6 +204,23 @@ export default function Create() {
   const aiResultRef = useRef<GeneratePortfolioResponse | null>(null);
   const aiErrorRef = useRef<string | null>(null);
   const [waitingForAI, setWaitingForAI] = useState(false);
+
+  // Fetch live prices when portfolio is generated
+  const fetchPrices = useCallback(async (tickers: string[]) => {
+    if (tickers.length === 0) return;
+    setPricesLoading(true);
+    try {
+      const res = await fetch(`/api/stock-prices?symbols=${tickers.join(',')}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHoldingPrices(data);
+      }
+    } catch (err) {
+      console.error('[Invest] Failed to fetch prices:', err);
+    } finally {
+      setPricesLoading(false);
+    }
+  }, []);
 
   const handleQuestionnaireComplete = (profile: StrategyProfile) => {
     setStrategyProfile(profile);
@@ -280,6 +309,9 @@ export default function Create() {
       weight: h.weight,
     })));
     setCreationStep('results');
+
+    // Fetch live prices for all tickers
+    fetchPrices(portfolio.holdings.map(h => h.ticker));
   };
 
   const handleStartOver = () => {
@@ -462,6 +494,17 @@ export default function Create() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {holdingPrices[holding.ticker] && (
+                            <div className="text-right mr-2 hidden sm:block">
+                              <span className="text-sm font-medium text-foreground">${holdingPrices[holding.ticker].price.toFixed(2)}</span>
+                              <span className={cn(
+                                'text-xs ml-1.5',
+                                holdingPrices[holding.ticker].changePercent >= 0 ? 'text-success' : 'text-destructive'
+                              )}>
+                                {holdingPrices[holding.ticker].changePercent >= 0 ? '+' : ''}{holdingPrices[holding.ticker].changePercent.toFixed(2)}%
+                              </span>
+                            </div>
+                          )}
                           <Badge variant="outline" className={`${roleColors[holding.role]} flex items-center gap-1`} style={{ background: 'rgba(148,163,184,0.15)', color: '#94A3B8', borderColor: 'rgba(148,163,184,0.2)' }}>
                             {roleIcons[holding.role]}
                             {holding.role}
@@ -472,6 +515,17 @@ export default function Create() {
                     </AccordionTrigger>
                     <AccordionContent className="pb-4">
                       <div className="space-y-4 pt-2 pl-2">
+                        {holdingPrices[holding.ticker] && (
+                          <div className="sm:hidden flex items-center gap-2 text-sm">
+                            <DollarSign className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-medium">${holdingPrices[holding.ticker].price.toFixed(2)}</span>
+                            <span className={cn(
+                              holdingPrices[holding.ticker].changePercent >= 0 ? 'text-success' : 'text-destructive'
+                            )}>
+                              {holdingPrices[holding.ticker].changePercent >= 0 ? '+' : ''}{holdingPrices[holding.ticker].changePercent.toFixed(2)}% today
+                            </span>
+                          </div>
+                        )}
                         <div>
                           <h5 className="font-medium text-sm mb-1 flex items-center gap-2">
                             <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -671,38 +725,85 @@ export default function Create() {
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Bottom CTAs */}
+          {/* Investment Summary + CTAs */}
             <div className="space-y-4 pt-2">
+              {/* Show chosen investment details */}
+              {strategyProfile.investmentAmount && (
+                <Card className="glass-card border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Investment Amount</p>
+                        <p className="text-lg font-semibold text-foreground">
+                          {investmentAmountLabels[strategyProfile.investmentAmount] || strategyProfile.investmentAmount}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Mode</p>
+                        <Badge variant={strategyProfile.investmentMode === 'simulated' ? 'secondary' : 'default'}>
+                          {strategyProfile.investmentMode === 'simulated' ? 'Practice Mode' : 'Real Money'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <div className="flex gap-3">
-                <Button
-                  onClick={async () => {
-                    const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    const savedId = await persistPortfolio(portfolioId, 'live');
-                    toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
-                    setTimeout(() => navigate('/dashboard'), 1000);
-                  }}
-                  className="flex-1 h-12 text-base font-semibold"
-                  disabled={editOpen && totalWeight !== 100}
-                >
-                  <DollarSign className="h-5 w-5 mr-2" />
-                  Invest Now
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
+                {strategyProfile.investmentMode === 'simulated' ? (
+                  <Button
+                    onClick={async () => {
+                      const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                      const savedId = await persistPortfolio(portfolioId, 'simulating');
+                      navigate(`/simulation/${savedId || portfolioId}`);
+                    }}
+                    className="flex-1 h-12 text-base font-semibold"
+                    disabled={editOpen && totalWeight !== 100}
+                  >
+                    <Scale className="h-5 w-5 mr-2" />
+                    Start Simulation
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={async () => {
+                      const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                      const savedId = await persistPortfolio(portfolioId, 'live');
+                      toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
+                      setTimeout(() => navigate('/dashboard'), 1000);
+                    }}
+                    className="flex-1 h-12 text-base font-semibold"
+                    disabled={editOpen && totalWeight !== 100}
+                  >
+                    <DollarSign className="h-5 w-5 mr-2" />
+                    Invest Now
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                )}
+                {/* Secondary option: the opposite of what they chose */}
                 <Button
                   variant="outline"
                   onClick={async () => {
                     const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    const savedId = await persistPortfolio(portfolioId, 'simulating');
-                    navigate(`/simulation/${savedId || portfolioId}`);
+                    if (strategyProfile.investmentMode === 'simulated') {
+                      const savedId = await persistPortfolio(portfolioId, 'live');
+                      toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
+                      setTimeout(() => navigate('/dashboard'), 1000);
+                    } else {
+                      const savedId = await persistPortfolio(portfolioId, 'simulating');
+                      navigate(`/simulation/${savedId || portfolioId}`);
+                    }
                   }}
-                  className="flex-1 h-12 text-base"
+                  className="h-12 text-base px-6"
                   disabled={editOpen && totalWeight !== 100}
                 >
-                  Simulate First
+                  {strategyProfile.investmentMode === 'simulated' ? 'Invest Real Money' : 'Simulate First'}
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground text-center">
-                Simulation is optional. You can invest directly or test with live data first.
+                {strategyProfile.investmentMode === 'simulated'
+                  ? "Practice mode uses real market data with no actual money at risk. You can switch to real money anytime."
+                  : "You can always switch to simulation mode later if you change your mind."}
               </p>
               <p className="text-sm text-muted-foreground text-center">
                 Platform fee: 0.25% annually on invested capital

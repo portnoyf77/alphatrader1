@@ -18,6 +18,9 @@ export interface StrategyProfile {
   // Phase 4: Preferences
   sectorEmphasis: string[];
   geographicPreference: 'us' | 'global' | 'emerging' | 'international' | null;
+  // Phase 5: Final details
+  investmentAmount: '1k' | '5k' | '10k' | '25k' | '50k' | '100k-plus' | null;
+  investmentMode: 'simulated' | 'real' | null;
 
   // Legacy fields kept for compatibility with animation/generation
   financialSituation?: string | null;
@@ -40,6 +43,8 @@ export const initialProfile: StrategyProfile = {
   hasEmergencyFund: null,
   sectorEmphasis: [],
   geographicPreference: null,
+  investmentAmount: null,
+  investmentMode: null,
   restrictions: [],
 };
 
@@ -53,7 +58,7 @@ export interface QuestionOption {
 
 export interface Question {
   id: keyof StrategyProfile;
-  phase: 1 | 2 | 3 | 4;
+  phase: 1 | 2 | 3 | 4 | 5 | 5;
   type: 'single' | 'multi' | 'slider';
   question: string;
   subtitle?: string;
@@ -268,6 +273,35 @@ export const questions: Question[] = [
       { value: 'global', label: 'A mix of everything', description: 'Blend of US and international companies for broader reach' },
       { value: 'emerging', label: 'Emerging markets', description: 'Countries with fast-growing economies -- higher risk, higher potential' },
       { value: 'international', label: 'International developed', description: 'Established markets like Europe, Japan, and Australia' },
+    ],
+  },
+  // ── Phase 5: Final Details ──
+  // Q13
+  {
+    id: 'investmentAmount',
+    phase: 5,
+    type: 'single',
+    question: 'How much do you want to put in right now?',
+    subtitle: "You can always add more later. Pick a starting amount you're comfortable with.",
+    options: [
+      { value: '1k', label: '$1,000', description: 'A great starting point to learn how investing works' },
+      { value: '5k', label: '$5,000', description: 'Enough to build a small but diversified portfolio' },
+      { value: '10k', label: '$10,000', description: 'A solid foundation -- room to spread across multiple holdings' },
+      { value: '25k', label: '$25,000', description: 'Serious starting capital with room for broad diversification' },
+      { value: '50k', label: '$50,000', description: 'A substantial portfolio with full flexibility' },
+      { value: '100k-plus', label: '$100,000+', description: 'Major investment -- the full toolkit is available' },
+    ],
+  },
+  // Q14
+  {
+    id: 'investmentMode',
+    phase: 5,
+    type: 'single',
+    question: 'Do you want to use real money or practice first?',
+    subtitle: "Simulation mode uses real market data but no actual money changes hands. It's a risk-free way to see how your portfolio would perform.",
+    options: [
+      { value: 'simulated', label: 'Practice mode', description: "Use fake money with real market prices -- perfect for learning, no risk" },
+      { value: 'real', label: 'Real money', description: "Invest actual dollars through your connected brokerage account" },
     ],
   },
 ];
@@ -526,15 +560,15 @@ export const progressMessages = [
 ];
 
 // Phase labels
-export const phaseLabels = ['Goals', 'Risk', 'About You', 'Preferences'];
+export const phaseLabels = ['Goals', 'Risk', 'About You', 'Preferences', 'Final Details'];
 
 // Get questions for a specific phase
-export function getQuestionsForPhase(phase: 1 | 2 | 3 | 4): Question[] {
+export function getQuestionsForPhase(phase: 1 | 2 | 3 | 4 | 5): Question[] {
   return questions.filter(q => q.phase === phase);
 }
 
 // Check if a phase is complete
-export function isPhaseComplete(profile: StrategyProfile, phase: 1 | 2 | 3 | 4): boolean {
+export function isPhaseComplete(profile: StrategyProfile, phase: 1 | 2 | 3 | 4 | 5): boolean {
   const phaseQuestions = getQuestionsForPhase(phase);
   return phaseQuestions.every(q => {
     if (q.isOptional) return true;

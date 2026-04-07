@@ -106,6 +106,18 @@ const CONTEXT_LINES: Partial<Record<keyof StrategyProfile, Record<string, string
     building: "Smart to do both at once. We'll stay moderate to be safe.",
     no: "No worries -- we'll keep things cautious until you've built one up.",
   },
+  investmentAmount: {
+    '1k': "Great starting point. You can always add more as you get comfortable.",
+    '5k': "A solid amount to start building something meaningful.",
+    '10k': "Nice. Enough room to spread across several different holdings.",
+    '25k': "Serious capital. We can build a well-diversified portfolio.",
+    '50k': "Substantial investment. The full range of strategies is open.",
+    '100k-plus': "Major commitment. We'll make sure every dollar is working hard.",
+  },
+  investmentMode: {
+    simulated: "Smart move. You'll see real market data without any risk.",
+    real: "Ready to go. We'll connect this to your brokerage account.",
+  },
 };
 
 function contextualForSlider(vol: number): string {
