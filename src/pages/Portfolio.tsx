@@ -1,7 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ArrowUp, ArrowDown, RefreshCw, DollarSign, TrendingUp, Wallet, Clock, XCircle, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { cn } from '@/lib/utils';
@@ -157,6 +168,41 @@ function QuickTrade({ onTradeComplete }: { onTradeComplete: () => void }) {
   );
 }
 
+function OpenPositionsSkeletonRows() {
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Symbol</TableHead>
+            <TableHead className="text-right">Qty</TableHead>
+            <TableHead className="text-right">Avg Entry</TableHead>
+            <TableHead className="text-right">Current</TableHead>
+            <TableHead className="text-right">Market Value</TableHead>
+            <TableHead className="text-right">P&L</TableHead>
+            <TableHead className="text-right">P&L %</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell><Skeleton className="h-4 w-14" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-14 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-8 w-14 ml-auto rounded-md" /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
 // ── Main Page ──
 
 export default function Portfolio() {
@@ -168,6 +214,7 @@ export default function Portfolio() {
   const [historyPeriod, setHistoryPeriod] = useState('1M');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [closingSymbol, setClosingSymbol] = useState<string | null>(null);
+  const [closeConfirm, setCloseConfirm] = useState<{ symbol: string; qty: number } | null>(null);
 
   const loading = acctLoading || posLoading;
 
@@ -353,7 +400,9 @@ export default function Portfolio() {
               <span className="text-xs text-muted-foreground font-normal">({positions.length})</span>
             )}
           </h2>
-          {positions.length === 0 ? (
+          {loading ? (
+            <OpenPositionsSkeletonRows />
+          ) : positions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
               No open positions. Place a trade to get started.
             </div>
@@ -392,7 +441,7 @@ export default function Portfolio() {
                           size="sm"
                           className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
                           disabled={closingSymbol === pos.symbol}
-                          onClick={() => handleClosePosition(pos.symbol)}
+                          onClick={() => setCloseConfirm({ symbol: pos.symbol, qty: pos.qty })}
                         >
                           {closingSymbol === pos.symbol ? 'Closing...' : 'Close'}
                         </Button>
@@ -509,6 +558,34 @@ export default function Portfolio() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={closeConfirm !== null} onOpenChange={(open) => !open && setCloseConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close position?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {closeConfirm
+                ? `Are you sure you want to close your position in ${closeConfirm.symbol}? This will sell all ${closeConfirm.qty % 1 === 0 ? closeConfirm.qty : closeConfirm.qty.toFixed(4)} shares at market price.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={closingSymbol !== null}
+              onClick={() => {
+                if (!closeConfirm) return;
+                const sym = closeConfirm.symbol;
+                setCloseConfirm(null);
+                void handleClosePosition(sym);
+              }}
+            >
+              Close position
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageLayout>
   );
 }

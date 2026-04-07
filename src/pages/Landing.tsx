@@ -157,7 +157,7 @@ export default function Landing() {
           <p
             className="mx-auto max-w-[600px] mb-10"
             style={{
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.55)',
               fontSize: '1.125rem',
               lineHeight: 1.6,
               opacity: 0,
@@ -287,7 +287,7 @@ export default function Landing() {
                 </div>
 
                 <h3 className="font-heading font-semibold text-xl mb-3">{step.title}</h3>
-                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9375rem', lineHeight: 1.6 }}>
                   {step.desc}
                 </p>
               </div>

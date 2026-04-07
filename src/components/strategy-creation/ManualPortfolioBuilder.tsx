@@ -1,7 +1,17 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, X, Plus, DollarSign, ArrowRight, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { RefreshCw, X, Plus, DollarSign, ArrowRight, Search, Trash2 } from 'lucide-react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -77,6 +87,7 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
   const [rebalanceMode, setRebalanceMode] = useState<'auto' | 'approval'>('auto');
   const [searchQuery, setSearchQuery] = useState('');
   const [showTickerSearch, setShowTickerSearch] = useState(false);
+  const [holdingToRemove, setHoldingToRemove] = useState<ManualHolding | null>(null);
 
   const gemPrefix = riskLevel === 'Low' ? 'Pearl' : riskLevel === 'High' ? 'Ruby' : 'Sapphire';
 
@@ -104,7 +115,6 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
 
   const totalWeight = holdings.reduce((sum, h) => sum + h.weight, 0);
   const isValid = riskLevel !== null && holdings.length >= 1 && totalWeight === 100;
-  const isOverweight = totalWeight > 100;
 
   const filteredTickers = useMemo(() => {
     const usedTickers = new Set(holdings.map(h => h.ticker));
@@ -316,13 +326,22 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
                       type="number"
                       min={0}
                       max={100}
+                      step={0.1}
+                      required
                       value={h.weight || ''}
                       onChange={e => updateWeight(h.id, parseFloat(e.target.value) || 0)}
                       className="w-20 text-right bg-secondary h-8"
                     />
                     <span className="text-xs text-muted-foreground">%</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeHolding(h.id)}>
-                      <X className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setHoldingToRemove(h)}
+                      aria-label={`Remove ${h.ticker}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </div>
                 </div>
@@ -332,18 +351,24 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
 
           {/* Total */}
           {holdings.length > 0 && (
-            <div className="flex items-center justify-between pt-2 border-t border-border/30">
-              <span className="text-sm text-muted-foreground">Total</span>
-              <span className={cn(
-                'font-mono font-bold text-lg',
-                totalWeight === 100 ? 'text-success' : isOverweight ? 'text-destructive' : 'text-foreground'
-              )}>
-                {totalWeight} / 100%
-              </span>
+            <div className="space-y-1 pt-2 border-t border-border/30">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total</span>
+                <span
+                  className={cn(
+                    'font-mono font-bold text-lg tabular-nums',
+                    totalWeight === 100 ? 'text-success' : 'text-warning',
+                  )}
+                >
+                  {totalWeight.toFixed(1)} / 100%
+                </span>
+              </div>
+              {totalWeight !== 100 && (
+                <p className="text-sm text-warning animate-in fade-in duration-200">
+                  Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
+                </p>
+              )}
             </div>
-          )}
-          {isOverweight && (
-            <p className="text-destructive text-xs">Total allocation exceeds 100%</p>
           )}
         </CardContent>
       </Card>
@@ -407,6 +432,31 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
           Platform fee: 0.25% annually on invested capital
         </p>
       </div>
+
+      <AlertDialog open={holdingToRemove !== null} onOpenChange={(open) => !open && setHoldingToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove holding?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {holdingToRemove
+                ? `Remove ${holdingToRemove.ticker} from your portfolio?`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() => {
+                if (holdingToRemove) removeHolding(holdingToRemove.id);
+                setHoldingToRemove(null);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

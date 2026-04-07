@@ -629,8 +629,10 @@ export default function Create() {
                           <TableCell>
                             <Input
                               type="number"
-                              min="0"
-                              max="100"
+                              min={0}
+                              max={100}
+                              step={0.1}
+                              required
                               value={h.weight || ''}
                               onChange={(e) => updateHoldingWeight(h.id, parseFloat(e.target.value) || 0)}
                               className="bg-secondary text-right w-20 ml-auto"
@@ -645,11 +647,24 @@ export default function Create() {
                       ))}
                     </TableBody>
                   </Table>
-                  <div className="mt-3 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Total Weight</span>
-                    <span className={totalWeight === 100 ? 'text-success' : 'text-destructive'}>
-                      {totalWeight}% {totalWeight !== 100 && '(must equal 100%)'}
-                    </span>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Total Weight</span>
+                      <span
+                        className={cn(
+                          'font-medium tabular-nums',
+                          totalWeight === 100 ? 'text-success' : 'text-warning',
+                        )}
+                      >
+                        {totalWeight.toFixed(1)}%
+                        {totalWeight !== 100 && ' (target 100%)'}
+                      </span>
+                    </div>
+                    {totalWeight !== 100 && (
+                      <p className="text-sm text-warning animate-in fade-in duration-200">
+                        Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -72,14 +72,14 @@ export function LiveTickerBar({ holdings }: { holdings: LiveTickerHolding[] }) {
 
   return (
     <div
-      className="mb-6 rounded-xl overflow-hidden backdrop-blur-xl"
+      className="rounded-xl overflow-hidden backdrop-blur-xl"
       style={{
         background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      <div className="flex items-center gap-3 px-4 py-2 border-b border-white/[0.06]">
+      <div className="flex items-center gap-3 px-4 py-2 border-b border-white/10">
         <div className="flex items-center gap-1.5 shrink-0">
           <span
             className={cn(

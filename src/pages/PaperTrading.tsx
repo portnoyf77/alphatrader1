@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -12,14 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import {
   getAccountInfo,
@@ -49,6 +42,64 @@ function formatSubmitted(at: string) {
   return d.toLocaleString();
 }
 
+function PaperPositionsSkeleton() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Symbol</TableHead>
+          <TableHead className="text-right">Qty</TableHead>
+          <TableHead className="text-right">Avg entry</TableHead>
+          <TableHead className="text-right">Current</TableHead>
+          <TableHead className="text-right">Unrealized P&amp;L</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <TableRow key={i}>
+            <TableCell><Skeleton className="h-4 w-14" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+function PaperOrdersSkeleton() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Symbol</TableHead>
+          <TableHead>Side</TableHead>
+          <TableHead className="text-right">Qty</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead className="text-right">Filled avg</TableHead>
+          <TableHead>Submitted</TableHead>
+          <TableHead className="text-right">Action</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <TableRow key={i}>
+            <TableCell><Skeleton className="h-4 w-14" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-7 w-14 ml-auto rounded-md" /></TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
 export default function PaperTrading() {
   const { toast } = useToast();
 
@@ -69,6 +120,13 @@ export default function PaperTrading() {
   const [limitPrice, setLimitPrice] = useState("");
   const [placing, setPlacing] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [portfolioTablesReady, setPortfolioTablesReady] = useState(false);
+  const [qtyBlurred, setQtyBlurred] = useState(false);
+
+  const qtyNum = useMemo(() => parseFloat(quantity.trim()), [quantity]);
+  const quantityValid =
+    quantity.trim() !== "" && !Number.isNaN(qtyNum) && qtyNum > 0;
+  const showQtyError = qtyBlurred && !quantityValid;
 
   const loadAccount = useCallback(async () => {
     setAccountLoading(true);
@@ -95,6 +153,8 @@ export default function PaperTrading() {
       const msg = e instanceof Error ? e.message : "Request failed";
       setPositionsError(msg);
       setOrdersError(msg);
+    } finally {
+      setPortfolioTablesReady(true);
     }
   }, []);
 
@@ -186,36 +246,41 @@ export default function PaperTrading() {
         {/* Price Chart */}
         {symbol.trim() && <StockChart symbol={symbol.trim().toUpperCase()} />}
 
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-heading">Place order</CardTitle>
             <CardDescription>{orderType === "market" ? "Market order" : "Limit order"}, day time-in-force</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant={side === "buy" ? "default" : "outline"}
-                onClick={() => setSide("buy")}
-                className={cn(side === "buy" && "bg-success hover:bg-success/90")}
-              >
-                Buy
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={side === "sell" ? "destructive" : "outline"}
-                onClick={() => setSide("sell")}
-              >
-                Sell
-              </Button>
-              <div className="ml-auto flex gap-1">
+            <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={side === "buy" ? "default" : "outline"}
+                  onClick={() => setSide("buy")}
+                  className={cn("min-h-11 touch-manipulation md:min-h-9", side === "buy" && "bg-success hover:bg-success/90")}
+                >
+                  Buy
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={side === "sell" ? "destructive" : "outline"}
+                  onClick={() => setSide("sell")}
+                  className="min-h-11 touch-manipulation md:min-h-9"
+                >
+                  Sell
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1 md:ml-auto">
                 <Button
                   type="button"
                   size="sm"
                   variant={orderType === "market" ? "default" : "outline"}
                   onClick={() => setOrderType("market")}
+                  className="min-h-11 touch-manipulation md:min-h-9"
                 >
                   Market
                 </Button>
@@ -224,12 +289,18 @@ export default function PaperTrading() {
                   size="sm"
                   variant={orderType === "limit" ? "default" : "outline"}
                   onClick={() => setOrderType("limit")}
+                  className="min-h-11 touch-manipulation md:min-h-9"
                 >
                   Limit
                 </Button>
               </div>
             </div>
-            <div className={cn("grid gap-4", orderType === "limit" ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+            <div
+              className={cn(
+                "grid grid-cols-1 gap-4",
+                orderType === "limit" ? "md:grid-cols-3" : "md:grid-cols-2",
+              )}
+            >
               <div className="space-y-2">
                 <Label htmlFor="pt-symbol">Symbol</Label>
                 <Input
@@ -246,9 +317,20 @@ export default function PaperTrading() {
                   id="pt-qty"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
+                  onBlur={() => setQtyBlurred(true)}
+                  type="number"
+                  min={0.01}
+                  step={0.01}
+                  required
                   inputMode="decimal"
                   className="tabular-nums"
+                  aria-invalid={showQtyError}
                 />
+                {showQtyError && (
+                  <p className="text-sm text-destructive animate-in fade-in duration-200">
+                    Quantity must be greater than 0
+                  </p>
+                )}
               </div>
               {orderType === "limit" && (
                 <div className="space-y-2">
@@ -264,7 +346,12 @@ export default function PaperTrading() {
                 </div>
               )}
             </div>
-            <Button type="button" onClick={handlePlaceOrder} disabled={placing}>
+            <Button
+              type="button"
+              className="min-h-11 w-full touch-manipulation md:min-h-10 md:w-auto"
+              onClick={handlePlaceOrder}
+              disabled={placing || !quantityValid}
+            >
               {placing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -286,13 +373,19 @@ export default function PaperTrading() {
             {positionsError && (
               <Alert variant="destructive" className="mb-4">
                 <AlertTitle>Positions</AlertTitle>
-                <AlertDescription>{positionsError}</AlertDescription>
+                <AlertDescription className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <span>{positionsError}</span>
+                  <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => void loadPositionsAndOrders()}>
+                    Retry
+                  </Button>
+                </AlertDescription>
               </Alert>
             )}
-            {!positionsError && positions.length === 0 && (
+            {!portfolioTablesReady && !positionsError && <PaperPositionsSkeleton />}
+            {portfolioTablesReady && !positionsError && positions.length === 0 && (
               <p className="text-sm text-muted-foreground">No open positions.</p>
             )}
-            {positions.length > 0 && (
+            {portfolioTablesReady && !positionsError && positions.length > 0 && (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -329,6 +422,7 @@ export default function PaperTrading() {
             )}
           </CardContent>
         </Card>
+        </div>
 
         <Card>
           <CardHeader>
@@ -339,13 +433,19 @@ export default function PaperTrading() {
             {ordersError && (
               <Alert variant="destructive" className="mb-4">
                 <AlertTitle>Orders</AlertTitle>
-                <AlertDescription>{ordersError}</AlertDescription>
+                <AlertDescription className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <span>{ordersError}</span>
+                  <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => void loadPositionsAndOrders()}>
+                    Retry
+                  </Button>
+                </AlertDescription>
               </Alert>
             )}
-            {!ordersError && orders.length === 0 && (
+            {!portfolioTablesReady && !ordersError && <PaperOrdersSkeleton />}
+            {portfolioTablesReady && !ordersError && orders.length === 0 && (
               <p className="text-sm text-muted-foreground">No orders yet.</p>
             )}
-            {orders.length > 0 && (
+            {portfolioTablesReady && !ordersError && orders.length > 0 && (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -386,7 +486,7 @@ export default function PaperTrading() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 h-7"
+                              className="min-h-11 text-xs text-red-400 hover:bg-red-400/10 hover:text-red-300 touch-manipulation md:h-7 md:min-h-7"
                               disabled={cancellingId === o.id}
                               onClick={async () => {
                                 setCancellingId(o.id);

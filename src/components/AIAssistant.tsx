@@ -60,6 +60,7 @@ export function AIAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasPlayedPulse, setHasPlayedPulse] = useState(false);
+  const [apiOffline, setApiOffline] = useState(false);
   const isMobile = useIsMobile();
   const userMessageCount = useRef(0);
   const briefingFetched = useRef(false);
@@ -121,6 +122,15 @@ export function AIAssistant() {
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open, isMobile]);
+
   // ── Core: send every message to Claude ──────────────────────
 
   const sendMessage = useCallback(
@@ -149,6 +159,7 @@ export function AIAssistant() {
         const aiResult = await sendChatMessage(chatHistory);
 
         if (aiResult) {
+          setApiOffline(false);
           // Check if Claude proposed any trades
           if (aiResult.tradeProposals && aiResult.tradeProposals.length > 0) {
             const trade = aiResult.tradeProposals[0]; // Handle first proposal
@@ -197,6 +208,7 @@ export function AIAssistant() {
             ]);
           }
         } else {
+          setApiOffline(true);
           // Claude unavailable -- show a helpful fallback instead of the old keyword engine
           setMessages((prev) => [
             ...prev,
@@ -303,23 +315,19 @@ export function AIAssistant() {
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'fixed z-40 flex items-center justify-center rounded-full transition-all duration-200',
+          'fixed z-40 flex min-h-11 min-w-11 items-center justify-center rounded-full transition-all duration-200 touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           'shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.4)]',
           'hover:scale-105 active:scale-95',
-          'w-14 h-14',
-          isMobile && 'w-12 h-12',
+          'h-14 w-14',
           !hasPlayedPulse && !open && 'assistant-pulse',
         )}
         style={{ bottom: 24, right: 24, background: 'white', color: '#050508' }}
         aria-label={open ? 'Close assistant' : 'Open assistant'}
       >
-        {open ? (
-          <X className={cn('h-6 w-6', isMobile && 'h-5 w-5')} />
-        ) : (
-          <MessageCircle className={cn('h-6 w-6', isMobile && 'h-5 w-5')} />
-        )}
+        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {open && (
@@ -332,6 +340,8 @@ export function AIAssistant() {
           onSubmit={handleSubmit}
           onQuickAction={handleQuickAction}
           onClose={() => setOpen(false)}
+          apiOffline={apiOffline}
+          onReconnect={() => setApiOffline(false)}
         />
       )}
     </>

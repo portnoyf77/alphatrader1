@@ -1,9 +1,17 @@
-import { useState, useCallback, useMemo, useEffect, useRef, type LucideIcon } from 'react';
+import { useState, useCallback, useMemo, useEffect, useLayoutEffect, useRef, type LucideIcon } from 'react';
 import { ArrowLeft, Check, Target, Clock, Wallet, Shield, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { StrategyProfile, initialProfile, questions, Question, deriveGemstone } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
+const QUESTIONNAIRE_STORAGE_KEY = 'alpha_questionnaire_progress';
+
+type StoredQuestionnaire = {
+  profile: StrategyProfile;
+  currentIndex: number;
+};
 
 const goalIcons: Record<string, LucideIcon> = {
   accumulation: Target,
@@ -197,7 +205,7 @@ function DrawdownScenarioChart({
           ))}
         </svg>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 w-full">
         {options.map((opt, i) => {
           const isSelected = value === opt.value;
           const isGlowing = selectedGlow === opt.value;
@@ -207,11 +215,11 @@ function DrawdownScenarioChart({
               type="button"
               onClick={() => onPick(opt.value)}
               className={cn(
-                'rounded-xl text-left transition-all duration-200 font-[var(--font-heading)] flex gap-3 items-start',
+                'w-full min-h-[44px] rounded-xl text-left transition-all duration-200 font-[var(--font-heading)] flex gap-3 items-start',
                 isGlowing && 'qa-select-pulse'
               )}
               style={{
-                padding: '12px 16px',
+                padding: '14px 16px',
                 background: isSelected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
                 border: isSelected ? '1px solid rgba(124,58,237,0.45)' : '1px solid rgba(255,255,255,0.1)',
                 color: isSelected ? 'white' : 'rgba(255,255,255,0.88)',
@@ -226,7 +234,7 @@ function DrawdownScenarioChart({
               />
               <span>
                 <span className="font-medium text-[0.9rem] block">{opt.label}</span>
-                <span className="block text-xs mt-0.5 whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.48)' }}>
+                <span className="block text-xs mt-0.5 whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.55)' }}>
                   {opt.description}
                 </span>
               </span>
@@ -254,7 +262,7 @@ function GemFacetProgress({ current, total }: { current: number; total: number }
           />
         ))}
       </div>
-      <p className="text-[0.82rem] tracking-wide" style={{ color: 'rgba(255,255,255,0.42)' }}>
+      <p className="text-[0.82rem] tracking-wide" style={{ color: 'rgba(255,255,255,0.55)' }}>
         Question {current + 1} of {total}
       </p>
     </div>
@@ -377,8 +385,10 @@ interface PortfolioQuestionnaireProps {
 }
 
 export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuestionnaireProps) {
+  const { toast } = useToast();
   const [profile, setProfile] = useState<StrategyProfile>(initialProfile);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const [animState, setAnimState] = useState<'idle' | 'exit' | 'enter'>('idle');
   const [direction, setDirection] = useState<'right' | 'left'>('right');
   const [selectedGlow, setSelectedGlow] = useState<string | null>(null);
@@ -387,6 +397,62 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const [contextualMessage, setContextualMessage] = useState<string | null>(null);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const advanceTimersRef = useRef<number[]>([]);
+  const persistDisabledRef = useRef(false);
+  const showRestoreToastRef = useRef(false);
+
+  const clearStoredProgress = useCallback(() => {
+    try {
+      sessionStorage.removeItem(QUESTIONNAIRE_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const finishQuestionnaire = useCallback(
+    (p: StrategyProfile) => {
+      persistDisabledRef.current = true;
+      clearStoredProgress();
+      onComplete(p);
+    },
+    [clearStoredProgress, onComplete],
+  );
+
+  useLayoutEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(QUESTIONNAIRE_STORAGE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw) as Partial<StoredQuestionnaire>;
+        if (data?.profile && typeof data.currentIndex === 'number') {
+          setProfile({ ...initialProfile, ...data.profile });
+          const idx = Math.max(0, Math.min(data.currentIndex, questions.length - 1));
+          setCurrentIndex(idx);
+          showRestoreToastRef.current = true;
+        }
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !showRestoreToastRef.current) return;
+    showRestoreToastRef.current = false;
+    toast({
+      title: 'Resuming where you left off',
+      duration: 3500,
+    });
+  }, [hydrated, toast]);
+
+  useEffect(() => {
+    if (!hydrated || persistDisabledRef.current) return;
+    try {
+      const payload: StoredQuestionnaire = { profile, currentIndex };
+      sessionStorage.setItem(QUESTIONNAIRE_STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* quota / private mode */
+    }
+  }, [profile, currentIndex, hydrated]);
 
   const clearAdvanceTimers = useCallback(() => {
     advanceTimersRef.current.forEach((id) => clearTimeout(id));
@@ -451,7 +517,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
       scheduleAfterContext(() => {
         if (isLast) {
           setPreCrystallize(true);
-          const tDone = window.setTimeout(() => onComplete(updatedProfile), PRE_CRYSTALLIZE_HANDOFF_MS);
+          const tDone = window.setTimeout(() => finishQuestionnaire(updatedProfile), PRE_CRYSTALLIZE_HANDOFF_MS);
           advanceTimersRef.current.push(tDone);
         } else {
           transitionTo(currentIndex + 1, 'right');
@@ -466,7 +532,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
       isLast,
       clearAdvanceTimers,
       scheduleAfterContext,
-      onComplete,
+      finishQuestionnaire,
       transitionTo,
     ]
   );
@@ -474,11 +540,11 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const handleNextFromStep = useCallback(() => {
     if (isLast) {
       setPreCrystallize(true);
-      setTimeout(() => onComplete(profile), PRE_CRYSTALLIZE_HANDOFF_MS);
+      setTimeout(() => finishQuestionnaire(profile), PRE_CRYSTALLIZE_HANDOFF_MS);
     } else {
       transitionTo(currentIndex + 1, 'right');
     }
-  }, [isLast, currentIndex, profile, onComplete, transitionTo]);
+  }, [isLast, currentIndex, profile, finishQuestionnaire, transitionTo]);
 
   const handleVolatilityConfirm = useCallback(() => {
     if (isAdvancing) return;
@@ -506,9 +572,14 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     setContextualMessage(null);
     setSectorGlow(null);
     setIsAdvancing(false);
-    if (currentIndex === 0) onCancel();
-    else transitionTo(currentIndex - 1, 'left');
-  }, [currentIndex, onCancel, transitionTo, clearAdvanceTimers]);
+    if (currentIndex === 0) {
+      persistDisabledRef.current = true;
+      clearStoredProgress();
+      onCancel();
+      return;
+    }
+    transitionTo(currentIndex - 1, 'left');
+  }, [currentIndex, onCancel, transitionTo, clearAdvanceTimers, clearStoredProgress]);
 
   const handleMultiToggle = useCallback(
     (value: string) => {
@@ -560,7 +631,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
 
     if (question.type === 'single' && question.options) {
       return (
-        <div className="flex flex-col items-center gap-3 w-full max-w-lg mx-auto">
+        <div className="flex flex-col items-stretch gap-3 w-full max-w-lg mx-auto px-1 sm:px-0">
           {question.options.map((opt) => {
             const isSelected = value === opt.value;
             const isGlowing = selectedGlow === opt.value;
@@ -572,11 +643,11 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
                 disabled={isAdvancing}
                 onClick={() => handleSingleSelect(opt.value)}
                 className={cn(
-                  'w-full rounded-xl text-left transition-all duration-200 font-[var(--font-heading)] flex gap-4 items-start',
+                  'w-full min-h-[44px] rounded-xl text-left transition-all duration-200 font-[var(--font-heading)] flex gap-4 items-start',
                   isGlowing && 'qa-select-pulse'
                 )}
                 style={{
-                  padding: '14px 22px',
+                  padding: '14px 18px',
                   background: isSelected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
                   border: isSelected ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.1)',
                   borderRadius: 12,
@@ -614,7 +685,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
                   <span className="font-medium text-[0.95rem] block">{opt.label}</span>
                   <span
                     className="block text-xs mt-1 whitespace-pre-line leading-relaxed"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
+                    style={{ color: 'rgba(255,255,255,0.55)' }}
                   >
                     {opt.description}
                   </span>
@@ -629,8 +700,8 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     if (question.type === 'multi' && question.options) {
       const selected = (value as string[]) || [];
       return (
-        <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
-          <div className="flex flex-wrap justify-center gap-2.5">
+        <div className="flex flex-col items-stretch gap-4 w-full max-w-lg mx-auto px-1 sm:px-0">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap justify-stretch sm:justify-center gap-2.5 w-full">
             {question.options.map((opt) => {
               const isSelected = selected.includes(opt.value);
               const isFlashing = sectorGlow === opt.value;
@@ -640,9 +711,9 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
                   type="button"
                   disabled={isAdvancing}
                   onClick={() => handleMultiToggle(opt.value)}
-                  className="flex items-center gap-2"
+                  className="flex w-full sm:w-auto min-h-[44px] sm:min-h-0 items-center justify-center sm:justify-start gap-2"
                   style={{
-                    padding: '10px 14px',
+                    padding: '12px 16px',
                     borderRadius: 12,
                     background: isSelected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
                     border: isSelected ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.1)',
@@ -735,7 +806,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
                 className="w-full qa-slider"
               />
             </div>
-            <div className="flex justify-between text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <div className="flex justify-between text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
               <span>Smooth ride</span>
               <span>Full throttle</span>
             </div>
@@ -802,7 +873,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
           <div className={titleEnterClass}>
             <TypingHeading text={currentQuestion.question} stepKey={currentIndex} />
             {currentQuestion.subtitle && (
-              <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 {currentQuestion.subtitle}
               </p>
             )}
@@ -825,10 +896,10 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         <button
           type="button"
           onClick={handleBack}
-          className="flex items-center gap-1.5 text-sm transition-colors"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
+          className="flex items-center gap-2 text-sm transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px] min-w-[44px] px-3 py-2 -ml-1 touch-manipulation"
+          style={{ color: 'rgba(255,255,255,0.55)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
         >
           <ArrowLeft className="h-4 w-4" />
           Back

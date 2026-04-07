@@ -1,9 +1,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw, BarChart3, Zap, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -25,15 +35,27 @@ const planTooltips: Record<string, string> = {
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
   const { restartTour } = useTour();
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
+    setLogoutDialogOpen(false);
     logout();
+    setMobileMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileMenuOpen]);
 
   // Guest users only see FAQ link
   const visibleLinks = isAuthenticated ? navLinks : [];
@@ -48,7 +70,10 @@ export function Navbar() {
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to="/" className="flex items-center gap-2 group">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 group rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
                     <Crown className="h-8 w-8 text-primary" />
                   </div>
@@ -71,8 +96,9 @@ export function Navbar() {
                         <Link
                           to={link.href}
                           className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-lg text-[0.875rem] font-medium transition-all",
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-[0.875rem] font-medium transition-all outline-none",
                             "font-[var(--font-heading)]",
+                            "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]",
                             location.pathname === link.href
                               ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
                               : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
@@ -133,7 +159,7 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-48 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.06)] shadow-xl"
+                  className="w-48 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.1)] shadow-xl"
                 >
                   <DropdownMenuItem
                     onClick={() => navigate('/faq')}
@@ -151,7 +177,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={handleLogout}
+                    onSelect={() => setLogoutDialogOpen(true)}
                     className="gap-2 cursor-pointer text-sm text-[rgba(239,68,68,0.7)] hover:text-[rgba(239,68,68,0.9)] focus:text-[rgba(239,68,68,0.9)] focus:bg-[rgba(239,68,68,0.06)]"
                   >
                     <LogOut className="h-4 w-4" />
@@ -172,90 +198,143 @@ export function Navbar() {
           </div>
 
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary"
+            type="button"
+            className="md:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-secondary touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
-            <div className="flex flex-col gap-2">
-              {visibleLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium transition-all",
-                      "font-[var(--font-heading)]",
-                      location.pathname === link.href
-                        ? "bg-[rgba(124,58,237,0.15)] text-primary border border-[rgba(124,58,237,0.25)]"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-              
-              {isAuthenticated && user ? (
-                <>
-                  <Link
-                    to="/faq"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent font-[var(--font-heading)]"
-                  >
-                    <HelpCircle className="h-4 w-4" />
-                    FAQ
-                  </Link>
-                  <button
-                    onClick={() => { restartTour(); navigate('/dashboard'); setMobileMenuOpen(false); }}
-                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[0.875rem] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent font-[var(--font-heading)]"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Restart Tour
-                  </button>
-                  <div className="px-4 py-3 border-t border-border/50 mt-2">
-                    <p className="text-xs text-muted-foreground">Signed in as</p>
-                    <p className="text-sm font-mono">{user.username}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 text-left"
-                  >
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border/50">
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-sm font-medium text-center border border-border"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-sm font-medium bg-white text-[#050508] text-center"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+          <div className="md:hidden fixed inset-0 z-[100] pointer-events-auto">
+            <button
+              type="button"
+              aria-label="Close menu"
+              className="absolute inset-0 bg-black/60 animate-in fade-in duration-200"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div
+              className={cn(
+                'absolute top-0 right-0 bottom-0 flex w-[min(100vw,20rem)] flex-col',
+                'border-l border-white/10 bg-[#050508] shadow-2xl',
+                'animate-in slide-in-from-right duration-300',
               )}
+            >
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-4">
+                <span className="font-heading text-sm font-semibold text-foreground">Menu</span>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-secondary touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain py-3 px-2">
+                {visibleLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-[0.875rem] font-medium transition-colors outline-none touch-manipulation',
+                        'font-[var(--font-heading)]',
+                        'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]',
+                        location.pathname === link.href
+                          ? 'border border-[rgba(124,58,237,0.25)] bg-[rgba(124,58,237,0.15)] text-primary'
+                          : 'border border-transparent text-muted-foreground hover:bg-secondary hover:text-foreground',
+                      )}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {link.label}
+                    </Link>
+                  );
+                })}
+
+                {isAuthenticated && user ? (
+                  <>
+                    <Link
+                      to="/faq"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-[0.875rem] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground font-[var(--font-heading)] touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    >
+                      <HelpCircle className="h-4 w-4 shrink-0" />
+                      FAQ
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        restartTour();
+                        navigate('/dashboard');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex min-h-11 w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-[0.875rem] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground font-[var(--font-heading)] touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    >
+                      <RotateCcw className="h-4 w-4 shrink-0" />
+                      Restart Tour
+                    </button>
+                    <div className="mt-2 border-t border-border/50 px-4 py-3">
+                      <p className="text-xs text-muted-foreground">Signed in as</p>
+                      <p className="text-sm font-mono">{user.username}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLogoutDialogOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="min-h-11 w-full rounded-lg px-4 py-3 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <div className="mt-2 flex flex-col gap-2 border-t border-border/50 pt-4">
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex min-h-11 items-center justify-center rounded-lg border border-border px-4 text-sm font-medium touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/signup"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-medium text-[#050508] touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
+
+      <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign out?</AlertDialogTitle>
+            <AlertDialogDescription>Sign out of Alpha Trader?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={confirmLogout}
+            >
+              Sign out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 }

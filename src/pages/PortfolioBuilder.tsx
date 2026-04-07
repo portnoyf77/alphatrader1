@@ -1,6 +1,16 @@
-import { useState, useMemo, useCallback } from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, TrendingUp, Zap, RotateCcw, DollarSign, PieChart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Sparkles, ArrowRight, ShieldCheck, TrendingUp, Zap, RotateCcw, DollarSign, PieChart, Trash2 } from 'lucide-react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StockChart } from '@/components/StockChart';
 import { placeOrder } from '@/lib/alpacaClient';
@@ -116,32 +126,56 @@ export default function PortfolioBuilder() {
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
   const [executionResults, setExecutionResults] = useState<{ symbol: string; status: string; error?: string }[]>([]);
   const [customWeights, setCustomWeights] = useState<Record<string, number>>({});
+  const [removedSymbols, setRemovedSymbols] = useState<string[]>([]);
+  const [symbolPendingRemove, setSymbolPendingRemove] = useState<string | null>(null);
   const { account } = useAlpacaAccount();
 
   const profile = PROFILES[risk];
   const amount = parseFloat(investAmount) || 0;
 
+  useEffect(() => {
+    setRemovedSymbols([]);
+  }, [risk]);
+
   // Initialize custom weights when profile changes
   const initWeights = useCallback(() => {
     const w: Record<string, number> = {};
-    profile.allocations.forEach((a) => { w[a.symbol] = a.weight; });
+    profile.allocations.forEach((a) => {
+      w[a.symbol] = a.weight;
+    });
     setCustomWeights(w);
   }, [profile]);
 
   // Reset custom weights when risk profile changes
-  useMemo(() => { initWeights(); }, [initWeights]);
+  useMemo(() => {
+    initWeights();
+  }, [initWeights]);
+
+  const activeAllocations = useMemo(
+    () => profile.allocations.filter((a) => !removedSymbols.includes(a.symbol)),
+    [profile, removedSymbols],
+  );
 
   const totalWeight = useMemo(() => {
-    return Object.values(customWeights).reduce((sum, w) => sum + w, 0);
-  }, [customWeights]);
+    return activeAllocations.reduce((sum, a) => sum + (customWeights[a.symbol] ?? a.weight), 0);
+  }, [activeAllocations, customWeights]);
 
   const orders = useMemo(() => {
-    return profile.allocations.map((a) => {
+    return activeAllocations.map((a) => {
       const weight = customWeights[a.symbol] ?? a.weight;
       const dollarAmount = amount * (weight / 100);
       return { ...a, weight, dollarAmount };
     });
-  }, [profile, amount, customWeights]);
+  }, [activeAllocations, amount, customWeights]);
+
+  const donutData = useMemo(
+    () =>
+      activeAllocations.map((a) => ({
+        ...a,
+        weight: customWeights[a.symbol] ?? a.weight,
+      })),
+    [activeAllocations, customWeights],
+  );
 
   const handleWeightChange = (symbol: string, newWeight: number) => {
     setCustomWeights((prev) => ({ ...prev, [symbol]: Math.max(0, Math.min(100, newWeight)) }));
@@ -258,7 +292,16 @@ export default function PortfolioBuilder() {
         {step === 'review' && (
           <div className="space-y-6">
             <div className="flex items-start gap-8">
-              <DonutChart allocations={profile.allocations} color={profile.color} />
+              {donutData.length > 0 ? (
+                <DonutChart allocations={donutData} color={profile.color} />
+              ) : (
+                <div
+                  className="flex h-[180px] w-[180px] shrink-0 items-center justify-center rounded-full border border-white/[0.06] text-center text-xs text-muted-foreground px-4"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}
+                >
+                  No holdings in this build. Reset to default to restore the template.
+                </div>
+              )}
               <div className="flex-1">
                 <h2 className="font-semibold text-lg mb-1" style={{ color: profile.color }}>
                   {profile.label} Portfolio
@@ -283,6 +326,7 @@ export default function PortfolioBuilder() {
                     <th className="text-right p-3 text-xs text-muted-foreground font-medium">Weight</th>
                     <th className="text-right p-3 text-xs text-muted-foreground font-medium">Amount</th>
                     <th className="text-right p-3 text-xs text-muted-foreground font-medium">Chart</th>
+                    <th className="text-right p-3 text-xs text-muted-foreground font-medium w-12" />
                   </tr>
                 </thead>
                 <tbody>
@@ -299,7 +343,8 @@ export default function PortfolioBuilder() {
                             type="number"
                             min={0}
                             max={100}
-                            step={1}
+                            step={0.1}
+                            required
                             value={o.weight}
                             onChange={(e) => handleWeightChange(o.symbol, parseFloat(e.target.value) || 0)}
                             className="w-14 h-7 rounded px-1.5 text-xs font-mono text-right bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
@@ -310,10 +355,21 @@ export default function PortfolioBuilder() {
                       <td className="p-3 text-right font-mono text-foreground">{formatCurrency(o.dollarAmount)}</td>
                       <td className="p-3 text-right">
                         <button
+                          type="button"
                           onClick={() => setSelectedChart(selectedChart === o.symbol ? null : o.symbol)}
                           className="text-xs text-primary hover:text-primary/80"
                         >
                           {selectedChart === o.symbol ? 'Hide' : 'View'}
+                        </button>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSymbolPendingRemove(o.symbol)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          aria-label={`Remove ${o.symbol}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </td>
                     </tr>
@@ -322,7 +378,14 @@ export default function PortfolioBuilder() {
                 <tfoot>
                   <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
                     <td colSpan={2} className="p-3 text-xs text-muted-foreground">
-                      <button onClick={initWeights} className="text-xs text-primary hover:text-primary/80">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemovedSymbols([]);
+                          initWeights();
+                        }}
+                        className="text-xs text-primary hover:text-primary/80"
+                      >
                         Reset to default
                       </button>
                     </td>
@@ -337,6 +400,7 @@ export default function PortfolioBuilder() {
                     <td className="p-3 text-right font-mono text-xs text-foreground">
                       {formatCurrency(amount * (totalWeight / 100))}
                     </td>
+                    <td />
                     <td />
                   </tr>
                 </tfoot>
@@ -359,7 +423,11 @@ export default function PortfolioBuilder() {
               <Button variant="outline" onClick={() => setStep('select')} className="gap-2">
                 <RotateCcw className="h-4 w-4" /> Back
               </Button>
-              <Button onClick={handleExecute} className="gap-2">
+              <Button
+                onClick={handleExecute}
+                className="gap-2"
+                disabled={activeAllocations.length === 0 || Math.abs(totalWeight - 100) > 0.01}
+              >
                 <Sparkles className="h-4 w-4" /> Execute All Trades
               </Button>
             </div>
@@ -430,6 +498,33 @@ export default function PortfolioBuilder() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={symbolPendingRemove !== null} onOpenChange={(open) => !open && setSymbolPendingRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove holding?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {symbolPendingRemove
+                ? `Remove ${symbolPendingRemove} from your portfolio?`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() => {
+                if (symbolPendingRemove) {
+                  setRemovedSymbols((prev) => [...prev, symbolPendingRemove]);
+                }
+                setSymbolPendingRemove(null);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageLayout>
   );
 }

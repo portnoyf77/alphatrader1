@@ -1,0 +1,157 @@
+═══════════════════════════════════════════════════════════════════════════════
+ALPHA TRADER VISUAL DESIGN AUDIT — EXECUTIVE SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+OVERALL GRADE: B- (Competent but unpolished)
+
+This is not a weekend hackathon, but it's not premium fintech either. It reads as
+a product built by engineers who *read* design system articles but didn't have a
+design lead pushing back on details.
+
+═══════════════════════════════════════════════════════════════════════════════
+KEY FINDINGS
+═══════════════════════════════════════════════════════════════════════════════
+
+CRITICAL ISSUES (Fix before fundraise):
+  1. Cards look like ghosts (borders are 0.06 opacity — nearly invisible)
+  2. Secondary text fails WCAG AA contrast (50% opacity on dark background)
+  3. No 8px spacing grid (arbitrary margins everywhere)
+  4. Three glass morphism styles with unclear hierarchy
+  5. Animations defined in JSX but keyframes missing from CSS
+
+HIGH ISSUES (Fix before launch):
+  6. Holding role colors are all identical (stub code not implemented)
+  7. Input focus indicators too faint (0.12 opacity shadow)
+  8. Typography scale inconsistent across pages (no baseline grid)
+  9. Utilities defined but not used (duplication of .label-meta, .stat-number)
+  10. No prefers-reduced-motion support (accessibility failure)
+
+MEDIUM ISSUES (Polish over next quarter):
+  11. Glass card blur is 64px (should be 12px for sharpness)
+  12. Primary purple could be more vibrant (58% → 90% saturation)
+  13. No loading skeletons (just "Loading..." text)
+  14. Button icon sizing not responsive to button size
+  15. Form inputs lack visual containers/grouping
+
+LOW ISSUES (Nice-to-have):
+  16. App.css has zero styling (boilerplate never cleaned up)
+  17. Focus states on buttons are browser-default
+  18. Glow effects overused (everything glows = nothing glows)
+  19. Card hover only changes top border (inconsistent)
+  20. Some class references don't exist in CSS (.earnings-glow)
+
+═══════════════════════════════════════════════════════════════════════════════
+WHAT'S ACTUALLY GOOD
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Intentional color system (HSL-based CSS variables)
+✓ Dark mode properly implemented (not an afterthought)
+✓ Font choices are confident (Plus Jakarta Sans + DM Sans combo works)
+✓ Some clever details (gem animations, count-up on scroll, contextual questionnaire)
+✓ Monospace font properly used for financial data (tabular-nums)
+✓ Success/destructive/warning colors are well-chosen
+✓ Component-based structure is solid (Radix UI + Tailwind)
+✓ Button variants are thoughtful (outline, success, default)
+
+═══════════════════════════════════════════════════════════════════════════════
+TECHNICAL DEBT BREAKDOWN
+═══════════════════════════════════════════════════════════════════════════════
+
+Typography:        C+ (Inconsistent hierarchy, no baseline grid)
+Color System:      B- (Good structure, too muted, contrast issues)
+Spacing:           D+ (No grid discipline)
+Dark Mode:         B  (Done right, let down by color choices)
+Components:        C  (Good markup, sloppy styling)
+Animations:        B+ (Mostly good, but undefined keyframes)
+Accessibility:     D  (Contrast + focus + motion failures)
+Overall Polish:    C+ (Looks OK from 30 feet, falls apart up close)
+
+═══════════════════════════════════════════════════════════════════════════════
+FILES THAT NEED IMMEDIATE ATTENTION
+═══════════════════════════════════════════════════════════════════════════════
+
+CRITICAL:
+  • src/index.css — border opacity too low, missing keyframes, glow overuse
+  • src/pages/Invest.tsx — role colors all identical (stub)
+  • tailwind.config.ts — animations not defined
+
+HIGH:
+  • src/pages/Landing.tsx — animations reference undefined keyframes
+  • src/components/ui/input.tsx — focus indicator too faint
+  • src/components/ui/card.tsx — hardcoded colors instead of CSS vars
+
+MEDIUM:
+  • src/pages/Dashboard.tsx — duplicated label/stat styling
+  • src/components/strategy-creation/PortfolioQuestionnaire.tsx — qa-select-pulse undefined
+
+═══════════════════════════════════════════════════════════════════════════════
+QUICK WINS (75 minutes total)
+═══════════════════════════════════════════════════════════════════════════════
+
+For implementation steps and copy-paste code fixes, see:
+  DESIGN_FIXES_QUICK_START.md
+
+Top 3 fixes (30 minutes):
+  1. Add missing keyframes to tailwind.config.ts
+  2. Increase border opacity from 0.06 to 0.10
+  3. Fix text contrast (50% opacity → 65%)
+
+These three alone move the needle from "looks amateurish" to "looks intentional."
+
+═══════════════════════════════════════════════════════════════════════════════
+WHAT THIS DESIGN COMMUNICATES
+═══════════════════════════════════════════════════════════════════════════════
+
+Current impression: "Serious engineers, no design lead. Moves fast, doesn't polish."
+Target impression: "Premium fintech. Intentional. Premium."
+
+The gap is not in the big ideas (gem system is clever), but in the details:
+  - Invisible borders make cards feel uncertain
+  - Faint text makes the app feel low-confidence
+  - Arbitrary spacing makes it feel unplanned
+  - Undefined animations suggest "we ship fast, we'll clean up later"
+
+For fundraising: VCs notice these things. Not deal-breakers, but signaling problems.
+
+═══════════════════════════════════════════════════════════════════════════════
+NEXT STEPS (PRIORITY ORDER)
+═══════════════════════════════════════════════════════════════════════════════
+
+WEEK 1 (Before beta launch):
+  ☐ Implement all CRITICAL fixes (3 hours)
+  ☐ Fix role colors (1 hour)
+  ☐ Increase input focus visibility (30 min)
+  ☐ Add prefers-reduced-motion support (1 hour)
+
+WEEK 2-3:
+  ☐ Refactor typography to use utilities (2 hours)
+  ☐ Create 8px spacing grid enforcement (2 hours)
+  ☐ Implement loading skeletons (3 hours)
+  ☐ Create Storybook (or simple component guide) (4 hours)
+
+NEXT MONTH (Before fundraise):
+  ☐ Boost purple saturation
+  ☐ Add subtle micro-interactions (hover effects)
+  ☐ Design custom chart styling
+  ☐ Test with real investors for feedback
+
+═══════════════════════════════════════════════════════════════════════════════
+ESTIMATED EFFORT TO "PREMIUM"
+═══════════════════════════════════════════════════════════════════════════════
+
+Current: B- (Competent, unpolished)
+        ↓
+        Quick fixes (75 min) → B (Solid, no embarrassing bugs)
+        ↓
+        Polish pass (20-30 hrs) → A- (Premium, investor-ready)
+        ↓
+        Strategic redesign (40-60 hrs) → A+ (Industry-leading)
+
+For VC rounds, you need at least A-. This is achievable in 2 weeks with focused work.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+For detailed findings, see: DESIGN_AUDIT.md
+For implementation code, see: DESIGN_FIXES_QUICK_START.md
+
+—Luna

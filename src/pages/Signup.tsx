@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { BackgroundOrbs } from '@/components/BackgroundOrbs';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type Step = 'email' | 'plan' | 'sent';
 
 const plans = [
@@ -49,13 +51,24 @@ export default function Signup() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailBlurred, setEmailBlurred] = useState(false);
+  const [emailSubmitAttempted, setEmailSubmitAttempted] = useState(false);
   const { signup, selectPlan: setUserPlan } = useMockAuth();
   const { toast } = useToast();
 
+  const emailTrim = email.trim();
+  const emailValid = EMAIL_REGEX.test(emailTrim);
+  const showEmailError =
+    (emailBlurred || emailSubmitAttempted) && emailTrim !== '' && !emailValid;
+
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
+    setEmailSubmitAttempted(true);
+    if (!emailTrim) {
       toast({ title: 'Email required', description: 'Please enter your email.', variant: 'destructive' });
+      return;
+    }
+    if (!emailValid) {
       return;
     }
     setStep('plan');
@@ -75,7 +88,7 @@ export default function Signup() {
     try {
       // Save plan choice before sending magic link
       setUserPlan(selectedPlan);
-      await signup(email.trim());
+      await signup(emailTrim);
       setStep('sent');
     } catch (error) {
       toast({
@@ -160,11 +173,18 @@ export default function Signup() {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setEmailBlurred(true)}
                         className="pl-10"
                         maxLength={255}
                         autoFocus
+                        aria-invalid={showEmailError}
                       />
                     </div>
+                    {showEmailError && (
+                      <p className="text-sm text-destructive animate-in fade-in duration-200">
+                        Please enter a valid email
+                      </p>
+                    )}
                   </div>
 
                   <Button type="submit" className="w-full" size="lg">

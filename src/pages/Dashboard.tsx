@@ -6,6 +6,7 @@ import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { useAlpacaNews } from '@/hooks/useAlpacaNews';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -69,7 +70,17 @@ function DashboardEquityChart() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-44 text-muted-foreground text-sm">Loading chart...</div>
+      <div className="w-full max-w-[600px] mx-auto">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <Skeleton className="h-4 w-28 rounded-md" />
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-7 w-9 rounded-md" />
+            ))}
+          </div>
+        </div>
+        <Skeleton className="h-[160px] w-full max-w-[600px] mx-auto rounded-xl" />
+      </div>
     );
   }
   if (data.length < 2) {
@@ -105,20 +116,21 @@ function DashboardEquityChart() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
+      <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-medium text-foreground">Equity History</span>
           <span className="text-xs font-mono" style={{ color: strokeColor }}>
             {changeValue >= 0 ? '+' : ''}{formatCurrency(changeValue)} ({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)
           </span>
         </div>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {PERIOD_OPTIONS.map((opt) => (
             <button
               key={opt.label}
+              type="button"
               onClick={() => setActivePeriod(opt.label)}
               className={cn(
-                'px-2.5 py-1 rounded text-[0.7rem] font-medium transition-colors',
+                'min-h-11 min-w-11 rounded px-2.5 text-[0.7rem] font-medium transition-colors touch-manipulation md:min-h-0 md:min-w-0 md:py-1',
                 activePeriod === opt.label
                   ? 'bg-primary/15 text-primary border border-primary/25'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
@@ -231,7 +243,7 @@ export default function Dashboard() {
     ['SPY', 'QQQ', 'AAPL', 'MSFT', 'NVDA'].forEach((s) => syms.add(s));
     return Array.from(syms);
   }, [positions]);
-  const { articles: liveNews, loading: newsLoading, error: newsError } = useAlpacaNews(newsSymbols, 10);
+  const { articles: liveNews, loading: newsLoading, error: newsError, refetch: refetchNews } = useAlpacaNews(newsSymbols, 10);
 
   // Fetch portfolios from Supabase, with localStorage fallback
   const { data: supabasePortfolios, loading: portfoliosLoading } = useMyPortfolios();
@@ -392,23 +404,44 @@ export default function Dashboard() {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        <div>
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your portfolios and investments.</p>
         </div>
 
         <LiveTickerBar holdings={liveTickerHoldings} />
 
+        {!portfoliosLoading && !hasPortfolios && (
+          <Card
+            className="glass-card border-border/30"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <CardContent className="flex flex-col items-center text-center p-6 py-12">
+              <Sparkles className="h-12 w-12 text-muted-foreground mb-4" aria-hidden />
+              <h3 className="text-lg font-semibold mb-4">You haven&apos;t created a portfolio yet</h3>
+              <p className="text-muted-foreground text-sm mb-6 max-w-md">
+                Build a personalized portfolio on the Invest flow and track it here alongside your live account.
+              </p>
+              <Link to="/invest">
+                <Button className="gap-2">
+                  Go to Invest
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Equity Chart + Quick Trade (shown when live data available) */}
         {hasLiveData && (
           <div
-            className="mb-8 rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
+            className="rounded-2xl p-6"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
           >
             <DashboardEquityChart />
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="flex items-center justify-between mb-2">
+            <div className="mt-6 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Trade</span>
                 <Link to="/portfolio-tracker" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                   Advanced trading &rarr;
@@ -429,8 +462,8 @@ export default function Dashboard() {
         )}
 
         {/* Hero Summary Bar */}
-        <div data-tour="summary-stats" className="flex items-start justify-between gap-6 mb-10 flex-wrap">
-          <div className="flex items-start gap-10 flex-wrap">
+        <div data-tour="summary-stats" className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-8 sm:flex-row sm:flex-wrap sm:items-start sm:gap-10">
             {/* Account Equity */}
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
@@ -524,8 +557,8 @@ export default function Dashboard() {
           </div>
 
           {/* Create New Portfolio Button */}
-          <Link to="/invest">
-            <Button className="h-10 gap-2 shrink-0">
+          <Link to="/invest" className="shrink-0 md:self-start">
+            <Button className="h-11 min-h-11 w-full gap-2 sm:w-auto md:h-10 md:min-h-10">
               <Plus className="h-4 w-4" />
               Create New Portfolio
             </Button>
@@ -534,28 +567,28 @@ export default function Dashboard() {
 
         {/* Risk Metrics (when live data + metrics available) */}
         {hasLiveData && metrics && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Volatility</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Volatility</p>
               <p className="font-mono text-lg font-semibold">{(metrics.volatility * 100).toFixed(1)}%</p>
               <p className="text-[0.7rem] text-muted-foreground">annualized</p>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Sharpe Ratio</p>
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Sharpe Ratio</p>
               <p className={cn("font-mono text-lg font-semibold", metrics.sharpeRatio >= 1 ? 'text-success' : metrics.sharpeRatio >= 0 ? 'text-foreground' : 'text-destructive')}>
                 {metrics.sharpeRatio.toFixed(2)}
               </p>
               <p className="text-[0.7rem] text-muted-foreground">risk-adjusted</p>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Max Drawdown</p>
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Max Drawdown</p>
               <p className="font-mono text-lg font-semibold text-destructive">
                 {(metrics.maxDrawdown * 100).toFixed(1)}%
               </p>
               <p className="text-[0.7rem] text-muted-foreground">worst decline</p>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-1">Alpha</p>
+            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Alpha</p>
               <p className={cn("font-mono text-lg font-semibold", metrics.alpha >= 0 ? 'text-success' : 'text-destructive')}>
                 {metrics.alpha >= 0 ? '+' : ''}{(metrics.alpha * 100).toFixed(1)}%
               </p>
@@ -567,12 +600,13 @@ export default function Dashboard() {
         {/* Contextual Alpha Promotion */}
         {qualifyingPortfolio && (
           <div
-            className="mb-6 rounded-xl p-4 flex items-center gap-4"
+            className="flex flex-col gap-4 rounded-xl p-6 sm:flex-row sm:items-center"
             style={{
               background: 'rgba(255,255,255,0.02)',
               backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
               borderLeft: '3px solid hsl(var(--primary))',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
             }}
           >
             <Crown className="h-5 w-5 flex-shrink-0 text-primary" />
@@ -581,14 +615,16 @@ export default function Dashboard() {
                 Your portfolio <span className="font-semibold">{qualifyingPortfolio.name}</span> qualifies for the marketplace. Publish it and start earning when others follow.
               </p>
             </div>
-            <Link to="/invest">
-              <Button variant="outline" size="sm" className="whitespace-nowrap text-xs">
+            <Link to="/invest" className="w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="min-h-11 w-full whitespace-nowrap text-xs touch-manipulation sm:w-auto md:min-h-9">
                 Learn How →
               </Button>
             </Link>
             <button
+              type="button"
               onClick={() => setDismissedPublishPrompt(true)}
-              className="p-1 rounded hover:bg-secondary/50 transition-colors text-muted-foreground hover:text-foreground flex-shrink-0"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center self-end rounded-lg text-muted-foreground transition-colors hover:bg-secondary/50 hover:text-foreground touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:self-auto md:min-h-10 md:min-w-10 md:p-1"
+              aria-label="Dismiss"
             >
               <X className="h-4 w-4" />
             </button>
@@ -597,8 +633,8 @@ export default function Dashboard() {
 
         {/* Live Alpaca Positions */}
         {hasLiveData && positions.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Live Positions</h2>
@@ -610,7 +646,7 @@ export default function Dashboard() {
                 View all <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
-            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(positions.length, 4)}, minmax(0, 1fr))` }}>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {positions.slice(0, 8).map((pos) => (
                 <div
                   key={pos.symbol}
@@ -650,25 +686,28 @@ export default function Dashboard() {
         )}
 
         {/* Tab Cards */}
-        <div data-tour="tab-cards" className="grid grid-cols-3 gap-4 mb-6">
+        <div data-tour="tab-cards" className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
             <button
               key={key}
+              type="button"
               onClick={() => setActiveTab(key)}
               className={cn(
-                "rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer",
+                "min-h-[44px] rounded-2xl p-6 text-left transition-all duration-200 cursor-pointer outline-none touch-manipulation",
                 "backdrop-blur-xl",
+                "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 activeTab === key
                   ? "border-2 shadow-[0_0_20px_rgba(124,58,237,0.1)]"
-                  : "border hover:border-[rgba(255,255,255,0.12)]"
+                  : "border hover:border-[rgba(255,255,255,0.14)]"
               )}
               style={{
                 background: 'rgba(255,255,255,0.02)',
-                borderColor: activeTab === key ? '#7C3AED' : 'rgba(255,255,255,0.06)',
+                borderColor: activeTab === key ? '#7C3AED' : 'rgba(255,255,255,0.1)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Icon className="h-4 w-4" style={{ color: activeTab === key ? '#A78BFA' : 'rgba(255,255,255,0.4)' }} />
+              <div className="flex items-center gap-2 mb-4">
+                <Icon className="h-4 w-4" style={{ color: activeTab === key ? '#A78BFA' : 'rgba(255,255,255,0.55)' }} />
                 <span className={cn(
                   "text-sm font-medium",
                   activeTab === key ? "text-foreground" : "text-muted-foreground"
@@ -681,23 +720,25 @@ export default function Dashboard() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'my-portfolios' && (
+        <div key={activeTab} className="animate-in fade-in duration-200">
+        {activeTab === 'my-portfolios' && hasPortfolios && (
           livePortfolios.length === 0 ? (
-            <div className="rounded-2xl border border-border/30 py-16 px-8 text-center mb-8" style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <Sparkles className="h-8 w-8 mx-auto mb-4 text-primary" />
-              <h3 className="text-lg font-semibold mb-2">You haven't created any portfolios yet</h3>
-              <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">
-                Let the AI build one for you in minutes. Answer a few questions and get a personalized portfolio.
+            <div
+              className="rounded-2xl border border-border/30 py-10 px-8 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            >
+              <p className="text-muted-foreground text-sm mb-3">
+                You don&apos;t have any live portfolios yet. Simulating or private portfolios stay under the Simulating tab.
               </p>
               <Link to="/invest">
-                <Button className="gap-2">
-                  Create Your First Portfolio
+                <Button variant="outline" size="sm" className="gap-2">
+                  Create a portfolio
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           ) : (
-            <Card className="glass-card mb-8">
+            <Card className="glass-card">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
@@ -773,7 +814,7 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'invested' && (
-          <Card className="glass-card mb-8">
+          <Card className="glass-card">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
@@ -851,7 +892,7 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'simulating' && (
-          <Card className="glass-card mb-8">
+          <Card className="glass-card">
             <CardContent className="p-0">
               {simulatingPortfolios.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
@@ -948,26 +989,41 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+        </div>
 
         {/* Market News — real Alpaca news feed */}
-        <div data-tour="market-news" className="mb-8">
+        <div data-tour="market-news">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-muted-foreground" />
               Market News
               <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
             </h2>
-            <Link to="/research" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+            <Link to="/research" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1 py-0.5 -mx-1">
               Full research <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
           {newsLoading && liveNews.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">Loading latest news...</div>
+            <div className="flex gap-4 overflow-x-auto pb-2 py-2">
+              {[1, 2, 3].map((i) => (
+                <Skeleton
+                  key={i}
+                  className="h-[280px] min-w-[280px] max-w-[280px] shrink-0 rounded-xl"
+                />
+              ))}
+            </div>
           ) : liveNews.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              {newsError
-                ? `News feed unavailable: ${newsError}`
-                : 'No recent news available.'}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 py-6 px-2">
+              <span className="text-sm text-muted-foreground text-center">
+                {newsError
+                  ? `News feed unavailable: ${newsError}`
+                  : 'No recent news available.'}
+              </span>
+              {newsError && (
+                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => refetchNews()}>
+                  Retry
+                </Button>
+              )}
             </div>
           ) : (
             <div
@@ -989,15 +1045,16 @@ export default function Dashboard() {
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col"
+                    className="news-carousel group flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     style={{
                       minWidth: '280px',
                       maxWidth: '280px',
                       height: '280px',
                       scrollSnapAlign: 'start',
                       background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
                       backdropFilter: 'blur(12px)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
                     }}
                   >
                     {thumbImg?.url && (
@@ -1006,11 +1063,11 @@ export default function Dashboard() {
                         style={{
                           height: '140px',
                           backgroundImage: `url(${thumbImg.url})`,
-                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          borderBottom: '1px solid rgba(255,255,255,0.1)',
                         }}
                       />
                     )}
-                    <div className="p-4 flex flex-col gap-2 flex-1 min-h-0">
+                    <div className="p-6 flex flex-col gap-2 flex-1 min-h-0">
                       <p
                         className="text-[0.85rem] font-semibold text-foreground leading-snug group-hover:text-white transition-colors"
                         style={{
@@ -1044,7 +1101,7 @@ export default function Dashboard() {
                               className="text-[0.6rem] font-mono px-1.5 py-0.5 rounded"
                               style={{
                                 background: relevantSymbols.includes(sym) ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)',
-                                color: relevantSymbols.includes(sym) ? '#A78BFA' : 'rgba(255,255,255,0.5)',
+                                color: relevantSymbols.includes(sym) ? '#A78BFA' : 'rgba(255,255,255,0.55)',
                                 border: `1px solid ${relevantSymbols.includes(sym) ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.08)'}`,
                               }}
                             >

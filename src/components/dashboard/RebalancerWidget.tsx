@@ -266,7 +266,7 @@ export function RebalancerWidget({
   if (!positionsLoading && positions.length === 0 && settings.targets.length === 0) {
     return (
       <Card
-        className="mb-8 border border-[rgba(255,255,255,0.06)]"
+        className="border border-[rgba(255,255,255,0.1)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
         style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(12px)' }}
       >
         <CardHeader>
@@ -292,7 +292,7 @@ export function RebalancerWidget({
   return (
     <>
       <Card
-        className="mb-8 border border-[rgba(255,255,255,0.06)]"
+        className="border border-[rgba(255,255,255,0.1)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
         style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(12px)' }}
       >
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between space-y-0">
@@ -449,7 +449,7 @@ export function RebalancerWidget({
             <div className="rounded-xl border border-[rgba(255,255,255,0.08)] overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-[rgba(255,255,255,0.06)] hover:bg-transparent">
+                  <TableRow className="border-[rgba(255,255,255,0.1)] hover:bg-transparent">
                     <TableHead>Symbol</TableHead>
                     <TableHead>Side</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
@@ -460,7 +460,7 @@ export function RebalancerWidget({
                 </TableHeader>
                 <TableBody>
                   {lastResult.trades.map((t, i) => (
-                    <TableRow key={`${t.symbol}-${i}`} className="border-[rgba(255,255,255,0.06)]">
+                    <TableRow key={`${t.symbol}-${i}`} className="border-[rgba(255,255,255,0.1)]">
                       <TableCell className="font-mono font-medium">{t.symbol}</TableCell>
                       <TableCell>
                         <span
@@ -557,7 +557,7 @@ export function RebalancerWidget({
               <div className="rounded-lg border border-[rgba(255,255,255,0.08)] overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-transparent border-[rgba(255,255,255,0.06)]">
+                    <TableRow className="hover:bg-transparent border-[rgba(255,255,255,0.1)]">
                       <TableHead>Symbol</TableHead>
                       <TableHead className="text-right">Current %</TableHead>
                       <TableHead className="w-[100px]">Target %</TableHead>
@@ -570,7 +570,7 @@ export function RebalancerWidget({
                       const cur =
                         equity > 0 && pos ? (pos.marketValue / equity) * 100 : 0;
                       return (
-                        <TableRow key={row.symbol} className="border-[rgba(255,255,255,0.06)]">
+                        <TableRow key={row.symbol} className="border-[rgba(255,255,255,0.1)]">
                           <TableCell className="font-mono font-medium">{row.symbol}</TableCell>
                           <TableCell className="text-right text-muted-foreground text-sm">
                             {cur.toFixed(1)}%

@@ -58,8 +58,10 @@ export function NotificationBell() {
         <Tooltip>
           <TooltipTrigger asChild>
             <button
+              type="button"
               onClick={() => setOpen(true)}
-              className="relative p-2 rounded-lg transition-colors hover:bg-secondary"
+              className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-colors hover:bg-secondary touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background md:min-h-0 md:min-w-0 md:p-2"
+              aria-label={count > 0 ? `${count} pending notifications` : 'Notifications'}
             >
               <Bell className="h-5 w-5 text-[rgba(255,255,255,0.6)] hover:text-foreground transition-colors" />
               {count > 0 && (
@@ -93,8 +95,10 @@ export function NotificationBell() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
+                      type="button"
                       onClick={() => setRebalancingModalOpen(true)}
-                      className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background md:min-h-0 md:min-w-0 md:p-1.5"
+                      aria-label="Rebalancing settings"
                     >
                       <Settings className="h-4 w-4" />
                     </button>

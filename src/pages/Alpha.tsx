@@ -429,7 +429,7 @@ export default function Alpha() {
                       {portfolio.name}
                     </span>
                   </div>
-                  <p className="text-xs font-mono mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <p className="text-xs font-mono mb-5" style={{ color: 'rgba(255,255,255,0.55)' }}>
                     {portfolio.creator_id}
                   </p>
 

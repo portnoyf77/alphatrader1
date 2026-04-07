@@ -1,4 +1,6 @@
 import { useState } from 'react';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 import { Link } from 'react-router-dom';
 import { Crown, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,12 +14,20 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
+  const [emailBlurred, setEmailBlurred] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const { login } = useMockAuth();
   const { toast } = useToast();
 
+  const emailTrim = email.trim();
+  const emailValid = EMAIL_REGEX.test(emailTrim);
+  const showEmailError =
+    (emailBlurred || submitAttempted) && emailTrim !== '' && !emailValid;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
+    setSubmitAttempted(true);
+    if (!emailTrim) {
       toast({
         title: 'Email required',
         description: 'Please enter your email address.',
@@ -25,9 +35,12 @@ export default function Login() {
       });
       return;
     }
+    if (!emailValid) {
+      return;
+    }
     setIsLoading(true);
     try {
-      await login(email.trim());
+      await login(emailTrim);
       setLinkSent(true);
     } catch (error) {
       toast({
@@ -108,10 +121,17 @@ export default function Login() {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setEmailBlurred(true)}
                         className="pl-10"
                         autoFocus
+                        aria-invalid={showEmailError}
                       />
                     </div>
+                    {showEmailError && (
+                      <p className="text-sm text-destructive animate-in fade-in duration-200">
+                        Please enter a valid email
+                      </p>
+                    )}
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

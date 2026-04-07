@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { X, Sparkles, Crown, SendHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Message, QuickAction } from './types';
 
@@ -12,6 +13,8 @@ interface AssistantPanelProps {
   onSubmit: (e: React.FormEvent) => void;
   onQuickAction: (action: QuickAction) => void;
   onClose: () => void;
+  apiOffline?: boolean;
+  onReconnect?: () => void;
 }
 
 function renderMarkdown(content: string) {
@@ -26,6 +29,8 @@ function renderMarkdown(content: string) {
 export function AssistantPanel({
   messages, inputValue, isTyping, isMobile,
   onInputChange, onSubmit, onQuickAction, onClose,
+  apiOffline = false,
+  onReconnect,
 }: AssistantPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,19 +45,33 @@ export function AssistantPanel({
 
   return (
     <div
-      className="fixed z-[45] flex flex-col assistant-panel-enter"
-      style={{
-        bottom: isMobile ? 0 : 96,
-        right: isMobile ? 0 : 24,
-        width: isMobile ? '100%' : 400,
-        height: isMobile ? 'calc(100vh - 80px)' : 560,
-        maxHeight: isMobile ? undefined : 'calc(100vh - 120px)',
-        borderRadius: isMobile ? '20px 20px 0 0' : 20,
-        background: 'rgba(5, 5, 8, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 16px 64px rgba(0, 0, 0, 0.5)',
-      }}
+      className={cn(
+        'fixed z-[45] flex flex-col assistant-panel-enter',
+        isMobile && 'inset-0 h-[100dvh] max-h-[100dvh] w-full rounded-none border-x-0 border-t-0',
+      )}
+      style={
+        isMobile
+          ? {
+              paddingTop: 'env(safe-area-inset-top, 0px)',
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              background: 'rgba(5, 5, 8, 0.98)',
+              backdropFilter: 'blur(20px)',
+              borderBottom: 'none',
+              boxShadow: 'none',
+            }
+          : {
+              bottom: 96,
+              right: 24,
+              width: 400,
+              height: 560,
+              maxHeight: 'calc(100vh - 120px)',
+              borderRadius: 20,
+              background: 'rgba(5, 5, 8, 0.95)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 16px 64px rgba(0, 0, 0, 0.5)',
+            }
+      }
     >
       {/* Header */}
       <div
@@ -63,12 +82,17 @@ export function AssistantPanel({
           <Sparkles className="h-5 w-5 text-primary" />
           <div>
             <span className="font-heading font-semibold text-sm text-foreground">Alpha Advisor</span>
-            <p className="text-[0.7rem] leading-none mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <p className="text-[0.7rem] leading-none mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Your personal investment guide
             </p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg transition-colors hover:bg-secondary">
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-colors hover:bg-secondary touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508] md:min-h-10 md:min-w-10 md:p-1.5"
+          aria-label="Close assistant"
+        >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
       </div>
@@ -129,7 +153,7 @@ export function AssistantPanel({
                     >
                       <p
                         className="text-[0.65rem] uppercase tracking-wider font-semibold mb-2.5"
-                        style={{ color: 'rgba(255,255,255,0.5)' }}
+                        style={{ color: 'rgba(255,255,255,0.55)' }}
                       >
                         Market order preview
                       </p>
@@ -137,13 +161,13 @@ export function AssistantPanel({
                         className="grid grid-cols-[minmax(0,auto)_1fr] gap-x-3 gap-y-2"
                         style={{ color: 'rgba(255,255,255,0.92)' }}
                       >
-                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Symbol</dt>
+                        <dt style={{ color: 'rgba(255,255,255,0.55)' }}>Symbol</dt>
                         <dd className="font-mono font-semibold">{msg.pendingTrade.symbol}</dd>
-                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Quantity</dt>
+                        <dt style={{ color: 'rgba(255,255,255,0.55)' }}>Quantity</dt>
                         <dd>{msg.pendingTrade.qty}</dd>
-                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Side</dt>
+                        <dt style={{ color: 'rgba(255,255,255,0.55)' }}>Side</dt>
                         <dd className="capitalize">{msg.pendingTrade.side}</dd>
-                        <dt style={{ color: 'rgba(255,255,255,0.45)' }}>Order type</dt>
+                        <dt style={{ color: 'rgba(255,255,255,0.55)' }}>Order type</dt>
                         <dd>Market</dd>
                       </dl>
                     </div>
@@ -160,9 +184,10 @@ export function AssistantPanel({
                                 : action.label
                             }
                             type="button"
+                            disabled={apiOffline}
                             onClick={() => onQuickAction(action)}
                             className={cn(
-                              'text-left transition-all duration-150',
+                              'min-h-11 touch-manipulation text-left transition-all duration-150 md:min-h-0',
                               isConfirmTrade
                                 ? 'glow-commit rounded-lg hover:scale-[1.02]'
                                 : 'hover:scale-[1.02]',
@@ -170,18 +195,20 @@ export function AssistantPanel({
                             style={
                               isConfirmTrade
                                 ? {
-                                    padding: '8px 16px',
+                                    padding: '10px 16px',
                                     fontSize: '0.8rem',
-                                    cursor: 'pointer',
+                                    cursor: apiOffline ? 'not-allowed' : 'pointer',
+                                    opacity: apiOffline ? 0.45 : 1,
                                   }
                                 : {
                                     background: 'rgba(255,255,255,0.04)',
                                     border: '1px solid rgba(255,255,255,0.1)',
                                     borderRadius: 8,
-                                    padding: '8px 16px',
+                                    padding: '10px 16px',
                                     fontSize: '0.8rem',
                                     color: 'rgba(255,255,255,0.75)',
-                                    cursor: 'pointer',
+                                    cursor: apiOffline ? 'not-allowed' : 'pointer',
+                                    opacity: apiOffline ? 0.45 : 1,
                                   }
                             }
                             onMouseEnter={(e) => {
@@ -247,6 +274,23 @@ export function AssistantPanel({
         )}
       </div>
 
+      {apiOffline && (
+        <div
+          className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5"
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.02)',
+          }}
+        >
+          <p className="text-xs text-muted-foreground">AI temporarily offline</p>
+          {onReconnect && (
+            <Button type="button" variant="outline" size="sm" className="shrink-0 min-h-11 md:h-8 md:min-h-8" onClick={onReconnect}>
+              Reconnect
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Input */}
       <form
         onSubmit={onSubmit}
@@ -259,20 +303,25 @@ export function AssistantPanel({
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+          disabled={apiOffline}
+          className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
           style={{
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: 10,
             padding: '10px 14px',
           }}
-          onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)'; }}
+          onFocus={(e) => {
+            if (apiOffline) return;
+            e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)';
+          }}
           onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
         />
         <button
           type="submit"
-          disabled={!inputValue.trim()}
-          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all disabled:opacity-30 bg-primary"
+          disabled={!inputValue.trim() || apiOffline}
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-primary transition-all touch-manipulation disabled:opacity-30 md:h-8 md:min-h-8 md:min-w-8 md:w-8"
+          aria-label="Send message"
         >
           <SendHorizontal className="h-4 w-4 text-primary-foreground" />
         </button>

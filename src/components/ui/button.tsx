@@ -5,22 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold font-heading ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold font-heading ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-white text-[#050508] border-none shadow-[0_4px_16px_rgba(255,255,255,0.08)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] hover:-translate-y-0.5",
+          "bg-white text-[#050508] border-none shadow-[0_4px_16px_rgba(255,255,255,0.08)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.12),0_0_36px_-8px_rgba(124,58,237,0.45)] hover:-translate-y-0.5",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-[rgba(255,255,255,0.15)] bg-transparent text-white hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.4)]",
+          "border border-[rgba(255,255,255,0.15)] bg-transparent text-white hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.4)] hover:scale-[1.02] transition-transform duration-150",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground",
+          "hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] transition-transform duration-150",
         link:
-          "text-primary underline-offset-4 hover:underline",
+          "text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         success:
           "bg-gradient-to-br from-success to-[#059669] text-white border border-success/30 shadow-[0_4px_16px_rgba(16,185,129,0.2)] hover:from-[#34D399] hover:to-success hover:shadow-[0_6px_24px_rgba(16,185,129,0.3)] hover:-translate-y-px",
       },
@@ -28,7 +28,8 @@ const buttonVariants = cva(
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-xl px-3",
         lg: "h-11 rounded-xl px-8",
-        icon: "h-10 w-10",
+        icon:
+          "h-11 w-11 min-h-11 min-w-11 shrink-0 md:h-10 md:w-10 md:min-h-10 md:min-w-10 touch-manipulation",
       },
     },
     defaultVariants: {
