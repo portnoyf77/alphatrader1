@@ -6,7 +6,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { cn } from '@/lib/utils';
 import { getNews, getLatestQuote, type AlpacaNewsArticle } from '@/lib/alpacaClient';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
-import { formatCurrency } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
 
 // ── Watchlist Manager ──
 

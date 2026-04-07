@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ValidationBadge } from './ValidationBadge';
 import { PortfolioThumbnail } from './PortfolioThumbnail';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatCurrency, formatPercent } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { riskToGem } from '@/lib/portfolioNaming';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';

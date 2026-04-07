@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, ChevronDown, Users, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { mockPortfolios, formatCurrency, creatorStats } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
+import { mockPortfolios, creatorStats } from '@/lib/mockData';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
@@ -37,6 +38,7 @@ function CountUpOnScroll({ target, prefix = '', suffix = '', duration = 1200, fo
 }
 
 export default function Landing() {
+  // TODO: Replace mockPortfolios and creatorStats with public Supabase query (no auth required) or static showcase data
   const validatedPortfolios = mockPortfolios.filter(s => s.status === 'validated_listed');
   const totalAllocated = validatedPortfolios.reduce((acc, s) => acc + s.allocated_amount_usd, 0);
   const totalFollowers = validatedPortfolios.reduce((acc, s) => acc + s.followers_count, 0);

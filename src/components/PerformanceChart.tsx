@@ -2,6 +2,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
+// TODO: Move generateChartData to a dedicated utility file instead of mockData
 import { generateChartData } from '@/lib/mockData';
 
 type TimeframeKey = '30' | '90' | 'ytd' | '1y' | 'all';

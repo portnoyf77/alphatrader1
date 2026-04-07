@@ -15,7 +15,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { StrategyActivityLog } from '@/components/StrategyActivityLog';
 import { ExposureBreakdown } from '@/components/ExposureBreakdown';
-import { mockPortfolios, mockComments, formatCurrency, formatPercent } from '@/lib/mockData';
+import { mockPortfolios, mockComments } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { useToast } from '@/hooks/use-toast';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -38,6 +39,8 @@ export default function StrategyDetail() {
   const [allocateAmount, setAllocateAmount] = useState('');
   const [acknowledgeTerms, setAcknowledgeTerms] = useState(false);
 
+  // TODO: Replace mockPortfolios.find() with usePortfolio(id) hook from '@/hooks/usePortfolios'
+  // TODO: Replace mockComments with getPortfolioComments from '@/lib/supabasePortfolioService' using useState/useEffect
   const strategy = mockPortfolios.find(s => s.id === id);
 
   if (!strategy) {

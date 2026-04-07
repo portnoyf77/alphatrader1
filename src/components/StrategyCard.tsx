@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Users, TrendingUp, TrendingDown, Pause, Globe, Laptop, Heart, Leaf, Zap, DollarSign, Shield, BarChart3, Crown, Coins } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatCurrency, formatPercent } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { getGemHex, getGemFromName } from '@/lib/portfolioNaming';
 import { GemDot } from '@/components/GemDot';
 import { calculateAlphaScore } from '@/lib/alphaScore';

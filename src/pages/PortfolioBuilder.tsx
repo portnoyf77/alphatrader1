@@ -6,7 +6,7 @@ import { StockChart } from '@/components/StockChart';
 import { placeOrder } from '@/lib/alpacaClient';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
 
 // ── Risk Profiles ──
 

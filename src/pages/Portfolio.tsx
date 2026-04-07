@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import {

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { useToast } from '@/hooks/use-toast';
-import { getPortfoliosWithPendingUpdates } from '@/lib/mockData';
+import { usePendingUpdates } from '@/hooks/usePortfolios';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';
 
@@ -24,7 +24,7 @@ export function NotificationBell() {
     return saved === 'manual' ? 'manual' : 'auto';
   });
 
-  const strategiesWithPending = getPortfoliosWithPendingUpdates();
+  const { data: strategiesWithPending = [], isLoading } = usePendingUpdates();
   const count = strategiesWithPending.length;
 
   const handleAccept = (strategy: Portfolio) => {

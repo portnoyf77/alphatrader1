@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { GemDot } from '@/components/GemDot';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatCurrency, formatPercent } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
 import { cn } from '@/lib/utils';

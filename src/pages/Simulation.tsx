@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
-import { formatPercent, mockPortfolios } from '@/lib/mockData';
+import { mockPortfolios } from '@/lib/mockData';
+import { formatPercent } from '@/lib/formatters';
 import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -86,6 +87,7 @@ export default function Simulation() {
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
   const [showGoLiveModal, setShowGoLiveModal] = useState(false);
 
+  // TODO: Replace mockPortfolios.find() with usePortfolio(id) hook, keep localStorage fallback for user-created portfolios
   const mockPortfolio = useMemo(() => mockPortfolios.find(p => p.id === id), [id]);
   const userPortfolio = useMemo(() => !mockPortfolio && id ? getUserCreatedPortfolio(id) : null, [id, mockPortfolio]);
 

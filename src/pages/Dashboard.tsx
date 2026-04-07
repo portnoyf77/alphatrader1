@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { GemDot } from '@/components/GemDot';
-import { formatCurrency, formatPercent, mockPortfolios } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { useMyPortfolios, useFollowedPortfolios } from '@/hooks/usePortfolios';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -21,25 +22,6 @@ import { getPortfolioHistory, placeOrder, type AlpacaPortfolioHistoryPoint } fro
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
 }
-
-// My portfolios (ones I created) — merge mock + user-created
-const baseMy = mockPortfolios.slice(0, 4);
-// Portfolios I've invested in
-const investedPortfolioData: Record<string, { myAllocation: number; myReturn: number }> = {
-  '5': { myAllocation: 38000, myReturn: -4.8 },
-  '6': { myAllocation: 33000, myReturn: 0.0 },
-  '7': { myAllocation: 33000, myReturn: 5.0 },
-};
-const investedPortfolios = mockPortfolios.slice(4, 7).map(p => ({
-  ...p,
-  myAllocation: investedPortfolioData[p.id]?.myAllocation ?? 25000,
-  myReturn: investedPortfolioData[p.id]?.myReturn ?? 0,
-}));
-
-// Mock user total return vs S&P 500
-const userTotalReturn = 12.4;
-const sp500Return = 9.8;
-const vsSP500 = userTotalReturn - sp500Return;
 
 // Helper to get gem color for left border
 function getGemBorderColor(name: string): string {
@@ -251,17 +233,29 @@ export default function Dashboard() {
   }, [positions]);
   const { articles: liveNews, loading: newsLoading, error: newsError } = useAlpacaNews(newsSymbols, 10);
 
-  // Merge mock + user-created portfolios
-  const userCreated = useMemo(() => getUserCreatedPortfolios(), []);
+  // Fetch portfolios from Supabase, with localStorage fallback
+  const { data: supabasePortfolios, loading: portfoliosLoading } = useMyPortfolios();
+  const { data: followedData, loading: followedLoading } = useFollowedPortfolios();
+
   const myPortfolios = useMemo(() => {
-    const normalized = userCreated.map((p: any) => ({
+    if (supabasePortfolios.length > 0) return supabasePortfolios;
+    // Fallback to localStorage during migration
+    const userCreated = getUserCreatedPortfolios();
+    return userCreated.map((p: any) => ({
       ...p,
       performance: p.performance || { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
       creator_investment: p.creator_investment || 0,
       risk_level: p.risk_level || 'Medium',
+      holdings: p.holdings || [],
     }));
-    return [...baseMy, ...normalized];
-  }, [userCreated]);
+  }, [supabasePortfolios]);
+
+  const investedPortfolios = useMemo(() => {
+    return followedData.map((p) => ({
+      ...p,
+      myReturn: 0, // Will be computed from real performance data later
+    }));
+  }, [followedData]);
 
   const liveTickerHoldings = useMemo(() => {
     const seen = new Set<string>();
@@ -327,6 +321,10 @@ export default function Dashboard() {
   // Count-up animations
   const animEquity = useCountUp(displayEquity, 800);
   const animPortfolioValue = useCountUp(displayPortfolioValue, 800);
+  // SP500 benchmark comparison - use live data when available
+  const sp500Return = 9.8; // TODO: fetch real S&P 500 benchmark from Alpaca
+  const userTotalReturn = portfolioReturn ? portfolioReturn.pct : 0;
+  const vsSP500 = userTotalReturn - sp500Return;
   const realVsSP500 = portfolioReturn ? portfolioReturn.pct - sp500Return : vsSP500;
   const animVsSP500 = useCountUp(realVsSP500, 800, 1);
 

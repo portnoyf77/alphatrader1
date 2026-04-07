@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
 import { generatePortfolio } from '@/lib/portfolioService';
 import type { QuestionnaireAnswers, GeneratePortfolioResponse } from '@/lib/portfolioTypes';
+import { createPortfolio } from '@/lib/supabasePortfolioService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -244,25 +245,69 @@ export default function Create() {
     setEditOpen(false);
   };
 
-  const persistPortfolio = (portfolioId: string, status: 'live' | 'simulating') => {
+  const persistPortfolio = async (portfolioId: string, status: 'live' | 'simulating') => {
     const riskLevel = deriveRiskLevel(strategyProfile);
-    const newPortfolio = {
-      id: portfolioId,
-      name: generatedStrategyName,
-      creator_id: '@alex_investor',
-      status,
-      risk_level: riskLevel,
-      objective: strategyProfile.primaryGoal || 'accumulation',
-      performance: { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
-      followers: 0,
-      allocated: 0,
-      creator_investment: 0,
-      holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
-      created_date: new Date().toISOString(),
+    const objectiveMap: Record<string, string> = {
+      accumulation: 'Growth',
+      retirement: 'Balanced',
+      income: 'Income',
+      preservation: 'Low volatility',
+      aggressive: 'Growth',
     };
-    const existing = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
-    existing.push(newPortfolio);
-    localStorage.setItem('userCreatedPortfolios', JSON.stringify(existing));
+
+    try {
+      const supabaseId = await createPortfolio({
+        name: generatedStrategyName,
+        objective: objectiveMap[strategyProfile.primaryGoal || 'accumulation'] || 'Growth',
+        riskLevel,
+        status: status === 'live' ? 'private' : 'private',
+        holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
+        descriptionRationale: generatedPortfolio?.strategy?.description,
+        sectors: [...new Set(editableHoldings.map(h => h.name.split(' ')[0]))],
+      });
+
+      // Also keep localStorage as fallback during migration
+      const fallback = {
+        id: supabaseId,
+        name: generatedStrategyName,
+        creator_id: 'self',
+        status,
+        risk_level: riskLevel,
+        objective: strategyProfile.primaryGoal || 'accumulation',
+        performance: { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+        followers: 0,
+        allocated: 0,
+        creator_investment: 0,
+        holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
+        created_date: new Date().toISOString(),
+      };
+      const existing = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+      existing.push(fallback);
+      localStorage.setItem('userCreatedPortfolios', JSON.stringify(existing));
+
+      return supabaseId;
+    } catch (err) {
+      console.error('Supabase save failed, falling back to localStorage:', err);
+      // Fallback: save to localStorage only
+      const fallback = {
+        id: portfolioId,
+        name: generatedStrategyName,
+        creator_id: 'self',
+        status,
+        risk_level: riskLevel,
+        objective: strategyProfile.primaryGoal || 'accumulation',
+        performance: { return_30d: 0, max_drawdown: 0, consistency_score: 50 },
+        followers: 0,
+        allocated: 0,
+        creator_investment: 0,
+        holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
+        created_date: new Date().toISOString(),
+      };
+      const existing = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+      existing.push(fallback);
+      localStorage.setItem('userCreatedPortfolios', JSON.stringify(existing));
+      return portfolioId;
+    }
   };
 
   const totalWeight = editableHoldings.reduce((acc, h) => acc + h.weight, 0);
@@ -513,9 +558,9 @@ export default function Create() {
             <div className="space-y-4 pt-2">
               <div className="flex gap-3">
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    persistPortfolio(portfolioId, 'live');
+                    const savedId = await persistPortfolio(portfolioId, 'live');
                     toast({ title: "Portfolio created!", description: "Redirecting to your dashboard..." });
                     setTimeout(() => navigate('/dashboard'), 1000);
                   }}
@@ -528,10 +573,10 @@ export default function Create() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
                     const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    persistPortfolio(portfolioId, 'simulating');
-                    navigate(`/simulation/${portfolioId}`);
+                    const savedId = await persistPortfolio(portfolioId, 'simulating');
+                    navigate(`/simulation/${savedId || portfolioId}`);
                   }}
                   className="flex-1 h-12 text-base"
                   disabled={editOpen && totalWeight !== 100}

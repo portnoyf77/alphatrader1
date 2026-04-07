@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Users, TrendingUp } from 'lucide-react';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { formatCurrency } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import type { Portfolio } from '@/lib/types';
 

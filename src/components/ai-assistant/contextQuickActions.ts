@@ -1,9 +1,10 @@
 import type { QuickAction } from './types';
-import { mockPortfolios } from '@/lib/mockData';
 
+// TODO: Replace mockPortfolios with async Supabase calls via getMyPortfolios or appropriate service
+// For now, use localStorage fallback since this is a non-component file that can't use hooks
 function getPortfolioById(id: string) {
   const userCreated = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
-  return [...mockPortfolios, ...userCreated].find(p => p.id === id);
+  return userCreated.find((p: any) => p.id === id);
 }
 
 export function getContextQuickActions(pathname: string, messageCount: number = 0): QuickAction[] {

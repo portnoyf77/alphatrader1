@@ -6,12 +6,14 @@ import { Slider } from '@/components/ui/slider';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { GemDot } from '@/components/GemDot';
 import { getGemHex } from '@/lib/portfolioNaming';
-import { mockPortfolios, formatCurrency } from '@/lib/mockData';
+import { mockPortfolios } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/formatters';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { cn } from '@/lib/utils';
 
 const ALPHA_FEE_RATE = 0.0025;
 
+// TODO: Replace mockPortfolios with useValidatedPortfolios hook
 // Top 3 alphas by earnings
 const topAlphas = [...mockPortfolios]
   .filter(s => s.status === 'validated_listed')
@@ -41,6 +43,7 @@ export default function Alpha() {
     setTimeout(() => setResultPulse(false), 200);
   };
 
+  // TODO: Replace mockPortfolios.find() with useMyPortfolios hook to check best qualifying portfolio
   // Determine best qualifying portfolio for authenticated user
   const bestPortfolio = isAuthenticated
     ? mockPortfolios.find(p => {

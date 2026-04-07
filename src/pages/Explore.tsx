@@ -13,7 +13,8 @@ import { StrategyCard } from '@/components/StrategyCard';
 import { GemDot } from '@/components/GemDot';
 import { MarketplaceHelpButton } from '@/components/MarketplaceHelpModal';
 import { TopPerformerCard } from '@/components/TopPerformerCard';
-import { getValidatedStrategies, formatCurrency, formatPercent } from '@/lib/mockData';
+import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { useValidatedPortfolios } from '@/hooks/usePortfolios';
 import { getGemHex } from '@/lib/portfolioNaming';
 import { calculateAlphaScore } from '@/lib/alphaScore';
 import { Link, useNavigate } from 'react-router-dom';
@@ -73,7 +74,7 @@ export default function Explore() {
   const [sortBy, setSortBy] = useState<SortOption>('30d_return');
   const [chartTimeframe, setChartTimeframe] = useState<ChartTimeframe>('30D');
 
-  const validatedStrategies = useMemo(() => getValidatedStrategies(), []);
+  const { data: validatedStrategies, loading: strategiesLoading } = useValidatedPortfolios();
 
   const getReturnForTimeframe = (portfolio: any, tf: ChartTimeframe) => {
     const returns = timeReturns[portfolio.name];
