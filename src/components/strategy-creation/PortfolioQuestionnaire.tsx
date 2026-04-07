@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { StrategyProfile, initialProfile, questions, Question, deriveGemstone } from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
-import { UnifiedGem } from './UnifiedGem';
 
 const goalIcons: Record<string, LucideIcon> = {
   accumulation: Target,
@@ -52,6 +51,9 @@ function contextualForSlider(vol: number): string {
 
 /** Glow ends at 350ms; contextual fades in after 200ms pause; 200ms fade; then hold before slide. */
 const ADVANCE_MS = 350 + 200 + 200 + 520;
+
+/** Orb-only bridge before particle animation — gem first appears in ParticleCrystallizationAnimation reveal. */
+const PRE_CRYSTALLIZE_HANDOFF_MS = 1600;
 
 const sectorSparkPaths: Record<string, string> = {
   Technology: 'M0 14 L3 12 L6 8 L9 10 L12 5 L15 7 L18 3 L20 4',
@@ -410,7 +412,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
       scheduleAfterContext(() => {
         if (isLast) {
           setPreCrystallize(true);
-          const tDone = window.setTimeout(() => onComplete(updatedProfile), 3500);
+          const tDone = window.setTimeout(() => onComplete(updatedProfile), PRE_CRYSTALLIZE_HANDOFF_MS);
           advanceTimersRef.current.push(tDone);
         } else {
           transitionTo(currentIndex + 1, 'right');
@@ -433,7 +435,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const handleNextFromStep = useCallback(() => {
     if (isLast) {
       setPreCrystallize(true);
-      setTimeout(() => onComplete(profile), 3500);
+      setTimeout(() => onComplete(profile), PRE_CRYSTALLIZE_HANDOFF_MS);
     } else {
       transitionTo(currentIndex + 1, 'right');
     }
@@ -728,9 +730,6 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
               filter: 'blur(30px)',
             }}
           />
-        </div>
-        <div className="qa-gem-materialize relative z-10">
-          <UnifiedGem gemType={gemType} size={200} opacity={1} detailLevel={1} glowIntensity={24} />
         </div>
       </div>
     );

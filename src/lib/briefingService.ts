@@ -5,6 +5,8 @@
  * in sessionStorage so it only runs once per browser session.
  */
 
+import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
+
 const CACHE_KEY = 'alpha_morning_briefing';
 
 interface CachedBriefing {
@@ -66,7 +68,7 @@ export async function getMorningBriefing(): Promise<string | null> {
   if (!isTradingDay()) return null;
 
   try {
-    const res = await fetch('/api/morning-briefing');
+    const res = await fetch(serverlessApiUrl('/api/morning-briefing'));
     if (!res.ok) {
       console.warn('[briefingService] API returned', res.status);
       return null;
@@ -79,7 +81,7 @@ export async function getMorningBriefing(): Promise<string | null> {
     }
     return null;
   } catch (err) {
-    console.warn('[briefingService] Briefing fetch failed:', err);
+    console.warn('[briefingService]', explainServerlessNetworkError(err));
     return null;
   }
 }

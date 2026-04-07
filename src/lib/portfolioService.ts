@@ -9,6 +9,7 @@ import type {
   QuestionnaireAnswers,
   GeneratePortfolioResponse,
 } from './portfolioTypes';
+import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
 
 /**
  * Request an AI-generated portfolio allocation.
@@ -25,11 +26,16 @@ import type {
 export async function generatePortfolio(
   answers: QuestionnaireAnswers,
 ): Promise<GeneratePortfolioResponse> {
-  const res = await fetch('/api/generate-portfolio', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(serverlessApiUrl('/api/generate-portfolio'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers }),
+    });
+  } catch (e) {
+    throw new Error(explainServerlessNetworkError(e));
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: 'Network error' }));

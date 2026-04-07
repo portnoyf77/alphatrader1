@@ -3,6 +3,8 @@
  * Returns Claude's response text plus any trade proposals Claude made.
  */
 
+import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
+
 type ChatMessage = {
   role: 'user' | 'assistant';
   content: string;
@@ -28,7 +30,7 @@ export async function sendChatMessage(
   messages: ChatMessage[],
 ): Promise<ChatResponse | null> {
   try {
-    const res = await fetch('/api/chat', {
+    const res = await fetch(serverlessApiUrl('/api/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
@@ -48,7 +50,7 @@ export async function sendChatMessage(
     }
     return null;
   } catch (err) {
-    console.warn('[chatService] Chat endpoint unavailable, using fallback');
+    console.warn('[chatService]', explainServerlessNetworkError(err));
     return null;
   }
 }

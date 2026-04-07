@@ -2,6 +2,8 @@
  * Client for POST /api/auto-rebalance and persisted target allocations.
  */
 
+import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
+
 export const REBALANCE_STORAGE_KEY = 'alpha_rebalance_targets';
 
 export type TargetAllocation = { symbol: string; targetPct: number };
@@ -119,19 +121,24 @@ export function sumTargetPct(targets: TargetAllocation[]): number {
 }
 
 export async function postAutoRebalance(body: RebalanceRequestBody): Promise<RebalanceResponse> {
-  const res = await fetch('/api/auto-rebalance', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      targetAllocations: body.targetAllocations.map((t) => ({
-        symbol: t.symbol.trim().toUpperCase(),
-        targetPct: Number(t.targetPct),
-      })),
-      driftThreshold: body.driftThreshold,
-      maxTradeValue: body.maxTradeValue,
-      dryRun: body.dryRun,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(serverlessApiUrl('/api/auto-rebalance'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetAllocations: body.targetAllocations.map((t) => ({
+          symbol: t.symbol.trim().toUpperCase(),
+          targetPct: Number(t.targetPct),
+        })),
+        driftThreshold: body.driftThreshold,
+        maxTradeValue: body.maxTradeValue,
+        dryRun: body.dryRun,
+      }),
+    });
+  } catch (e) {
+    throw new Error(explainServerlessNetworkError(e));
+  }
 
   const data = (await res.json()) as RebalanceResponse & { error?: string };
   if (!res.ok) {
