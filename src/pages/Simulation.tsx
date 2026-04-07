@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, AlertTriangle, DollarSign, Play, Square, Timer, Clock, Radio } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, AlertTriangle, DollarSign, Play, Square, Timer, Clock, Radio, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { formatPercent } from '@/lib/formatters';
 import { usePortfolio } from '@/hooks/usePortfolios';
+import { deletePortfolio } from '@/lib/supabasePortfolioService';
 import { GemDot } from '@/components/GemDot';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -86,6 +87,8 @@ export default function Simulation() {
   const [simulationState, setSimulationState] = useState<SimulationState>('running');
   const [timeRange, setTimeRange] = useState<TimeRange>('All');
   const [showGoLiveModal, setShowGoLiveModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch from Supabase first, fall back to localStorage for user-created portfolios
   const { data: supabasePortfolio, loading: supabaseLoading } = usePortfolio(id);
@@ -158,6 +161,21 @@ export default function Simulation() {
     } catch {}
     toast({ title: `${portfolio.name} is now live`, description: 'Your portfolio has been activated with real capital.' });
     navigate('/dashboard');
+  };
+
+  const handleDeleteSimulation = async () => {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await deletePortfolio(id);
+      toast({ title: 'Simulation deleted', description: `${portfolio.name} has been removed.` });
+      navigate('/dashboard');
+    } catch {
+      toast({ title: 'Delete failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   const startDateFormatted = SIM_START_DATE.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -261,6 +279,10 @@ export default function Simulation() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30" onClick={() => setShowDeleteModal(true)}>
+                    <Trash2 className="h-3 w-3 mr-1.5" />
+                    Delete
+                  </Button>
                   {simulationState === 'running' ? (
                     <Button variant="outline" size="sm" onClick={handleStopSimulation}>
                       <Square className="h-3 w-3 mr-1.5" />
@@ -479,6 +501,24 @@ export default function Simulation() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGoLiveModal(false)}>Cancel</Button>
             <Button onClick={handleGoLiveConfirm} className="glow-commit">Go Live</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="glass-elevated">
+          <DialogHeader>
+            <DialogTitle>Delete {portfolio.name}?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove this simulation and all its data. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)} disabled={deleting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteSimulation} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete Simulation'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

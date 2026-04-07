@@ -1,5 +1,24 @@
 import { useState, useCallback, useMemo, useEffect, useLayoutEffect, useRef, type LucideIcon } from 'react';
-import { ArrowLeft, Check, Target, Clock, Wallet, Shield, TrendingUp } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  Target,
+  Clock,
+  Wallet,
+  Shield,
+  TrendingUp,
+  Cpu,
+  HeartPulse,
+  Landmark,
+  Flame,
+  ShoppingBag,
+  Apple,
+  Factory,
+  Radio,
+  Gem,
+  Zap,
+  Building2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { StrategyProfile, initialProfile, questions, Question, deriveGemstone } from '@/lib/strategyProfile';
@@ -24,76 +43,76 @@ const goalIcons: Record<string, LucideIcon> = {
 /** One-sentence advisor reactions after each answer (by question id + option value). */
 const CONTEXT_LINES: Partial<Record<keyof StrategyProfile, Record<string, string>>> = {
   primaryGoal: {
-    accumulation: "Steady compounding—we'll lean into durable growth.",
-    retirement: 'Long horizons can carry more volatility when you plan for them.',
-    income: "Cash flow matters; we'll balance yield with staying power.",
-    preservation: "Defense first—we'll keep the ride as smooth as we can.",
-    aggressive: "Bold move. We'll check that your timeline can back it up.",
+    accumulation: "Great choice. We'll build something designed to grow steadily over time.",
+    retirement: "Smart thinking. The earlier you start, the easier this gets.",
+    income: "Got it -- we'll focus on investments that pay you back regularly.",
+    preservation: "Safety first. We'll keep things steady and predictable.",
+    aggressive: "Bold pick. We'll make sure the rest of your profile supports it.",
   },
   timeline: {
-    '1-2': "Short runway means we'll favor liquidity and calmer swings.",
-    '3-5': 'A few years gives you room to ride out a rough quarter or two.',
-    '5-10': 'That is a solid window for growth assets to do their job.',
-    '10+': 'Time is one of your biggest advantages—nice.',
+    '1-2': "Short timeline -- we'll keep things stable so your money is there when you need it.",
+    '3-5': 'A few years gives us room to aim for growth without too much risk.',
+    '5-10': "That's a solid window. Enough time for your investments to ride out bumps.",
+    '10+': 'Time is your superpower here. The longer you can wait, the more we can aim for.',
   },
   drawdownReaction: {
-    'sell-all': "A human reaction—we'll assume you want a gentler glide path.",
-    'sell-some': "Prudent de-risking—we'll bake that instinct into the mix.",
-    hold: 'Discipline like that is how wealth survives real storms.',
-    'buy-more': 'Contrarian energy—we will reflect that in how bold we go.',
+    'sell-all': "Totally understandable. We'll build a portfolio with a smoother ride.",
+    'sell-some': "That's a cautious instinct -- we'll factor that in.",
+    hold: "Patience like that is a real advantage in investing.",
+    'buy-more': "That's the contrarian mindset. We'll reflect that confidence in your portfolio.",
   },
   geographicPreference: {
-    us: "Home bias is simple; we'll keep the story easy to follow.",
-    global: 'Broad reach is a classic way to smooth country-specific shocks.',
-    emerging: 'Higher octane--we will expect more chop for potential upside.',
-    international: 'Developed markets abroad diversify without the wildest swings.',
+    us: "Keeping it close to home. The US market is the deepest in the world.",
+    global: 'A worldwide mix can help smooth out bumps from any one country.',
+    emerging: "More adventurous -- these markets can be volatile, but the growth potential is real.",
+    international: 'Established economies abroad give you diversity without too much unpredictability.',
   },
   incomeRange: {
-    'under-50k': "Every dollar counts more--we'll be thoughtful about fees and position sizes.",
-    '50k-100k': 'Solid footing. Enough room to build a meaningful allocation.',
-    '100k-200k': "Good capacity to weather market dips without touching your portfolio.",
-    '200k-500k': 'Strong earning power gives you real freedom in how aggressive you go.',
-    '500k-plus': "High capacity to absorb risk--but that doesn't mean you should.",
+    'under-50k': "Noted. We'll be especially mindful of fees and keeping things efficient.",
+    '50k-100k': "Good foundation. Plenty of room to build something meaningful.",
+    '100k-200k': "Solid position -- you can weather some market dips without worry.",
+    '200k-500k': "Strong earning power gives you more flexibility in how bold you go.",
+    '500k-plus': "Lots of capacity -- though that doesn't mean you have to go aggressive.",
   },
   investmentExperience: {
-    none: "Starting fresh is fine--we'll keep things straightforward.",
-    beginner: "You've dipped your toes in. We'll build on that foundation.",
-    intermediate: "You know the basics. We can lean into more nuanced allocations.",
-    advanced: "Veteran hands. We'll skip the guardrails you don't need.",
+    none: "Welcome! We'll keep everything clear and straightforward.",
+    beginner: "Good that you've started. We'll build on what you already know.",
+    intermediate: "You've got a solid base. We can get a bit more creative.",
+    advanced: "You know the ropes. We'll skip the basics and get to the good stuff.",
   },
   accountType: {
-    taxable: 'Tax efficiency matters here--dividends and turnover affect your take-home.',
-    'retirement-ira': 'Tax-deferred growth changes the math on what belongs in here.',
-    'retirement-401k': 'Long-horizon retirement money can handle more volatility.',
-    mixed: "Multiple accounts means we can be strategic about what goes where.",
+    taxable: "Flexibility is the upside here. We'll be smart about tax efficiency.",
+    'retirement-ira': "Tax-advantaged space -- great for long-term growth.",
+    'retirement-401k': "Employer retirement plans are built for the long haul.",
+    mixed: "Multiple accounts give us room to be strategic about what goes where.",
   },
   portfolioSize: {
-    'under-10k': "Small but mighty--we'll keep positions concentrated and meaningful.",
-    '10k-50k': 'Enough room for real diversification across asset classes.',
-    '50k-250k': 'Solid capital base. We can spread across sectors and geographies.',
-    '250k-1m': "Serious money. We'll use the full toolkit.",
-    '1m-plus': 'Institutional-grade design is on the table.',
+    'under-10k': "Starting small is perfectly fine -- we'll make every dollar count.",
+    '10k-50k': "Enough to build real diversification across different investments.",
+    '50k-250k': "Great foundation. We can spread nicely across sectors and regions.",
+    '250k-1m': "Serious capital. The full range of strategies is open to you.",
+    '1m-plus': "Wide open playbook. We'll design something truly tailored.",
   },
   ageRange: {
-    '18-29': 'Decades of compounding ahead--time is your biggest asset.',
-    '30-39': 'Peak accumulation years. Growth still makes a lot of sense.',
-    '40-49': "Halfway point--we'll balance growth with protection.",
-    '50-59': "Preservation starts to matter more. We'll reflect that.",
-    '60-plus': "Income and stability take priority now.",
+    '18-29': "You've got decades ahead -- time is your biggest advantage.",
+    '30-39': "Still plenty of runway. Growth makes a lot of sense here.",
+    '40-49': "Good balance point -- we'll blend growth with some protection.",
+    '50-59': "Protecting what you've built starts to matter more now.",
+    '60-plus': "Stability and income are the priority. We'll keep things steady.",
   },
   hasEmergencyFund: {
-    'yes-6mo': "Strong buffer. You can invest without worrying about forced selling.",
-    'yes-3mo': "Decent cushion. We'll factor that confidence into the mix.",
-    building: "Smart to invest alongside building savings--we'll stay moderate.",
-    no: "Consider building one first. We'll err on the cautious side for now.",
+    'yes-6mo': "That's a strong safety net. You can invest with confidence.",
+    'yes-3mo': "Good cushion. That gives us more room to work with.",
+    building: "Smart to do both at once. We'll stay moderate to be safe.",
+    no: "No worries -- we'll keep things cautious until you've built one up.",
   },
 };
 
 function contextualForSlider(vol: number): string {
-  if (vol <= 10) return "Barely a ripple—we'll keep the path unusually calm.";
-  if (vol <= 20) return 'Measured bumps—enough life in the portfolio to grow.';
-  if (vol <= 30) return "Real swings ahead—we'll make sure you're rewarded for sitting tight.";
-  return "Full rollercoaster—we'll push growth and expect you to strap in.";
+  if (vol <= 10) return "Nice and calm -- we'll keep things as smooth as possible.";
+  if (vol <= 20) return "Some bumps along the way, but nothing too wild. A good middle ground.";
+  if (vol <= 30) return "You're okay with real ups and downs. That can pay off over time.";
+  return "Full speed ahead. We'll aim for maximum growth -- buckle up.";
 }
 
 /** Glow ends at 350ms; contextual fades in after 200ms pause; 200ms fade; then hold before slide. */
@@ -101,36 +120,6 @@ const ADVANCE_MS = 350 + 200 + 200 + 520;
 
 /** Orb-only bridge before particle animation — gem first appears in ParticleCrystallizationAnimation reveal. */
 const PRE_CRYSTALLIZE_HANDOFF_MS = 1600;
-
-const sectorSparkPaths: Record<string, string> = {
-  'Information Technology': 'M0 14 L3 12 L6 8 L9 10 L12 5 L15 7 L18 3 L20 4',
-  'Health Care': 'M0 10 L4 11 L8 9 L12 10 L16 7 L20 6',
-  Financials: 'M0 11 L4 9 L8 12 L12 8 L16 10 L20 9',
-  Energy: 'M0 12 L5 8 L10 11 L15 5 L20 7',
-  'Consumer Discretionary': 'M0 10 L5 12 L10 9 L15 11 L20 8',
-  'Consumer Staples': 'M0 10 L4 10 L8 9 L12 10 L16 9 L20 9',
-  Industrials: 'M0 11 L6 9 L12 12 L18 8 L20 10',
-  'Communication Services': 'M0 13 L4 10 L8 12 L12 7 L16 9 L20 5',
-  Materials: 'M0 11 L5 13 L10 10 L15 12 L20 9',
-  Utilities: 'M0 10 L5 10 L10 11 L15 10 L20 10',
-  'Real Estate': 'M0 12 L5 10 L10 13 L15 9 L20 11',
-};
-
-function SectorSparkline({ sector }: { sector: string }) {
-  const d = sectorSparkPaths[sector] ?? 'M0 10 L20 10';
-  return (
-    <svg width="36" height="18" viewBox="0 0 20 16" className="shrink-0 opacity-70" aria-hidden>
-      <path
-        d={d}
-        fill="none"
-        stroke="rgba(124,58,237,0.55)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 function volatilitySeries(vol: number, steps: number): string {
   const w = 120;
@@ -325,6 +314,20 @@ const sectorGlowColors: Record<string, string> = {
   Materials: 'rgba(217,119,6,0.25)',
   Utilities: 'rgba(34,197,94,0.2)',
   'Real Estate': 'rgba(245,158,11,0.2)',
+};
+
+const sectorIcons: Record<string, LucideIcon> = {
+  'Information Technology': Cpu,
+  'Health Care': HeartPulse,
+  Financials: Landmark,
+  Energy: Flame,
+  'Consumer Discretionary': ShoppingBag,
+  'Consumer Staples': Apple,
+  Industrials: Factory,
+  'Communication Services': Radio,
+  Materials: Gem,
+  Utilities: Zap,
+  'Real Estate': Building2,
 };
 
 function QuestionAccent({ index }: { index: number }) {
@@ -713,6 +716,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
             {question.options.map((opt) => {
               const isSelected = selected.includes(opt.value);
               const isFlashing = sectorGlow === opt.value;
+              const SectorIcon = sectorIcons[opt.value];
               return (
                 <button
                   key={opt.value}
@@ -743,7 +747,13 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
                     }
                   }}
                 >
-                  <SectorSparkline sector={opt.value} />
+                  {SectorIcon && (
+                    <SectorIcon
+                      className="h-4 w-4 shrink-0"
+                      style={{ color: sectorGlowColors[opt.value] ?? 'rgba(124,58,237,0.55)' }}
+                      aria-hidden
+                    />
+                  )}
                   {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
                   <span className="text-sm font-medium font-[var(--font-heading)]">{opt.label}</span>
                 </button>

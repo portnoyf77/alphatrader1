@@ -709,6 +709,43 @@ export async function followPortfolio(portfolioId: string, allocationUsd: number
   await supabase.rpc('increment_followers', { p_portfolio_id: portfolioId });
 }
 
+/**
+ * Delete a portfolio and all its related data (holdings, performance, activity log).
+ * Only the portfolio creator can delete it. Falls back to localStorage removal.
+ */
+export async function deletePortfolio(portfolioId: string): Promise<void> {
+  // Try Supabase first
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      // Delete related data first (foreign key constraints)
+      await supabase.from('portfolio_activity_log').delete().eq('portfolio_id', portfolioId);
+      await supabase.from('portfolio_performance').delete().eq('portfolio_id', portfolioId);
+      await supabase.from('portfolio_holdings').delete().eq('portfolio_id', portfolioId);
+      await supabase.from('portfolio_comments').delete().eq('portfolio_id', portfolioId);
+      await supabase.from('followed_portfolios').delete().eq('portfolio_id', portfolioId);
+
+      const { error } = await supabase
+        .from('portfolios')
+        .delete()
+        .eq('id', portfolioId)
+        .eq('creator_id', user.id);
+
+      if (error) throw error;
+      // Also clean localStorage in case there's a cached copy
+    }
+  } catch (err) {
+    console.warn('[deletePortfolio] Supabase delete failed, falling back to localStorage:', err);
+  }
+
+  // Always clean localStorage too
+  try {
+    const stored = JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]');
+    const filtered = stored.filter((p: any) => p.id !== portfolioId);
+    localStorage.setItem('userCreatedPortfolios', JSON.stringify(filtered));
+  } catch {}
+}
+
 export async function unfollowPortfolio(portfolioId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
