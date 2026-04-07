@@ -234,12 +234,7 @@ export default function ProfileSetup() {
     usernameStatus === 'available' &&
     !!formData.country?.trim();
 
-  const step1Valid =
-    !!formData.employmentStatus &&
-    !!formData.annualIncome &&
-    !!formData.netWorth &&
-    !!formData.investmentExperience &&
-    !!formData.sourceOfFunds;
+  const step1Valid = true;
 
   const step2Valid =
     !!formData.investmentGoal &&
@@ -426,13 +421,13 @@ export default function ProfileSetup() {
 
               <div>
                 <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Display Name <span className="text-red-400">*</span>
+                  Full Name<span className="text-red-400 ml-0.5">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.displayName}
                   onChange={(e) => updateField('displayName', e.target.value)}
-                  placeholder="Your name"
+                  placeholder="First and last name"
                   maxLength={80}
                   className={inputClass}
                 />
@@ -440,7 +435,7 @@ export default function ProfileSetup() {
 
               <div>
                 <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Username <span className="text-red-400">*</span>
+                  Username<span className="text-red-400 ml-0.5">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
@@ -508,7 +503,7 @@ export default function ProfileSetup() {
 
               <div>
                 <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Country <span className="text-red-400">*</span>
+                  Country<span className="text-red-400 ml-0.5">*</span>
                 </label>
                 <select
                   value={formData.country ?? ''}
@@ -651,6 +646,7 @@ export default function ProfileSetup() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   Primary investment goal
+                  <span className="text-red-400 ml-0.5">*</span>
                 </p>
                 <div className="grid gap-3">
                   {GOAL_CARDS.map((c) => {
@@ -681,6 +677,7 @@ export default function ProfileSetup() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   Time horizon
+                  <span className="text-red-400 ml-0.5">*</span>
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {HORIZON_CARDS.map((c) => {
@@ -704,6 +701,7 @@ export default function ProfileSetup() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   Risk tolerance
+                  <span className="text-red-400 ml-0.5">*</span>
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {RISK_CARDS.map((c) => {
@@ -735,6 +733,11 @@ export default function ProfileSetup() {
                   Pick the tier that fits how you trade. You can change later.
                 </p>
               </div>
+
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Select a plan
+                <span className="text-red-400 ml-0.5">*</span>
+              </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {PLAN_OPTIONS.map((plan) => {
@@ -811,6 +814,7 @@ export default function ProfileSetup() {
                 />
                 <span className="text-sm text-white/90 leading-relaxed">
                   I agree to Alpha Trader&apos;s Terms of Service
+                  <span className="text-red-400 ml-0.5">*</span>
                 </span>
               </label>
 
@@ -827,6 +831,7 @@ export default function ProfileSetup() {
                   I acknowledge the Investment Risk Disclosure — I understand that all
                   investments carry risk and past performance does not guarantee future
                   results
+                  <span className="text-red-400 ml-0.5">*</span>
                 </span>
               </label>
 
@@ -841,6 +846,7 @@ export default function ProfileSetup() {
                 />
                 <span className="text-sm text-white/90 leading-relaxed">
                   I consent to receive electronic communications
+                  <span className="text-red-400 ml-0.5">*</span>
                 </span>
               </label>
 
