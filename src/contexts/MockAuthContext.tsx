@@ -10,6 +10,25 @@ export interface AppUser {
   needsProfileSetup: boolean;
 }
 
+export interface OnboardingData {
+  // Step 1: Personal Info
+  displayName: string;
+  username: string;
+  phone?: string;
+  dateOfBirth?: string;
+  country?: string;
+  // Step 2: Investor Profile
+  employmentStatus?: string;
+  annualIncome?: string;
+  netWorth?: string;
+  investmentExperience?: string;
+  sourceOfFunds?: string;
+  // Step 3: Investment Goals
+  investmentGoal?: string;
+  timeHorizon?: string;
+  riskTolerance?: string;
+}
+
 interface AuthContextType {
   user: AppUser | null;
   isAuthenticated: boolean;
@@ -18,6 +37,7 @@ interface AuthContextType {
   signup: (email: string) => Promise<void>;
   logout: () => void;
   updateProfile: (username: string, displayName: string) => Promise<void>;
+  completeOnboarding: (data: OnboardingData) => Promise<void>;
   trialStartDate: number | null;
   userPlan: string | null;
   isTrialExpired: boolean;
@@ -107,18 +127,18 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('username, display_name')
+          .select('username, display_name, onboarding_completed')
           .eq('id', user.id)
           .single();
 
         if (cancelled) return;
 
-        if (!error && data && data.username && data.username.trim().length > 0) {
+        if (!error && data && data.onboarding_completed) {
           setUser((prev) =>
             prev && prev.id === user.id
               ? {
                   ...prev,
-                  username: `@${data.username}`,
+                  username: data.username ? `@${data.username}` : prev.username,
                   displayName: data.display_name || '',
                   needsProfileSetup: false,
                 }
@@ -127,7 +147,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         // Profile fetch failed -- needsProfileSetup stays true, user
-        // will land on the profile setup page (safe fallback)
+        // will land on the onboarding wizard (safe fallback)
       }
     })();
 
@@ -178,6 +198,43 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Save all onboarding data + mark onboarding complete
+  const completeOnboarding = async (data: OnboardingData) => {
+    if (!user) throw new Error('Not authenticated');
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        username: data.username.toLowerCase().replace(/^@/, ''),
+        display_name: data.displayName.trim(),
+        phone: data.phone || null,
+        date_of_birth: data.dateOfBirth || null,
+        country: data.country || null,
+        employment_status: data.employmentStatus || null,
+        annual_income: data.annualIncome || null,
+        net_worth: data.netWorth || null,
+        investment_experience: data.investmentExperience || null,
+        source_of_funds: data.sourceOfFunds || null,
+        investment_goal: data.investmentGoal || null,
+        time_horizon: data.timeHorizon || null,
+        risk_tolerance: data.riskTolerance || null,
+        accepted_terms_at: now,
+        accepted_risk_disclosure_at: now,
+        onboarding_completed: true,
+        updated_at: now,
+      }, { onConflict: 'id' });
+
+    if (error) throw error;
+
+    setUser({
+      ...user,
+      username: `@${data.username.toLowerCase().replace(/^@/, '')}`,
+      displayName: data.displayName.trim(),
+      needsProfileSetup: false,
+    });
+  };
+
   const selectPlan = (plan: string) => {
     setUserPlan(plan);
     localStorage.setItem('userPlan', plan);
@@ -200,6 +257,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         updateProfile,
+        completeOnboarding,
         trialStartDate,
         userPlan,
         isTrialExpired,
@@ -222,6 +280,7 @@ export function useMockAuth() {
       signup: async () => {},
       logout: () => {},
       updateProfile: async () => {},
+      completeOnboarding: async () => {},
       trialStartDate: null,
       userPlan: null,
       isTrialExpired: false,

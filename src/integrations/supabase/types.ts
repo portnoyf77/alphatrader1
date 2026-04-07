@@ -22,6 +22,20 @@ export type Database = {
           avatar_url: string | null
           plan: string | null
           trial_started_at: string | null
+          phone: string | null
+          date_of_birth: string | null
+          country: string | null
+          employment_status: string | null
+          annual_income: string | null
+          net_worth: string | null
+          investment_experience: string | null
+          source_of_funds: string | null
+          investment_goal: string | null
+          time_horizon: string | null
+          risk_tolerance: string | null
+          accepted_terms_at: string | null
+          accepted_risk_disclosure_at: string | null
+          onboarding_completed: boolean
           created_at: string
           updated_at: string
         }
@@ -32,6 +46,20 @@ export type Database = {
           avatar_url?: string | null
           plan?: string | null
           trial_started_at?: string | null
+          phone?: string | null
+          date_of_birth?: string | null
+          country?: string | null
+          employment_status?: string | null
+          annual_income?: string | null
+          net_worth?: string | null
+          investment_experience?: string | null
+          source_of_funds?: string | null
+          investment_goal?: string | null
+          time_horizon?: string | null
+          risk_tolerance?: string | null
+          accepted_terms_at?: string | null
+          accepted_risk_disclosure_at?: string | null
+          onboarding_completed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -42,6 +70,20 @@ export type Database = {
           avatar_url?: string | null
           plan?: string | null
           trial_started_at?: string | null
+          phone?: string | null
+          date_of_birth?: string | null
+          country?: string | null
+          employment_status?: string | null
+          annual_income?: string | null
+          net_worth?: string | null
+          investment_experience?: string | null
+          source_of_funds?: string | null
+          investment_goal?: string | null
+          time_horizon?: string | null
+          risk_tolerance?: string | null
+          accepted_terms_at?: string | null
+          accepted_risk_disclosure_at?: string | null
+          onboarding_completed?: boolean
           created_at?: string
           updated_at?: string
         }
