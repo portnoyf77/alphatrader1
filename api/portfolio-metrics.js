@@ -189,8 +189,10 @@ export default async function handler(req, res) {
     }
 
     // Calculate period in days
-    const startTime = new Date(timestamps[0]).getTime();
-    const endTime = new Date(timestamps[timestamps.length - 1]).getTime();
+    // Alpaca returns timestamps as Unix epoch seconds (numbers), not ISO strings
+    const toMs = (t) => typeof t === 'number' ? t * 1000 : new Date(t).getTime();
+    const startTime = toMs(timestamps[0]);
+    const endTime = toMs(timestamps[timestamps.length - 1]);
     const periodDays = Math.floor((endTime - startTime) / (1000 * 60 * 60 * 24));
     const periodYears = periodDays / 365;
 
@@ -206,7 +208,7 @@ export default async function handler(req, res) {
     const sharpeRatio = calculateSharpeRatio(annualizedReturn, volatility);
 
     // Step 2: Fetch SPY data for same period
-    const startDate = timestamps[0].split('T')[0]; // ISO date YYYY-MM-DD
+    const startDate = new Date(toMs(timestamps[0])).toISOString().split('T')[0];
     const spyData = await fetchSPYHistory(startDate);
 
     let sp500Return = null;

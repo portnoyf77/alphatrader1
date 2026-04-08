@@ -315,7 +315,7 @@ export function tradeStats(trades: TradeResult[]): {
   totalSellQty: number;
 } {
   let submitted = 0, failed = 0, skipped = 0, totalBuyValue = 0, totalSellQty = 0;
-  for (const t of trades) {
+  for (const t of (trades || [])) {
     if (t.status === 'submitted') submitted++;
     else if (t.status === 'failed') failed++;
     else skipped++;
