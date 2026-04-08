@@ -5,12 +5,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MockAuthProvider } from "@/contexts/MockAuthContext";
-import { TourProvider } from "@/contexts/TourContext";
 import { AIAssistant } from "@/components/AIAssistant";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
-import { TourWelcomeModalWrapper } from "@/components/TourWelcomeModalWrapper";
-import { GuidedTour } from "@/components/GuidedTour";
 import { usePageView } from "@/hooks/usePageView";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -45,17 +42,12 @@ function GatedApp() {
     () => localStorage.getItem("demoAccessGranted") === "true",
   );
 
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-
   if (!accessGranted) {
     return (
       <DemoGate
         onAccessGranted={() => {
           localStorage.setItem("demoAccessGranted", "true");
           setAccessGranted(true);
-          if (localStorage.getItem("tourCompleted") !== "true") {
-            setShowWelcomeModal(true);
-          }
         }}
       />
     );
@@ -65,10 +57,6 @@ function GatedApp() {
     <>
       <PageViewTracker />
       <AIAssistant />
-      <GuidedTour />
-      {showWelcomeModal && (
-        <TourWelcomeModalWrapper onDone={() => setShowWelcomeModal(false)} />
-      )}
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
@@ -167,20 +155,18 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <MockAuthProvider>
-        <TourProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Bypasses DemoGate and all gated routes */}
-                <Route path="/test-alpaca" element={<AlpacaConnectionTest />} />
-                <Route path="/paper-trading" element={<PaperTrading />} />
-                <Route path="*" element={<GatedApp />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </TourProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Bypasses DemoGate and all gated routes */}
+              <Route path="/test-alpaca" element={<AlpacaConnectionTest />} />
+              <Route path="/paper-trading" element={<PaperTrading />} />
+              <Route path="*" element={<GatedApp />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
       </MockAuthProvider>
     </QueryClientProvider>
   );

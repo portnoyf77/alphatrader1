@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, RotateCcw, BarChart3, Zap, Sparkles } from 'lucide-react';
+import { Crown, Menu, X, LogOut, User, LayoutDashboard, Store, HelpCircle, LucideIcon, ChevronDown, BarChart3, Zap, Sparkles } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -18,7 +18,6 @@ import { cn } from '@/lib/utils';
 import { useMockAuth } from '@/contexts/MockAuthContext';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useMarketStatus } from '@/hooks/useMarketStatus';
-import { useTour } from '@/contexts/TourContext';
 
 const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string }[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
@@ -40,7 +39,6 @@ export function Navbar() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated, userPlan } = useMockAuth();
   const marketStatus = useMarketStatus();
-  const { restartTour } = useTour();
 
   const confirmLogout = () => {
     setLogoutDialogOpen(false);
@@ -137,7 +135,7 @@ export function Navbar() {
                 </Tooltip>
               </TooltipProvider>
             )}
-            {isAuthenticated && <div data-tour="notification-bell"><NotificationBell /></div>}
+            {isAuthenticated && <NotificationBell />}
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -167,13 +165,6 @@ export function Navbar() {
                   >
                     <HelpCircle className="h-4 w-4" />
                     FAQ
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => { restartTour(); navigate('/dashboard'); }}
-                    className="gap-2 cursor-pointer text-sm"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Restart Tour
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -267,18 +258,6 @@ export function Navbar() {
                       <HelpCircle className="h-4 w-4 shrink-0" />
                       FAQ
                     </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        restartTour();
-                        navigate('/dashboard');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex min-h-11 w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-[0.875rem] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground font-[var(--font-heading)] touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
-                    >
-                      <RotateCcw className="h-4 w-4 shrink-0" />
-                      Restart Tour
-                    </button>
                     <div className="mt-2 border-t border-border/50 px-4 py-3">
                       <p className="text-xs text-muted-foreground">Signed in as</p>
                       <p className="text-sm font-semibold">{user.displayName || user.username}</p>

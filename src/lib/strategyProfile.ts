@@ -270,11 +270,21 @@ const AI_FLOW_NOT_SPECIFIED = 'Not specified';
 export function geographyRefinementToPreference(
   geography: string,
 ): StrategyProfile['geographicPreference'] {
-  const g = geography.toLowerCase();
+  const g = geography.toLowerCase().trim();
   if (g.includes('emerging')) return 'emerging';
-  if (g.includes('global')) return 'global';
-  if (g.includes('primarily') && g.includes('us')) return 'us';
+  if (g.includes('global') || g.includes('mix')) return 'global';
   if (g === 'no preference' || g.includes('no preference')) return null;
+  // US-focused labels (avoid matching the substring "us" inside unrelated words)
+  if (
+    g.startsWith('us ') ||
+    g.endsWith(' us') ||
+    g.includes('primarily') ||
+    g === 'us' ||
+    g.includes('us-focused') ||
+    g.includes('us focused')
+  ) {
+    return 'us';
+  }
   return 'us';
 }
 

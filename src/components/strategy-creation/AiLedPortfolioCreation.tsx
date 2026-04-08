@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Crown } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getPortfolioRecommendation } from '@/lib/portfolioService';
-import type {
-  OnboardingProfile,
-  PortfolioRecommendation,
-  PortfolioRefinements,
-} from '@/lib/portfolioTypes';
+import { getPortfolioAdvice } from '@/lib/portfolioAdvice';
+import type { OnboardingProfile, PortfolioRefinements } from '@/lib/portfolioTypes';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { StrategyProfile } from '@/lib/strategyProfile';
@@ -15,6 +11,8 @@ import { strategyProfileForAiAnimation } from '@/lib/strategyProfile';
 
 const NOT_SPECIFIED = 'Not specified';
 
+const GOAL_OPTIONS = ['Growth', 'Income', 'Preservation', 'Speculation'] as const;
+const RISK_OPTIONS = ['Conservative', 'Moderate', 'Aggressive'] as const;
 const SECTOR_PILLS = [
   'Technology',
   'Healthcare',
@@ -26,30 +24,36 @@ const SECTOR_PILLS = [
   'Real Estate',
   'No preference',
 ] as const;
+const GEO_OPTIONS = ['US focused', 'Global mix', 'Emerging markets', 'No preference'] as const;
 
-const VOL_OPTIONS: {
-  value: 'low' | 'moderate' | 'high';
-  title: string;
-  hint: string;
-}[] = [
-  { value: 'low', title: 'Steady & stable', hint: 'Smoother path, modest return potential' },
-  { value: 'moderate', title: 'Some ups and downs', hint: 'Balance between growth and comfort' },
-  { value: 'high', title: 'I can handle big swings', hint: 'Higher volatility for higher growth potential' },
-];
-
-const GEO_OPTIONS = [
-  'Primarily US',
-  'Global diversification',
-  'Emerging markets focus',
-  'No preference',
+const QUESTION_TITLES = [
+  "What's the goal for this portfolio?",
+  'How aggressive should this portfolio be?',
+  'What sectors should this portfolio focus on?',
+  'What geographic exposure?',
 ] as const;
+
+const QUESTION_PROMPTS = [
+  "What's the goal for this portfolio? Options: Growth, Income, Preservation, Speculation",
+  'How aggressive should this portfolio be? Options: Conservative, Moderate, Aggressive',
+  'What sectors should this portfolio focus on? Options: Technology, Healthcare, Energy, Financials, Consumer, Industrial, Clean Energy, Real Estate, No preference',
+  'What geographic exposure? Options: US focused, Global mix, Emerging markets, No preference',
+] as const;
+
+export type AiWizardState = {
+  step: number;
+  goal: string | null;
+  risk: string | null;
+  sectors: string[];
+  geography: string | null;
+  reasonings: [string | null, string | null, string | null, string | null];
+};
 
 export interface AiFlowResumePayload {
   onboardingProfile: OnboardingProfile;
   refinements: PortfolioRefinements;
-  recommendation: PortfolioRecommendation | null;
   gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
-  refineStepIndex: number;
+  wizardState: AiWizardState | null;
 }
 
 interface ProfileRow {
@@ -83,71 +87,109 @@ function rowToOnboarding(row: ProfileRow): OnboardingProfile {
   };
 }
 
-function mapSuggestedSector(s: string): string | null {
-  const x = s.toLowerCase().trim();
-  if (!x) return null;
-  if (x.includes('tech') || x === 'it' || x.includes('information technology')) return 'Technology';
-  if (x.includes('health')) return 'Healthcare';
-  if (x.includes('clean') && x.includes('energy')) return 'Clean Energy';
-  if (x.includes('energy')) return 'Energy';
-  if (x.includes('financial')) return 'Financials';
-  if (x.includes('consumer')) return 'Consumer';
-  if (x.includes('industrial')) return 'Industrial';
-  if (x.includes('real estate') || x.includes('reit')) return 'Real Estate';
-  const exact = (SECTOR_PILLS as readonly string[]).find((p) => p.toLowerCase() === x);
-  return exact || null;
+function riskToVolatility(risk: string): 'low' | 'moderate' | 'high' {
+  if (risk === 'Conservative') return 'low';
+  if (risk === 'Aggressive') return 'high';
+  return 'moderate';
 }
 
-function matchGeographySuggestion(s: string): (typeof GEO_OPTIONS)[number] | null {
-  const lower = s.toLowerCase();
-  if (lower.includes('emerging')) return 'Emerging markets focus';
-  if (lower.includes('global') || lower.includes('worldwide')) return 'Global diversification';
-  if (lower.includes('us') || lower.includes('domestic') || lower.includes('primarily'))
-    return 'Primarily US';
-  if (lower.includes('no preference')) return 'No preference';
+function riskToGemLevel(risk: string | null): 'conservative' | 'moderate' | 'aggressive' | null {
+  if (!risk) return null;
+  if (risk === 'Conservative') return 'conservative';
+  if (risk === 'Aggressive') return 'aggressive';
+  if (risk === 'Moderate') return 'moderate';
   return null;
 }
 
-function parseBoldMarkdown(text: string): React.ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return (
-        <strong key={i} className="font-semibold text-white">
-          {part.slice(2, -2)}
-        </strong>
-      );
+function matchGoal(raw: unknown): (typeof GOAL_OPTIONS)[number] | null {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  return GOAL_OPTIONS.find((o) => o.toLowerCase() === s.toLowerCase()) ?? null;
+}
+
+function matchRisk(raw: unknown): (typeof RISK_OPTIONS)[number] | null {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  return RISK_OPTIONS.find((o) => o.toLowerCase() === s.toLowerCase()) ?? null;
+}
+
+function normalizeSectorToken(t: string): string | null {
+  const x = t.trim();
+  if (!x) return null;
+  const lower = x.toLowerCase();
+  const hit = (SECTOR_PILLS as readonly string[]).find((p) => p.toLowerCase() === lower);
+  if (hit) return hit;
+  if (lower.includes('tech')) return 'Technology';
+  if (lower.includes('health')) return 'Healthcare';
+  if (lower.includes('clean') && lower.includes('energy')) return 'Clean Energy';
+  if (lower.includes('energy')) return 'Energy';
+  if (lower.includes('financial')) return 'Financials';
+  if (lower.includes('consumer')) return 'Consumer';
+  if (lower.includes('industrial')) return 'Industrial';
+  if (lower.includes('real')) return 'Real Estate';
+  return null;
+}
+
+function parseSectorSuggestion(raw: unknown): Set<string> {
+  const out = new Set<string>();
+  if (raw == null) return out;
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      const n = normalizeSectorToken(String(item));
+      if (n) out.add(n);
     }
-    return <span key={i}>{part}</span>;
-  });
-}
-
-function sectorsToSet(ref: PortfolioRefinements): Set<string> {
-  if (ref.sectors === 'No preference' || !ref.sectors.trim()) {
-    return new Set<string>(['No preference']);
+  } else {
+    const s = String(raw);
+    for (const part of s.split(/[,;]/)) {
+      const n = normalizeSectorToken(part);
+      if (n) out.add(n);
+    }
   }
-  return new Set(ref.sectors.split(',').map((x) => x.trim()).filter(Boolean));
+  if (out.size === 0) return new Set(['No preference']);
+  if (out.has('No preference')) return new Set(['No preference']);
+  return out;
 }
 
-function buildRefinements(
-  selectedSectors: Set<string>,
-  volatility: 'low' | 'moderate' | 'high',
-  geography: string,
+function matchGeography(raw: unknown): (typeof GEO_OPTIONS)[number] | null {
+  if (raw == null) return null;
+  const s = String(raw).trim().toLowerCase();
+  if (s.includes('emerging')) return 'Emerging markets';
+  if (s.includes('global') || s.includes('mix')) return 'Global mix';
+  if (s.includes('no preference')) return 'No preference';
+  if (s.includes('us') || s.includes('focused')) return 'US focused';
+  return GEO_OPTIONS.find((o) => o.toLowerCase() === s) ?? null;
+}
+
+function buildRefinementsFromWizard(
+  sectors: Set<string>,
+  risk: string | null,
+  geography: string | null,
 ): PortfolioRefinements {
-  if (selectedSectors.has('No preference') || selectedSectors.size === 0) {
-    return { sectors: 'No preference', volatility, geography };
+  const vol = riskToVolatility(risk ?? 'Moderate');
+  const geo = geography ?? 'US focused';
+  if (sectors.has('No preference') || sectors.size === 0) {
+    return { sectors: 'No preference', volatility: vol, geography: geo };
   }
-  const list = [...selectedSectors].filter((s) => s !== 'No preference');
-  return { sectors: list.join(', '), volatility, geography };
+  const list = [...sectors].filter((x) => x !== 'No preference');
+  return { sectors: list.join(', '), volatility: vol, geography: geo };
 }
 
-type Phase =
-  | 'proposal-loading'
-  | 'proposal'
-  | 'proposal-error'
-  | 'refine';
-
-type AnimState = 'idle' | 'exit' | 'enter';
+function buildPreviousAnswers(
+  step: number,
+  goal: string | null,
+  risk: string | null,
+  sectors: Set<string>,
+): Record<string, unknown> {
+  if (step <= 0) return {};
+  if (step === 1) return { goal: goal ?? '' };
+  if (step === 2) return { goal: goal ?? '', risk: risk ?? '' };
+  if (step === 3) {
+    const sectorStr =
+      [...sectors].filter((s) => s !== 'No preference').join(', ') || 'No preference';
+    return { goal: goal ?? '', risk: risk ?? '', sectors: sectorStr };
+  }
+  return {};
+}
 
 interface AiLedPortfolioCreationProps {
   onCancel: () => void;
@@ -156,10 +198,12 @@ interface AiLedPortfolioCreationProps {
     refinements: PortfolioRefinements;
     gemAnimationProfile: StrategyProfile;
     gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
-    recommendation: PortfolioRecommendation | null;
+    wizardState: AiWizardState;
   }) => void;
   resume?: AiFlowResumePayload | null;
 }
+
+const initialReasonings: [null, null, null, null] = [null, null, null, null];
 
 export function AiLedPortfolioCreation({
   onCancel,
@@ -168,79 +212,68 @@ export function AiLedPortfolioCreation({
 }: AiLedPortfolioCreationProps) {
   const { user, isLoading: authLoading } = useMockAuth();
   const booted = useRef(false);
+  const skipAdviceFetchRef = useRef(!!resume?.wizardState);
 
-  const [phase, setPhase] = useState<Phase>(resume ? 'refine' : 'proposal-loading');
+  const [profileLoading, setProfileLoading] = useState(!resume);
   const [onboardingProfile, setOnboardingProfile] = useState<OnboardingProfile>(
     resume?.onboardingProfile ?? emptyOnboarding(),
   );
-  const [recommendation, setRecommendation] = useState<PortfolioRecommendation | null>(
-    resume?.recommendation ?? null,
-  );
-  const [gemProposalLevel, setGemProposalLevel] = useState<
-    'conservative' | 'moderate' | 'aggressive' | null
-  >(resume?.gemProposalLevel ?? null);
-  const [proposalError, setProposalError] = useState<string | null>(null);
-
-  const [refineStep, setRefineStep] = useState(resume?.refineStepIndex ?? 0);
-  const [animState, setAnimState] = useState<AnimState>('idle');
-  const [direction, setDirection] = useState<'right' | 'left'>('right');
-
-  const [selectedSectors, setSelectedSectors] = useState<Set<string>>(() =>
-    resume ? sectorsToSet(resume.refinements) : new Set(['No preference']),
-  );
-  const [volatility, setVolatility] = useState<'low' | 'moderate' | 'high'>(
-    (resume?.refinements.volatility as 'low' | 'moderate' | 'high') || 'moderate',
-  );
-  const [geography, setGeography] = useState<string>(
-    resume?.refinements.geography ?? GEO_OPTIONS[0],
+  /** Passed to getPortfolioAdvice; null when Supabase profile fetch failed or no user. */
+  const [adviceProfile, setAdviceProfile] = useState<OnboardingProfile | null>(() =>
+    resume?.onboardingProfile ?? null,
   );
 
-  const [prefilledFromAi, setPrefilledFromAi] = useState({
-    sectors: false,
-    volatility: false,
-    geography: false,
+  const [step, setStep] = useState(() => resume?.wizardState?.step ?? 0);
+  const [goal, setGoal] = useState<string | null>(() => resume?.wizardState?.goal ?? null);
+  const [risk, setRisk] = useState<string | null>(() => resume?.wizardState?.risk ?? null);
+  const [sectors, setSectors] = useState<Set<string>>(() => {
+    if (resume?.wizardState?.sectors?.length)
+      return new Set(resume.wizardState.sectors);
+    return new Set<string>();
   });
+  const [geography, setGeography] = useState<string | null>(
+    () => resume?.wizardState?.geography ?? null,
+  );
+  const [reasonings, setReasonings] = useState<
+    [string | null, string | null, string | null, string | null]
+  >(() => resume?.wizardState?.reasonings ?? [...initialReasonings]);
 
-  const transitionRefine = useCallback((next: number, dir: 'right' | 'left') => {
+  const [adviceLoading, setAdviceLoading] = useState(false);
+  const [animState, setAnimState] = useState<'idle' | 'exit' | 'enter'>('idle');
+  const [direction, setDirection] = useState<'right' | 'left'>('right');
+  const [reasoningFade, setReasoningFade] = useState(false);
+
+  const answersRef = useRef({ goal, risk, sectors });
+  answersRef.current = { goal, risk, sectors };
+
+  const transitionTo = useCallback((nextStep: number, dir: 'right' | 'left') => {
     setDirection(dir);
     setAnimState('exit');
+    setReasoningFade(false);
     window.setTimeout(() => {
-      setRefineStep(next);
+      setStep(nextStep);
       setAnimState('enter');
       window.setTimeout(() => setAnimState('idle'), 420);
     }, 420);
-  }, []);
-
-  const fetchRecommendation = useCallback(async (profile: OnboardingProfile) => {
-    setPhase('proposal-loading');
-    setProposalError(null);
-    try {
-      const rec = await getPortfolioRecommendation(profile);
-      setRecommendation(rec);
-      setPhase('proposal');
-    } catch (e) {
-      setProposalError(e instanceof Error ? e.message : 'Could not load a recommendation.');
-      setPhase('proposal-error');
-    }
   }, []);
 
   useEffect(() => {
     if (booted.current) return;
     if (resume) {
       booted.current = true;
+      setProfileLoading(false);
       return;
     }
     if (authLoading) return;
-
     booted.current = true;
 
     void (async () => {
       if (!user?.id) {
         setOnboardingProfile(emptyOnboarding());
-        setPhase('refine');
+        setAdviceProfile(null);
+        setProfileLoading(false);
         return;
       }
-
       const { data, error } = await supabase
         .from('profiles')
         .select(
@@ -251,72 +284,154 @@ export function AiLedPortfolioCreation({
 
       if (error || !data) {
         setOnboardingProfile(emptyOnboarding());
-        setPhase('refine');
-        return;
+        setAdviceProfile(null);
+      } else {
+        const o = rowToOnboarding(data as ProfileRow);
+        setOnboardingProfile(o);
+        setAdviceProfile(o);
       }
-
-      const ob = rowToOnboarding(data as ProfileRow);
-      setOnboardingProfile(ob);
-      await fetchRecommendation(ob);
+      setProfileLoading(false);
     })();
-  }, [user?.id, resume, fetchRecommendation, authLoading]);
+  }, [user?.id, resume, authLoading]);
 
-  const applyRecommendationPrefill = useCallback((rec: PortfolioRecommendation) => {
-    const sectors = new Set<string>();
-    let mapped = rec.suggestedSectors.map(mapSuggestedSector).filter(Boolean) as string[];
-    mapped = [...new Set(mapped)];
-    if (mapped.length === 0) {
-      sectors.add('No preference');
-    } else {
-      mapped.forEach((s) => sectors.add(s));
+  useEffect(() => {
+    if (profileLoading) return;
+    if (skipAdviceFetchRef.current) {
+      skipAdviceFetchRef.current = false;
+      return;
     }
-    setSelectedSectors(sectors);
 
-    setVolatility(rec.suggestedVolatility);
-    const geo = matchGeographySuggestion(rec.suggestedGeography) ?? 'Primarily US';
-    setGeography(geo);
+    let cancelled = false;
+    const s = step;
 
-    setPrefilledFromAi({ sectors: true, volatility: true, geography: true });
-  }, []);
+    async function loadAdvice() {
+      setAdviceLoading(true);
+      setReasonings((prev) => {
+        const n = [...prev] as [string | null, string | null, string | null, string | null];
+        n[s] = null;
+        return n;
+      });
+      setReasoningFade(false);
 
-  const handleSoundsGood = () => {
-    if (!recommendation) return;
-    setGemProposalLevel(recommendation.suggestedRiskLevel);
-    applyRecommendationPrefill(recommendation);
-    setRefineStep(0);
-    setPhase('refine');
+      const { goal: g, risk: r, sectors: sec } = answersRef.current;
+      const prevAns = buildPreviousAnswers(s, g, r, sec);
+      const result = await getPortfolioAdvice(adviceProfile, QUESTION_PROMPTS[s], prevAns);
+
+      if (cancelled) return;
+      setAdviceLoading(false);
+
+      if (!result) return;
+
+      setReasonings((prev) => {
+        const n = [...prev] as [string | null, string | null, string | null, string | null];
+        n[s] = result.reasoning;
+        return n;
+      });
+
+      const v = result.suggestedValue;
+      if (s === 0) {
+        const g = matchGoal(v);
+        if (g) setGoal(g);
+      } else if (s === 1) {
+        const r = matchRisk(v);
+        if (r) setRisk(r);
+      } else if (s === 2) {
+        const set = parseSectorSuggestion(v);
+        setSectors(set);
+      } else if (s === 3) {
+        const g = matchGeography(v);
+        if (g) setGeography(g);
+      }
+    }
+
+    void loadAdvice();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on step / profile only; answers read from ref for previousAnswers
+  }, [step, profileLoading, adviceProfile]);
+
+  useEffect(() => {
+    const text = reasonings[step];
+    if (!text) {
+      setReasoningFade(false);
+      return;
+    }
+    setReasoningFade(false);
+    const id = window.setTimeout(() => setReasoningFade(true), 50);
+    return () => clearTimeout(id);
+  }, [reasonings, step]);
+
+  const goNext = () => {
+    if (step < 3) transitionTo(step + 1, 'right');
   };
 
-  const handleSkipProposal = () => {
-    setGemProposalLevel(null);
-    setRecommendation(null);
-    setSelectedSectors(new Set(['No preference']));
-    setVolatility('moderate');
-    setGeography(GEO_OPTIONS[0]);
-    setPrefilledFromAi({ sectors: false, volatility: false, geography: false });
-    setRefineStep(0);
-    setPhase('refine');
+  const goBack = () => {
+    if (step <= 0) {
+      onCancel();
+      return;
+    }
+    transitionTo(step - 1, 'left');
   };
 
-  const handleSkipFromError = () => {
-    setProposalError(null);
-    setRecommendation(null);
-    setGemProposalLevel(null);
-    setSelectedSectors(new Set(['No preference']));
-    setVolatility('moderate');
-    setGeography(GEO_OPTIONS[0]);
-    setPrefilledFromAi({ sectors: false, volatility: false, geography: false });
-    setRefineStep(0);
-    setPhase('refine');
+  const canProceed = (() => {
+    if (step === 0) return goal != null;
+    if (step === 1) return risk != null;
+    if (step === 2) return sectors.size > 0;
+    if (step === 3) return geography != null;
+    return false;
+  })();
+
+  const handleBuild = () => {
+    if (!goal || !risk || !geography) return;
+    const refinements = buildRefinementsFromWizard(sectors, risk, geography);
+    const mergedProfile: OnboardingProfile = {
+      ...onboardingProfile,
+      investmentGoal: goal,
+      riskTolerance: risk,
+    };
+    const gemProposalLevel = riskToGemLevel(risk);
+    const gemAnimationProfile = strategyProfileForAiAnimation(
+      gemProposalLevel
+        ? { kind: 'recommendation', suggestedRiskLevel: gemProposalLevel }
+        : { kind: 'volatility', volatility: riskToVolatility(risk) },
+    );
+    const wizardState: AiWizardState = {
+      step,
+      goal,
+      risk,
+      sectors: [...sectors],
+      geography,
+      reasonings: [...reasonings],
+    };
+    onBeginCrystallization({
+      onboardingProfile: mergedProfile,
+      refinements,
+      gemAnimationProfile,
+      gemProposalLevel,
+      wizardState,
+    });
   };
+
+  const exitWrapClass =
+    animState === 'exit' ? (direction === 'right' ? 'qa-slide-out-left' : 'qa-slide-out-right') : '';
+  const bodyEnterClass =
+    animState === 'enter'
+      ? direction === 'right'
+        ? 'qa-slide-in-right-body'
+        : 'qa-slide-in-left-body'
+      : '';
+  const titleEnterClass =
+    animState === 'enter'
+      ? direction === 'right'
+        ? 'qa-slide-in-right'
+        : 'qa-slide-in-left'
+      : '';
 
   const toggleSector = (label: string) => {
-    setPrefilledFromAi((p) => ({ ...p, sectors: false }));
-    setSelectedSectors((prev) => {
+    setSectors((prev) => {
       const next = new Set(prev);
-      if (label === 'No preference') {
-        return new Set(['No preference']);
-      }
+      if (label === 'No preference') return new Set(['No preference']);
       next.delete('No preference');
       if (next.has(label)) next.delete(label);
       else next.add(label);
@@ -325,362 +440,187 @@ export function AiLedPortfolioCreation({
     });
   };
 
-  const exitWrapClass =
-    animState === 'exit' ? (direction === 'right' ? 'qa-slide-out-left' : 'qa-slide-out-right') : '';
-  const titleEnterClass =
-    animState === 'enter' ? (direction === 'right' ? 'qa-slide-in-right' : 'qa-slide-in-left') : '';
-  const bodyEnterClass =
-    animState === 'enter'
-      ? direction === 'right'
-        ? 'qa-slide-in-right-body'
-        : 'qa-slide-in-left-body'
-      : '';
+  const shimmer = adviceLoading && reasonings[step] == null;
 
-  const riskBadge = (level: PortfolioRecommendation['suggestedRiskLevel']) => {
-    const styles = {
-      conservative: { bg: 'rgba(226,232,240,0.15)', border: '#E2E8F0', label: 'Pearl · Conservative' },
-      moderate: { bg: 'rgba(59,130,246,0.12)', border: '#3B82F6', label: 'Sapphire · Moderate' },
-      aggressive: { bg: 'rgba(225,29,72,0.12)', border: '#E11D48', label: 'Ruby · Aggressive' },
-    }[level];
+  if (profileLoading) {
     return (
-      <span
-        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-        style={{ background: styles.bg, border: `1px solid ${styles.border}`, color: '#f8fafc' }}
-      >
-        {styles.label}
-      </span>
-    );
-  };
-
-  const renderProposal = () => {
-    if (!recommendation) return null;
-    return (
-      <div className="space-y-6" style={{ color: 'rgba(248,250,252,0.92)' }}>
-        <div
-          className="glass-card rounded-xl p-6 backdrop-blur-md"
-          style={{
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderLeft: '3px solid rgba(124,58,237,0.6)',
-            background: 'rgba(255,255,255,0.04)',
-          }}
-        >
-          <p className="text-lg leading-relaxed whitespace-pre-wrap">{parseBoldMarkdown(recommendation.recommendation)}</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 gap-y-3">
-          {riskBadge(recommendation.suggestedRiskLevel)}
-          <span className="text-sm text-white/80">{recommendation.suggestedApproach}</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {recommendation.suggestedSectors.slice(0, 12).map((s) => (
-            <span
-              key={s}
-              className="rounded-full px-3 py-1 text-xs"
-              style={{
-                background: 'rgba(124,58,237,0.12)',
-                border: '1px solid rgba(124,58,237,0.35)',
-                color: 'rgba(248,250,252,0.9)',
-              }}
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button
-            type="button"
-            className="h-12 flex-1 bg-white text-[#050508] hover:bg-white/90 font-semibold"
-            onClick={handleSoundsGood}
-          >
-            Sounds good, let me refine
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 flex-1 border-white/25 bg-transparent text-white hover:bg-white/10"
-            onClick={handleSkipProposal}
-          >
-            Skip and choose myself
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderRefineQuestion = () => {
-    if (refineStep === 0) {
-      return (
-        <div className="space-y-5 w-full max-w-xl mx-auto">
-          <h2
-            className={cn('text-xl sm:text-2xl font-semibold text-center', titleEnterClass)}
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            What sectors should this portfolio focus on?
-          </h2>
-          {prefilledFromAi.sectors && (
-            <p className="text-center text-sm text-white/55">
-              I suggested these based on your growth profile — feel free to change them.
-            </p>
-          )}
-          <div className={cn('flex flex-wrap justify-center gap-2', bodyEnterClass)}>
-            {SECTOR_PILLS.map((pill) => {
-              const selected = selectedSectors.has(pill);
-              return (
-                <button
-                  key={pill}
-                  type="button"
-                  onClick={() => toggleSector(pill)}
-                  className={cn(
-                    'rounded-full px-4 py-2.5 text-sm transition-all',
-                    selected && 'qa-select-pulse',
-                  )}
-                  style={{
-                    background: selected ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
-                    border: selected
-                      ? '1px solid rgba(124,58,237,0.55)'
-                      : '1px solid rgba(255,255,255,0.12)',
-                    color: selected ? '#fff' : 'rgba(248,250,252,0.85)',
-                    boxShadow: selected ? '0 0 18px rgba(124,58,237,0.2)' : undefined,
-                  }}
-                >
-                  {pill}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    if (refineStep === 1) {
-      return (
-        <div className="space-y-5 w-full max-w-xl mx-auto">
-          <h2
-            className={cn('text-xl sm:text-2xl font-semibold text-center', titleEnterClass)}
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            How volatile should this portfolio be?
-          </h2>
-          {prefilledFromAi.volatility && recommendation && (
-            <p className="text-center text-sm text-white/55 max-w-md mx-auto">
-              I leaned toward {recommendation.suggestedVolatility} volatility because it lines up with your
-              profile and the {recommendation.suggestedRiskLevel} risk posture — adjust if you prefer.
-            </p>
-          )}
-          <div className={cn('grid gap-3', bodyEnterClass)}>
-            {VOL_OPTIONS.map((opt) => {
-              const selected = volatility === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    setPrefilledFromAi((p) => ({ ...p, volatility: false }));
-                    setVolatility(opt.value);
-                  }}
-                  className={cn(
-                    'rounded-xl text-left p-4 transition-all',
-                    selected && 'qa-select-pulse',
-                  )}
-                  style={{
-                    background: selected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.04)',
-                    border: selected
-                      ? '1px solid rgba(124,58,237,0.5)'
-                      : '1px solid rgba(255,255,255,0.1)',
-                    color: '#fff',
-                    boxShadow: selected ? '0 0 20px rgba(124,58,237,0.18)' : undefined,
-                  }}
-                >
-                  <div className="font-[var(--font-heading)] font-semibold">{opt.title}</div>
-                  <div className="text-sm text-white/60 mt-1">{opt.hint}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-5 w-full max-w-xl mx-auto">
-        <h2
-          className={cn('text-xl sm:text-2xl font-semibold text-center', titleEnterClass)}
-          style={{ fontFamily: 'var(--font-heading)' }}
-        >
-          What geographic exposure?
-        </h2>
-        <div className={cn('grid gap-3', bodyEnterClass)}>
-          {GEO_OPTIONS.map((opt) => {
-            const selected = geography === opt;
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => {
-                  setPrefilledFromAi((p) => ({ ...p, geography: false }));
-                  setGeography(opt);
-                }}
-                className={cn('rounded-xl text-left p-4 transition-all', selected && 'qa-select-pulse')}
-                style={{
-                  background: selected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: selected
-                    ? '1px solid rgba(124,58,237,0.5)'
-                    : '1px solid rgba(255,255,255,0.1)',
-                  color: '#fff',
-                  boxShadow: selected ? '0 0 20px rgba(124,58,237,0.18)' : undefined,
-                }}
-              >
-                <div className="font-[var(--font-heading)] font-semibold">{opt}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const refineNext = () => {
-    if (refineStep < 2) transitionRefine(refineStep + 1, 'right');
-    else {
-      const refinements = buildRefinements(selectedSectors, volatility, geography);
-      const gemAnimationProfile = strategyProfileForAiAnimation(
-        gemProposalLevel
-          ? { kind: 'recommendation', suggestedRiskLevel: gemProposalLevel }
-          : { kind: 'volatility', volatility },
-      );
-      onBeginCrystallization({
-        onboardingProfile,
-        refinements,
-        gemAnimationProfile,
-        gemProposalLevel,
-        recommendation,
-      });
-    }
-  };
-
-  const refineBack = () => {
-    if (refineStep > 0) {
-      transitionRefine(refineStep - 1, 'left');
-      return;
-    }
-    if (phase === 'refine' && recommendation) {
-      setPhase('proposal');
-      return;
-    }
-    onCancel();
-  };
-
-  const progressDots = (
-    <div className="mb-6 space-y-2">
-      <p className="text-center text-xs text-white/45 tracking-wide">
-        Step {refineStep + 1} of 3
-      </p>
-      <div className="flex justify-center gap-2">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-0.5 rounded-full transition-all"
-            style={{
-              width: refineStep === i ? 48 : 20,
-              background:
-                refineStep >= i ? 'rgba(124,58,237,0.75)' : 'rgba(255,255,255,0.12)',
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-
-  if (phase === 'proposal-loading') {
-    return (
-      <div
-        className="min-h-[50vh] flex flex-col items-center justify-center gap-4"
-        style={{ background: 'transparent' }}
-      >
-        <Crown
-          className="h-12 w-12 text-violet-400"
-          style={{ animation: 'crownPulse 2s ease-in-out infinite' }}
-        />
-        <p className="text-lg text-white/85">Analyzing your investor profile...</p>
-        <style>{`
-          @keyframes crownPulse {
-            0%, 100% { opacity: 0.45; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.06); }
-          }
-        `}</style>
+      <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
+        <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
       </div>
     );
   }
 
-  if (phase === 'proposal-error') {
-    return (
-      <div className="space-y-6 text-center max-w-md mx-auto py-8">
-        <p className="text-white/90">{proposalError}</p>
-        <Button
-          className="bg-white text-[#050508] hover:bg-white/90"
-          onClick={() => fetchRecommendation(onboardingProfile)}
-        >
-          Try again
-        </Button>
-        <div>
-          <button
-            type="button"
-            className="text-sm text-violet-400/90 hover:text-violet-300 underline-offset-2 hover:underline"
-            onClick={handleSkipFromError}
-          >
-            Skip to manual setup
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (phase === 'proposal') {
-    return (
-      <div className="space-y-2 pb-8">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
-        {renderProposal()}
-      </div>
-    );
-  }
+  const reasoningText = reasonings[step];
 
   return (
-    <div className="pb-8">
+    <div className="pb-6 max-w-lg mx-auto w-full">
       <button
         type="button"
-        onClick={refineBack}
-        className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white mb-4"
+        onClick={goBack}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back
+        {step === 0 ? 'Back' : 'Back'}
       </button>
 
-      {progressDots}
-
-      <div className={cn('min-h-[320px]', exitWrapClass)}>
-        {renderRefineQuestion()}
+      <div className="mb-6 space-y-2">
+        <p className="text-center text-xs text-muted-foreground tracking-wide">
+          {step + 1} of 4
+        </p>
+        <div className="flex justify-center gap-1.5">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-0.5 rounded-full transition-all duration-300"
+              style={{
+                width: step === i ? 40 : 12,
+                background: step >= i ? 'rgba(124,58,237,0.75)' : 'rgba(255,255,255,0.12)',
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="mt-10 flex justify-center">
-        {refineStep < 2 ? (
-          <Button
-            className="min-w-[200px] h-12 bg-white text-[#050508] hover:bg-white/90 font-semibold"
-            onClick={refineNext}
+      <div className={cn('min-h-[280px]', exitWrapClass)}>
+        <div>
+          <h2
+            className={cn(
+              'text-xl font-[var(--font-heading)] font-semibold text-foreground mb-6 text-center',
+              titleEnterClass,
+            )}
           >
-            Continue
+            {QUESTION_TITLES[step]}
+          </h2>
+
+          <div className={cn(bodyEnterClass)}>
+            {step === 0 && (
+              <div className="flex flex-col gap-3">
+                {GOAL_OPTIONS.map((opt) => {
+                  const selected = goal === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setGoal(opt)}
+                      className={cn(
+                        'w-full rounded-xl border px-4 py-4 text-left text-sm font-medium transition-all',
+                        shimmer && 'animate-pulse',
+                        selected
+                          ? 'border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
+                          : 'border-white/10 bg-white/[0.02] text-foreground/90 hover:border-white/20',
+                      )}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="flex flex-col gap-3">
+                {RISK_OPTIONS.map((opt) => {
+                  const selected = risk === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setRisk(opt)}
+                      className={cn(
+                        'w-full rounded-xl border px-4 py-4 text-left text-sm font-medium transition-all',
+                        shimmer && 'animate-pulse',
+                        selected
+                          ? 'border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
+                          : 'border-white/10 bg-white/[0.02] text-foreground/90 hover:border-white/20',
+                      )}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="flex flex-wrap gap-2 justify-center">
+                {SECTOR_PILLS.map((pill) => {
+                  const selected = sectors.has(pill);
+                  return (
+                    <button
+                      key={pill}
+                      type="button"
+                      onClick={() => toggleSector(pill)}
+                      className={cn(
+                        'rounded-full px-4 py-2 text-sm transition-all',
+                        shimmer && 'animate-pulse',
+                        selected
+                          ? 'border border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
+                          : 'border border-white/10 bg-transparent text-foreground/90 hover:border-white/20',
+                      )}
+                    >
+                      {pill}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="flex flex-wrap gap-2 justify-center">
+                {GEO_OPTIONS.map((opt) => {
+                  const selected = geography === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setGeography(opt)}
+                      className={cn(
+                        'rounded-full px-4 py-2 text-sm transition-all',
+                        shimmer && 'animate-pulse',
+                        selected
+                          ? 'border border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
+                          : 'border border-white/10 bg-transparent text-foreground/90 hover:border-white/20',
+                      )}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {reasoningText && (
+              <div
+                className={cn(
+                  'mt-6 flex gap-2 text-sm text-muted-foreground transition-opacity duration-300',
+                  reasoningFade ? 'opacity-100' : 'opacity-0',
+                )}
+              >
+                <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5 text-violet-400" aria-hidden />
+                <p className="leading-relaxed">{reasoningText}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 flex justify-center">
+        {step < 3 ? (
+          <Button
+            type="button"
+            className="min-w-[200px] h-11 bg-white text-[#050508] hover:bg-white/90 font-semibold"
+            disabled={!canProceed}
+            onClick={goNext}
+          >
+            Next
           </Button>
         ) : (
           <Button
-            className="min-w-[220px] h-12 bg-white text-[#050508] hover:bg-white/90 font-semibold"
-            onClick={refineNext}
+            type="button"
+            className="min-w-[220px] h-11 bg-white text-[#050508] hover:bg-white/90 font-semibold"
+            disabled={!canProceed}
+            onClick={handleBuild}
           >
             Build my portfolio
           </Button>

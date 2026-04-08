@@ -441,7 +441,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════ DUAL CTA ═══════════ */}
-      <section className="py-24" data-tour="alpha-cta">
+      <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Investor CTA */}
@@ -466,7 +466,6 @@ export default function Landing() {
 
             {/* Alpha CTA */}
             <div
-              data-tour="alpha-fee-text"
               className="text-center rounded-[20px] p-12"
               style={{
                 background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(225,29,72,0.05))',

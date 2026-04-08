@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface AppUser {
   id: string;
@@ -33,8 +33,9 @@ interface AuthContextType {
   user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string) => Promise<void>;
-  signup: (email: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  /** signUp then signInWithPassword; true if session active, false if email confirmation blocks login. */
+  signup: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (username: string, displayName: string) => Promise<void>;
   completeOnboarding: (data: OnboardingData) => Promise<void>;
@@ -157,22 +158,22 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const isTrialExpired =
     trialStartDate !== null && !userPlan && Date.now() - trialStartDate > FREE_TRIAL_MS;
 
-  // Magic link sign-in (works for both new and existing users)
-  const login = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    // After this, Supabase sends a magic link email.
-    // The user clicks it, gets redirected back, and onAuthStateChange fires.
   };
 
-  // Signup is the same as login for magic link
-  const signup = async (email: string) => {
-    await login(email);
+  const signup = async (email: string, password: string): Promise<boolean> => {
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/profile-setup`,
+      },
+    });
+    if (signUpError) throw signUpError;
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+    return !loginError;
   };
 
   // Save username + display name to profiles table
@@ -276,8 +277,8 @@ export function useMockAuth() {
       user: null,
       isAuthenticated: false,
       isLoading: true,
-      login: async () => {},
-      signup: async () => {},
+      login: async (_email: string, _password: string) => {},
+      signup: async (_email: string, _password: string) => false,
       logout: () => {},
       updateProfile: async () => {},
       completeOnboarding: async () => {},

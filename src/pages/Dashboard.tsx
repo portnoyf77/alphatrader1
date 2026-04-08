@@ -317,7 +317,7 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-8 space-y-6">
 
         {/* ── Account Summary + AI Activity Log ── */}
-        <div data-tour="summary-stats" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left: Account Value */}
           <div className="lg:col-span-2">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -444,7 +444,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── Portfolio Tab Cards ── */}
-        <div data-tour="tab-cards" className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
             <button
               key={key}
@@ -813,7 +813,7 @@ export default function Dashboard() {
         )}
 
         {/* ── Market News ── */}
-        <div data-tour="market-news">
+        <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-muted-foreground" />

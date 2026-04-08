@@ -20,10 +20,10 @@ import { useToast } from '@/hooks/use-toast';
 import {
   AiLedPortfolioCreation,
   type AiFlowResumePayload,
+  type AiWizardState,
 } from '@/components/strategy-creation/AiLedPortfolioCreation';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
 import { ManualPortfolioBuilder } from '@/components/strategy-creation/ManualPortfolioBuilder';
-import type { PortfolioRecommendation } from '@/lib/portfolioTypes';
 import {
   StrategyProfile,
   initialProfile,
@@ -132,9 +132,9 @@ export default function Create() {
     refinements: PortfolioRefinements;
   } | null>(null);
   const aiResumeContextRef = useRef<{
-    recommendation: PortfolioRecommendation | null;
     gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
-  }>({ recommendation: null, gemProposalLevel: null });
+    wizardState: AiWizardState | null;
+  }>({ gemProposalLevel: null, wizardState: null });
 
   // Editable holdings state
   const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
@@ -187,7 +187,7 @@ export default function Create() {
       refinements: PortfolioRefinements;
       gemAnimationProfile: StrategyProfile;
       gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
-      recommendation: PortfolioRecommendation | null;
+      wizardState: AiWizardState;
     }) => {
       setStrategyProfile(buildStrategyProfileFromAiFlow(ctx.onboardingProfile, ctx.refinements));
       setGemAnimationProfile(ctx.gemAnimationProfile);
@@ -198,8 +198,8 @@ export default function Create() {
         refinements: ctx.refinements,
       };
       aiResumeContextRef.current = {
-        recommendation: ctx.recommendation,
         gemProposalLevel: ctx.gemProposalLevel,
+        wizardState: ctx.wizardState,
       };
       setAiFlowResume(null);
       setCreationStep('animation');
@@ -230,9 +230,8 @@ export default function Create() {
     setAiFlowResume({
       onboardingProfile: payload.onboarding,
       refinements: payload.refinements,
-      recommendation: resumeCtx.recommendation,
       gemProposalLevel: resumeCtx.gemProposalLevel,
-      refineStepIndex: 0,
+      wizardState: resumeCtx.wizardState,
     });
     setAiFlowSessionKey((k) => k + 1);
     setCreationStep('questionnaire');
@@ -343,7 +342,7 @@ export default function Create() {
     setCrystallizeKey((k) => k + 1);
     setAiStrategyMeta(null);
     lastCrystallizePayloadRef.current = null;
-    aiResumeContextRef.current = { recommendation: null, gemProposalLevel: null };
+    aiResumeContextRef.current = { gemProposalLevel: null, wizardState: null };
     aiFlowActiveRef.current = false;
     aiResultRef.current = null;
     aiErrorRef.current = null;
@@ -1164,7 +1163,7 @@ export default function Create() {
           {activeTab === 'ai' && (
             <>
               {creationStep === 'questionnaire' && (
-                <div data-tour="ai-wizard">
+                <div>
                   <AiLedPortfolioCreation
                     key={aiFlowSessionKey}
                     resume={aiFlowResume}

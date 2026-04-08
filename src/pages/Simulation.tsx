@@ -318,7 +318,7 @@ export default function Simulation() {
         </Card>
 
         {/* Live Performance Chart */}
-        <Card data-tour="simulation-chart" className="glass-card mb-6">
+        <Card className="glass-card mb-6">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
