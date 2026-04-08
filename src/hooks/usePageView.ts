@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseConfigured, supabase } from '@/integrations/supabase/client';
 
 const getSessionId = () => {
   let sessionId = sessionStorage.getItem('analytics_session_id');
@@ -17,6 +17,8 @@ export const usePageView = () => {
   const entryTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
     const sessionId = getSessionId();
     entryTimeRef.current = Date.now();
 

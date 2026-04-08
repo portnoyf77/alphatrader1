@@ -5,13 +5,34 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+/** True when real Supabase env vars are set (e.g. on Vercel). */
+export const isSupabaseConfigured = Boolean(
+  SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY,
+);
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+// createClient throws if URL/key are missing ("supabaseUrl is required"). App.tsx imports
+// modules that pull this file at startup, so a blank deploy (no VITE_* on Vercel) crashed React.
+const PLACEHOLDER_URL = 'https://placeholder.supabase.co';
+const PLACEHOLDER_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+
+export const supabase = createClient<Database>(
+  isSupabaseConfigured ? SUPABASE_URL! : PLACEHOLDER_URL,
+  isSupabaseConfigured ? SUPABASE_PUBLISHABLE_KEY! : PLACEHOLDER_KEY,
+  {
+    auth: {
+      storage: localStorage,
+      persistSession: isSupabaseConfigured,
+      autoRefreshToken: isSupabaseConfigured,
+    },
+  },
+);
+
+if (!isSupabaseConfigured && import.meta.env.PROD) {
+  console.warn(
+    '[Alpha Trader] Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY on the host (e.g. Vercel) for Supabase features.',
+  );
+}
