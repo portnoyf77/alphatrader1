@@ -38,7 +38,7 @@ export default function Login() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
-  const { login } = useMockAuth();
+  const { login, isAuthenticated, user } = useMockAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,6 +50,12 @@ export default function Login() {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      navigate(user.needsProfileSetup ? '/profile-setup' : '/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const emailTrim = email.trim();
   const emailValid = EMAIL_REGEX.test(emailTrim);
@@ -80,10 +86,10 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(emailTrim, password);
-      navigate('/dashboard', { replace: true });
+      // Don't navigate here. The useEffect above will navigate once
+      // MockAuthContext finishes loading the profile + sets isAuthenticated.
     } catch (error) {
       setAuthError(loginErrorMessage(error));
-    } finally {
       setIsLoading(false);
     }
   };

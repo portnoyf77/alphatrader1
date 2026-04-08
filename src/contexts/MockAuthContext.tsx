@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -109,8 +109,6 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [trialStartDate, setTrialStartDate] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string | null>(null);
-  /** Avoid duplicate hydrate when login() already merged profile before SIGNED_IN listener runs. */
-  const loginHydrateRef = useRef(false);
 
   const initTrialIfNeeded = () => {
     if (!localStorage.getItem('trialStartDate')) {
@@ -147,7 +145,6 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Initial session is handled by getSession() above
       if (event === 'INITIAL_SESSION') return;
-      if (loginHydrateRef.current) return;
 
       setIsLoading(true);
       try {
@@ -173,22 +170,16 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     trialStartDate !== null && !userPlan && Date.now() - trialStartDate > FREE_TRIAL_MS;
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      throw new Error('No session after sign-in');
-    }
-    loginHydrateRef.current = true;
     setIsLoading(true);
-    try {
-      const u = await buildAppUserFromSession(session.user);
-      setUser(u);
-      initTrialIfNeeded();
-    } finally {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
       setIsLoading(false);
-      loginHydrateRef.current = false;
+      throw error;
     }
+    // Auth succeeded. onAuthStateChange will fire SIGNED_IN, which calls
+    // buildAppUserFromSession and sets isLoading = false once profile resolves.
+    // Do NOT block here on a profile query -- if Supabase DB is slow the
+    // login button hangs indefinitely.
   };
 
   const signup = async (email: string, password: string): Promise<boolean> => {
