@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AgentActivityLog } from '@/components/AgentActivityLog';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/formatters';
@@ -306,6 +307,9 @@ export default function Portfolio() {
                 <DollarSign className="h-4 w-4" />
                 <span className="text-xs uppercase tracking-wider">Equity</span>
               </div>
+
+        {/* Agent Activity Log */}
+        <AgentActivityLog />
               <div className="font-mono text-xl font-bold">
                 {loading ? '...' : formatCurrency(account?.equity ?? 0)}
               </div>

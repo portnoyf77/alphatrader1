@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock, Bot } from 'lucide-react';
+import { AgentActivityCard } from '@/components/dashboard/AgentActivityCard';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { useAlpacaNews } from '@/hooks/useAlpacaNews';
@@ -432,14 +433,7 @@ export default function Dashboard() {
               <Bot className="h-4 w-4 text-primary" />
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">AI Activity</span>
             </div>
-            <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <p className="text-sm text-muted-foreground">
-                Rebalance recommendations and agent actions will appear here.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Coming soon
-              </p>
-            </div>
+            <AgentActivityCard />
           </div>
         </div>
 
