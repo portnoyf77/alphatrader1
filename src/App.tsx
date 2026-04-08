@@ -60,8 +60,8 @@ function GatedApp() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/faq" element={<FAQ />} />
 
