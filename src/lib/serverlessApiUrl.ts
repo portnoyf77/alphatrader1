@@ -1,5 +1,5 @@
 /**
- * Build the URL for Vercel serverless routes (`/api/chat`, `/api/generate-portfolio`, etc.).
+ * Build the URL for Vercel serverless routes (`/api/chat`, `/api/generate-portfolio`, `/api/portfolio-recommend`, etc.).
  *
  * - **Production (Vercel):** leave `VITE_API_ORIGIN` unset → same-origin `/api/...` works.
  * - **Local `npm run dev`:** Vite does not run `api/*.js`. Either:

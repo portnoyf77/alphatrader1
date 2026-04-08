@@ -1,8 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
 import { generatePortfolio } from '@/lib/portfolioService';
-import type { QuestionnaireAnswers, GeneratePortfolioResponse } from '@/lib/portfolioTypes';
+import type {
+  GeneratePortfolioResponse,
+  OnboardingProfile,
+  PortfolioRefinements,
+} from '@/lib/portfolioTypes';
 import { createPortfolio } from '@/lib/supabasePortfolioService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +17,20 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useToast } from '@/hooks/use-toast';
-import { PortfolioQuestionnaire } from '@/components/strategy-creation/PortfolioQuestionnaire';
+import {
+  AiLedPortfolioCreation,
+  type AiFlowResumePayload,
+} from '@/components/strategy-creation/AiLedPortfolioCreation';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
 import { ManualPortfolioBuilder } from '@/components/strategy-creation/ManualPortfolioBuilder';
-import { StrategyProfile, initialProfile, deriveRiskLevel, explainRiskScoring } from '@/lib/strategyProfile';
+import type { PortfolioRecommendation } from '@/lib/portfolioTypes';
+import {
+  StrategyProfile,
+  initialProfile,
+  deriveRiskLevel,
+  explainRiskScoring,
+  buildStrategyProfileFromAiFlow,
+} from '@/lib/strategyProfile';
 import { cn } from '@/lib/utils';
 
 interface GeneratedHolding {
@@ -41,102 +55,6 @@ interface EditableHolding {
   ticker: string;
   name: string;
   weight: number;
-}
-
-// ── Convert StrategyProfile codes to readable strings for Claude ──
-const goalLabels: Record<string, string> = {
-  accumulation: 'Long-term wealth accumulation',
-  retirement: 'Retirement savings',
-  income: 'Income generation from dividends and interest',
-  preservation: 'Capital preservation',
-  aggressive: 'Aggressive growth, accepting higher risk',
-};
-const timelineLabels: Record<string, string> = {
-  '1-2': '1-2 years (short-term)',
-  '3-5': '3-5 years (medium-term)',
-  '5-10': '5-10 years (long-term)',
-  '10+': '10+ years (very long-term)',
-};
-const drawdownLabels: Record<string, string> = {
-  'sell-all': 'Very conservative - would sell everything on a 20% drop',
-  'sell-some': 'Cautious - would reduce exposure on a 20% drop',
-  hold: 'Moderate - would hold steady through a 20% drop',
-  'buy-more': 'Aggressive - would buy more on a 20% drop',
-};
-const geoLabels: Record<string, string> = {
-  us: 'Primarily US-focused',
-  global: 'Global diversification (US + international mix)',
-  emerging: 'Emerging markets focus (higher growth potential)',
-  international: 'International developed markets (Europe, Japan, Australia)',
-};
-
-const incomeLabels: Record<string, string> = {
-  'under-50k': 'Under $50k/year',
-  '50k-100k': '$50k-$100k/year',
-  '100k-200k': '$100k-$200k/year',
-  '200k-500k': '$200k-$500k/year',
-  '500k-plus': '$500k+/year',
-};
-const experienceLabels: Record<string, string> = {
-  none: 'No investing experience',
-  beginner: 'Beginner (under 1 year)',
-  intermediate: 'Intermediate (a few years)',
-  advanced: 'Advanced (5+ years)',
-};
-const accountTypeLabels: Record<string, string> = {
-  taxable: 'Taxable brokerage account',
-  'retirement-ira': 'IRA (Traditional or Roth)',
-  'retirement-401k': '401(k) / 403(b)',
-  mixed: 'Multiple account types',
-};
-const portfolioSizeLabels: Record<string, string> = {
-  'under-10k': 'Under $10k',
-  '10k-50k': '$10k-$50k',
-  '50k-250k': '$50k-$250k',
-  '250k-1m': '$250k-$1M',
-  '1m-plus': '$1M+',
-};
-const ageRangeLabels: Record<string, string> = {
-  '18-29': 'Age 18-29',
-  '30-39': 'Age 30-39',
-  '40-49': 'Age 40-49',
-  '50-59': 'Age 50-59',
-  '60-plus': 'Age 60+',
-};
-const emergencyFundLabels: Record<string, string> = {
-  'yes-6mo': '6+ months of expenses saved',
-  'yes-3mo': '3-6 months saved',
-  building: 'Building emergency fund',
-  no: 'No emergency fund yet',
-};
-function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
-  const sectors = profile.sectorEmphasis.length > 0
-    ? profile.sectorEmphasis.join(', ')
-    : 'No specific sector preference (broad diversification)';
-
-  return {
-    goal: goalLabels[profile.primaryGoal || ''] || 'Wealth accumulation',
-    timeline: timelineLabels[profile.timeline || ''] || '5-10 years',
-    risk: drawdownLabels[profile.drawdownReaction || ''] || 'Moderate',
-    sectors,
-    geography: geoLabels[profile.geographicPreference || ''] || 'US-focused',
-    volatility: `Comfortable with up to ${profile.volatilityTolerance}% portfolio swings`,
-    income: incomeLabels[profile.incomeRange || ''] || undefined,
-    experience: experienceLabels[profile.investmentExperience || ''] || undefined,
-    accountType: accountTypeLabels[profile.accountType || ''] || undefined,
-    portfolioSize: portfolioSizeLabels[profile.portfolioSize || ''] || undefined,
-    ageRange: ageRangeLabels[profile.ageRange || ''] || undefined,
-    emergencyFund: emergencyFundLabels[profile.hasEmergencyFund || ''] || undefined,
-    investmentAmount:
-      profile.investmentAmount != null && typeof profile.investmentAmount === 'number'
-        ? new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(profile.investmentAmount)
-        : undefined,
-  };
 }
 
 // ── Map AI holding type to a display role ──
@@ -196,6 +114,28 @@ export default function Create() {
   // Manual tab orb color
   const [manualOrbColor, setManualOrbColor] = useState<string | null>(null);
 
+  const [gemAnimationProfile, setGemAnimationProfile] = useState<StrategyProfile>(initialProfile);
+  const [aiGenerationError, setAiGenerationError] = useState<string | null>(null);
+  const [usedAiLedFlow, setUsedAiLedFlow] = useState(false);
+  const [aiFlowSessionKey, setAiFlowSessionKey] = useState(0);
+  const [aiFlowResume, setAiFlowResume] = useState<AiFlowResumePayload | null>(null);
+  const [crystallizeKey, setCrystallizeKey] = useState(0);
+  const [aiStrategyMeta, setAiStrategyMeta] = useState<{
+    name: string;
+    description: string;
+    riskLevel: string;
+  } | null>(null);
+
+  const aiFlowActiveRef = useRef(false);
+  const lastCrystallizePayloadRef = useRef<{
+    onboarding: OnboardingProfile;
+    refinements: PortfolioRefinements;
+  } | null>(null);
+  const aiResumeContextRef = useRef<{
+    recommendation: PortfolioRecommendation | null;
+    gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
+  }>({ recommendation: null, gemProposalLevel: null });
+
   // Editable holdings state
   const [editableHoldings, setEditableHoldings] = useState<EditableHolding[]>([]);
   const [editOpen, setEditOpen] = useState(false);
@@ -222,21 +162,81 @@ export default function Create() {
     }
   }, []);
 
-  const handleQuestionnaireComplete = (profile: StrategyProfile) => {
-    setStrategyProfile(profile);
-    setCreationStep('animation');
+  const startAiGeneration = useCallback(
+    (onboarding: OnboardingProfile, refinements: PortfolioRefinements) => {
+      aiResultRef.current = null;
+      aiErrorRef.current = null;
+      setAiGenerationError(null);
+      generatePortfolio(onboarding, refinements)
+        .then((result) => {
+          aiResultRef.current = result;
+        })
+        .catch((err) => {
+          console.error('[Invest] AI portfolio generation failed:', err);
+          const msg = err instanceof Error ? err.message : 'Portfolio generation failed';
+          aiErrorRef.current = msg;
+          setAiGenerationError(msg);
+        });
+    },
+    [],
+  );
 
-    // Fire AI generation in parallel with the animation
-    aiResultRef.current = null;
+  const handleBeginAiCrystallization = useCallback(
+    (ctx: {
+      onboardingProfile: OnboardingProfile;
+      refinements: PortfolioRefinements;
+      gemAnimationProfile: StrategyProfile;
+      gemProposalLevel: 'conservative' | 'moderate' | 'aggressive' | null;
+      recommendation: PortfolioRecommendation | null;
+    }) => {
+      setStrategyProfile(buildStrategyProfileFromAiFlow(ctx.onboardingProfile, ctx.refinements));
+      setGemAnimationProfile(ctx.gemAnimationProfile);
+      setUsedAiLedFlow(true);
+      aiFlowActiveRef.current = true;
+      lastCrystallizePayloadRef.current = {
+        onboarding: ctx.onboardingProfile,
+        refinements: ctx.refinements,
+      };
+      aiResumeContextRef.current = {
+        recommendation: ctx.recommendation,
+        gemProposalLevel: ctx.gemProposalLevel,
+      };
+      setAiFlowResume(null);
+      setCreationStep('animation');
+      setWaitingForAI(false);
+      startAiGeneration(ctx.onboardingProfile, ctx.refinements);
+    },
+    [startAiGeneration],
+  );
+
+  const handleRetryAiGeneration = useCallback(() => {
+    const payload = lastCrystallizePayloadRef.current;
+    if (!payload) return;
+    setAiGenerationError(null);
     aiErrorRef.current = null;
-    const answers = profileToAnswers(profile);
-    generatePortfolio(answers)
-      .then((result) => { aiResultRef.current = result; })
-      .catch((err) => {
-        console.error('[Invest] AI portfolio generation failed:', err);
-        aiErrorRef.current = err instanceof Error ? err.message : 'Portfolio generation failed';
-      });
-  };
+    aiResultRef.current = null;
+    setCrystallizeKey((k) => k + 1);
+    startAiGeneration(payload.onboarding, payload.refinements);
+  }, [startAiGeneration]);
+
+  const handleAdjustFromAiResults = useCallback(() => {
+    const payload = lastCrystallizePayloadRef.current;
+    const resumeCtx = aiResumeContextRef.current;
+    if (!payload) return;
+    setGeneratedPortfolio(null);
+    setGeneratedStrategyName('');
+    setEditableHoldings([]);
+    setAiStrategyMeta(null);
+    setAiFlowResume({
+      onboardingProfile: payload.onboarding,
+      refinements: payload.refinements,
+      recommendation: resumeCtx.recommendation,
+      gemProposalLevel: resumeCtx.gemProposalLevel,
+      refineStepIndex: 0,
+    });
+    setAiFlowSessionKey((k) => k + 1);
+    setCreationStep('questionnaire');
+  }, []);
 
   const handleAnimationComplete = async (name: string) => {
     setGeneratedStrategyName(name);
@@ -255,6 +255,11 @@ export default function Create() {
     // If AI failed, show error and let user retry
     if (aiErrorRef.current || !aiResultRef.current) {
       const errorMsg = aiErrorRef.current || 'Portfolio generation timed out';
+      if (aiFlowActiveRef.current) {
+        setWaitingForAI(false);
+        setAiGenerationError(errorMsg);
+        return;
+      }
       toast({
         title: 'Portfolio generation failed',
         description: `${errorMsg}. You can try again.`,
@@ -270,7 +275,15 @@ export default function Create() {
       ? `${name.split('-')[0]}-${name.split('-')[1]}` // Keep the gem-number format
       : name;
 
-    const aiHoldings: GeneratedHolding[] = ai.holdings.map(h => ({
+    setAiStrategyMeta({
+      name: ai.strategy?.name || strategyName,
+      description: ai.strategy?.description || '',
+      riskLevel: ai.strategy?.riskLevel || 'moderate',
+    });
+
+    const sortedHoldings = [...ai.holdings].sort((a, b) => b.allocation - a.allocation);
+
+    const aiHoldings: GeneratedHolding[] = sortedHoldings.map(h => ({
       ticker: h.symbol,
       name: h.name,
       weight: h.allocation,
@@ -309,6 +322,7 @@ export default function Create() {
       weight: h.weight,
     })));
     setCreationStep('results');
+    aiFlowActiveRef.current = false;
 
     // Fetch live prices for all tickers
     fetchPrices(portfolio.holdings.map(h => h.ticker));
@@ -317,10 +331,22 @@ export default function Create() {
   const handleStartOver = () => {
     setCreationStep('questionnaire');
     setStrategyProfile(initialProfile);
+    setGemAnimationProfile(initialProfile);
     setGeneratedPortfolio(null);
     setGeneratedStrategyName('');
     setEditableHoldings([]);
     setEditOpen(false);
+    setUsedAiLedFlow(false);
+    setAiGenerationError(null);
+    setAiFlowResume(null);
+    setAiFlowSessionKey((k) => k + 1);
+    setCrystallizeKey((k) => k + 1);
+    setAiStrategyMeta(null);
+    lastCrystallizePayloadRef.current = null;
+    aiResumeContextRef.current = { recommendation: null, gemProposalLevel: null };
+    aiFlowActiveRef.current = false;
+    aiResultRef.current = null;
+    aiErrorRef.current = null;
   };
 
   const persistPortfolio = async (portfolioId: string, status: 'live' | 'simulating') => {
@@ -340,7 +366,7 @@ export default function Create() {
         riskLevel,
         status: status === 'live' ? 'private' : 'private',
         holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
-        descriptionRationale: generatedPortfolio?.strategy?.description,
+        descriptionRationale: generatedPortfolio?.rationale,
         sectors: [...new Set(editableHoldings.map(h => h.name.split(' ')[0]))],
       });
 
@@ -427,7 +453,239 @@ export default function Create() {
     return descs[gem] || `${gem} reflects your personalized investment approach`;
   };
 
-  const renderResultsContent = () => (
+  const renderAiLedResults = () => {
+    if (!generatedPortfolio) return null;
+    const aiHoldingsSorted = [...generatedPortfolio.holdings].sort((a, b) => b.weight - a.weight);
+    return (
+      <div className="space-y-6 qa-reveal-stagger">
+        <div className="space-y-2">
+          <h2
+            className="text-2xl sm:text-3xl font-bold text-foreground"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            {aiStrategyMeta?.name ?? generatedPortfolio.name}
+          </h2>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            {aiStrategyMeta?.description ?? generatedPortfolio.rationale}
+          </p>
+        </div>
+
+        <div className="grid gap-4">
+          {aiHoldingsSorted.map((holding) => (
+            <Card
+              key={holding.ticker}
+              className="glass-card border-white/10 backdrop-blur-md"
+              style={{ background: 'rgba(255,255,255,0.04)' }}
+            >
+              <CardContent className="p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="space-y-2 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="font-bold text-lg text-white">{holding.ticker}</span>
+                    <span className="text-sm text-white/75">{holding.name}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{holding.explanation}</p>
+                </div>
+                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 shrink-0">
+                  <span className="text-3xl font-bold tabular-nums text-white">{holding.weight}%</span>
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-white/20 bg-white/5"
+                    style={{ color: 'rgba(248,250,252,0.85)' }}
+                  >
+                    {holding.characteristics[0] ?? holding.role}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="glass-card border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Key Risks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.risks}</p>
+          </CardContent>
+        </Card>
+
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-[rgba(124,58,237,0.28)] bg-[rgba(124,58,237,0.06)] hover:bg-[rgba(124,58,237,0.1)] transition-colors text-sm"
+            >
+              <span className="flex items-center gap-2 text-foreground font-medium">
+                <Info className="h-4 w-4 text-violet-400" />
+                How we built your portfolio
+              </span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <Card className="glass-card border-white/10">
+              <CardContent className="p-5 space-y-3 text-sm text-muted-foreground leading-relaxed">
+                <p>{aiStrategyMeta?.description ?? generatedPortfolio.rationale}</p>
+                <p>
+                  The AI analyzed live market data, your onboarding investor profile, and the sector, volatility,
+                  and geography preferences you chose during refinement — so this allocation is personalized, not a
+                  fixed template.
+                </p>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible open={editOpen} onOpenChange={setEditOpen}>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/30 bg-secondary/20 hover:bg-secondary/40 transition-colors text-sm"
+            >
+              <span className="text-muted-foreground">Want to adjust? You can add, remove, or change holdings.</span>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${editOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-base">Edit Holdings</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={autoBalance}>
+                    <Scale className="h-3.5 w-3.5 mr-1.5" />
+                    Auto-Balance
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={addHolding}>
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Add Holding
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Ticker</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="text-right">Weight (%)</TableHead>
+                      <TableHead className="w-12" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {editableHoldings.map((h) => (
+                      <TableRow key={h.id}>
+                        <TableCell>
+                          <Input
+                            value={h.ticker}
+                            onChange={(e) =>
+                              setEditableHoldings((prev) =>
+                                prev.map((x) =>
+                                  x.id === h.id ? { ...x, ticker: e.target.value.toUpperCase() } : x,
+                                ),
+                              )
+                            }
+                            className="bg-secondary w-20"
+                          />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{h.name || '—'}</TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={0.1}
+                            required
+                            value={h.weight || ''}
+                            onChange={(e) => updateHoldingWeight(h.id, parseFloat(e.target.value) || 0)}
+                            className="bg-secondary text-right w-20 ml-auto"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeHolding(h.id)}
+                            disabled={editableHoldings.length <= 1}
+                          >
+                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="mt-3 space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Weight</span>
+                    <span
+                      className={cn(
+                        'font-medium tabular-nums',
+                        totalWeight === 100 ? 'text-success' : 'text-warning',
+                      )}
+                    >
+                      {totalWeight.toFixed(1)}%
+                      {totalWeight !== 100 && ' (target 100%)'}
+                    </span>
+                  </div>
+                  {totalWeight !== 100 && (
+                    <p className="text-sm text-warning animate-in fade-in duration-200">
+                      Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <div className="space-y-4 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              className="flex-1 h-12 bg-white text-[#050508] hover:bg-white/90 font-semibold"
+              disabled={editOpen && totalWeight !== 100}
+              onClick={async () => {
+                const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                const savedId = await persistPortfolio(portfolioId, 'simulating');
+                navigate(`/simulation/${savedId || portfolioId}`);
+              }}
+            >
+              <Scale className="h-5 w-5 mr-2" />
+              Invest
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 sm:min-w-[140px] border-white/25 bg-transparent text-white hover:bg-white/10"
+              onClick={handleAdjustFromAiResults}
+            >
+              Adjust
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Paper trading uses real market data with no money at risk. You can refine allocations above before you
+            invest.
+          </p>
+          <p className="text-sm text-muted-foreground text-center">
+            Platform fee: 0.25% annually on invested capital
+          </p>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={handleStartOver}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+            >
+              ↺ Start Over
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderLegacyResults = () => (
     <div className="space-y-6 qa-reveal-stagger">
       {generatedPortfolio && (
         <>
@@ -828,6 +1086,13 @@ export default function Create() {
     </div>
   );
 
+  const renderResultsContent = () => {
+    if (generatedPortfolio && usedAiLedFlow) {
+      return renderAiLedResults();
+    }
+    return renderLegacyResults();
+  };
+
   // Show tabs only during questionnaire step of AI flow (or always for manual)
   const showTabs = activeTab === 'manual' || creationStep === 'questionnaire';
 
@@ -860,7 +1125,7 @@ export default function Create() {
                 <h1 className="text-3xl font-bold mb-2">Create Portfolio</h1>
                 <p className="text-muted-foreground">
                   {activeTab === 'ai'
-                    ? 'Answer a few questions and the AI will build a personalized portfolio for you.'
+                    ? 'Your AI co-pilot reviews your profile, proposes a direction, and builds allocations to match.'
                     : 'Build your portfolio manually by selecting holdings and allocations.'}
                 </p>
               </div>
@@ -900,14 +1165,26 @@ export default function Create() {
             <>
               {creationStep === 'questionnaire' && (
                 <div data-tour="ai-wizard">
-                  <PortfolioQuestionnaire
-                    onComplete={handleQuestionnaireComplete}
+                  <AiLedPortfolioCreation
+                    key={aiFlowSessionKey}
+                    resume={aiFlowResume}
                     onCancel={() => navigate(-1)}
+                    onBeginCrystallization={handleBeginAiCrystallization}
                   />
                 </div>
               )}
               {creationStep === 'animation' && (
-                waitingForAI ? (
+                aiGenerationError ? (
+                  <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center gap-6 px-4 text-center max-w-md mx-auto">
+                    <p className="text-foreground">{aiGenerationError}</p>
+                    <Button
+                      className="bg-white text-[#050508] hover:bg-white/90 font-semibold"
+                      onClick={handleRetryAiGeneration}
+                    >
+                      Try again
+                    </Button>
+                  </div>
+                ) : waitingForAI ? (
                   <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="text-muted-foreground">Finalizing your portfolio with live market data...</p>
@@ -915,7 +1192,8 @@ export default function Create() {
                   </div>
                 ) : (
                   <ParticleCrystallizationAnimation
-                    profile={strategyProfile}
+                    key={crystallizeKey}
+                    profile={gemAnimationProfile}
                     onComplete={handleAnimationComplete}
                   />
                 )

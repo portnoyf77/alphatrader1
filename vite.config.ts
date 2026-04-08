@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => {
     };
     proxy["/api/chat"] = { ...forward };
     proxy["/api/generate-portfolio"] = { ...forward };
+    proxy["/api/portfolio-recommend"] = { ...forward };
     proxy["/api/auto-rebalance"] = { ...forward };
     proxy["/api/morning-briefing"] = { ...forward };
   }

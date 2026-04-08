@@ -1,4 +1,5 @@
 import { RiskLevel, GeoFocus } from './types';
+import type { OnboardingProfile, PortfolioRefinements } from './portfolioTypes';
 
 // Portfolio profile questionnaire types
 export interface StrategyProfile {
@@ -261,6 +262,164 @@ export function prefillFromOnboarding(onboarding: {
   }
 
   return result;
+}
+
+const AI_FLOW_NOT_SPECIFIED = 'Not specified';
+
+/** Map refinement geography label to internal preference codes. */
+export function geographyRefinementToPreference(
+  geography: string,
+): StrategyProfile['geographicPreference'] {
+  const g = geography.toLowerCase();
+  if (g.includes('emerging')) return 'emerging';
+  if (g.includes('global')) return 'global';
+  if (g.includes('primarily') && g.includes('us')) return 'us';
+  if (g === 'no preference' || g.includes('no preference')) return null;
+  return 'us';
+}
+
+/**
+ * Merge onboarding API payload + refinement choices into a StrategyProfile for
+ * persistence, risk explanations, and portfolio metadata after the AI-led flow.
+ */
+export function buildStrategyProfileFromAiFlow(
+  onboarding: OnboardingProfile,
+  refinements: PortfolioRefinements,
+): StrategyProfile {
+  const base: StrategyProfile = { ...initialProfile };
+  const prefill = prefillFromOnboarding({
+    investmentGoal:
+      onboarding.investmentGoal && onboarding.investmentGoal !== AI_FLOW_NOT_SPECIFIED
+        ? onboarding.investmentGoal
+        : undefined,
+    timeHorizon:
+      onboarding.timeHorizon && onboarding.timeHorizon !== AI_FLOW_NOT_SPECIFIED
+        ? onboarding.timeHorizon
+        : undefined,
+    annualIncome:
+      onboarding.annualIncome && onboarding.annualIncome !== AI_FLOW_NOT_SPECIFIED
+        ? onboarding.annualIncome
+        : undefined,
+    investmentExperience:
+      onboarding.investmentExperience && onboarding.investmentExperience !== AI_FLOW_NOT_SPECIFIED
+        ? onboarding.investmentExperience
+        : undefined,
+    netWorth:
+      onboarding.netWorth && onboarding.netWorth !== AI_FLOW_NOT_SPECIFIED
+        ? onboarding.netWorth
+        : undefined,
+  });
+  Object.assign(base, prefill);
+
+  if (refinements.sectors !== 'No preference' && refinements.sectors.trim()) {
+    base.sectorEmphasis = refinements.sectors.split(',').map((s) => s.trim()).filter(Boolean);
+  } else {
+    base.sectorEmphasis = [];
+  }
+
+  base.volatilityTolerance =
+    refinements.volatility === 'low' ? 10 : refinements.volatility === 'high' ? 35 : 20;
+
+  base.geographicPreference = geographyRefinementToPreference(refinements.geography);
+  base.investmentMode = 'simulated';
+
+  if (!base.drawdownReaction) {
+    base.drawdownReaction =
+      refinements.volatility === 'low'
+        ? 'sell-some'
+        : refinements.volatility === 'high'
+          ? 'buy-more'
+          : 'hold';
+  }
+  if (!base.timeline) base.timeline = '5-10';
+  if (!base.primaryGoal) base.primaryGoal = 'accumulation';
+  if (!base.hasEmergencyFund) base.hasEmergencyFund = 'yes-3mo';
+  if (!base.ageRange) base.ageRange = '40-49';
+  if (!base.incomeRange) base.incomeRange = '100k-200k';
+  if (!base.investmentExperience) base.investmentExperience = 'intermediate';
+  if (!base.portfolioSize) base.portfolioSize = '50k-250k';
+  if (!base.accountType) base.accountType = 'taxable';
+
+  return base;
+}
+
+const aiAnimLow: StrategyProfile = {
+  ...initialProfile,
+  drawdownReaction: 'sell-all',
+  volatilityTolerance: 5,
+  primaryGoal: 'preservation',
+  timeline: '1-2',
+  hasEmergencyFund: 'no',
+  ageRange: '60-plus',
+  incomeRange: 'under-50k',
+  investmentExperience: 'none',
+  portfolioSize: 'under-10k',
+  accountType: 'taxable',
+  sectorEmphasis: [],
+  geographicPreference: null,
+  investmentAmount: null,
+  investmentMode: null,
+};
+
+const aiAnimMed: StrategyProfile = {
+  ...initialProfile,
+  drawdownReaction: 'hold',
+  volatilityTolerance: 22,
+  primaryGoal: 'accumulation',
+  timeline: '5-10',
+  hasEmergencyFund: 'yes-3mo',
+  ageRange: '40-49',
+  incomeRange: '100k-200k',
+  investmentExperience: 'intermediate',
+  portfolioSize: '50k-250k',
+  accountType: 'taxable',
+  sectorEmphasis: [],
+  geographicPreference: null,
+  investmentAmount: null,
+  investmentMode: null,
+};
+
+const aiAnimHigh: StrategyProfile = {
+  ...initialProfile,
+  drawdownReaction: 'buy-more',
+  volatilityTolerance: 38,
+  primaryGoal: 'aggressive',
+  timeline: '10+',
+  hasEmergencyFund: 'yes-6mo',
+  ageRange: '18-29',
+  incomeRange: '500k-plus',
+  investmentExperience: 'advanced',
+  portfolioSize: '1m-plus',
+  accountType: 'retirement-ira',
+  sectorEmphasis: [],
+  geographicPreference: null,
+  investmentAmount: null,
+  investmentMode: null,
+};
+
+export type AiGemRiskSource =
+  | { kind: 'recommendation'; suggestedRiskLevel: 'conservative' | 'moderate' | 'aggressive' }
+  | { kind: 'volatility'; volatility: 'low' | 'moderate' | 'high' };
+
+/**
+ * Minimal StrategyProfile so deriveRiskLevel / deriveGemstone match AI suggestion
+ * (Screen 1 risk) or the user's volatility choice when Screen 1 was skipped.
+ */
+export function strategyProfileForAiAnimation(source: AiGemRiskSource): StrategyProfile {
+  let tier: 'conservative' | 'moderate' | 'aggressive';
+  if (source.kind === 'recommendation') {
+    tier = source.suggestedRiskLevel;
+  } else {
+    tier =
+      source.volatility === 'low'
+        ? 'conservative'
+        : source.volatility === 'high'
+          ? 'aggressive'
+          : 'moderate';
+  }
+  if (tier === 'conservative') return { ...aiAnimLow };
+  if (tier === 'aggressive') return { ...aiAnimHigh };
+  return { ...aiAnimMed };
 }
 
 /**
