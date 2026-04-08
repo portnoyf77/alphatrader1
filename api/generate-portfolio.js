@@ -1,12 +1,13 @@
 /**
  * Vercel serverless function: AI portfolio generation.
  *
- * Pre-fetches account, positions, and market data from Alpaca in parallel,
- * then makes a SINGLE Claude call with all data embedded in the prompt.
- * No tool-use loop -- fits within Vercel Hobby's 10-second timeout.
+ * Stage 2 of the hybrid portfolio creation flow. Takes the user's
+ * onboarding profile + their portfolio refinement choices, pre-fetches
+ * Alpaca account/market data, then makes a SINGLE Claude call to
+ * generate the actual portfolio allocation.
  *
  * POST /api/generate-portfolio
- * Body: { answers: QuestionnaireAnswers }
+ * Body: { profile: OnboardingProfile, refinements: PortfolioRefinements }
  * Returns: { holdings: GeneratedHolding[], strategy: StrategyMeta } | { error: string }
  */
 
@@ -56,7 +57,6 @@ async function fetchPositionsSummary() {
 }
 
 async function fetchMarketSnapshot() {
-  // Fetch quotes for a broad set of popular ETFs and stocks so Claude has real prices
   const symbols = [
     'VTI', 'VXUS', 'QQQ', 'SPY', 'IWM',       // broad equity
     'BND', 'TLT', 'VCIT', 'HYG',                // bonds
@@ -93,33 +93,31 @@ async function fetchTopNews() {
   } catch { return 'News data unavailable.'; }
 }
 
-// ── System prompt with all data baked in ────────────────────────
+// ── System prompt ──────────────────────────────────────────────
 
-function buildPrompt(answers, account, positions, marketData, news) {
-  return `You are Alpha, the AI portfolio architect for Alpha Trader -- a paper trading platform powered by Alpaca.
+function buildPrompt(profile, refinements, account, positions, marketData, news) {
+  return `You are Alpha, the AI portfolio architect for Alpha Trader -- a paper trading platform powered by Alpaca. This is a standard investment account (not a retirement account, 401k, or IRA).
 
 ## Your task
-Generate a personalised portfolio allocation based on the user's questionnaire answers and the live market data provided below. Output ONLY valid JSON.
+Build a concrete portfolio allocation. The user has already reviewed your initial recommendation and refined their preferences. Now generate the actual holdings.
 
-## The user's questionnaire answers
-- Investment goal: ${answers.goal}
-- Time horizon: ${answers.timeline}
-- Risk tolerance: ${answers.risk}
-- Sector preferences: ${answers.sectors}
-- Geographic preference: ${answers.geography}
-- Volatility comfort: ${answers.volatility}
-${answers.income ? `- Annual income: ${answers.income}` : ''}
-${answers.experience ? `- Investment experience: ${answers.experience}` : ''}
-${answers.accountType ? `- Account type: ${answers.accountType}` : ''}
-${answers.portfolioSize ? `- Portfolio size: ${answers.portfolioSize}` : ''}
-${answers.ageRange ? `- Age range: ${answers.ageRange}` : ''}
-${answers.emergencyFund ? `- Emergency fund: ${answers.emergencyFund}` : ''}
-${answers.investmentAmount ? `- Amount to invest: ${answers.investmentAmount}` : ''}
+## Investor profile (from onboarding)
+- Investment goal: ${profile.investmentGoal || 'Not specified'}
+- Time horizon: ${profile.timeHorizon || 'Not specified'}
+- Risk tolerance: ${profile.riskTolerance || 'Not specified'}
+- Investment experience: ${profile.investmentExperience || 'Not specified'}
+- Annual income range: ${profile.annualIncome || 'Not specified'}
+- Net worth range: ${profile.netWorth || 'Not specified'}
 
-## User's current account
+## Portfolio specifications (user's refinement choices)
+- Sector focus: ${refinements.sectors || 'No preference'}
+- Volatility tolerance: ${refinements.volatility || 'Moderate'}
+- Geographic exposure: ${refinements.geography || 'No preference'}${refinements.userFeedback ? `\n- Additional input: ${refinements.userFeedback}` : ''}
+
+## Current account
 ${account}
 
-## User's current positions
+## Current positions
 ${positions}
 
 ## Live market quotes (mid prices)
@@ -130,40 +128,31 @@ ${news}
 
 ## How to build the portfolio
 
-Based on the questionnaire answers and data above:
-1. Consider the user's account size and existing positions to avoid over-concentration
-2. Select 5-8 holdings (ETFs and/or individual stocks) that match their preferences:
-   - Risk tolerance -> asset class mix (more bonds/gold for conservative, more equities/growth for aggressive)
-   - Time horizon -> growth vs. value vs. income emphasis
-   - Sector preferences -> directly influence holding selection
-   - Geographic preference -> domestic vs. international weighting
-   - Volatility comfort -> broad index ETFs vs. concentrated plays
-3. Factor in the investor's financial profile when provided:
-   - Income level: lower income = favor lower-cost ETFs, minimize turnover; higher income = more latitude
-   - Experience: beginners get simpler, well-known ETFs; advanced investors can handle individual stocks
-   - Account type: retirement accounts favor growth (tax-deferred); taxable accounts favor tax-efficient ETFs
-   - Portfolio size: smaller portfolios need fewer, broader holdings; larger portfolios can diversify more
-   - Age: younger investors can accept more equity/growth tilt; older investors need more bonds/income
-   - Emergency fund: no cushion = reduce risk level one notch (forced selling risk)
-4. Use the live quotes above to pick from liquid, actively-traded securities
-5. Set allocation percentages that sum to exactly 100
+The investor profile tells you WHO this person is. The portfolio specifications tell you WHAT this particular portfolio should be. A single user can create multiple portfolios with different characteristics -- respect the portfolio specs even if they diverge from the profile (e.g., a conservative investor creating an aggressive portfolio is fine).
+
+1. Use the portfolio specifications as the primary driver for holdings selection
+2. Use the investor profile for context (experience level affects complexity, account size affects position count)
+3. Consider existing positions to avoid over-concentration
+4. Select 5-8 holdings (ETFs and/or individual stocks) matching the specifications
+5. Use the live quotes to pick from liquid, actively-traded securities
+6. Set allocation percentages that sum to exactly 100
 
 ## Output format (CRITICAL -- follow this exactly)
 
 Respond with valid JSON and NOTHING ELSE. No markdown, no backticks, no explanation outside the JSON.
 
-{"holdings":[{"symbol":"VTI","name":"Vanguard Total Stock Market ETF","allocation":30,"type":"ETF","reasoning":"Broad US equity exposure provides core growth..."}],"strategy":{"name":"Short Name (2-5 words)","description":"1-2 sentence summary of the strategy.","riskLevel":"conservative | moderate | aggressive","gemType":"Pearl | Sapphire | Ruby"}}
+{"holdings":[{"symbol":"VTI","name":"Vanguard Total Stock Market ETF","allocation":30,"type":"ETF","reasoning":"Broad US equity exposure provides core growth..."}],"strategy":{"name":"Short Name (2-5 words)","description":"1-2 sentence summary of the strategy and why it fits this investor.","riskLevel":"conservative | moderate | aggressive","gemType":"Pearl | Sapphire | Ruby"}}
 
 Rules:
 - "allocation" values are integers summing to exactly 100
 - "type" is one of: "ETF", "Stock", "Bond ETF", "Commodity ETF", "REIT"
-- "reasoning" is 1-2 sentences per holding
-- "riskLevel": conservative if cautious/low, aggressive if high, moderate otherwise
+- "reasoning" is 1-2 sentences per holding explaining why it fits THIS portfolio's specs
+- "riskLevel": derive from the portfolio specifications (not the user's profile)
 - "gemType": Pearl for conservative, Sapphire for moderate, Ruby for aggressive
 - ONLY include tradeable US securities available on Alpaca
 - This is paper trading. Be concrete and opinionated, not generic.
-- If the user wants tech, include tech-heavy holdings. If income, include dividend/bond ETFs.
-- Genuinely reflect their stated preferences. Do NOT give everyone the same 60/40 template.`;
+- Genuinely reflect the portfolio specifications. Do NOT give everyone the same 60/40 template.
+- The strategy "description" should reference what makes this portfolio unique.`;
 }
 
 // ── Main handler ────────────────────────────────────────────────
@@ -179,15 +168,13 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-  const { answers } = req.body;
-  if (!answers || typeof answers !== 'object') {
-    return res.status(400).json({ error: 'answers object required' });
-  }
+  const { profile, refinements } = req.body;
 
-  const requiredKeys = ['goal', 'timeline', 'risk', 'sectors', 'geography', 'volatility'];
-  const missing = requiredKeys.filter(k => !answers[k]);
-  if (missing.length > 0) {
-    return res.status(400).json({ error: `Missing: ${missing.join(', ')}` });
+  if (!profile || typeof profile !== 'object') {
+    return res.status(400).json({ error: 'profile object required' });
+  }
+  if (!refinements || typeof refinements !== 'object') {
+    return res.status(400).json({ error: 'refinements object required' });
   }
 
   try {
@@ -200,7 +187,7 @@ export default async function handler(req, res) {
     ]);
 
     // Step 2: Single Claude call with all data in the prompt (~3-5 seconds)
-    const systemPrompt = buildPrompt(answers, account, positions, marketData, news);
+    const systemPrompt = buildPrompt(profile, refinements, account, positions, marketData, news);
 
     const anthropicRes = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',

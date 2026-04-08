@@ -1,9 +1,11 @@
 /**
- * Types for AI-generated portfolio allocations.
+ * Types for the hybrid AI-led portfolio creation flow.
  *
- * Used by portfolioService.ts and the Invest.tsx / PortfolioQuestionnaire.tsx
- * components to replace the old hardcoded holdings.
+ * Stage 1: portfolio-recommend -- AI proposes a direction based on user profile
+ * Stage 2: generate-portfolio -- AI builds the allocation using profile + refinements
  */
+
+// ── Shared types ───────────────────────────────────────────────
 
 /** A single holding in the generated portfolio. */
 export interface GeneratedHolding {
@@ -12,7 +14,7 @@ export interface GeneratedHolding {
   /** Percentage allocation (integer, all holdings sum to 100) */
   allocation: number;
   type: 'ETF' | 'Stock' | 'Bond ETF' | 'Commodity ETF' | 'REIT';
-  /** 1-2 sentence explanation of why this holding fits the investor's profile */
+  /** 1-2 sentence explanation of why this holding fits the portfolio specs */
   reasoning: string;
 }
 
@@ -24,13 +26,52 @@ export interface StrategyMeta {
   gemType: 'Pearl' | 'Sapphire' | 'Ruby';
 }
 
+// ── Stage 1: Portfolio Recommendation ──────────────────────────
+
+/** User's onboarding profile data sent to /api/portfolio-recommend and /api/generate-portfolio. */
+export interface OnboardingProfile {
+  investmentGoal: string;
+  timeHorizon: string;
+  riskTolerance: string;
+  investmentExperience: string;
+  annualIncome: string;
+  netWorth: string;
+}
+
+/** Response from /api/portfolio-recommend. */
+export interface PortfolioRecommendation {
+  /** 2-3 paragraph natural language recommendation with reasoning */
+  recommendation: string;
+  suggestedRiskLevel: 'conservative' | 'moderate' | 'aggressive';
+  suggestedApproach: string;
+  suggestedSectors: string[];
+  suggestedGeography: string;
+  suggestedVolatility: 'low' | 'moderate' | 'high';
+}
+
+// ── Stage 2: Portfolio Generation ──────────────────────────────
+
+/** The user's portfolio-specific refinement choices. */
+export interface PortfolioRefinements {
+  /** Comma-separated sector preferences, or "No preference" */
+  sectors: string;
+  /** Volatility tolerance: "low", "moderate", "high" */
+  volatility: string;
+  /** Geographic exposure preference */
+  geography: string;
+  /** Optional free-text feedback on the AI's initial recommendation */
+  userFeedback?: string;
+}
+
 /** The full response from /api/generate-portfolio. */
 export interface GeneratePortfolioResponse {
   holdings: GeneratedHolding[];
   strategy: StrategyMeta;
 }
 
-/** The questionnaire answers sent to the API. */
+// ── Legacy (kept for backward compatibility during migration) ──
+
+/** @deprecated Use OnboardingProfile + PortfolioRefinements instead. */
 export interface QuestionnaireAnswers {
   goal: string;
   timeline: string;
@@ -38,13 +79,4 @@ export interface QuestionnaireAnswers {
   sectors: string;
   geography: string;
   volatility: string;
-  // Phase 3: Financial Profile (optional for backward compat)
-  income?: string;
-  experience?: string;
-  accountType?: string;
-  portfolioSize?: string;
-  ageRange?: string;
-  emergencyFund?: string;
-  /** Dollar amount the user chose to invest (formatted string for the AI prompt). */
-  investmentAmount?: string;
 }

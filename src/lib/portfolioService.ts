@@ -1,37 +1,77 @@
 /**
- * Client-side service for AI portfolio generation.
+ * Client-side service for the hybrid AI-led portfolio creation flow.
  *
- * Calls /api/generate-portfolio with questionnaire answers and returns
- * personalised holdings + strategy metadata from Claude.
+ * Stage 1: getPortfolioRecommendation() -- AI proposes a direction based on profile
+ * Stage 2: generatePortfolio() -- AI builds the allocation using profile + refinements
  */
 
 import type {
-  QuestionnaireAnswers,
+  OnboardingProfile,
+  PortfolioRecommendation,
+  PortfolioRefinements,
   GeneratePortfolioResponse,
 } from './portfolioTypes';
 import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
 
 /**
- * Request an AI-generated portfolio allocation.
+ * Stage 1: Get AI's portfolio recommendation based on the user's profile.
  *
- * @param answers - The user's 6 questionnaire answers.
- * @returns The generated portfolio, or throws with a user-friendly message.
+ * Call this when the user enters the portfolio creation flow. The AI
+ * reads their onboarding data and proposes a starting direction with
+ * clear reasoning the UI can display.
  *
- * Usage in Invest.tsx or PortfolioQuestionnaire.tsx:
+ * @param profile - The user's onboarding profile data.
+ * @returns AI recommendation with suggested risk level, sectors, etc.
+ */
+export async function getPortfolioRecommendation(
+  profile: OnboardingProfile,
+): Promise<PortfolioRecommendation> {
+  let res: Response;
+  try {
+    res = await fetch(serverlessApiUrl('/api/portfolio-recommend'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile }),
+    });
+  } catch (e) {
+    throw new Error(explainServerlessNetworkError(e));
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: 'Network error' }));
+    throw new Error(body.error || `Recommendation failed (${res.status})`);
+  }
+
+  const data: PortfolioRecommendation = await res.json();
+
+  if (!data.recommendation) {
+    throw new Error('AI returned an empty recommendation. Please try again.');
+  }
+
+  return data;
+}
+
+/**
+ * Stage 2: Generate the actual portfolio allocation.
  *
- *   const result = await generatePortfolio(answers);
- *   // result.holdings  -> GeneratedHolding[]  (replaces enhancedGeneratedHoldings)
- *   // result.strategy  -> StrategyMeta        (name, description, gemType, riskLevel)
+ * Call this after the user has reviewed the AI's recommendation and
+ * refined their portfolio preferences. This fires during the
+ * crystallization animation.
+ *
+ * @param profile - The user's onboarding profile data.
+ * @param refinements - The user's portfolio-specific choices (sectors, volatility, geography).
+ * @returns Generated holdings and strategy metadata.
  */
 export async function generatePortfolio(
-  answers: QuestionnaireAnswers,
+  profile: OnboardingProfile,
+  refinements: PortfolioRefinements,
 ): Promise<GeneratePortfolioResponse> {
   let res: Response;
   try {
     res = await fetch(serverlessApiUrl('/api/generate-portfolio'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers }),
+      body: JSON.stringify({ profile, refinements }),
     });
   } catch (e) {
     throw new Error(explainServerlessNetworkError(e));
@@ -44,7 +84,6 @@ export async function generatePortfolio(
 
   const data: GeneratePortfolioResponse = await res.json();
 
-  // Sanity check: make sure we got holdings back
   if (!data.holdings || data.holdings.length === 0) {
     throw new Error('AI returned an empty portfolio. Please try again.');
   }
