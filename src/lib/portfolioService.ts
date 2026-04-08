@@ -10,8 +10,11 @@ import type {
   PortfolioRecommendation,
   PortfolioRefinements,
   GeneratePortfolioResponse,
+  GeneratedHolding,
+  StrategyMeta,
 } from './portfolioTypes';
 import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
+import { placeMarketOrderNotional, type AlpacaOrder } from '@/lib/alpacaClient';
 
 /** Per-question AI advice for the portfolio wizard (re-exported for a single import surface). */
 export { getPortfolioAdvice, type PortfolioAdviceResponse } from './portfolioAdvice';
@@ -92,4 +95,39 @@ export async function generatePortfolio(
   }
 
   return data;
+}
+
+const MIN_EXECUTE_USD = 100;
+
+/**
+ * Place Alpaca market orders (notional) for each holding in proportion to allocation.
+ *
+ * @param holdings - Generated portfolio holdings (weights sum to 100).
+ * @param strategy - Strategy metadata from generate-portfolio.
+ * @param investmentAmount - Total dollars to deploy across holdings.
+ * @param portfolioName - Strategy display name (reserved for order tagging).
+ */
+export async function executePortfolio(
+  holdings: GeneratedHolding[],
+  _strategy: StrategyMeta,
+  investmentAmount: number,
+  _portfolioName: string,
+): Promise<{ orders: AlpacaOrder[] }> {
+  if (!Number.isFinite(investmentAmount) || investmentAmount < MIN_EXECUTE_USD) {
+    throw new Error(`Investment amount must be at least $${MIN_EXECUTE_USD}.`);
+  }
+  if (!holdings.length) {
+    throw new Error('No holdings to execute.');
+  }
+  const orders: AlpacaOrder[] = [];
+  for (const h of holdings) {
+    const notional = (investmentAmount * h.allocation) / 100;
+    if (notional < 1) continue;
+    const order = await placeMarketOrderNotional(h.symbol, notional, 'buy');
+    orders.push(order);
+  }
+  if (orders.length === 0) {
+    throw new Error('No orders met the minimum notional size.');
+  }
+  return { orders };
 }

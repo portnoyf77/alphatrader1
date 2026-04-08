@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
-import { generatePortfolio } from '@/lib/portfolioService';
+import { generatePortfolio, executePortfolio } from '@/lib/portfolioService';
 import type {
   GeneratePortfolioResponse,
+  GeneratedHolding as ApiGeneratedHolding,
   OnboardingProfile,
   PortfolioRefinements,
 } from '@/lib/portfolioTypes';
@@ -87,6 +88,26 @@ const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
   International: <Globe className="h-3 w-3" />,
 };
 
+/** Max holdings shown after AI generation; weights are renormalized to sum to 100%. */
+const AI_RESULTS_MAX_HOLDINGS = 6;
+
+function capHoldingsByAllocation<T extends { allocation: number }>(holdings: T[], max: number): T[] {
+  const sorted = [...holdings].sort((a, b) => b.allocation - a.allocation);
+  const top = sorted.slice(0, max);
+  const sum = top.reduce((s, h) => s + h.allocation, 0);
+  if (top.length === 0 || sum === 0) return top;
+  const floors = top.map((h) => Math.floor((h.allocation / sum) * 100));
+  let drift = 100 - floors.reduce((s, x) => s + x, 0);
+  const allocations = [...floors];
+  let i = 0;
+  while (drift > 0) {
+    allocations[i % allocations.length] += 1;
+    drift -= 1;
+    i += 1;
+  }
+  return top.map((h, idx) => ({ ...h, allocation: allocations[idx] }));
+}
+
 type CreationStep = 'questionnaire' | 'animation' | 'results';
 type CreationTab = 'ai' | 'manual';
 
@@ -144,6 +165,7 @@ export default function Create() {
   const aiResultRef = useRef<GeneratePortfolioResponse | null>(null);
   const aiErrorRef = useRef<string | null>(null);
   const [waitingForAI, setWaitingForAI] = useState(false);
+  const [investExecuting, setInvestExecuting] = useState(false);
 
   // Fetch live prices when portfolio is generated
   const fetchPrices = useCallback(async (tickers: string[]) => {
@@ -280,9 +302,9 @@ export default function Create() {
       riskLevel: ai.strategy?.riskLevel || 'moderate',
     });
 
-    const sortedHoldings = [...ai.holdings].sort((a, b) => b.allocation - a.allocation);
+    const cappedApiHoldings = capHoldingsByAllocation(ai.holdings, AI_RESULTS_MAX_HOLDINGS);
 
-    const aiHoldings: GeneratedHolding[] = sortedHoldings.map(h => ({
+    const aiHoldings: GeneratedHolding[] = cappedApiHoldings.map(h => ({
       ticker: h.symbol,
       name: h.name,
       weight: h.allocation,
@@ -293,9 +315,9 @@ export default function Create() {
       tradeoff: '',
     }));
 
-    // Build strategy breakdown from holdings
+    // Build strategy breakdown from capped holdings
     const breakdownMap = new Map<string, number>();
-    for (const h of ai.holdings) {
+    for (const h of cappedApiHoldings) {
       const existing = breakdownMap.get(h.type) || 0;
       breakdownMap.set(h.type, existing + h.allocation);
     }
@@ -346,6 +368,7 @@ export default function Create() {
     aiFlowActiveRef.current = false;
     aiResultRef.current = null;
     aiErrorRef.current = null;
+    setInvestExecuting(false);
   };
 
   const persistPortfolio = async (portfolioId: string, status: 'live' | 'simulating') => {
@@ -455,232 +478,282 @@ export default function Create() {
   const renderAiLedResults = () => {
     if (!generatedPortfolio) return null;
     const aiHoldingsSorted = [...generatedPortfolio.holdings].sort((a, b) => b.weight - a.weight);
+
     return (
-      <div className="space-y-6 qa-reveal-stagger">
-        <div className="space-y-2">
-          <h2
-            className="text-2xl sm:text-3xl font-bold text-foreground"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            {aiStrategyMeta?.name ?? generatedPortfolio.name}
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed">
-            {aiStrategyMeta?.description ?? generatedPortfolio.rationale}
-          </p>
-        </div>
+      <div className="qa-reveal-stagger relative pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))]">
+        <div className="max-h-[min(520px,calc(100dvh-11rem))] overflow-y-auto overscroll-contain space-y-2 pr-0.5">
+            <div className="space-y-1">
+              <h2
+                className="text-xl sm:text-2xl font-bold text-foreground leading-tight"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                {aiStrategyMeta?.name ?? generatedPortfolio.name}
+              </h2>
+              <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
+                {aiStrategyMeta?.description ?? generatedPortfolio.rationale}
+              </p>
+            </div>
 
-        <div className="grid gap-4">
-          {aiHoldingsSorted.map((holding) => (
-            <Card
-              key={holding.ticker}
-              className="glass-card border-white/10 backdrop-blur-md"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
-            >
-              <CardContent className="p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="space-y-2 flex-1 min-w-0">
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="font-bold text-lg text-white">{holding.ticker}</span>
-                    <span className="text-sm text-white/75">{holding.name}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{holding.explanation}</p>
-                </div>
-                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                  <span className="text-3xl font-bold tabular-nums text-white">{holding.weight}%</span>
-                  <Badge
-                    variant="outline"
-                    className="text-xs border-white/20 bg-white/5"
-                    style={{ color: 'rgba(248,250,252,0.85)' }}
+            <div className="flex flex-col gap-1">
+              {aiHoldingsSorted.map((holding) => {
+                const typeLabel = holding.characteristics[0] ?? holding.role;
+                return (
+                  <details
+                    key={holding.ticker}
+                    className="group rounded-lg border border-white/10 bg-white/[0.03] open:bg-white/[0.05] transition-colors"
                   >
-                    {holding.characteristics[0] ?? holding.role}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    <summary className="flex cursor-pointer list-none items-center gap-2 px-2.5 py-1.5 text-sm [&::-webkit-details-marker]:hidden">
+                      <span className="shrink-0 font-semibold tabular-nums text-foreground">{holding.ticker}</span>
+                      <span className="min-w-0 flex-1 truncate text-muted-foreground">{holding.name}</span>
+                      <span className="shrink-0 tabular-nums font-semibold text-foreground">{holding.weight}%</span>
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 border-white/20 bg-white/5 px-1.5 py-0 text-[10px] uppercase tracking-wide"
+                      >
+                        {typeLabel}
+                      </Badge>
+                      <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-60 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="border-t border-white/[0.06] px-2.5 py-2 text-xs leading-snug text-muted-foreground">
+                      {holding.explanation}
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
 
-        <Card className="glass-card border-destructive/30">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Key Risks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base text-muted-foreground leading-relaxed">{generatedPortfolio.risks}</p>
-          </CardContent>
-        </Card>
+            <Collapsible defaultOpen={false}>
+              <div className="rounded-lg border border-destructive/25 bg-destructive/[0.06]">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-2 px-2.5 py-2 text-left text-sm font-medium text-foreground"
+                >
+                  <span className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
+                    Key Risks
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-2.5 pb-2.5">
+                <p className="text-xs leading-relaxed text-muted-foreground">{generatedPortfolio.risks}</p>
+              </CollapsibleContent>
+              </div>
+            </Collapsible>
 
-        <Collapsible>
-          <CollapsibleTrigger asChild>
-            <button
-              type="button"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-[rgba(124,58,237,0.28)] bg-[rgba(124,58,237,0.06)] hover:bg-[rgba(124,58,237,0.1)] transition-colors text-sm"
-            >
-              <span className="flex items-center gap-2 text-foreground font-medium">
-                <Info className="h-4 w-4 text-violet-400" />
-                How we built your portfolio
-              </span>
-              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
-            </button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
-            <Card className="glass-card border-white/10">
-              <CardContent className="p-5 space-y-3 text-sm text-muted-foreground leading-relaxed">
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-lg border border-[rgba(124,58,237,0.28)] bg-[rgba(124,58,237,0.06)] px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-[rgba(124,58,237,0.1)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-violet-400" />
+                    How we built your portfolio
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-xs leading-relaxed text-muted-foreground">
                 <p>{aiStrategyMeta?.description ?? generatedPortfolio.rationale}</p>
-                <p>
-                  The AI analyzed live market data, your onboarding investor profile, and the sector, volatility,
-                  and geography preferences you chose during refinement — so this allocation is personalized, not a
-                  fixed template.
+                <p className="mt-2">
+                  The AI analyzed live market data, your onboarding investor profile, and the sector, volatility, and
+                  geography preferences you chose during refinement — so this allocation is personalized, not a fixed
+                  template.
                 </p>
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
+              </CollapsibleContent>
+            </Collapsible>
 
-        <Collapsible open={editOpen} onOpenChange={setEditOpen}>
-          <CollapsibleTrigger asChild>
-            <button
-              type="button"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/30 bg-secondary/20 hover:bg-secondary/40 transition-colors text-sm"
-            >
-              <span className="text-muted-foreground">Want to adjust? You can add, remove, or change holdings.</span>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${editOpen ? 'rotate-180' : ''}`} />
-            </button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
-            <Card className="glass-card">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">Edit Holdings</CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={autoBalance}>
-                    <Scale className="h-3.5 w-3.5 mr-1.5" />
-                    Auto-Balance
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={addHolding}>
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    Add Holding
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ticker</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="text-right">Weight (%)</TableHead>
-                      <TableHead className="w-12" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {editableHoldings.map((h) => (
-                      <TableRow key={h.id}>
-                        <TableCell>
-                          <Input
-                            value={h.ticker}
-                            onChange={(e) =>
-                              setEditableHoldings((prev) =>
-                                prev.map((x) =>
-                                  x.id === h.id ? { ...x, ticker: e.target.value.toUpperCase() } : x,
-                                ),
-                              )
-                            }
-                            className="bg-secondary w-20"
-                          />
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{h.name || '—'}</TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={0.1}
-                            required
-                            value={h.weight || ''}
-                            onChange={(e) => updateHoldingWeight(h.id, parseFloat(e.target.value) || 0)}
-                            className="bg-secondary text-right w-20 ml-auto"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeHolding(h.id)}
-                            disabled={editableHoldings.length <= 1}
-                          >
-                            <Trash2 className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className="mt-3 space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Total Weight</span>
-                    <span
-                      className={cn(
-                        'font-medium tabular-nums',
-                        totalWeight === 100 ? 'text-success' : 'text-warning',
+            <Collapsible open={editOpen} onOpenChange={setEditOpen}>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-lg border border-border/30 bg-secondary/20 px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-secondary/40"
+                >
+                  <span>Edit holdings (add, remove, weights)</span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 transition-transform ${editOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <Card className="glass-card">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
+                    <CardTitle className="text-sm">Edit Holdings</CardTitle>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={autoBalance}>
+                        <Scale className="h-3 w-3 mr-1" />
+                        Balance
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={addHolding}>
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-3">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="h-8 text-xs">Ticker</TableHead>
+                          <TableHead className="h-8 text-xs">Name</TableHead>
+                          <TableHead className="h-8 w-[4.5rem] text-right text-xs">%</TableHead>
+                          <TableHead className="h-8 w-8 p-0" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {editableHoldings.map((h) => (
+                          <TableRow key={h.id}>
+                            <TableCell className="py-1.5">
+                              <Input
+                                value={h.ticker}
+                                onChange={(e) =>
+                                  setEditableHoldings((prev) =>
+                                    prev.map((x) =>
+                                      x.id === h.id ? { ...x, ticker: e.target.value.toUpperCase() } : x,
+                                    ),
+                                  )
+                                }
+                                className="h-8 bg-secondary text-xs"
+                              />
+                            </TableCell>
+                            <TableCell className="py-1.5 text-muted-foreground text-xs">{h.name || '—'}</TableCell>
+                            <TableCell className="py-1.5">
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                step={0.1}
+                                required
+                                value={h.weight || ''}
+                                onChange={(e) => updateHoldingWeight(h.id, parseFloat(e.target.value) || 0)}
+                                className="h-8 bg-secondary text-right text-xs"
+                              />
+                            </TableCell>
+                            <TableCell className="py-1.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => removeHolding(h.id)}
+                                disabled={editableHoldings.length <= 1}
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Total Weight</span>
+                        <span
+                          className={cn(
+                            'font-medium tabular-nums',
+                            totalWeight === 100 ? 'text-success' : 'text-warning',
+                          )}
+                        >
+                          {totalWeight.toFixed(1)}%
+                          {totalWeight !== 100 && ' (target 100%)'}
+                        </span>
+                      </div>
+                      {totalWeight !== 100 && (
+                        <p className="text-xs text-warning">Adjust weights to total 100%.</p>
                       )}
-                    >
-                      {totalWeight.toFixed(1)}%
-                      {totalWeight !== 100 && ' (target 100%)'}
-                    </span>
-                  </div>
-                  {totalWeight !== 100 && (
-                    <p className="text-sm text-warning animate-in fade-in duration-200">
-                      Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
-
-        <div className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              className="flex-1 h-12 bg-white text-[#050508] hover:bg-white/90 font-semibold"
-              disabled={editOpen && totalWeight !== 100}
-              onClick={async () => {
-                const portfolioId = generatedStrategyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                const savedId = await persistPortfolio(portfolioId, 'simulating');
-                navigate(`/simulation/${savedId || portfolioId}`);
-              }}
-            >
-              <Scale className="h-5 w-5 mr-2" />
-              Invest
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-12 sm:min-w-[140px] border-white/25 bg-transparent text-white hover:bg-white/10"
-              onClick={handleAdjustFromAiResults}
-            >
-              Adjust
-            </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
-          <p className="text-sm text-muted-foreground text-center">
-            Paper trading uses real market data with no money at risk. You can refine allocations above before you
-            invest.
-          </p>
-          <p className="text-sm text-muted-foreground text-center">
-            Platform fee: 0.25% annually on invested capital
-          </p>
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={handleStartOver}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
-            >
-              ↺ Start Over
-            </button>
+
+          <div
+            className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#050508]/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_32px_rgba(0,0,0,0.45)] backdrop-blur-md supports-[backdrop-filter]:bg-[#050508]/85"
+            style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
+          >
+            <div className="mx-auto flex max-w-3xl flex-col gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                <Button
+                  className="h-11 flex-1 bg-white text-[#050508] hover:bg-white/90 font-semibold"
+                  disabled={investExecuting || totalWeight !== 100}
+                  onClick={async () => {
+                    const ai = aiResultRef.current;
+                    const investmentAmount = strategyProfile.investmentAmount;
+                    if (!ai || investmentAmount == null) {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Missing data',
+                        description: 'Portfolio or investment amount is unavailable. Try creating the portfolio again.',
+                      });
+                      return;
+                    }
+                    try {
+                      setInvestExecuting(true);
+                      const holdingsPayload: ApiGeneratedHolding[] = editableHoldings.map((eh) => {
+                        const orig = ai.holdings.find((o) => o.symbol === eh.ticker);
+                        return {
+                          symbol: eh.ticker,
+                          name: orig?.name ?? eh.name,
+                          allocation: eh.weight,
+                          type: orig?.type ?? 'ETF',
+                          reasoning: orig?.reasoning ?? '',
+                        };
+                      });
+                      await executePortfolio(
+                        holdingsPayload,
+                        ai.strategy,
+                        investmentAmount,
+                        ai.strategy.name,
+                      );
+                      toast({
+                        title: 'Orders submitted',
+                        description: 'Your portfolio trades are being placed. Taking you to the dashboard.',
+                      });
+                      navigate('/dashboard');
+                    } catch (err) {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Could not place trades',
+                        description: err instanceof Error ? err.message : 'Unknown error',
+                      });
+                    } finally {
+                      setInvestExecuting(false);
+                    }
+                  }}
+                >
+                  {investExecuting ? (
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <Scale className="h-5 w-5 mr-2" />
+                  )}
+                  Invest
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-11 border-white/25 bg-transparent text-white hover:bg-white/10 sm:min-w-[120px]"
+                  onClick={handleAdjustFromAiResults}
+                >
+                  Adjust
+                </Button>
+              </div>
+              <p className="text-center text-[10px] leading-tight text-muted-foreground">
+                Paper trading — refine weights above, then invest. Platform fee: 0.25% annually.
+              </p>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleStartOver}
+                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ↺ Start Over
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
     );
   };
 

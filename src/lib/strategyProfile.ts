@@ -333,6 +333,14 @@ export function buildStrategyProfileFromAiFlow(
   base.geographicPreference = geographyRefinementToPreference(refinements.geography);
   base.investmentMode = 'simulated';
 
+  if (
+    refinements.investmentAmount != null &&
+    Number.isFinite(refinements.investmentAmount) &&
+    refinements.investmentAmount > 0
+  ) {
+    base.investmentAmount = refinements.investmentAmount;
+  }
+
   if (!base.drawdownReaction) {
     base.drawdownReaction =
       refinements.volatility === 'low'

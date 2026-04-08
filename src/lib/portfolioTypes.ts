@@ -61,6 +61,8 @@ export interface PortfolioRefinements {
   geography: string;
   /** Optional free-text feedback on the AI's initial recommendation */
   userFeedback?: string;
+  /** Dollar amount from the AI wizard investment step (Q5). */
+  investmentAmount?: number;
 }
 
 /** The full response from /api/generate-portfolio. */

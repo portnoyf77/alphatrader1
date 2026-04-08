@@ -224,6 +224,40 @@ export async function placeOrder(
 }
 
 /**
+ * POST /v2/orders with `notional` (dollar amount) for fractional market orders (paper API).
+ */
+export async function placeMarketOrderNotional(
+  symbol: string,
+  notionalUsd: number,
+  side: AlpacaOrderSide = "buy",
+): Promise<AlpacaOrder> {
+  const sym = symbol.trim().toUpperCase();
+  if (!sym) {
+    throw new Error("Symbol is required");
+  }
+  if (!Number.isFinite(notionalUsd) || notionalUsd < 1) {
+    throw new Error("Notional amount must be at least $1");
+  }
+  const body: Record<string, string> = {
+    symbol: sym,
+    notional: notionalUsd.toFixed(2),
+    side,
+    type: "market",
+    time_in_force: "day",
+  };
+  const res = await fetch(`${TRADING_PROXY_PREFIX}/v2/orders`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await throwAlpacaError(res);
+  return res.json() as Promise<AlpacaOrder>;
+}
+
+/**
  * GET /v2/positions.
  */
 export async function getPositions(): Promise<AlpacaPosition[]> {

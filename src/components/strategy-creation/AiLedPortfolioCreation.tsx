@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { StrategyProfile } from '@/lib/strategyProfile';
 import { strategyProfileForAiAnimation } from '@/lib/strategyProfile';
+import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 
 const NOT_SPECIFIED = 'Not specified';
 
@@ -31,6 +32,7 @@ const SECTOR_PILLS = [
 const GEO_OPTIONS = ['US focused', 'Global mix', 'Emerging markets', 'No preference'] as const;
 
 const INVESTMENT_QUICK_PICKS = [1_000, 5_000, 10_000, 25_000, 50_000, 100_000] as const;
+const MIN_INVESTMENT_USD = 100;
 
 const SECTOR_OPTIONS_PROMPT =
   'Technology, Healthcare, Financials, Consumer, Communication, Industrials, Energy, Utilities, Real Estate, Materials, No preference';
@@ -196,6 +198,7 @@ function buildRefinementsFromWizard(
     volatility: vol,
     geography: geo,
     userFeedback,
+    investmentAmount,
   };
   if (sectors.has('No preference') || sectors.size === 0) {
     return base;
@@ -245,6 +248,8 @@ export function AiLedPortfolioCreation({
   resume,
 }: AiLedPortfolioCreationProps) {
   const { user, isLoading: authLoading } = useMockAuth();
+  const { account: alpacaAccount, loading: alpacaAccountLoading, error: alpacaAccountError } =
+    useAlpacaAccount();
   const booted = useRef(false);
   const skipAdviceFetchRef = useRef(!!resume?.wizardState);
 
@@ -421,12 +426,23 @@ export function AiLedPortfolioCreation({
     transitionTo(step - 1, 'left');
   };
 
+  const buyingPower = alpacaAccount?.buyingPower ?? null;
+
   const canProceed = (() => {
     if (step === 0) return goal != null;
     if (step === 1) return risk != null;
     if (step === 2) return sectors.size > 0;
     if (step === 3) return geography != null;
-    if (step === 4) return investmentAmount != null && investmentAmount > 0;
+    if (step === 4) {
+      if (alpacaAccountLoading) return false;
+      if (alpacaAccountError || buyingPower == null) return false;
+      if (investmentAmount == null) return false;
+      return (
+        investmentAmount >= MIN_INVESTMENT_USD &&
+        investmentAmount <= buyingPower &&
+        buyingPower >= MIN_INVESTMENT_USD
+      );
+    }
     return false;
   })();
 
@@ -662,6 +678,33 @@ export function AiLedPortfolioCreation({
 
             {step === 4 && (
               <div className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  {alpacaAccountLoading ? (
+                    'Loading account…'
+                  ) : alpacaAccountError ? (
+                    <span className="text-destructive">{alpacaAccountError}</span>
+                  ) : buyingPower != null ? (
+                    <>
+                      Available:{' '}
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }).format(buyingPower)}
+                    </>
+                  ) : (
+                    'Unable to read buying power.'
+                  )}
+                </p>
+                {step === 4 &&
+                  !alpacaAccountLoading &&
+                  buyingPower != null &&
+                  buyingPower < MIN_INVESTMENT_USD && (
+                    <p className="text-sm text-center text-destructive">
+                      Buying power is below the ${MIN_INVESTMENT_USD.toLocaleString('en-US')} minimum to invest.
+                    </p>
+                  )}
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
                     $
@@ -672,20 +715,47 @@ export function AiLedPortfolioCreation({
                     placeholder="Amount"
                     value={amountInput}
                     onChange={(e) => onAmountInputChange(e.target.value)}
+                    disabled={alpacaAccountLoading || buyingPower == null}
                     className="pl-7 h-12 rounded-xl bg-white/[0.02] border-white/10 text-foreground"
                   />
                 </div>
+                {step === 4 &&
+                  !alpacaAccountLoading &&
+                  buyingPower != null &&
+                  investmentAmount != null &&
+                  investmentAmount > 0 &&
+                  investmentAmount < MIN_INVESTMENT_USD && (
+                    <p className="text-sm text-center text-destructive">
+                      Minimum investment is ${MIN_INVESTMENT_USD.toLocaleString('en-US')}.
+                    </p>
+                  )}
+                {step === 4 &&
+                  !alpacaAccountLoading &&
+                  buyingPower != null &&
+                  investmentAmount != null &&
+                  investmentAmount > buyingPower && (
+                    <p className="text-sm text-center text-destructive">
+                      Amount exceeds available buying power.
+                    </p>
+                  )}
                 <div className="flex flex-wrap gap-2 justify-center">
                   {INVESTMENT_QUICK_PICKS.map((n) => {
                     const selected = investmentAmount === n;
+                    const pickDisabled =
+                      alpacaAccountLoading ||
+                      buyingPower == null ||
+                      n < MIN_INVESTMENT_USD ||
+                      n > buyingPower;
                     return (
                       <button
                         key={n}
                         type="button"
+                        disabled={pickDisabled}
                         onClick={() => pickInvestmentAmount(n)}
                         className={cn(
                           'rounded-full px-4 py-2 text-sm transition-all',
-                          selected
+                          pickDisabled && 'opacity-40 cursor-not-allowed',
+                          selected && !pickDisabled
                             ? 'border border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
                             : 'border border-white/10 bg-transparent text-foreground/90 hover:border-white/20',
                         )}
