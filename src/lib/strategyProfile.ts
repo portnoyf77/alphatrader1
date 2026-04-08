@@ -19,7 +19,7 @@ export interface StrategyProfile {
   sectorEmphasis: string[];
   geographicPreference: 'us' | 'global' | 'emerging' | 'international' | null;
   // Phase 5: Final details
-  investmentAmount: '1k' | '5k' | '10k' | '25k' | '50k' | '100k-plus' | null;
+  investmentAmount: number | null;
   investmentMode: 'simulated' | 'real' | null;
 
   // Legacy fields kept for compatibility with animation/generation
@@ -29,6 +29,9 @@ export interface StrategyProfile {
   managementApproach?: string | null;
   initialInvestment?: number;
 }
+
+/** Paper-trading default for questionnaire max investment / validation. */
+export const QUESTIONNAIRE_PAPER_AVAILABLE_USD = 100_000;
 
 export const initialProfile: StrategyProfile = {
   primaryGoal: null,
@@ -59,7 +62,7 @@ export interface QuestionOption {
 export interface Question {
   id: keyof StrategyProfile;
   phase: 1 | 2 | 3 | 4;
-  type: 'single' | 'multi' | 'slider';
+  type: 'single' | 'multi' | 'slider' | 'amount';
   question: string;
   subtitle?: string;
   options?: QuestionOption[];
@@ -69,6 +72,7 @@ export interface Question {
     step: number;
     unit: string;
   };
+  amountConfig?: { min: number; presets: number[] };
   isOptional?: boolean;
 }
 
@@ -162,17 +166,10 @@ export const questions: Question[] = [
   {
     id: 'investmentAmount',
     phase: 4,
-    type: 'single',
+    type: 'amount',
     question: 'How much do you want to put in right now?',
     subtitle: "You can always add more later. Pick a starting amount you're comfortable with.",
-    options: [
-      { value: '1k', label: '$1,000', description: 'A great starting point to learn how investing works' },
-      { value: '5k', label: '$5,000', description: 'Enough to build a small but diversified portfolio' },
-      { value: '10k', label: '$10,000', description: 'A solid foundation -- room to spread across multiple holdings' },
-      { value: '25k', label: '$25,000', description: 'Serious starting capital with room for broad diversification' },
-      { value: '50k', label: '$50,000', description: 'A substantial portfolio with full flexibility' },
-      { value: '100k-plus', label: '$100,000+', description: 'Major investment -- the full toolkit is available' },
-    ],
+    amountConfig: { min: 100, presets: [1000, 5000, 10000, 25000, 50000] },
   },
   {
     id: 'investmentMode',
@@ -535,6 +532,16 @@ export function isPhaseComplete(profile: StrategyProfile, phase: 1 | 2 | 3 | 4):
     const value = profile[q.id];
     if (Array.isArray(value)) return true;
     if (q.type === 'slider') return true;
+    if (q.type === 'amount') {
+      const n = profile.investmentAmount;
+      const min = q.amountConfig?.min ?? 0;
+      return (
+        typeof n === 'number' &&
+        !Number.isNaN(n) &&
+        n >= min &&
+        n <= QUESTIONNAIRE_PAPER_AVAILABLE_USD
+      );
+    }
     return value !== null && value !== undefined;
   });
 }
@@ -545,15 +552,38 @@ export function getProgressPercentage(profile: StrategyProfile): number {
   const answered = requiredQuestions.filter(q => {
     const value = profile[q.id];
     if (q.type === 'slider') return true;
+    if (q.type === 'amount') {
+      const n = profile.investmentAmount;
+      const min = q.amountConfig?.min ?? 0;
+      return (
+        typeof n === 'number' &&
+        !Number.isNaN(n) &&
+        n >= min &&
+        n <= QUESTIONNAIRE_PAPER_AVAILABLE_USD
+      );
+    }
     return value !== null && value !== undefined;
   });
   return Math.round((answered.length / requiredQuestions.length) * 100);
 }
 
 // Helper to get option label
-export function getOptionLabel(questionId: keyof StrategyProfile, value: string): string {
+export function getOptionLabel(
+  questionId: keyof StrategyProfile,
+  value: string | number | null | undefined,
+): string {
+  if (value === null || value === undefined) return '';
+  if (questionId === 'investmentAmount' && typeof value === 'number') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
+  const s = String(value);
   const question = questions.find(q => q.id === questionId);
-  if (!question?.options) return value;
-  const option = question.options.find(o => o.value === value);
-  return option?.label || value;
+  if (!question?.options) return s;
+  const option = question.options.find(o => o.value === s);
+  return option?.label || s;
 }

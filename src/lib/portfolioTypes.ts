@@ -45,4 +45,6 @@ export interface QuestionnaireAnswers {
   portfolioSize?: string;
   ageRange?: string;
   emergencyFund?: string;
+  /** Dollar amount the user chose to invest (formatted string for the AI prompt). */
+  investmentAmount?: string;
 }

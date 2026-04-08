@@ -109,15 +109,6 @@ const emergencyFundLabels: Record<string, string> = {
   building: 'Building emergency fund',
   no: 'No emergency fund yet',
 };
-const investmentAmountLabels: Record<string, string> = {
-  '1k': '$1,000',
-  '5k': '$5,000',
-  '10k': '$10,000',
-  '25k': '$25,000',
-  '50k': '$50,000',
-  '100k-plus': '$100,000+',
-};
-
 function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
   const sectors = profile.sectorEmphasis.length > 0
     ? profile.sectorEmphasis.join(', ')
@@ -136,6 +127,15 @@ function profileToAnswers(profile: StrategyProfile): QuestionnaireAnswers {
     portfolioSize: portfolioSizeLabels[profile.portfolioSize || ''] || undefined,
     ageRange: ageRangeLabels[profile.ageRange || ''] || undefined,
     emergencyFund: emergencyFundLabels[profile.hasEmergencyFund || ''] || undefined,
+    investmentAmount:
+      profile.investmentAmount != null && typeof profile.investmentAmount === 'number'
+        ? new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }).format(profile.investmentAmount)
+        : undefined,
   };
 }
 
@@ -728,14 +728,20 @@ export default function Create() {
           {/* Investment Summary + CTAs */}
             <div className="space-y-4 pt-2">
               {/* Show chosen investment details */}
-              {strategyProfile.investmentAmount && (
+              {strategyProfile.investmentAmount != null &&
+                typeof strategyProfile.investmentAmount === 'number' && (
                 <Card className="glass-card border-primary/20">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Investment Amount</p>
                         <p className="text-lg font-semibold text-foreground">
-                          {investmentAmountLabels[strategyProfile.investmentAmount] || strategyProfile.investmentAmount}
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          }).format(strategyProfile.investmentAmount)}
                         </p>
                       </div>
                       <div className="text-right">

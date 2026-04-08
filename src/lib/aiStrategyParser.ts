@@ -37,6 +37,7 @@ export async function parseWithAI(
           type: currentQuestion.type,
           options: currentQuestion.options,
           sliderConfig: currentQuestion.sliderConfig,
+          amountConfig: currentQuestion.amountConfig,
         },
         conversationHistory: conversationHistory.map(m => ({
           role: m.role,

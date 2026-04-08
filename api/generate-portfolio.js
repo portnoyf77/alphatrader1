@@ -114,6 +114,7 @@ ${answers.accountType ? `- Account type: ${answers.accountType}` : ''}
 ${answers.portfolioSize ? `- Portfolio size: ${answers.portfolioSize}` : ''}
 ${answers.ageRange ? `- Age range: ${answers.ageRange}` : ''}
 ${answers.emergencyFund ? `- Emergency fund: ${answers.emergencyFund}` : ''}
+${answers.investmentAmount ? `- Amount to invest: ${answers.investmentAmount}` : ''}
 
 ## User's current account
 ${account}

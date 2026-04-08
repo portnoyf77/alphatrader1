@@ -28,6 +28,7 @@ import {
   Question,
   deriveGemstone,
   prefillFromOnboarding,
+  QUESTIONNAIRE_PAPER_AVAILABLE_USD,
 } from '@/lib/strategyProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useMockAuth } from '@/contexts/MockAuthContext';
@@ -115,14 +116,6 @@ const CONTEXT_LINES: Partial<Record<keyof StrategyProfile, Record<string, string
     building: "Smart to do both at once. We'll stay moderate to be safe.",
     no: "No worries -- we'll keep things cautious until you've built one up.",
   },
-  investmentAmount: {
-    '1k': "Great starting point. You can always add more as you get comfortable.",
-    '5k': "A solid amount to start building something meaningful.",
-    '10k': "Nice. Enough room to spread across several different holdings.",
-    '25k': "Serious capital. We can build a well-diversified portfolio.",
-    '50k': "Substantial investment. The full range of strategies is open.",
-    '100k-plus': "Major commitment. We'll make sure every dollar is working hard.",
-  },
   investmentMode: {
     simulated: "Smart move. You'll see real market data without any risk.",
     real: "Ready to go. We'll connect this to your brokerage account.",
@@ -134,6 +127,40 @@ function contextualForSlider(vol: number): string {
   if (vol <= 20) return "Some bumps along the way, but nothing too wild. A good middle ground.";
   if (vol <= 30) return "You're okay with real ups and downs. That can pay off over time.";
   return "Full speed ahead. We'll aim for maximum growth -- buckle up.";
+}
+
+function contextualForAmount(n: number): string {
+  if (n < 5_000) {
+    return "Great starting point. You can always add more as you get comfortable.";
+  }
+  if (n < 15_000) {
+    return "A solid amount to start building something meaningful.";
+  }
+  if (n < 40_000) {
+    return "Nice. Enough room to spread across several different holdings.";
+  }
+  if (n < 80_000) {
+    return "Serious capital. We can build a well-diversified portfolio.";
+  }
+  return "Major commitment. We'll make sure every dollar is working hard.";
+}
+
+const LEGACY_INVESTMENT_AMOUNT_CODES: Record<string, number> = {
+  '1k': 1000,
+  '5k': 5000,
+  '10k': 10000,
+  '25k': 25000,
+  '50k': 50000,
+  '100k-plus': 100_000,
+};
+
+function normalizeLegacyInvestmentAmount(profile: Partial<StrategyProfile>): Partial<StrategyProfile> {
+  const v = profile.investmentAmount as unknown;
+  if (typeof v === 'string') {
+    const n = LEGACY_INVESTMENT_AMOUNT_CODES[v];
+    return { ...profile, investmentAmount: n ?? null };
+  }
+  return profile;
 }
 
 /** Glow ends at 350ms; contextual fades in after 200ms pause; 200ms fade; then hold before slide. */
@@ -429,6 +456,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const [preCrystallize, setPreCrystallize] = useState(false);
   const [contextualMessage, setContextualMessage] = useState<string | null>(null);
   const [isAdvancing, setIsAdvancing] = useState(false);
+  const [amountDisplay, setAmountDisplay] = useState('');
   const advanceTimersRef = useRef<number[]>([]);
   const persistDisabledRef = useRef(false);
   const showRestoreToastRef = useRef(false);
@@ -458,7 +486,8 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
         const data = JSON.parse(raw) as Partial<StoredQuestionnaire>;
         if (data?.profile && typeof data.currentIndex === 'number') {
           questionnaireRestoredRef.current = true;
-          setProfile({ ...initialProfile, ...data.profile });
+          const merged = { ...initialProfile, ...data.profile } as StrategyProfile;
+          setProfile({ ...merged, ...normalizeLegacyInvestmentAmount(merged) });
           const idx = Math.max(0, Math.min(data.currentIndex, questions.length - 1));
           setCurrentIndex(idx);
           showRestoreToastRef.current = true;
@@ -530,6 +559,12 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   useEffect(() => {
     if (animState === 'idle') setIsAdvancing(false);
   }, [animState, currentIndex]);
+
+  useEffect(() => {
+    if (questions[currentIndex]?.id !== 'investmentAmount') return;
+    const n = profile.investmentAmount;
+    setAmountDisplay(n != null ? n.toLocaleString('en-US') : '');
+  }, [currentIndex]);
 
   const totalQuestions = questions.length;
   const currentQuestion = questions[currentIndex];
@@ -615,6 +650,32 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
     setContextualMessage(contextualForSlider(profile.volatilityTolerance));
     scheduleAfterContext(() => handleNextFromStep());
   }, [isAdvancing, profile.volatilityTolerance, clearAdvanceTimers, scheduleAfterContext, handleNextFromStep]);
+
+  const handleInvestmentAmountConfirm = useCallback(() => {
+    if (isAdvancing) return;
+    const q = questions.find((x) => x.id === 'investmentAmount');
+    const min = q?.amountConfig?.min ?? 100;
+    const n = profile.investmentAmount;
+    if (
+      n === null ||
+      typeof n !== 'number' ||
+      Number.isNaN(n) ||
+      n < min ||
+      n > QUESTIONNAIRE_PAPER_AVAILABLE_USD
+    ) {
+      return;
+    }
+    setIsAdvancing(true);
+    clearAdvanceTimers();
+    setContextualMessage(contextualForAmount(n));
+    scheduleAfterContext(() => handleNextFromStep());
+  }, [
+    isAdvancing,
+    profile.investmentAmount,
+    clearAdvanceTimers,
+    scheduleAfterContext,
+    handleNextFromStep,
+  ]);
 
   const handleSectorConfirm = useCallback(() => {
     if (isAdvancing) return;
@@ -819,6 +880,105 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
             )}
             <Button size="sm" disabled={isAdvancing} onClick={handleSectorConfirm}>
               Confirm ({selected.length})
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (question.type === 'amount' && question.amountConfig) {
+      const min = question.amountConfig.min;
+      const presets = question.amountConfig.presets;
+      const n = profile.investmentAmount;
+      const hasNum = typeof n === 'number' && !Number.isNaN(n);
+      const belowMin = hasNum && n < min;
+      const overBalance = hasNum && n > QUESTIONNAIRE_PAPER_AVAILABLE_USD;
+      const isValid =
+        hasNum && n >= min && n <= QUESTIONNAIRE_PAPER_AVAILABLE_USD;
+      const balanceFormatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(QUESTIONNAIRE_PAPER_AVAILABLE_USD);
+
+      return (
+        <div className="w-full max-w-md mx-auto space-y-5 px-1 sm:px-0">
+          {/* TODO: fetch real balance from Alpaca account */}
+          <p className="text-sm text-center" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            Available balance: {balanceFormatted}
+          </p>
+          <div
+            className="flex w-full items-stretch rounded-xl border overflow-hidden"
+            style={{
+              borderColor: 'rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+            }}
+          >
+            <span
+              className="flex items-center px-3 text-lg font-medium text-muted-foreground border-r"
+              style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            >
+              $
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="0"
+              value={amountDisplay}
+              disabled={isAdvancing}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, '');
+                if (!raw) {
+                  setAmountDisplay('');
+                  updateProfile('investmentAmount', null);
+                  return;
+                }
+                const num = parseInt(raw, 10);
+                if (Number.isNaN(num)) return;
+                setAmountDisplay(num.toLocaleString('en-US'));
+                updateProfile('investmentAmount', num);
+              }}
+              className="min-w-0 flex-1 bg-transparent px-3 py-3 text-lg font-mono text-white placeholder:text-[rgba(255,255,255,0.25)] focus:outline-none focus:ring-0"
+            />
+          </div>
+          {belowMin && (
+            <p className="text-sm text-center text-red-400">
+              Minimum investment is $100
+            </p>
+          )}
+          {overBalance && (
+            <p className="text-sm text-center text-red-400">
+              Insufficient funds. Your available balance is {balanceFormatted}
+            </p>
+          )}
+          <div className="flex flex-wrap justify-center gap-2">
+            {presets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                disabled={isAdvancing}
+                onClick={() => {
+                  updateProfile('investmentAmount', preset);
+                  setAmountDisplay(preset.toLocaleString('en-US'));
+                }}
+                className="rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: 'rgba(255,255,255,0.9)',
+                }}
+              >
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  maximumFractionDigits: 0,
+                }).format(preset)}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-center pt-2">
+            <Button disabled={isAdvancing || !isValid} onClick={handleInvestmentAmountConfirm}>
+              Confirm
             </Button>
           </div>
         </div>
