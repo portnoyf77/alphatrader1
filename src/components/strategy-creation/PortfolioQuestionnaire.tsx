@@ -21,7 +21,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { StrategyProfile, initialProfile, questions, Question, deriveGemstone } from '@/lib/strategyProfile';
+import {
+  StrategyProfile,
+  initialProfile,
+  questions,
+  Question,
+  deriveGemstone,
+  prefillFromOnboarding,
+} from '@/lib/strategyProfile';
+import { supabase } from '@/integrations/supabase/client';
+import { useMockAuth } from '@/contexts/MockAuthContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -409,6 +418,7 @@ interface PortfolioQuestionnaireProps {
 
 export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuestionnaireProps) {
   const { toast } = useToast();
+  const { user } = useMockAuth();
   const [profile, setProfile] = useState<StrategyProfile>(initialProfile);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
@@ -422,6 +432,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
   const advanceTimersRef = useRef<number[]>([]);
   const persistDisabledRef = useRef(false);
   const showRestoreToastRef = useRef(false);
+  const questionnaireRestoredRef = useRef(false);
 
   const clearStoredProgress = useCallback(() => {
     try {
@@ -446,6 +457,7 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
       if (raw) {
         const data = JSON.parse(raw) as Partial<StoredQuestionnaire>;
         if (data?.profile && typeof data.currentIndex === 'number') {
+          questionnaireRestoredRef.current = true;
           setProfile({ ...initialProfile, ...data.profile });
           const idx = Math.max(0, Math.min(data.currentIndex, questions.length - 1));
           setCurrentIndex(idx);
@@ -466,6 +478,33 @@ export function PortfolioQuestionnaire({ onComplete, onCancel }: PortfolioQuesti
       duration: 3500,
     });
   }, [hydrated, toast]);
+
+  useEffect(() => {
+    if (!hydrated || !user?.id || questionnaireRestoredRef.current) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(
+          'investment_goal, time_horizon, annual_income, investment_experience, net_worth, date_of_birth'
+        )
+        .eq('id', user.id)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      const prefill = prefillFromOnboarding({
+        investmentGoal: data.investment_goal ?? undefined,
+        timeHorizon: data.time_horizon ?? undefined,
+        annualIncome: data.annual_income ?? undefined,
+        investmentExperience: data.investment_experience ?? undefined,
+        netWorth: data.net_worth ?? undefined,
+        dateOfBirth: data.date_of_birth ?? undefined,
+      });
+      setProfile((prev) => ({ ...prev, ...prefill }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, user?.id]);
 
   useEffect(() => {
     if (!hydrated || persistDisabledRef.current) return;

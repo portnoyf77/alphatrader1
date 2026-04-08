@@ -58,7 +58,7 @@ export interface QuestionOption {
 
 export interface Question {
   id: keyof StrategyProfile;
-  phase: 1 | 2 | 3 | 4 | 5 | 5;
+  phase: 1 | 2 | 3 | 4;
   type: 'single' | 'multi' | 'slider';
   question: string;
   subtitle?: string;
@@ -73,59 +73,9 @@ export interface Question {
 }
 
 export const questions: Question[] = [
-  // Q1
-  {
-    id: 'primaryGoal',
-    phase: 1,
-    type: 'single',
-    question: "What's the main reason you want to invest?",
-    subtitle: "No wrong answers here. This helps us point your portfolio in the right direction.",
-    options: [
-      {
-        value: 'accumulation',
-        label: 'Grow my savings',
-        description: "You want your money to grow over time.\nThink of it like planting a tree -- it grows slowly, but it grows.",
-      },
-      {
-        value: 'retirement',
-        label: 'Save for retirement',
-        description: "You're building a fund for when you stop working.\nThe earlier you start, the less heavy lifting you have to do.",
-      },
-      {
-        value: 'income',
-        label: 'Earn regular income',
-        description: "You'd like your investments to pay you back regularly.\nLike rent from a property, but from stocks and bonds.",
-      },
-      {
-        value: 'preservation',
-        label: 'Protect what I have',
-        description: "You've already built savings and don't want to lose them.\nSafety and stability matter more than big gains.",
-      },
-      {
-        value: 'aggressive',
-        label: 'Go for maximum growth',
-        description: "You're comfortable with big ups and downs for a shot at bigger returns.\nThis is the boldest option -- not for the faint of heart.",
-      },
-    ],
-  },
-  // Q2
-  {
-    id: 'timeline',
-    phase: 1,
-    type: 'single',
-    question: 'How soon do you think you\'ll need this money?',
-    subtitle: "It's okay to guess. A rough idea helps us plan how cautious or bold to be.",
-    options: [
-      { value: '1-2', label: '1-2 Years', description: 'Pretty soon -- maybe for a big purchase or an emergency cushion' },
-      { value: '3-5', label: '3-5 Years', description: 'A few years out -- like saving for a house or a major life change' },
-      { value: '5-10', label: '5-10 Years', description: 'No rush -- you have time to ride out market ups and downs' },
-      { value: '10+', label: '10+ Years', description: 'Long haul -- the longer you wait, the more time your money has to grow' },
-    ],
-  },
-  // Q3
   {
     id: 'drawdownReaction',
-    phase: 2,
+    phase: 1,
     type: 'single',
     question: "Imagine your investments suddenly lost 20% of their value. What would you do?",
     subtitle: "There's no right answer -- just go with your gut. This tells us a lot about what kind of portfolio will feel right for you.",
@@ -136,10 +86,9 @@ export const questions: Question[] = [
       { value: 'buy-more', label: 'Buy more', description: "Lower prices? That's a sale -- I'd invest more" },
     ],
   },
-  // Q4
   {
     id: 'volatilityTolerance',
-    phase: 2,
+    phase: 1,
     type: 'slider',
     question: 'How bumpy of a ride are you okay with?',
     subtitle: "Investments go up and down. Slide right if you can stomach bigger swings for potentially bigger rewards. Slide left if you'd rather keep things calm.",
@@ -150,40 +99,9 @@ export const questions: Question[] = [
       unit: '%',
     },
   },
-  // ── Phase 3: Financial Profile (NEW) ──
-  // Q5
-  {
-    id: 'incomeRange',
-    phase: 3,
-    type: 'single',
-    question: 'Roughly how much do you earn per year?',
-    subtitle: "This stays private. We use it to understand how much risk makes sense for your situation -- not to judge.",
-    options: [
-      { value: 'under-50k', label: 'Under $50k', description: "You're building your base -- every dollar matters" },
-      { value: '50k-100k', label: '$50k - $100k', description: 'Stable ground with room to start investing' },
-      { value: '100k-200k', label: '$100k - $200k', description: 'Comfortable enough to weather some bumps' },
-      { value: '200k-500k', label: '$200k - $500k', description: 'Strong position to take on more risk if you choose' },
-      { value: '500k-plus', label: '$500k+', description: 'Wide range of options available to you' },
-    ],
-  },
-  // Q6
-  {
-    id: 'investmentExperience',
-    phase: 3,
-    type: 'single',
-    question: 'How much investing have you done before?',
-    subtitle: "Brand new? That's completely fine. This helps us match the portfolio to your comfort level.",
-    options: [
-      { value: 'none', label: 'Brand new', description: "I've never invested -- this is my first time" },
-      { value: 'beginner', label: 'A little bit', description: "I've tried buying a stock or a fund, but I'm still learning" },
-      { value: 'intermediate', label: 'A few years in', description: "I've been investing for a while and I know the basics" },
-      { value: 'advanced', label: 'Very experienced', description: "I've managed my own portfolio for 5+ years" },
-    ],
-  },
-  // Q7
   {
     id: 'accountType',
-    phase: 3,
+    phase: 2,
     type: 'single',
     question: 'What kind of account will you be investing in?',
     subtitle: "Not sure? A regular brokerage account is the most common starting point. Retirement accounts (like IRAs) have special tax benefits.",
@@ -194,40 +112,9 @@ export const questions: Question[] = [
       { value: 'mixed', label: 'More than one', description: "I'm investing across different account types" },
     ],
   },
-  // Q8
-  {
-    id: 'portfolioSize',
-    phase: 3,
-    type: 'single',
-    question: 'How much are you thinking of investing?',
-    subtitle: "There's no minimum to get started. This helps us figure out how to spread your money across different investments.",
-    options: [
-      { value: 'under-10k', label: 'Under $10k', description: "Starting small is smart -- you can always add more later" },
-      { value: '10k-50k', label: '$10k - $50k', description: 'Enough to spread across several different investments' },
-      { value: '50k-250k', label: '$50k - $250k', description: 'A solid amount to build a well-rounded portfolio' },
-      { value: '250k-1m', label: '$250k - $1M', description: 'Plenty of room for a diversified, sophisticated setup' },
-      { value: '1m-plus', label: '$1M+', description: 'Full range of strategies at your fingertips' },
-    ],
-  },
-  // Q9
-  {
-    id: 'ageRange',
-    phase: 3,
-    type: 'single',
-    question: 'What age range are you in?',
-    subtitle: "This isn't about limits -- it's about time. Younger investors can usually afford to be bolder because they have more years to recover from dips.",
-    options: [
-      { value: '18-29', label: '18 - 29', description: 'You have decades ahead -- time is your biggest advantage' },
-      { value: '30-39', label: '30 - 39', description: 'Still plenty of time, and likely earning more each year' },
-      { value: '40-49', label: '40 - 49', description: 'A good balance point between growth and caution' },
-      { value: '50-59', label: '50 - 59', description: 'Starting to think about protecting what you have' },
-      { value: '60-plus', label: '60+', description: 'Stability and steady income become the priority' },
-    ],
-  },
-  // Q10
   {
     id: 'hasEmergencyFund',
-    phase: 3,
+    phase: 2,
     type: 'single',
     question: 'Do you have some savings set aside for emergencies?',
     subtitle: "An emergency fund is money you can grab if life throws you a curveball -- a job loss, a medical bill, a car repair. It means you won't have to sell your investments at a bad time.",
@@ -238,11 +125,9 @@ export const questions: Question[] = [
       { value: 'no', label: 'Not yet', description: "That's okay. We'll keep your portfolio a bit more cautious to be safe" },
     ],
   },
-  // ── Phase 4: Preferences ──
-  // Q11
   {
     id: 'sectorEmphasis',
-    phase: 4,
+    phase: 3,
     type: 'multi',
     question: 'Any industries you find especially interesting?',
     subtitle: "Pick as many as you like, or skip this entirely. If you skip, we'll spread your portfolio across all of them.",
@@ -261,10 +146,9 @@ export const questions: Question[] = [
       { value: 'Real Estate', label: 'Real Estate', description: 'REITs, property development, management' },
     ],
   },
-  // Q12
   {
     id: 'geographicPreference',
-    phase: 4,
+    phase: 3,
     type: 'single',
     question: 'Where in the world do you want to invest?',
     subtitle: "Most people start with US companies, but investing globally can help spread risk. No wrong choice here.",
@@ -275,11 +159,9 @@ export const questions: Question[] = [
       { value: 'international', label: 'International developed', description: 'Established markets like Europe, Japan, and Australia' },
     ],
   },
-  // ── Phase 5: Final Details ──
-  // Q13
   {
     id: 'investmentAmount',
-    phase: 5,
+    phase: 4,
     type: 'single',
     question: 'How much do you want to put in right now?',
     subtitle: "You can always add more later. Pick a starting amount you're comfortable with.",
@@ -292,10 +174,9 @@ export const questions: Question[] = [
       { value: '100k-plus', label: '$100,000+', description: 'Major investment -- the full toolkit is available' },
     ],
   },
-  // Q14
   {
     id: 'investmentMode',
-    phase: 5,
+    phase: 4,
     type: 'single',
     question: 'Do you want to use real money or practice first?',
     subtitle: "Simulation mode uses real market data but no actual money changes hands. It's a risk-free way to see how your portfolio would perform.",
@@ -305,6 +186,85 @@ export const questions: Question[] = [
     ],
   },
 ];
+
+export function prefillFromOnboarding(onboarding: {
+  investmentGoal?: string;
+  timeHorizon?: string;
+  annualIncome?: string;
+  investmentExperience?: string;
+  netWorth?: string;
+  dateOfBirth?: string;
+}): Partial<StrategyProfile> {
+  const result: Partial<StrategyProfile> = {};
+
+  const goalMap: Record<string, StrategyProfile['primaryGoal']> = {
+    Growth: 'accumulation',
+    Income: 'income',
+    Preservation: 'preservation',
+  };
+  if (onboarding.investmentGoal) {
+    result.primaryGoal = goalMap[onboarding.investmentGoal] || 'accumulation';
+  }
+
+  const horizonMap: Record<string, StrategyProfile['timeline']> = {
+    'Short-term (< 1 year)': '1-2',
+    'Medium-term (1-5 years)': '3-5',
+    'Long-term (5+ years)': '10+',
+  };
+  if (onboarding.timeHorizon) {
+    result.timeline = horizonMap[onboarding.timeHorizon] || '3-5';
+  }
+
+  const incomeMap: Record<string, StrategyProfile['incomeRange']> = {
+    'Under $25k': 'under-50k',
+    '$25k-$50k': 'under-50k',
+    '$50k-$100k': '50k-100k',
+    '$100k-$250k': '100k-200k',
+    '$250k-$500k': '200k-500k',
+    'Over $500k': '500k-plus',
+  };
+  if (onboarding.annualIncome) {
+    result.incomeRange = incomeMap[onboarding.annualIncome] ?? null;
+  }
+
+  const expMap: Record<string, StrategyProfile['investmentExperience']> = {
+    None: 'none',
+    'Beginner (< 1 year)': 'beginner',
+    'Intermediate (1-5 years)': 'intermediate',
+    'Advanced (5+ years)': 'advanced',
+    Professional: 'advanced',
+  };
+  if (onboarding.investmentExperience) {
+    result.investmentExperience = expMap[onboarding.investmentExperience] ?? null;
+  }
+
+  const sizeMap: Record<string, StrategyProfile['portfolioSize']> = {
+    'Under $50k': 'under-10k',
+    '$50k-$100k': '10k-50k',
+    '$100k-$500k': '50k-250k',
+    '$500k-$1M': '250k-1m',
+    'Over $1M': '1m-plus',
+  };
+  if (onboarding.netWorth) {
+    result.portfolioSize = sizeMap[onboarding.netWorth] ?? null;
+  }
+
+  if (onboarding.dateOfBirth) {
+    const dob = new Date(onboarding.dateOfBirth);
+    if (!Number.isNaN(dob.getTime())) {
+      const age = Math.floor(
+        (Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+      );
+      if (age >= 60) result.ageRange = '60-plus';
+      else if (age >= 50) result.ageRange = '50-59';
+      else if (age >= 40) result.ageRange = '40-49';
+      else if (age >= 30) result.ageRange = '30-39';
+      else result.ageRange = '18-29';
+    }
+  }
+
+  return result;
+}
 
 /**
  * Derive risk level from the full investor profile.
@@ -560,15 +520,15 @@ export const progressMessages = [
 ];
 
 // Phase labels
-export const phaseLabels = ['Goals', 'Risk', 'About You', 'Preferences', 'Final Details'];
+export const phaseLabels = ['Risk', 'About You', 'Preferences', 'Final Details'];
 
 // Get questions for a specific phase
-export function getQuestionsForPhase(phase: 1 | 2 | 3 | 4 | 5): Question[] {
+export function getQuestionsForPhase(phase: 1 | 2 | 3 | 4): Question[] {
   return questions.filter(q => q.phase === phase);
 }
 
 // Check if a phase is complete
-export function isPhaseComplete(profile: StrategyProfile, phase: 1 | 2 | 3 | 4 | 5): boolean {
+export function isPhaseComplete(profile: StrategyProfile, phase: 1 | 2 | 3 | 4): boolean {
   const phaseQuestions = getQuestionsForPhase(phase);
   return phaseQuestions.every(q => {
     if (q.isOptional) return true;

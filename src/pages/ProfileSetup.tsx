@@ -7,6 +7,9 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
+  Wallet,
+  Shield,
 } from 'lucide-react';
 import { useMockAuth, type OnboardingData } from '@/contexts/MockAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,28 +99,36 @@ const FUNDS_SOURCE = [
   'Other',
 ] as const;
 
+const GOAL_ICON_MAP = {
+  TrendingUp,
+  Wallet,
+  Shield,
+} as const;
+
+type GoalCardIcon = keyof typeof GOAL_ICON_MAP;
+
 const GOAL_CARDS: {
   value: string;
   title: string;
-  emoji: string;
+  icon: GoalCardIcon;
   desc: string;
 }[] = [
   {
     value: 'Growth',
     title: 'Growth',
-    emoji: '📈',
+    icon: 'TrendingUp',
     desc: 'Maximize long-term capital appreciation',
   },
   {
     value: 'Income',
     title: 'Income',
-    emoji: '💰',
+    icon: 'Wallet',
     desc: 'Generate regular dividend/interest income',
   },
   {
     value: 'Preservation',
     title: 'Preservation',
-    emoji: '🛡️',
+    icon: 'Shield',
     desc: 'Protect capital with minimal risk',
   },
 ];
@@ -651,6 +662,7 @@ export default function ProfileSetup() {
                 <div className="grid gap-3">
                   {GOAL_CARDS.map((c) => {
                     const selected = formData.investmentGoal === c.value;
+                    const GoalIcon = GOAL_ICON_MAP[c.icon];
                     return (
                       <button
                         key={c.value}
@@ -660,7 +672,7 @@ export default function ProfileSetup() {
                         style={selectedCardStyle(selected)}
                       >
                         <div className="flex gap-3 items-start">
-                          <span className="text-2xl leading-none">{c.emoji}</span>
+                          <GoalIcon className="h-5 w-5 text-primary" />
                           <div>
                             <div className="font-semibold text-white">{c.title}</div>
                             <div className="text-sm text-muted-foreground mt-0.5">
