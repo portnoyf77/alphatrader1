@@ -13,6 +13,9 @@ import type {
 } from './portfolioTypes';
 import { serverlessApiUrl, explainServerlessNetworkError } from '@/lib/serverlessApiUrl';
 
+/** Per-question AI advice for the portfolio wizard (re-exported for a single import surface). */
+export { getPortfolioAdvice, type PortfolioAdviceResponse } from './portfolioAdvice';
+
 /**
  * Stage 1: Get AI's portfolio recommendation based on the user's profile.
  *

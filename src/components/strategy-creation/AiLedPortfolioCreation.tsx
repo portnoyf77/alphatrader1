@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getPortfolioAdvice } from '@/lib/portfolioAdvice';
+import { getPortfolioAdvice } from '@/lib/portfolioService';
 import type { OnboardingProfile, PortfolioRefinements } from '@/lib/portfolioTypes';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { StrategyProfile } from '@/lib/strategyProfile';
 import { strategyProfileForAiAnimation } from '@/lib/strategyProfile';
@@ -13,32 +14,49 @@ const NOT_SPECIFIED = 'Not specified';
 
 const GOAL_OPTIONS = ['Growth', 'Income', 'Preservation', 'Speculation'] as const;
 const RISK_OPTIONS = ['Conservative', 'Moderate', 'Aggressive'] as const;
+/** GICS-style sector labels for the wizard */
 const SECTOR_PILLS = [
   'Technology',
   'Healthcare',
-  'Energy',
   'Financials',
   'Consumer',
-  'Industrial',
-  'Clean Energy',
+  'Communication',
+  'Industrials',
+  'Energy',
+  'Utilities',
   'Real Estate',
+  'Materials',
   'No preference',
 ] as const;
 const GEO_OPTIONS = ['US focused', 'Global mix', 'Emerging markets', 'No preference'] as const;
+
+const INVESTMENT_QUICK_PICKS = [1_000, 5_000, 10_000, 25_000, 50_000, 100_000] as const;
+
+const SECTOR_OPTIONS_PROMPT =
+  'Technology, Healthcare, Financials, Consumer, Communication, Industrials, Energy, Utilities, Real Estate, Materials, No preference';
 
 const QUESTION_TITLES = [
   "What's the goal for this portfolio?",
   'How aggressive should this portfolio be?',
   'What sectors should this portfolio focus on?',
   'What geographic exposure?',
+  'How much do you want to invest?',
 ] as const;
 
 const QUESTION_PROMPTS = [
   "What's the goal for this portfolio? Options: Growth, Income, Preservation, Speculation",
   'How aggressive should this portfolio be? Options: Conservative, Moderate, Aggressive',
-  'What sectors should this portfolio focus on? Options: Technology, Healthcare, Energy, Financials, Consumer, Industrial, Clean Energy, Real Estate, No preference',
+  `What sectors should this portfolio focus on? Options: ${SECTOR_OPTIONS_PROMPT}`,
   'What geographic exposure? Options: US focused, Global mix, Emerging markets, No preference',
 ] as const;
+
+export type AiWizardReasonings = [
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+];
 
 export type AiWizardState = {
   step: number;
@@ -46,7 +64,8 @@ export type AiWizardState = {
   risk: string | null;
   sectors: string[];
   geography: string | null;
-  reasonings: [string | null, string | null, string | null, string | null];
+  investmentAmount: number | null;
+  reasonings: AiWizardReasonings;
 };
 
 export interface AiFlowResumePayload {
@@ -121,11 +140,14 @@ function normalizeSectorToken(t: string): string | null {
   if (hit) return hit;
   if (lower.includes('tech')) return 'Technology';
   if (lower.includes('health')) return 'Healthcare';
-  if (lower.includes('clean') && lower.includes('energy')) return 'Clean Energy';
+  if (lower.includes('clean') && lower.includes('energy')) return 'Energy';
   if (lower.includes('energy')) return 'Energy';
   if (lower.includes('financial')) return 'Financials';
   if (lower.includes('consumer')) return 'Consumer';
-  if (lower.includes('industrial')) return 'Industrial';
+  if (lower.includes('communication') || lower === 'comms') return 'Communication';
+  if (lower.includes('industrial')) return 'Industrials';
+  if (lower.includes('utility') || lower.includes('utilities')) return 'Utilities';
+  if (lower.includes('material')) return 'Materials';
   if (lower.includes('real')) return 'Real Estate';
   return null;
 }
@@ -164,14 +186,22 @@ function buildRefinementsFromWizard(
   sectors: Set<string>,
   risk: string | null,
   geography: string | null,
+  investmentAmount: number,
 ): PortfolioRefinements {
   const vol = riskToVolatility(risk ?? 'Moderate');
   const geo = geography ?? 'US focused';
+  const userFeedback = `Investment amount: $${investmentAmount.toLocaleString('en-US')}`;
+  const base: PortfolioRefinements = {
+    sectors: 'No preference',
+    volatility: vol,
+    geography: geo,
+    userFeedback,
+  };
   if (sectors.has('No preference') || sectors.size === 0) {
-    return { sectors: 'No preference', volatility: vol, geography: geo };
+    return base;
   }
   const list = [...sectors].filter((x) => x !== 'No preference');
-  return { sectors: list.join(', '), volatility: vol, geography: geo };
+  return { ...base, sectors: list.join(', ') };
 }
 
 function buildPreviousAnswers(
@@ -203,7 +233,11 @@ interface AiLedPortfolioCreationProps {
   resume?: AiFlowResumePayload | null;
 }
 
-const initialReasonings: [null, null, null, null] = [null, null, null, null];
+const initialReasonings: AiWizardReasonings = [null, null, null, null, null];
+
+function normalizeWizardReasonings(r: readonly (string | null)[] | undefined): AiWizardReasonings {
+  return [r?.[0] ?? null, r?.[1] ?? null, r?.[2] ?? null, r?.[3] ?? null, r?.[4] ?? null];
+}
 
 export function AiLedPortfolioCreation({
   onCancel,
@@ -234,9 +268,17 @@ export function AiLedPortfolioCreation({
   const [geography, setGeography] = useState<string | null>(
     () => resume?.wizardState?.geography ?? null,
   );
-  const [reasonings, setReasonings] = useState<
-    [string | null, string | null, string | null, string | null]
-  >(() => resume?.wizardState?.reasonings ?? [...initialReasonings]);
+  const [investmentAmount, setInvestmentAmount] = useState<number | null>(
+    () => resume?.wizardState?.investmentAmount ?? null,
+  );
+  const [amountInput, setAmountInput] = useState(() =>
+    resume?.wizardState?.investmentAmount != null
+      ? String(resume.wizardState.investmentAmount)
+      : '',
+  );
+  const [reasonings, setReasonings] = useState<AiWizardReasonings>(() =>
+    normalizeWizardReasonings(resume?.wizardState?.reasonings),
+  );
 
   const [adviceLoading, setAdviceLoading] = useState(false);
   const [animState, setAnimState] = useState<'idle' | 'exit' | 'enter'>('idle');
@@ -296,6 +338,7 @@ export function AiLedPortfolioCreation({
 
   useEffect(() => {
     if (profileLoading) return;
+    if (step >= 4) return;
     if (skipAdviceFetchRef.current) {
       skipAdviceFetchRef.current = false;
       return;
@@ -307,7 +350,7 @@ export function AiLedPortfolioCreation({
     async function loadAdvice() {
       setAdviceLoading(true);
       setReasonings((prev) => {
-        const n = [...prev] as [string | null, string | null, string | null, string | null];
+        const n = [...prev] as AiWizardReasonings;
         n[s] = null;
         return n;
       });
@@ -315,7 +358,11 @@ export function AiLedPortfolioCreation({
 
       const { goal: g, risk: r, sectors: sec } = answersRef.current;
       const prevAns = buildPreviousAnswers(s, g, r, sec);
-      const result = await getPortfolioAdvice(adviceProfile, QUESTION_PROMPTS[s], prevAns);
+      const result = await getPortfolioAdvice(
+        adviceProfile ?? onboardingProfile,
+        QUESTION_PROMPTS[s],
+        prevAns,
+      );
 
       if (cancelled) return;
       setAdviceLoading(false);
@@ -323,24 +370,24 @@ export function AiLedPortfolioCreation({
       if (!result) return;
 
       setReasonings((prev) => {
-        const n = [...prev] as [string | null, string | null, string | null, string | null];
+        const n = [...prev] as AiWizardReasonings;
         n[s] = result.reasoning;
         return n;
       });
 
       const v = result.suggestedValue;
       if (s === 0) {
-        const g = matchGoal(v);
-        if (g) setGoal(g);
+        const mg = matchGoal(v);
+        if (mg) setGoal(mg);
       } else if (s === 1) {
-        const r = matchRisk(v);
-        if (r) setRisk(r);
+        const mr = matchRisk(v);
+        if (mr) setRisk(mr);
       } else if (s === 2) {
         const set = parseSectorSuggestion(v);
         setSectors(set);
       } else if (s === 3) {
-        const g = matchGeography(v);
-        if (g) setGeography(g);
+        const geo = matchGeography(v);
+        if (geo) setGeography(geo);
       }
     }
 
@@ -349,7 +396,7 @@ export function AiLedPortfolioCreation({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on step / profile only; answers read from ref for previousAnswers
-  }, [step, profileLoading, adviceProfile]);
+  }, [step, profileLoading, adviceProfile, onboardingProfile]);
 
   useEffect(() => {
     const text = reasonings[step];
@@ -363,7 +410,7 @@ export function AiLedPortfolioCreation({
   }, [reasonings, step]);
 
   const goNext = () => {
-    if (step < 3) transitionTo(step + 1, 'right');
+    if (step < 4) transitionTo(step + 1, 'right');
   };
 
   const goBack = () => {
@@ -379,12 +426,13 @@ export function AiLedPortfolioCreation({
     if (step === 1) return risk != null;
     if (step === 2) return sectors.size > 0;
     if (step === 3) return geography != null;
+    if (step === 4) return investmentAmount != null && investmentAmount > 0;
     return false;
   })();
 
   const handleBuild = () => {
-    if (!goal || !risk || !geography) return;
-    const refinements = buildRefinementsFromWizard(sectors, risk, geography);
+    if (!goal || !risk || !geography || investmentAmount == null || investmentAmount <= 0) return;
+    const refinements = buildRefinementsFromWizard(sectors, risk, geography, investmentAmount);
     const mergedProfile: OnboardingProfile = {
       ...onboardingProfile,
       investmentGoal: goal,
@@ -402,6 +450,7 @@ export function AiLedPortfolioCreation({
       risk,
       sectors: [...sectors],
       geography,
+      investmentAmount,
       reasonings: [...reasonings],
     };
     onBeginCrystallization({
@@ -440,7 +489,7 @@ export function AiLedPortfolioCreation({
     });
   };
 
-  const shimmer = adviceLoading && reasonings[step] == null;
+  const shimmer = step < 4 && adviceLoading && reasonings[step] == null;
 
   if (profileLoading) {
     return (
@@ -452,6 +501,27 @@ export function AiLedPortfolioCreation({
   }
 
   const reasoningText = reasonings[step];
+
+  const parseAmountInput = (raw: string): number | null => {
+    const cleaned = raw.replace(/[^0-9.]/g, '');
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return n;
+  };
+
+  const onAmountInputChange = (raw: string) => {
+    setAmountInput(raw);
+    setInvestmentAmount(parseAmountInput(raw));
+  };
+
+  const pickInvestmentAmount = (n: number) => {
+    setInvestmentAmount(n);
+    setAmountInput(n.toLocaleString('en-US'));
+  };
+
+  const formatQuickPickLabel = (n: number) =>
+    n >= 1000 && n % 1000 === 0 ? `$${n / 1000}K` : `$${n.toLocaleString('en-US')}`;
 
   return (
     <div className="pb-6 max-w-lg mx-auto w-full">
@@ -466,10 +536,10 @@ export function AiLedPortfolioCreation({
 
       <div className="mb-6 space-y-2">
         <p className="text-center text-xs text-muted-foreground tracking-wide">
-          {step + 1} of 4
+          {step + 1} of 5
         </p>
         <div className="flex justify-center gap-1.5">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <div
               key={i}
               className="h-0.5 rounded-full transition-all duration-300"
@@ -590,15 +660,53 @@ export function AiLedPortfolioCreation({
               </div>
             )}
 
+            {step === 4 && (
+              <div className="flex flex-col gap-4">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                    $
+                  </span>
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="Amount"
+                    value={amountInput}
+                    onChange={(e) => onAmountInputChange(e.target.value)}
+                    className="pl-7 h-12 rounded-xl bg-white/[0.02] border-white/10 text-foreground"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {INVESTMENT_QUICK_PICKS.map((n) => {
+                    const selected = investmentAmount === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => pickInvestmentAmount(n)}
+                        className={cn(
+                          'rounded-full px-4 py-2 text-sm transition-all',
+                          selected
+                            ? 'border border-purple-500 bg-purple-500/10 qa-select-pulse text-foreground'
+                            : 'border border-white/10 bg-transparent text-foreground/90 hover:border-white/20',
+                        )}
+                      >
+                        {formatQuickPickLabel(n)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {reasoningText && (
               <div
                 className={cn(
-                  'mt-6 flex gap-2 text-sm text-muted-foreground transition-opacity duration-300',
+                  'mt-6 flex gap-2 items-start transition-opacity duration-300',
                   reasoningFade ? 'opacity-100' : 'opacity-0',
                 )}
               >
-                <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5 text-violet-400" aria-hidden />
-                <p className="leading-relaxed">{reasoningText}</p>
+                <Sparkles size={14} className="shrink-0 mt-0.5 text-muted-foreground" aria-hidden />
+                <p className="text-sm text-muted-foreground leading-relaxed">{reasoningText}</p>
               </div>
             )}
           </div>
@@ -606,7 +714,7 @@ export function AiLedPortfolioCreation({
       </div>
 
       <div className="mt-8 flex justify-center">
-        {step < 3 ? (
+        {step < 4 ? (
           <Button
             type="button"
             className="min-w-[200px] h-11 bg-white text-[#050508] hover:bg-white/90 font-semibold"
