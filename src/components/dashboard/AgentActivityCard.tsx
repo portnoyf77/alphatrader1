@@ -74,8 +74,8 @@ export function AgentActivityCard({ className }: AgentActivityCardProps) {
   }
 
   const { submitted, totalBuyValue, totalSellQty } = tradeStats(latestLog.trades);
-  const buyCount = latestLog.trades.filter((t) => t.side === 'buy').length;
-  const sellCount = latestLog.trades.filter((t) => t.side === 'sell').length;
+  const buyCount = (latestLog.trades || []).filter((t) => t.side === 'buy').length;
+  const sellCount = (latestLog.trades || []).filter((t) => t.side === 'sell').length;
 
   // Determine market outlook badge color
   const outlookBg =

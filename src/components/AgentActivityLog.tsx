@@ -154,8 +154,8 @@ function LogEntryCard({
   const confidenceLevel = log.overseerDecision.confidence || 5;
   const filledDots = Math.ceil(confidenceLevel / 2);
 
-  const buyCount = log.trades.filter((t) => t.side === 'buy').length;
-  const sellCount = log.trades.filter((t) => t.side === 'sell').length;
+  const buyCount = (log.trades || []).filter((t) => t.side === 'buy').length;
+  const sellCount = (log.trades || []).filter((t) => t.side === 'sell').length;
   const tradeCount = buyCount + sellCount;
 
   return (
@@ -252,10 +252,10 @@ function LogEntryCard({
           {activeTab === 'overview' && (
             <div className="space-y-3">
               {/* Trades */}
-              {log.trades.length > 0 ? (
+              {(log.trades || []).length > 0 ? (
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-foreground">Trades</div>
-                  {log.trades.map((trade, idx) => (
+                  {(log.trades || []).map((trade, idx) => (
                     <div
                       key={idx}
                       className="p-2 rounded bg-white/5 border border-white/10 space-y-1"
