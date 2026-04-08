@@ -93,7 +93,7 @@ function timeSince(dateStr: string): string {
 }
 
 function NewsCard({ article, watchlist }: { article: AlpacaNewsArticle; watchlist: string[] }) {
-  const relevantSymbols = article.symbols.filter((s) => watchlist.includes(s));
+  const relevantSymbols = (article.symbols || []).filter((s) => watchlist.includes(s));
   const thumbImg = article.images?.find((img) => img.size === 'small') ?? article.images?.find((img) => img.size === 'thumb') ?? article.images?.[0];
 
   return (
@@ -159,8 +159,8 @@ export default function Research() {
 
   // Auto-add position symbols to watchlist
   useEffect(() => {
-    if (positions.length === 0) return;
-    const posSymbols = positions.map((p) => p.symbol);
+    if ((positions || []).length === 0) return;
+    const posSymbols = (positions || []).map((p) => p.symbol);
     const merged = [...new Set([...watchlist, ...posSymbols])];
     if (merged.length !== watchlist.length) {
       setWatchlistState(merged);

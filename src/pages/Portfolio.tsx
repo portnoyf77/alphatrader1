@@ -278,10 +278,10 @@ export default function Portfolio() {
     }
   };
 
-  const openOrders = useMemo(() => orders.filter((o) => ['new', 'accepted', 'partially_filled', 'pending_new'].includes(o.status)), [orders]);
-  const recentFills = useMemo(() => orders.filter((o) => o.status === 'filled').slice(0, 20), [orders]);
+  const openOrders = useMemo(() => (orders || []).filter((o) => ['new', 'accepted', 'partially_filled', 'pending_new'].includes(o.status)), [orders]);
+  const recentFills = useMemo(() => (orders || []).filter((o) => o.status === 'filled').slice(0, 20), [orders]);
 
-  const totalCostBasis = positions.reduce((sum, p) => sum + p.avgEntryPrice * p.qty, 0);
+  const totalCostBasis = (positions || []).reduce((sum, p) => sum + p.avgEntryPrice * p.qty, 0);
   const totalPLPercent = totalCostBasis > 0 ? (totalUnrealizedPL / totalCostBasis) * 100 : 0;
 
   return (

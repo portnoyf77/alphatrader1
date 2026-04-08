@@ -65,7 +65,7 @@ interface StrategyCardProps {
 export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const isPositive = strategy.performance.return_30d >= 0;
   const isPaused = strategy.new_allocations_paused;
-  const displaySectors = strategy.sectors.slice(0, 3);
+  const displaySectors = (strategy.sectors || []).slice(0, 3);
   
   const gemHex = getGemHex(strategy.name);
   const reputationScore = calculateAlphaScore(strategy).toFixed(1);

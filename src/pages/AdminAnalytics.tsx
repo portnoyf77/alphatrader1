@@ -195,7 +195,7 @@ export default function AdminAnalytics() {
                 <CardTitle className="text-base">Visitors by City</CardTitle>
               </CardHeader>
               <CardContent>
-                {data.cityBreakdown.length === 0 ? (
+                {(data.cityBreakdown || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">No city data yet</p>
                 ) : (
                   <Table>
@@ -208,7 +208,7 @@ export default function AdminAnalytics() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.cityBreakdown.map((row, i) => (
+                      {(data.cityBreakdown || []).map((row, i) => (
                         <TableRow key={i}>
                           <TableCell className="font-medium">{row.city}</TableCell>
                           <TableCell className="text-muted-foreground">{row.region}</TableCell>
@@ -229,7 +229,7 @@ export default function AdminAnalytics() {
                 <CardTitle className="text-base">Visitors by Country</CardTitle>
               </CardHeader>
               <CardContent>
-                {data.countryBreakdown.length === 0 ? (
+                {(data.countryBreakdown || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">No country data yet</p>
                 ) : (
                   <Table>
@@ -240,7 +240,7 @@ export default function AdminAnalytics() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.countryBreakdown.map((row, i) => (
+                      {(data.countryBreakdown || []).map((row, i) => (
                         <TableRow key={i}>
                           <TableCell className="font-medium">{row.country}</TableCell>
                           <TableCell className="text-right">{row.count}</TableCell>
@@ -259,7 +259,7 @@ export default function AdminAnalytics() {
                 <CardTitle className="text-base">Top Pages</CardTitle>
               </CardHeader>
               <CardContent>
-                {data.topPages.length === 0 ? (
+                {(data.topPages || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">No page data yet</p>
                 ) : (
                   <Table>
@@ -270,7 +270,7 @@ export default function AdminAnalytics() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.topPages.map((row, i) => (
+                      {(data.topPages || []).map((row, i) => (
                         <TableRow key={i}>
                           <TableCell className="font-mono text-sm">{row.page}</TableCell>
                           <TableCell className="text-right">{row.count}</TableCell>
@@ -289,7 +289,7 @@ export default function AdminAnalytics() {
                 <CardTitle className="text-base">Recent Visits</CardTitle>
               </CardHeader>
               <CardContent>
-                {data.recentViews.length === 0 ? (
+                {(data.recentViews || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">No visits yet</p>
                 ) : (
                   <Table>
@@ -302,7 +302,7 @@ export default function AdminAnalytics() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.recentViews.map((row) => (
+                      {(data.recentViews || []).map((row) => (
                         <TableRow key={row.id}>
                           <TableCell className="font-mono text-sm">{row.page_path}</TableCell>
                           <TableCell className="text-muted-foreground text-sm">

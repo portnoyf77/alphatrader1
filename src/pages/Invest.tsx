@@ -302,7 +302,7 @@ export default function Create() {
       riskLevel: ai.strategy?.riskLevel || 'moderate',
     });
 
-    const cappedApiHoldings = capHoldingsByAllocation(ai.holdings, AI_RESULTS_MAX_HOLDINGS);
+    const cappedApiHoldings = capHoldingsByAllocation(ai.holdings || [], AI_RESULTS_MAX_HOLDINGS);
 
     const aiHoldings: GeneratedHolding[] = cappedApiHoldings.map(h => ({
       ticker: h.symbol,

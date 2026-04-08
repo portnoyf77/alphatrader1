@@ -207,14 +207,14 @@ export default function Dashboard() {
   }, [followedData]);
 
   const simulatingPortfolios = useMemo(() =>
-    myPortfolios.filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
+    (myPortfolios || []).filter((p: any) => p.status === 'private' || p.status === 'simulating'), [myPortfolios]);
 
-  const livePortfolios = myPortfolios.filter((s: any) => s.status !== 'private' && s.status !== 'simulating');
+  const livePortfolios = (myPortfolios || []).filter((s: any) => s.status !== 'private' && s.status !== 'simulating');
   const liveCount = livePortfolios.length;
   const simulatingCount = simulatingPortfolios.length;
-  const totalMyInvestment = myPortfolios.reduce((acc: number, s: any) => acc + (s.creator_investment || 0), 0);
-  const totalInvestedInOthers = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
-  const totalAllocatedInvested = investedPortfolios.reduce((acc, s) => acc + s.myAllocation, 0);
+  const totalMyInvestment = (myPortfolios || []).reduce((acc: number, s: any) => acc + (s.creator_investment || 0), 0);
+  const totalInvestedInOthers = (investedPortfolios || []).reduce((acc, s) => acc + s.myAllocation, 0);
+  const totalAllocatedInvested = (investedPortfolios || []).reduce((acc, s) => acc + s.myAllocation, 0);
 
   // Use live Alpaca data when available, fall back to mock
   const displayEquity = account ? account.equity : totalMyInvestment + totalInvestedInOthers;
@@ -845,9 +845,9 @@ export default function Dashboard() {
                 .news-carousel::-webkit-scrollbar-track { background: transparent; }
                 .news-carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
               `}</style>
-              {liveNews.map((article) => {
-                const positionSymbols = positions.map((p) => p.symbol);
-                const relevantSymbols = article.symbols.filter((s) => positionSymbols.includes(s));
+              {(liveNews || []).map((article) => {
+                const positionSymbols = (positions || []).map((p) => p.symbol);
+                const relevantSymbols = (article.symbols || []).filter((s) => positionSymbols.includes(s));
                 const thumbImg = article.images?.find((img) => img.size === 'thumb') ?? article.images?.find((img) => img.size === 'small') ?? article.images?.[0];
                 return (
                   <a
@@ -902,9 +902,9 @@ export default function Dashboard() {
                           {article.summary}
                         </p>
                       )}
-                      {article.symbols.length > 0 && (
+                      {(article.symbols || []).length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {article.symbols.slice(0, 4).map((sym) => (
+                          {(article.symbols || []).slice(0, 4).map((sym) => (
                             <span
                               key={sym}
                               className="text-[0.6rem] font-mono px-1.5 py-0.5 rounded"

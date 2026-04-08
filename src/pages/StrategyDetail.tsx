@@ -333,7 +333,7 @@ export default function StrategyDetail() {
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Allowed Assets</p>
                     <div className="flex flex-wrap gap-2">
-                      {strategy.allowed_assets.map((asset, idx) => (
+                      {(strategy.allowed_assets || []).map((asset, idx) => (
                         <span key={idx} className="px-2 py-1 rounded-md bg-secondary text-xs">
                           {asset}
                         </span>
@@ -411,7 +411,7 @@ export default function StrategyDetail() {
                     </TableHeader>
                     <TableBody>
                       {isOwner ? (
-                        strategy.holdings.map((holding) => (
+                        (strategy.holdings || []).map((holding) => (
                           <TableRow key={holding.ticker}>
                             <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
                             <TableCell>{holding.name}</TableCell>
@@ -428,7 +428,7 @@ export default function StrategyDetail() {
                         ))
                       ) : (
                         Object.entries(
-                          strategy.holdings.reduce<Record<string, number>>((acc, h) => {
+                          (strategy.holdings || []).reduce<Record<string, number>>((acc, h) => {
                             const sector = h.sector || 'Other';
                             acc[sector] = (acc[sector] || 0) + h.weight;
                             return acc;

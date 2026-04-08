@@ -83,7 +83,7 @@ export default function Explore() {
   };
 
   const topPerformers = useMemo(() => {
-    return [...validatedStrategies]
+    return [...(validatedStrategies || [])]
       .sort((a, b) => getReturnForTimeframe(b, chartTimeframe) - getReturnForTimeframe(a, chartTimeframe))
       .slice(0, 5);
   }, [validatedStrategies, chartTimeframe]);
@@ -96,7 +96,7 @@ export default function Explore() {
   };
 
   const alphaLeaderboard = useMemo(() => {
-    return [...validatedStrategies]
+    return [...(validatedStrategies || [])]
       .map((s) => {
         const trackRecordDays = Math.floor((Date.now() - new Date(s.created_date).getTime()) / (1000 * 60 * 60 * 24));
         const reputationScore = calculateAlphaScore(s);
@@ -114,7 +114,7 @@ export default function Explore() {
   }, [validatedStrategies]);
 
   const filteredStrategies = useMemo(() => {
-    const filtered = validatedStrategies.filter(strategy => {
+    const filtered = (validatedStrategies || []).filter(strategy => {
       const matchesSearch = strategy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         strategy.creator_id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesRisk = riskFilter === 'all' || strategy.risk_level === riskFilter;

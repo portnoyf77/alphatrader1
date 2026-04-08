@@ -104,7 +104,7 @@ export default function PortfolioOwnerDetail() {
   };
 
   const openTweakModal = () => {
-    setEditableHoldings(portfolio.holdings.map(h => ({ ...h })));
+    setEditableHoldings((portfolio.holdings || []).map(h => ({ ...h })));
     setTweakMode('choice');
     setShowTweakModal(true);
   };
@@ -418,7 +418,7 @@ export default function PortfolioOwnerDetail() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {portfolio.holdings.map((holding) => (
+                  {(portfolio.holdings || []).map((holding) => (
                     <TableRow key={holding.ticker}>
                       <TableCell className="font-mono font-semibold">{holding.ticker}</TableCell>
                       <TableCell>{holding.name}</TableCell>
