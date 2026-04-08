@@ -13,6 +13,7 @@ export function ProtectedRoute({ children, allowExpiredTrial = false, skipProfil
   const { user, isAuthenticated, isLoading, isTrialExpired } = useMockAuth();
   const location = useLocation();
 
+  // isLoading stays true until session + profiles row are resolved (MockAuthContext)
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-6">
@@ -31,7 +32,7 @@ export function ProtectedRoute({ children, allowExpiredTrial = false, skipProfil
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Redirect to profile setup if user hasn't chosen a username yet
+  // Onboarding not finished (profiles.onboarding_completed !== true) → full wizard
   if (!skipProfileCheck && user?.needsProfileSetup) {
     return <Navigate to="/profile-setup" replace />;
   }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -58,15 +58,50 @@ function generateUsername(userId: string): string {
   return `@inv_${short}`;
 }
 
-// Quick synchronous user object -- never blocks auth flow
+/** Base user before profile row is merged (needsProfileSetup defaults true until DB says otherwise). */
 function toAppUser(su: SupabaseUser): AppUser {
   return {
     id: su.id,
     username: generateUsername(su.id),
     displayName: '',
     email: su.email || '',
-    needsProfileSetup: true, // assume true until profile loads
+    needsProfileSetup: true,
   };
+}
+
+type ProfileRow = {
+  username: string | null;
+  display_name: string | null;
+  onboarding_completed: boolean | null;
+};
+
+/**
+ * Load profiles row and merge into AppUser. Uses maybeSingle() so missing row is OK.
+ * needsProfileSetup is false only when onboarding_completed is true.
+ */
+async function buildAppUserFromSession(su: SupabaseUser): Promise<AppUser> {
+  const base = toAppUser(su);
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username, display_name, onboarding_completed')
+      .eq('id', su.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return base;
+    }
+    const row = data as ProfileRow;
+    const complete = Boolean(row.onboarding_completed);
+    return {
+      ...base,
+      username: row.username ? `@${row.username.replace(/^@/, '')}` : base.username,
+      displayName: row.display_name?.trim() || '',
+      needsProfileSetup: !complete,
+    };
+  } catch {
+    return base;
+  }
 }
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
@@ -74,86 +109,65 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [trialStartDate, setTrialStartDate] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string | null>(null);
+  /** Avoid duplicate hydrate when login() already merged profile before SIGNED_IN listener runs. */
+  const loginHydrateRef = useRef(false);
 
-  // Bootstrap: check existing session + listen for auth changes
+  const initTrialIfNeeded = () => {
+    if (!localStorage.getItem('trialStartDate')) {
+      const now = Date.now();
+      setTrialStartDate(now);
+      localStorage.setItem('trialStartDate', now.toString());
+    }
+  };
+
+  // Bootstrap: session + profile must resolve before isLoading becomes false
   useEffect(() => {
-    // 1. Load local plan / trial data
     const storedTrial = localStorage.getItem('trialStartDate');
     if (storedTrial) setTrialStartDate(parseInt(storedTrial, 10));
     const storedPlan = localStorage.getItem('userPlan');
     if (storedPlan) setUserPlan(storedPlan);
 
-    // 2. Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(toAppUser(session.user));
-        // Initialize trial if first session
-        if (!localStorage.getItem('trialStartDate')) {
-          const now = Date.now();
-          setTrialStartDate(now);
-          localStorage.setItem('trialStartDate', now.toString());
-        }
-      }
-      setIsLoading(false);
-    });
-
-    // 3. Listen for sign-in / sign-out events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          setUser(toAppUser(session.user));
-          // Initialize trial on first auth
-          if (!localStorage.getItem('trialStartDate')) {
-            const now = Date.now();
-            setTrialStartDate(now);
-            localStorage.setItem('trialStartDate', now.toString());
-          }
-        } else {
-          setUser(null);
-        }
-        setIsLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // After auth resolves, load profile from Supabase in the background
-  useEffect(() => {
-    if (!user || !user.needsProfileSetup) return;
-
     let cancelled = false;
 
     (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username, display_name, onboarding_completed')
-          .eq('id', user.id)
-          .single();
-
+      setIsLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (session?.user) {
+        const u = await buildAppUserFromSession(session.user);
         if (cancelled) return;
-
-        if (!error && data && data.onboarding_completed) {
-          setUser((prev) =>
-            prev && prev.id === user.id
-              ? {
-                  ...prev,
-                  username: data.username ? `@${data.username}` : prev.username,
-                  displayName: data.display_name || '',
-                  needsProfileSetup: false,
-                }
-              : prev
-          );
-        }
-      } catch {
-        // Profile fetch failed -- needsProfileSetup stays true, user
-        // will land on the onboarding wizard (safe fallback)
+        setUser(u);
+        initTrialIfNeeded();
+      } else {
+        setUser(null);
       }
+      if (!cancelled) setIsLoading(false);
     })();
 
-    return () => { cancelled = true; };
-  }, [user?.id]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Initial session is handled by getSession() above
+      if (event === 'INITIAL_SESSION') return;
+      if (loginHydrateRef.current) return;
+
+      setIsLoading(true);
+      try {
+        if (session?.user) {
+          const u = await buildAppUserFromSession(session.user);
+          setUser(u);
+          initTrialIfNeeded();
+        } else {
+          setUser(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const isTrialExpired =
     trialStartDate !== null && !userPlan && Date.now() - trialStartDate > FREE_TRIAL_MS;
@@ -161,6 +175,20 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      throw new Error('No session after sign-in');
+    }
+    loginHydrateRef.current = true;
+    setIsLoading(true);
+    try {
+      const u = await buildAppUserFromSession(session.user);
+      setUser(u);
+      initTrialIfNeeded();
+    } finally {
+      setIsLoading(false);
+      loginHydrateRef.current = false;
+    }
   };
 
   const signup = async (email: string, password: string): Promise<boolean> => {
