@@ -1,21 +1,33 @@
-/**
- * Minimal Tooltip stubs for shadcn/ui compatibility.
- * Replace with full shadcn/ui install when ready.
- */
-import React from 'react';
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
-export function TooltipProvider({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
+import { cn } from "@/lib/utils";
 
-export function Tooltip({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
+const TooltipProvider = TooltipPrimitive.Provider;
 
-export function TooltipTrigger({ children, ...props }: React.HTMLAttributes<HTMLDivElement> & { asChild?: boolean }) {
-  return <div {...props}>{children}</div>;
-}
+const Tooltip = TooltipPrimitive.Root;
 
-export function TooltipContent({ children }: { children: React.ReactNode }) {
-  return null;
-}
+const TooltipTrigger = TooltipPrimitive.Trigger;
+
+const TooltipPortal = TooltipPrimitive.Portal;
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPortal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 overflow-hidden rounded-lg px-3 py-2 text-[0.8125rem] shadow-[0_4px_16px_rgba(0,0,0,0.3)] animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "bg-[rgba(15,15,26,0.95)] backdrop-blur-lg border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.85)] max-w-[250px]",
+        className,
+      )}
+      {...props}
+    />
+  </TooltipPortal>
+));
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

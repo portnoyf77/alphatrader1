@@ -1,37 +1,24 @@
-/**
- * Minimal Toaster stub for shadcn/ui compatibility.
- * Replace with full shadcn/ui install when ready.
- */
-import React, { createContext, useContext, useState, useCallback } from 'react';
-
-interface Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  variant?: 'default' | 'destructive';
-}
-
-interface ToastContextValue {
-  toasts: Toast[];
-  toast: (t: Omit<Toast, 'id'>) => void;
-  dismiss: (id: string) => void;
-}
-
-const ToastContext = createContext<ToastContextValue>({
-  toasts: [],
-  toast: () => {},
-  dismiss: () => {},
-});
-
-export function useToast() {
-  return useContext(ToastContext);
-}
-
-export function toast(opts: Omit<Toast, 'id'>) {
-  // No-op in stub -- would need global state for full implementation
-  console.log('[toast]', opts.title, opts.description);
-}
+import { useToast } from "@/hooks/use-toast";
+import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "@/components/ui/toast";
 
 export function Toaster() {
-  return null;
+  const { toasts } = useToast();
+
+  return (
+    <ToastProvider>
+      {toasts.map(function ({ id, title, description, action, ...props }) {
+        return (
+          <Toast key={id} {...props}>
+            <div className="grid gap-1">
+              {title && <ToastTitle>{title}</ToastTitle>}
+              {description && <ToastDescription>{description}</ToastDescription>}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        );
+      })}
+      <ToastViewport />
+    </ToastProvider>
+  );
 }

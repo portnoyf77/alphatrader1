@@ -1,499 +1,591 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getAccountSummary, type AccountSummary, type Position } from '@/lib/accountService';
-import { getRebalanceLogs, type RebalanceLogEntry, formatRelativeTime, isAgentActive, tradeStats } from '@/lib/rebalanceService';
-import { formatCurrency, formatPercent, cn } from '@/lib/utils';
-import { NavBar } from '@/components/NavBar';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ArrowUp, ArrowDown, RefreshCw, DollarSign, TrendingUp, Wallet, Clock, XCircle, BarChart3 } from 'lucide-react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/formatters';
+import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
+import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
+import {
+  getOrders,
+  getPortfolioHistory,
+  cancelOrder,
+  closePosition,
+  placeOrder,
+  type AlpacaOrder,
+  type AlpacaPortfolioHistoryPoint,
+} from '@/lib/alpacaClient';
 
-export default function Portfolio() {
-  const navigate = useNavigate();
-  const [data, setData] = useState<AccountSummary | null>(null);
-  const [logs, setLogs] = useState<RebalanceLogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedLogIdx, setExpandedLogIdx] = useState<number | null>(null);
-  const [expandedAgentTab, setExpandedAgentTab] = useState<'news' | 'fundamentals'>('news');
+// ── Equity Chart (lightweight SVG) ──
 
-  const fetchData = async () => {
-    try {
-      const [accountData, rebalanceLogs] = await Promise.all([
-        getAccountSummary(),
-        getRebalanceLogs(10),
-      ]);
-      setData(accountData);
-      setLogs(rebalanceLogs);
-      setLoading(false);
-    } catch (err) {
-      console.error('Failed to fetch portfolio data:', err);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (loading || !data) {
+function EquityChart({ data }: { data: AlpacaPortfolioHistoryPoint[] }) {
+  if (data.length < 2) {
     return (
-      <div className="min-h-screen bg-gray-950">
-        <NavBar />
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-20 bg-gray-800 rounded animate-pulse" />
-            ))}
-          </div>
-        </main>
+      <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+        Not enough data for chart yet. Place some trades and check back.
       </div>
     );
   }
 
-  const acct = data.account;
-  const positions = data.positions;
-  const history = data.history ?? [];
+  const values = data.map((d) => d.equity);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const range = maxVal - minVal || 1;
+  const width = 600;
+  const height = 180;
+  const padding = 20;
 
-  // Performance metrics
-  const totalUnrealizedPL = data.totalUnrealizedPL;
-  const isPositive = totalUnrealizedPL >= 0;
-
-  const bestPosition = positions.reduce<Position | null>((best, p) => {
-    if (!best || p.unrealizedPLPct > best.unrealizedPLPct) return p;
-    return best;
-  }, null);
-
-  const worstPosition = positions.reduce<Position | null>((worst, p) => {
-    if (!worst || p.unrealizedPLPct < worst.unrealizedPLPct) return p;
-    return worst;
-  }, null);
-
-  // Chart data - simple SVG polyline from history
-  const equities = history.map(h => h.equity);
-  const minEquity = equities.length > 0 ? Math.min(...equities) : acct.equity;
-  const maxEquity = equities.length > 0 ? Math.max(...equities) : acct.equity;
-  const range = maxEquity - minEquity || 1;
-
-  const chartWidth = 600;
-  const chartHeight = 300;
-  const padding = 40;
-
-  const points = history.map((h, i) => {
-    const x = padding + (i / (history.length - 1 || 1)) * (chartWidth - 2 * padding);
-    const y = chartHeight - padding - ((h.equity - minEquity) / range) * (chartHeight - 2 * padding);
-    return [x, y];
+  const points = data.map((d, i) => {
+    const x = padding + (i / (data.length - 1)) * (width - 2 * padding);
+    const y = padding + (1 - (d.equity - minVal) / range) * (height - 2 * padding);
+    return `${x},${y}`;
   });
 
-  const polylinePoints = points.map(p => `${p[0]},${p[1]}`).join(' ');
-  const lineColor = isPositive ? '#22c55e' : '#ef4444';
+  const isPositive = data[data.length - 1].equity >= data[0].equity;
+  const strokeColor = isPositive ? '#10B981' : '#EF4444';
+
+  // Area fill
+  const firstX = padding;
+  const lastX = padding + ((data.length - 1) / (data.length - 1)) * (width - 2 * padding);
+  const areaPath = `M${points[0]} ${points.slice(1).join(' ')} L${lastX},${height - padding} L${firstX},${height - padding} Z`;
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <NavBar />
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.2" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#equityGrad)" />
+      <polyline
+        points={points.join(' ')}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {/* Y-axis labels */}
+      <text x={padding} y={padding - 4} fill="#888" fontSize="10" textAnchor="start">
+        {formatCurrency(maxVal)}
+      </text>
+      <text x={padding} y={height - padding + 14} fill="#888" fontSize="10" textAnchor="start">
+        {formatCurrency(minVal)}
+      </text>
+    </svg>
+  );
+}
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Portfolio Performance Section */}
-        <div className="mb-8">
-          <div className="mb-6">
-            <p className="text-gray-400 text-sm mb-2">Total Equity</p>
-            <div className="flex items-baseline gap-3">
-              <p className="text-4xl font-bold text-white">{formatCurrency(acct.equity)}</p>
-              <p className={cn('text-xl font-semibold', acct.dayChangeAmt >= 0 ? 'text-green-400' : 'text-red-400')}>
-                {acct.dayChangeAmt >= 0 ? '+' : ''}{formatCurrency(acct.dayChangeAmt)} ({acct.dayChangePct >= 0 ? '+' : ''}{acct.dayChangePct.toFixed(2)}%)
-              </p>
-            </div>
-          </div>
+// ── Quick Trade Form ──
 
-          {/* Equity Chart */}
-          {history.length > 1 && (
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-              <svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
-                {Array.from({ length: 5 }).map((_, i) => {
-                  const y = padding + (i * (chartHeight - 2 * padding)) / 4;
-                  return (
-                    <line
-                      key={`grid-${i}`}
-                      x1={padding}
-                      y1={y}
-                      x2={chartWidth - padding}
-                      y2={y}
-                      stroke="#374151"
-                      strokeDasharray="4"
-                    />
-                  );
-                })}
+function QuickTrade({ onTradeComplete }: { onTradeComplete: () => void }) {
+  const [symbol, setSymbol] = useState('');
+  const [qty, setQty] = useState('1');
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
+  const [status, setStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message?: string }>({ type: 'idle' });
 
-                <polyline
-                  points={polylinePoints}
-                  fill="none"
-                  stroke={lineColor}
-                  strokeWidth="2"
-                  vectorEffect="non-scaling-stroke"
-                />
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!symbol.trim() || !qty) return;
+    setStatus({ type: 'loading' });
+    try {
+      const order = await placeOrder(symbol, Number(qty), side);
+      setStatus({ type: 'success', message: `${order.side.toUpperCase()} ${order.qty} ${order.symbol} - ${order.status}` });
+      setSymbol('');
+      setQty('1');
+      setTimeout(() => {
+        setStatus({ type: 'idle' });
+        onTradeComplete();
+      }, 2000);
+    } catch (err) {
+      setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Order failed' });
+    }
+  };
 
-                <text x={padding - 10} y={padding - 10} textAnchor="end" fill="#9ca3af" fontSize="12">
-                  ${maxEquity.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </text>
-                <text
-                  x={padding - 10}
-                  y={chartHeight - padding + 15}
-                  textAnchor="end"
-                  fill="#9ca3af"
-                  fontSize="12"
-                >
-                  ${minEquity.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </text>
-              </svg>
-            </div>
+  return (
+    <form onSubmit={handleSubmit} className="flex items-end gap-3 flex-wrap">
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-muted-foreground">Symbol</label>
+        <input
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="AAPL"
+          className="h-9 w-24 rounded-lg px-3 text-sm bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-muted-foreground">Qty</label>
+        <input
+          type="number"
+          min="1"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          className="h-9 w-20 rounded-lg px-3 text-sm bg-secondary/50 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      <div className="flex gap-1">
+        <button
+          type="button"
+          onClick={() => setSide('buy')}
+          className={cn(
+            'h-9 px-3 rounded-lg text-sm font-medium transition-colors',
+            side === 'buy' ? 'bg-emerald-600 text-white' : 'bg-secondary/50 text-muted-foreground hover:text-foreground',
           )}
-        </div>
-
-        {/* Holdings Grid */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">Holdings</h2>
-          {positions.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {positions.map((p: Position) => {
-                const textColor = p.unrealizedPL >= 0 ? 'text-green-400' : 'text-red-400';
-
-                return (
-                  <div key={p.symbol} className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="text-2xl font-bold text-white">{p.symbol}</p>
-                        <p className="text-sm text-gray-400">{p.qty.toFixed(2)} shares</p>
-                      </div>
-                      <div className="text-right">
-                        <p className={cn('text-lg font-semibold', textColor)}>
-                          {formatCurrency(p.unrealizedPL)}
-                        </p>
-                        <p className={cn('text-sm', textColor)}>{formatPercent(p.unrealizedPLPct / 100)}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Current Price</span>
-                        <span className="text-white font-medium">{formatCurrency(p.currentPrice)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Avg Entry</span>
-                        <span className="text-white font-medium">{formatCurrency(p.avgEntry)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Market Value</span>
-                        <span className="text-white font-medium">{formatCurrency(p.marketValue)}</span>
-                      </div>
-
-                      {/* Allocation Bar */}
-                      <div className="mt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs text-gray-400">Portfolio Allocation</span>
-                          <span className="text-xs font-medium text-gray-300">{p.allocationPct}%</span>
-                        </div>
-                        <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-blue-500 h-full rounded-full transition-all"
-                            style={{ width: `${Math.min(p.allocationPct, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center text-gray-400">
-              No positions yet.
-            </div>
+        >
+          Buy
+        </button>
+        <button
+          type="button"
+          onClick={() => setSide('sell')}
+          className={cn(
+            'h-9 px-3 rounded-lg text-sm font-medium transition-colors',
+            side === 'sell' ? 'bg-red-600 text-white' : 'bg-secondary/50 text-muted-foreground hover:text-foreground',
           )}
-        </div>
+        >
+          Sell
+        </button>
+      </div>
+      <Button type="submit" size="sm" disabled={status.type === 'loading' || !symbol.trim()}>
+        {status.type === 'loading' ? 'Placing...' : 'Place Order'}
+      </Button>
+      {status.type === 'success' && <span className="text-xs text-emerald-400">{status.message}</span>}
+      {status.type === 'error' && <span className="text-xs text-red-400">{status.message}</span>}
+    </form>
+  );
+}
 
-        {/* Agent Activity Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div
-              className={cn(
-                'w-2 h-2 rounded-full',
-                logs.length > 0 && isAgentActive(logs[0].timestamp) ? 'bg-green-500 animate-pulse' : 'bg-gray-600'
-              )}
-            />
-            <h2 className="text-xl font-bold text-white">Agent Activity</h2>
-          </div>
-
-          {logs.length > 0 ? (
-            <div className="space-y-2">
-              {logs.map((log, idx) => {
-                const isExpanded = expandedLogIdx === idx;
-                const trades = log.trades || [];
-                const decision = log.overseerDecision;
-                const stats = tradeStats(trades);
-
-                return (
-                  <div key={log.timestamp + idx} className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
-                    {/* Collapsed Header */}
-                    <button
-                      onClick={() => setExpandedLogIdx(isExpanded ? null : idx)}
-                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800 transition"
-                    >
-                      <div className="flex items-center gap-4 flex-1 text-left">
-                        <div className="text-gray-400">
-                          {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                        </div>
-
-                        <div className="text-sm text-gray-400">{formatRelativeTime(log.timestamp)}</div>
-
-                        <span
-                          className={cn(
-                            'px-2 py-1 rounded text-xs font-semibold',
-                            decision.marketOutlook === 'bullish'
-                              ? 'bg-green-900 text-green-300'
-                              : decision.marketOutlook === 'bearish'
-                                ? 'bg-red-900 text-red-300'
-                                : 'bg-gray-700 text-gray-300'
-                          )}
-                        >
-                          {decision.marketOutlook}
-                        </span>
-
-                        {/* Confidence bar (1-10 mapped to 10 dots) */}
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={cn(
-                                'w-1.5 h-1.5 rounded-full',
-                                i < decision.confidence ? 'bg-blue-500' : 'bg-gray-700'
-                              )}
-                            />
-                          ))}
-                        </div>
-
-                        <span className="text-xs text-gray-400 ml-auto">
-                          {trades.length} trade{trades.length !== 1 ? 's' : ''}
-                          {stats.failed > 0 && ` (${stats.failed} failed)`}
-                        </span>
-                      </div>
-
-                      <span className={cn(
-                        'text-xs font-semibold ml-3',
-                        decision.action === 'aggressive' ? 'text-red-400' :
-                        decision.action === 'defensive' ? 'text-yellow-400' :
-                        decision.action === 'hold' ? 'text-gray-400' : 'text-blue-400'
-                      )}>
-                        {decision.action.toUpperCase()}
-                      </span>
-                    </button>
-
-                    {/* Expanded Content */}
-                    {isExpanded && (
-                      <div className="px-6 py-4 border-t border-gray-800 space-y-6 bg-gray-800/30">
-                        {/* Dry run badge */}
-                        {log.dryRun && (
-                          <div className="bg-yellow-900/30 border border-yellow-700 rounded px-3 py-2 text-xs text-yellow-300">
-                            DRY RUN - No trades were executed
-                          </div>
-                        )}
-
-                        {/* Overseer Decision */}
-                        <div>
-                          <h3 className="text-sm font-semibold text-white mb-2">Overseer Decision</h3>
-                          <p className="text-sm text-gray-400 mb-2">{decision.reasoning}</p>
-                          <p className="text-xs text-gray-500">{decision.portfolioAssessment}</p>
-                        </div>
-
-                        {/* Trades */}
-                        {trades.length > 0 ? (
-                          <div>
-                            <h3 className="text-sm font-semibold text-white mb-3">Trades</h3>
-                            <div className="space-y-2">
-                              {trades.map((trade, i) => (
-                                <div key={i} className="bg-gray-900 rounded p-3 text-sm">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="font-medium text-white">{trade.symbol}</span>
-                                    <div className="flex items-center gap-2">
-                                      <span
-                                        className={cn(
-                                          'px-2 py-0.5 rounded text-xs font-semibold',
-                                          trade.side === 'buy'
-                                            ? 'bg-green-900 text-green-300'
-                                            : 'bg-red-900 text-red-300'
-                                        )}
-                                      >
-                                        {trade.side.toUpperCase()}
-                                      </span>
-                                      <span className={cn(
-                                        'text-xs',
-                                        trade.status === 'submitted' ? 'text-green-400' :
-                                        trade.status === 'failed' ? 'text-red-400' :
-                                        trade.status === 'dry_run' ? 'text-yellow-400' : 'text-gray-400'
-                                      )}>
-                                        {trade.status}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="text-gray-400 mb-1">
-                                    {trade.notional ? formatCurrency(trade.notional) : `${trade.qty} shares`}
-                                  </div>
-                                  {trade.reasoning && <p className="text-gray-500 text-xs">{trade.reasoning}</p>}
-                                  {trade.error && <p className="text-red-400 text-xs mt-1">{trade.error}</p>}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-500 italic">Holding steady - no trades this cycle</p>
-                        )}
-
-                        {/* Agent Reports (tabbed) */}
-                        <div>
-                          <div className="flex gap-2 mb-3">
-                            <button
-                              onClick={() => setExpandedAgentTab('news')}
-                              className={cn(
-                                'text-xs px-3 py-1.5 rounded font-medium transition',
-                                expandedAgentTab === 'news'
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-700 text-gray-400 hover:text-gray-300'
-                              )}
-                            >
-                              News Analyst
-                            </button>
-                            <button
-                              onClick={() => setExpandedAgentTab('fundamentals')}
-                              className={cn(
-                                'text-xs px-3 py-1.5 rounded font-medium transition',
-                                expandedAgentTab === 'fundamentals'
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-700 text-gray-400 hover:text-gray-300'
-                              )}
-                            >
-                              Fundamentals Analyst
-                            </button>
-                          </div>
-
-                          {expandedAgentTab === 'news' && log.newsReport && (
-                            <div className="space-y-3">
-                              {log.newsReport.error ? (
-                                <p className="text-sm text-red-400">{log.newsReport.error}</p>
-                              ) : (
-                                <>
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-xs text-gray-400">Market Sentiment:</span>
-                                    <span className={cn(
-                                      'text-xs font-semibold px-2 py-0.5 rounded',
-                                      log.newsReport.marketSentiment === 'bullish' ? 'bg-green-900 text-green-300' :
-                                      log.newsReport.marketSentiment === 'bearish' ? 'bg-red-900 text-red-300' :
-                                      'bg-gray-700 text-gray-300'
-                                    )}>
-                                      {log.newsReport.marketSentiment}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-400">{log.newsReport.marketSummary}</p>
-                                  {log.newsReport.symbols.length > 0 && (
-                                    <div className="space-y-1 mt-2">
-                                      {log.newsReport.symbols.map((s) => (
-                                        <div key={s.symbol} className="flex items-center justify-between text-xs bg-gray-900 rounded px-3 py-2">
-                                          <span className="font-medium text-white">{s.symbol}</span>
-                                          <span className={cn(
-                                            s.sentiment === 'bullish' ? 'text-green-400' :
-                                            s.sentiment === 'bearish' ? 'text-red-400' : 'text-gray-400'
-                                          )}>
-                                            {s.sentiment} (impact: {s.impactScore}/10)
-                                          </span>
-                                          <span className="text-gray-500">{s.recommendation}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          )}
-
-                          {expandedAgentTab === 'fundamentals' && log.fundamentalsReport && (
-                            <div className="space-y-3">
-                              {log.fundamentalsReport.error ? (
-                                <p className="text-sm text-red-400">{log.fundamentalsReport.error}</p>
-                              ) : (
-                                <>
-                                  <p className="text-sm text-gray-400">{log.fundamentalsReport.overallAssessment}</p>
-                                  {log.fundamentalsReport.symbols.length > 0 && (
-                                    <div className="space-y-1 mt-2">
-                                      {log.fundamentalsReport.symbols.map((s) => (
-                                        <div key={s.symbol} className="flex items-center justify-between text-xs bg-gray-900 rounded px-3 py-2">
-                                          <span className="font-medium text-white">{s.symbol}</span>
-                                          <span className={cn(
-                                            s.technicalSignal === 'bullish' ? 'text-green-400' :
-                                            s.technicalSignal === 'bearish' ? 'text-red-400' : 'text-gray-400'
-                                          )}>
-                                            {s.technicalSignal} {s.fundamentalScore !== null ? `(score: ${s.fundamentalScore}/10)` : ''}
-                                          </span>
-                                          <span className="text-gray-500">{s.recommendation}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Account Snapshot */}
-                        <div className="flex gap-4 text-xs text-gray-500 pt-2 border-t border-gray-700">
-                          <span>Equity: {formatCurrency(log.accountSnapshot.equityBefore)}</span>
-                          <span>Cash: {formatCurrency(log.accountSnapshot.cashBefore)}</span>
-                          <span>{log.accountSnapshot.positionCount} positions</span>
-                          <span>Cycle: {(log.cycleDurationMs / 1000).toFixed(1)}s</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center text-gray-400">
-              <p>No agent activity yet. Agents run every 15 minutes during market hours (9:30 AM - 4:00 PM ET).</p>
-            </div>
-          )}
-        </div>
-
-        {/* Performance Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-            <p className="text-xs text-gray-400 mb-2">Total Unrealized P&L</p>
-            <p className={cn('text-lg font-semibold', isPositive ? 'text-green-400' : 'text-red-400')}>
-              {formatCurrency(totalUnrealizedPL)}
-            </p>
-          </div>
-
-          {bestPosition && (
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-              <p className="text-xs text-gray-400 mb-2">Best Position</p>
-              <p className="text-lg font-semibold text-green-400">
-                {bestPosition.symbol} {formatPercent(bestPosition.unrealizedPLPct / 100)}
-              </p>
-            </div>
-          )}
-
-          {worstPosition && (
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-              <p className="text-xs text-gray-400 mb-2">Worst Position</p>
-              <p className="text-lg font-semibold text-red-400">
-                {worstPosition.symbol} {formatPercent(worstPosition.unrealizedPLPct / 100)}
-              </p>
-            </div>
-          )}
-
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-            <p className="text-xs text-gray-400 mb-2">Positions</p>
-            <p className="text-lg font-semibold text-white">{data.positionCount}</p>
-          </div>
-        </div>
-      </main>
+function OpenPositionsSkeletonRows() {
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Symbol</TableHead>
+            <TableHead className="text-right">Qty</TableHead>
+            <TableHead className="text-right">Avg Entry</TableHead>
+            <TableHead className="text-right">Current</TableHead>
+            <TableHead className="text-right">Market Value</TableHead>
+            <TableHead className="text-right">P&L</TableHead>
+            <TableHead className="text-right">P&L %</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell><Skeleton className="h-4 w-14" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-14 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-8 w-14 ml-auto rounded-md" /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
+  );
+}
+
+// ── Main Page ──
+
+export default function Portfolio() {
+  const { account, loading: acctLoading, refetch: refetchAccount } = useAlpacaAccount();
+  const { positions, totalMarketValue, totalUnrealizedPL, loading: posLoading, refetch: refetchPositions } = useAlpacaPositions();
+  const [orders, setOrders] = useState<AlpacaOrder[]>([]);
+  const [history, setHistory] = useState<AlpacaPortfolioHistoryPoint[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [historyPeriod, setHistoryPeriod] = useState('1M');
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [closingSymbol, setClosingSymbol] = useState<string | null>(null);
+  const [closeConfirm, setCloseConfirm] = useState<{ symbol: string; qty: number } | null>(null);
+
+  const loading = acctLoading || posLoading;
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const o = await getOrders(100);
+      setOrders(o);
+    } catch {
+      /* swallow */
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const fetchHistory = async (period: string) => {
+    try {
+      const h = await getPortfolioHistory(period, period === '1D' ? '15Min' : '1D');
+      setHistory(h);
+    } catch {
+      setHistory([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+    fetchHistory(historyPeriod);
+  }, [historyPeriod]);
+
+  const handleRefresh = () => {
+    refetchAccount();
+    refetchPositions();
+    fetchOrders();
+    fetchHistory(historyPeriod);
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    setCancellingId(orderId);
+    try {
+      await cancelOrder(orderId);
+      await fetchOrders();
+    } catch {
+      /* swallow */
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const handleClosePosition = async (symbol: string) => {
+    setClosingSymbol(symbol);
+    try {
+      await closePosition(symbol);
+      refetchPositions();
+      refetchAccount();
+      await fetchOrders();
+    } catch {
+      /* swallow */
+    } finally {
+      setClosingSymbol(null);
+    }
+  };
+
+  const openOrders = useMemo(() => orders.filter((o) => ['new', 'accepted', 'partially_filled', 'pending_new'].includes(o.status)), [orders]);
+  const recentFills = useMemo(() => orders.filter((o) => o.status === 'filled').slice(0, 20), [orders]);
+
+  const totalCostBasis = positions.reduce((sum, p) => sum + p.avgEntryPrice * p.qty, 0);
+  const totalPLPercent = totalCostBasis > 0 ? (totalUnrealizedPL / totalCostBasis) * 100 : 0;
+
+  return (
+    <PageLayout>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-1">Portfolio</h1>
+            <p className="text-muted-foreground">Real-time view of your Alpaca paper trading account.</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+            <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
+            Refresh
+          </Button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                <DollarSign className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-wider">Equity</span>
+              </div>
+              <div className="font-mono text-xl font-bold">
+                {loading ? '...' : formatCurrency(account?.equity ?? 0)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                <TrendingUp className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-wider">Unrealized P&L</span>
+              </div>
+              <div className={cn('font-mono text-xl font-bold', totalUnrealizedPL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                {loading ? '...' : `${totalUnrealizedPL >= 0 ? '+' : ''}${formatCurrency(totalUnrealizedPL)}`}
+              </div>
+              {!loading && totalPLPercent !== 0 && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {totalPLPercent >= 0 ? '+' : ''}{totalPLPercent.toFixed(2)}%
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                <Wallet className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-wider">Cash</span>
+              </div>
+              <div className="font-mono text-xl font-bold">
+                {loading ? '...' : formatCurrency(account?.cash ?? 0)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                <BarChart3 className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-wider">Day P&L</span>
+              </div>
+              <div className={cn('font-mono text-xl font-bold', (account?.dayPL ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                {loading ? '...' : `${(account?.dayPL ?? 0) >= 0 ? '+' : ''}${formatCurrency(account?.dayPL ?? 0)}`}
+              </div>
+              {!loading && account && account.dayPLPercent !== 0 && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {account.dayPLPercent >= 0 ? '+' : ''}{account.dayPLPercent.toFixed(2)}%
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Equity Chart */}
+        <div
+          className="mb-8 rounded-xl p-4"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold">Equity History</h2>
+            <div className="flex gap-1">
+              {['1D', '1W', '1M', '3M', '6M', '1A'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setHistoryPeriod(p)}
+                  className={cn(
+                    'px-2 py-1 text-xs rounded transition-colors',
+                    historyPeriod === p
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+          <EquityChart data={history} />
+        </div>
+
+        {/* Quick Trade */}
+        <div
+          className="mb-8 rounded-xl p-4"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <h2 className="text-sm font-semibold mb-3">Quick Trade</h2>
+          <QuickTrade onTradeComplete={handleRefresh} />
+        </div>
+
+        {/* Positions Table */}
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            Open Positions
+            {positions.length > 0 && (
+              <span className="text-xs text-muted-foreground font-normal">({positions.length})</span>
+            )}
+          </h2>
+          {loading ? (
+            <OpenPositionsSkeletonRows />
+          ) : positions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              No open positions. Place a trade to get started.
+            </div>
+          ) : (
+            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Symbol</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right">Avg Entry</TableHead>
+                    <TableHead className="text-right">Current</TableHead>
+                    <TableHead className="text-right">Market Value</TableHead>
+                    <TableHead className="text-right">P&L</TableHead>
+                    <TableHead className="text-right">P&L %</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {positions.map((pos) => (
+                    <TableRow key={pos.symbol}>
+                      <TableCell className="font-mono font-semibold">{pos.symbol}</TableCell>
+                      <TableCell className="text-right font-mono">{pos.qty}</TableCell>
+                      <TableCell className="text-right font-mono">${pos.avgEntryPrice.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono">${pos.currentPrice.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono">{formatCurrency(pos.marketValue)}</TableCell>
+                      <TableCell className={cn('text-right font-mono', pos.unrealizedPL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                        {pos.unrealizedPL >= 0 ? '+' : ''}{formatCurrency(pos.unrealizedPL)}
+                      </TableCell>
+                      <TableCell className={cn('text-right font-mono', pos.unrealizedPLPercent >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                        {pos.unrealizedPLPercent >= 0 ? '+' : ''}{pos.unrealizedPLPercent.toFixed(2)}%
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                          disabled={closingSymbol === pos.symbol}
+                          onClick={() => setCloseConfirm({ symbol: pos.symbol, qty: pos.qty })}
+                        >
+                          {closingSymbol === pos.symbol ? 'Closing...' : 'Close'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        {/* Open Orders */}
+        {openOrders.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Open Orders
+              <span className="text-xs text-muted-foreground font-normal">({openOrders.length})</span>
+            </h2>
+            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Symbol</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Submitted</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {openOrders.map((o) => (
+                    <TableRow key={o.id}>
+                      <TableCell className="font-mono font-semibold">{o.symbol}</TableCell>
+                      <TableCell>
+                        <span className={cn('text-xs font-medium px-2 py-0.5 rounded', o.side === 'buy' ? 'bg-emerald-400/15 text-emerald-400' : 'bg-red-400/15 text-red-400')}>
+                          {o.side.toUpperCase()}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right font-mono">{o.qty}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{o.type} / {o.time_in_force}</TableCell>
+                      <TableCell className="text-xs text-yellow-400">{o.status}</TableCell>
+                      <TableCell className="text-right text-xs text-muted-foreground">
+                        {new Date(o.submitted_at).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                          disabled={cancellingId === o.id}
+                          onClick={() => handleCancelOrder(o.id)}
+                        >
+                          <XCircle className="h-3 w-3 mr-1" />
+                          {cancellingId === o.id ? 'Cancelling...' : 'Cancel'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Fills */}
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold mb-3">Recent Fills</h2>
+          {ordersLoading ? (
+            <div className="text-center py-6 text-muted-foreground text-sm">Loading order history...</div>
+          ) : recentFills.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground text-sm">No filled orders yet.</div>
+          ) : (
+            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Symbol</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right">Fill Price</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead className="text-right">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentFills.map((o) => {
+                    const fillPrice = parseFloat(o.filled_avg_price || '0');
+                    const filledQty = parseFloat(o.filled_qty || '0');
+                    const total = fillPrice * filledQty;
+                    return (
+                      <TableRow key={o.id}>
+                        <TableCell className="font-mono font-semibold">{o.symbol}</TableCell>
+                        <TableCell>
+                          <span className={cn('text-xs font-medium px-2 py-0.5 rounded', o.side === 'buy' ? 'bg-emerald-400/15 text-emerald-400' : 'bg-red-400/15 text-red-400')}>
+                            {o.side.toUpperCase()}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-mono">{o.filled_qty}</TableCell>
+                        <TableCell className="text-right font-mono">${fillPrice.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-mono">{formatCurrency(total)}</TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground">
+                          {new Date(o.submitted_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <AlertDialog open={closeConfirm !== null} onOpenChange={(open) => !open && setCloseConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close position?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {closeConfirm
+                ? `Are you sure you want to close your position in ${closeConfirm.symbol}? This will sell all ${closeConfirm.qty % 1 === 0 ? closeConfirm.qty : closeConfirm.qty.toFixed(4)} shares at market price.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={closingSymbol !== null}
+              onClick={() => {
+                if (!closeConfirm) return;
+                const sym = closeConfirm.symbol;
+                setCloseConfirm(null);
+                void handleClosePosition(sym);
+              }}
+            >
+              Close position
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </PageLayout>
   );
 }
