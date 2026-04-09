@@ -74,7 +74,7 @@ export function TopPerformerCard({ portfolio, rank, returnValue, timeLabel, isAn
               "text-2xl font-bold font-mono",
               isPositive ? "text-success" : "text-destructive"
             )}>
-              {isPositive ? '+' : ''}{returnValue.toFixed(1)}%
+              {isPositive ? '+' : ''}{((returnValue ?? 0)).toFixed(1)}%
             </p>
             <p className="text-[10px] text-muted-foreground">{timeLabel}</p>
           </div>

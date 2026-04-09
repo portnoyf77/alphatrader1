@@ -357,15 +357,15 @@ export function ManualPortfolioBuilder({ onOrbColorChange }: ManualPortfolioBuil
                 <span
                   className={cn(
                     'font-mono font-bold text-lg tabular-nums',
-                    totalWeight === 100 ? 'text-success' : 'text-warning',
+                    (totalWeight ?? 0) === 100 ? 'text-success' : 'text-warning',
                   )}
                 >
-                  {totalWeight.toFixed(1)} / 100%
+                  {((totalWeight ?? 0)).toFixed(1)} / 100%
                 </span>
               </div>
-              {totalWeight !== 100 && (
+              {(totalWeight ?? 0) !== 100 && (
                 <p className="text-sm text-warning animate-in fade-in duration-200">
-                  Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
+                  Allocations total {((totalWeight ?? 0)).toFixed(1)}% — adjust weights so the sum equals 100%.
                 </p>
               )}
             </div>

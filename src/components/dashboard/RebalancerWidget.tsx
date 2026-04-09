@@ -344,10 +344,10 @@ export function RebalancerWidget({
                           {d.symbol}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          <span className="text-emerald-400/90">{d.currentPct.toFixed(1)}%</span>
+                          <span className="text-emerald-400/90">{((d?.currentPct ?? 0)).toFixed(1)}%</span>
                           {' · '}
                           target{' '}
-                          <span className="text-violet-300/90">{d.targetPct.toFixed(1)}%</span>
+                          <span className="text-violet-300/90">{((d?.targetPct ?? 0)).toFixed(1)}%</span>
                           {' · '}
                           drift{' '}
                           <span
@@ -357,8 +357,8 @@ export function RebalancerWidget({
                               sev === 'bad' && 'text-red-400',
                             )}
                           >
-                            {d.driftPct > 0 ? '+' : ''}
-                            {d.driftPct.toFixed(1)}%
+                            {(d?.driftPct ?? 0) > 0 ? '+' : ''}
+                            {((d?.driftPct ?? 0)).toFixed(1)}%
                           </span>
                         </div>
                       </div>
@@ -575,7 +575,7 @@ export function RebalancerWidget({
                         <TableRow key={row.symbol} className="border-[rgba(255,255,255,0.1)]">
                           <TableCell className="font-mono font-medium">{row.symbol}</TableCell>
                           <TableCell className="text-right text-muted-foreground text-sm">
-                            {cur.toFixed(1)}%
+                            {((cur ?? 0)).toFixed(1)}%
                           </TableCell>
                           <TableCell>
                             <Input
@@ -636,7 +636,7 @@ export function RebalancerWidget({
                       totalOk ? 'text-emerald-400' : editorTotal > 100 ? 'text-red-400' : 'text-amber-400',
                     )}
                   >
-                    {editorTotal.toFixed(1)}%
+                    {((editorTotal ?? 0)).toFixed(1)}%
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-secondary overflow-hidden">

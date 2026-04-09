@@ -69,9 +69,9 @@ function WatchlistQuotes({ symbols }: { symbols: string[] }) {
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
           <div className="font-mono font-semibold text-xs text-foreground">{q.symbol}</div>
-          <div className="font-mono text-sm text-foreground mt-0.5">${q.mid.toFixed(2)}</div>
+          <div className="font-mono text-sm text-foreground mt-0.5">${((q?.mid ?? 0)).toFixed(2)}</div>
           <div className="text-[0.6rem] text-muted-foreground mt-0.5">
-            B: ${q.bid.toFixed(2)} / A: ${q.ask.toFixed(2)}
+            B: ${((q?.bid ?? 0)).toFixed(2)} / A: ${((q?.ask ?? 0)).toFixed(2)}
           </div>
         </div>
       ))}

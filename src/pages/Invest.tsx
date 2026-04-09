@@ -652,14 +652,14 @@ export default function Create() {
                         <span
                           className={cn(
                             'font-medium tabular-nums',
-                            totalWeight === 100 ? 'text-success' : 'text-warning',
+                            (totalWeight ?? 0) === 100 ? 'text-success' : 'text-warning',
                           )}
                         >
-                          {totalWeight.toFixed(1)}%
-                          {totalWeight !== 100 && ' (target 100%)'}
+                          {((totalWeight ?? 0)).toFixed(1)}%
+                          {(totalWeight ?? 0) !== 100 && ' (target 100%)'}
                         </span>
                       </div>
-                      {totalWeight !== 100 && (
+                      {(totalWeight ?? 0) !== 100 && (
                         <p className="text-xs text-warning">Adjust weights to total 100%.</p>
                       )}
                     </div>
@@ -826,12 +826,12 @@ export default function Create() {
                         <div className="flex items-center gap-3">
                           {holdingPrices[holding.ticker] && (
                             <div className="text-right mr-2 hidden sm:block">
-                              <span className="text-sm font-medium text-foreground">${holdingPrices[holding.ticker].price.toFixed(2)}</span>
+                              <span className="text-sm font-medium text-foreground">${((holdingPrices[holding.ticker]?.price ?? 0)).toFixed(2)}</span>
                               <span className={cn(
                                 'text-xs ml-1.5',
-                                holdingPrices[holding.ticker].changePercent >= 0 ? 'text-success' : 'text-destructive'
+                                ((holdingPrices[holding.ticker]?.changePercent ?? 0)) >= 0 ? 'text-success' : 'text-destructive'
                               )}>
-                                {holdingPrices[holding.ticker].changePercent >= 0 ? '+' : ''}{holdingPrices[holding.ticker].changePercent.toFixed(2)}%
+                                {((holdingPrices[holding.ticker]?.changePercent ?? 0)) >= 0 ? '+' : ''}{((holdingPrices[holding.ticker]?.changePercent ?? 0)).toFixed(2)}%
                               </span>
                             </div>
                           )}
@@ -848,11 +848,11 @@ export default function Create() {
                         {holdingPrices[holding.ticker] && (
                           <div className="sm:hidden flex items-center gap-2 text-sm">
                             <DollarSign className="h-3.5 w-3.5 text-primary" />
-                            <span className="font-medium">${holdingPrices[holding.ticker].price.toFixed(2)}</span>
+                            <span className="font-medium">${((holdingPrices[holding.ticker]?.price ?? 0)).toFixed(2)}</span>
                             <span className={cn(
-                              holdingPrices[holding.ticker].changePercent >= 0 ? 'text-success' : 'text-destructive'
+                              ((holdingPrices[holding.ticker]?.changePercent ?? 0)) >= 0 ? 'text-success' : 'text-destructive'
                             )}>
-                              {holdingPrices[holding.ticker].changePercent >= 0 ? '+' : ''}{holdingPrices[holding.ticker].changePercent.toFixed(2)}% today
+                              {((holdingPrices[holding.ticker]?.changePercent ?? 0)) >= 0 ? '+' : ''}{((holdingPrices[holding.ticker]?.changePercent ?? 0)).toFixed(2)}% today
                             </span>
                           </div>
                         )}
@@ -1037,16 +1037,16 @@ export default function Create() {
                       <span
                         className={cn(
                           'font-medium tabular-nums',
-                          totalWeight === 100 ? 'text-success' : 'text-warning',
+                          (totalWeight ?? 0) === 100 ? 'text-success' : 'text-warning',
                         )}
                       >
-                        {totalWeight.toFixed(1)}%
-                        {totalWeight !== 100 && ' (target 100%)'}
+                        {((totalWeight ?? 0)).toFixed(1)}%
+                        {(totalWeight ?? 0) !== 100 && ' (target 100%)'}
                       </span>
                     </div>
-                    {totalWeight !== 100 && (
+                    {(totalWeight ?? 0) !== 100 && (
                       <p className="text-sm text-warning animate-in fade-in duration-200">
-                        Allocations total {totalWeight.toFixed(1)}% — adjust weights so the sum equals 100%.
+                        Allocations total {((totalWeight ?? 0)).toFixed(1)}% — adjust weights so the sum equals 100%.
                       </p>
                     )}
                   </div>
@@ -1094,7 +1094,7 @@ export default function Create() {
                       navigate(`/simulation/${savedId || portfolioId}`);
                     }}
                     className="flex-1 h-12 text-base font-semibold"
-                    disabled={editOpen && totalWeight !== 100}
+                    disabled={editOpen && (totalWeight ?? 0) !== 100}
                   >
                     <Scale className="h-5 w-5 mr-2" />
                     Start Simulation
@@ -1109,7 +1109,7 @@ export default function Create() {
                       setTimeout(() => navigate('/dashboard'), 1000);
                     }}
                     className="flex-1 h-12 text-base font-semibold"
-                    disabled={editOpen && totalWeight !== 100}
+                    disabled={editOpen && (totalWeight ?? 0) !== 100}
                   >
                     <DollarSign className="h-5 w-5 mr-2" />
                     Invest Now

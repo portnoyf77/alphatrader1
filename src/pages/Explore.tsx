@@ -103,7 +103,7 @@ export default function Explore() {
         return {
           ...s,
           trackRecordDays,
-          reputationScore: Number(reputationScore.toFixed(1)),
+          reputationScore: Number(((reputationScore ?? 0)).toFixed(1)),
         };
       })
       .sort((a, b) => {

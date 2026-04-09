@@ -171,13 +171,13 @@ export function AlpacaConnectionTest() {
                   <div>
                     <dt className="text-sm text-muted-foreground">Bid</dt>
                     <dd className="text-xl font-semibold tabular-nums text-success">
-                      {quote.bidPrice.toFixed(4)}
+                      {((quote?.bidPrice ?? 0)).toFixed(4)}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">Ask</dt>
                     <dd className="text-xl font-semibold tabular-nums text-primary">
-                      {quote.askPrice.toFixed(4)}
+                      {((quote?.askPrice ?? 0)).toFixed(4)}
                     </dd>
                   </div>
                 </dl>

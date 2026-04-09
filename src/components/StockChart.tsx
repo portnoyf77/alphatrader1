@@ -51,13 +51,13 @@ function MiniChart({ bars, width = 400, height = 140 }: { bars: AlpacaBar[]; wid
       </svg>
       <div className="flex items-center justify-between mt-1 px-1">
         <span className="text-xs text-muted-foreground font-mono">
-          ${bars[0].c.toFixed(2)}
+          ${((bars?.[0]?.c ?? 0)).toFixed(2)}
         </span>
         <span className={cn('text-xs font-mono font-medium', isPositive ? 'text-emerald-400' : 'text-red-400')}>
-          {change >= 0 ? '+' : ''}{change.toFixed(2)} ({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)
+          {(change ?? 0) >= 0 ? '+' : ''}{((change ?? 0)).toFixed(2)} ({(changePct ?? 0) >= 0 ? '+' : ''}{((changePct ?? 0)).toFixed(2)}%)
         </span>
         <span className="text-xs text-foreground font-mono font-semibold">
-          ${bars[bars.length - 1].c.toFixed(2)}
+          ${((bars?.[bars.length - 1]?.c ?? 0)).toFixed(2)}
         </span>
       </div>
     </div>
@@ -96,7 +96,7 @@ export function StockChart({ symbol }: { symbol: string }) {
         <div className="flex items-center gap-2">
           <span className="font-mono font-bold text-foreground">{symbol}</span>
           {bars.length > 0 && (
-            <span className="font-mono text-sm text-foreground">${bars[bars.length - 1].c.toFixed(2)}</span>
+            <span className="font-mono text-sm text-foreground">${((bars?.[bars.length - 1]?.c ?? 0)).toFixed(2)}</span>
           )}
         </div>
         <div className="flex gap-1">

@@ -68,7 +68,7 @@ export function StrategyCard({ strategy, rank }: StrategyCardProps) {
   const displaySectors = (strategy.sectors || []).slice(0, 3);
   
   const gemHex = getGemHex(strategy.name);
-  const reputationScore = calculateAlphaScore(strategy).toFixed(1);
+  const reputationScore = ((calculateAlphaScore(strategy) ?? 0)).toFixed(1);
 
   return (
     <Link to={`/portfolio/${strategy.id}`}>

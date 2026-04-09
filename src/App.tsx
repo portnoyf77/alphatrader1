@@ -8,6 +8,7 @@ import { MockAuthProvider } from "@/contexts/MockAuthContext";
 import { AIAssistant } from "@/components/AIAssistant";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DemoGate } from "@/components/DemoGate";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { usePageView } from "@/hooks/usePageView";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -57,7 +58,8 @@ function GatedApp() {
     <>
       <PageViewTracker />
       <AIAssistant />
-      <Routes>
+      <ErrorBoundary>
+        <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
@@ -147,6 +149,7 @@ function GatedApp() {
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </ErrorBoundary>
     </>
   );
 }

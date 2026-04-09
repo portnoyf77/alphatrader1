@@ -466,15 +466,15 @@ export default function Simulation() {
           />
           <MetricCard
             label="Sharpe Ratio"
-            value={metrics.sharpe.toFixed(2)}
+            value={((metrics?.sharpe ?? 0)).toFixed(2)}
             icon={<BarChart3 className="h-4 w-4" />}
             tooltip="Risk-adjusted return — higher is better. Above 1.0 is considered good."
           />
           <MetricCard
             label="vs S&P 500"
-            value={`${metrics.vsSP >= 0 ? '+' : ''}${metrics.vsSP.toFixed(1)}%`}
+            value={`${(metrics?.vsSP ?? 0) >= 0 ? '+' : ''}${((metrics?.vsSP ?? 0)).toFixed(1)}%`}
             icon={<BarChart3 className="h-4 w-4" />}
-            trend={metrics.vsSP >= 0 ? 'up' : 'down'}
+            trend={(metrics?.vsSP ?? 0) >= 0 ? 'up' : 'down'}
             tooltip="Your simulated return compared to S&P 500"
           />
         </div>
@@ -492,12 +492,12 @@ export default function Simulation() {
           <div className="py-4 space-y-3">
             <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
               <span className="text-sm text-muted-foreground">Portfolio Value</span>
-              <span className="font-mono font-bold">${metrics.value.toLocaleString()}</span>
+              <span className="font-mono font-bold">${((metrics?.value ?? 0)).toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
               <span className="text-sm text-muted-foreground">Total Return</span>
-              <span className={cn("font-mono font-bold", metrics.return >= 0 ? "text-success" : "text-destructive")}>
-                {metrics.return >= 0 ? '+' : ''}{metrics.return.toFixed(1)}%
+              <span className={cn("font-mono font-bold", (metrics?.return ?? 0) >= 0 ? "text-success" : "text-destructive")}>
+                {(metrics?.return ?? 0) >= 0 ? '+' : ''}{((metrics?.return ?? 0)).toFixed(1)}%
               </span>
             </div>
           </div>

@@ -119,7 +119,7 @@ function DashboardEquityChart() {
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-medium text-foreground">Account Equity History</span>
           <span className="text-xs font-mono" style={{ color: strokeColor }}>
-            {changeValue >= 0 ? '+' : ''}{formatCurrency(changeValue)} ({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)
+            {(changeValue ?? 0) >= 0 ? '+' : ''}{formatCurrency(changeValue ?? 0)} ({(changePct ?? 0) >= 0 ? '+' : ''}{((changePct ?? 0)).toFixed(2)}%)
           </span>
         </div>
         <div className="flex flex-wrap gap-1">
@@ -342,8 +342,8 @@ export default function Dashboard() {
                     ) : (
                       <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
                     )}
-                    <span className="text-[0.8rem] font-medium" style={{ color: displayDayPLPercent >= 0 ? '#10B981' : '#EF4444' }}>
-                      {displayDayPLPercent >= 0 ? '+' : ''}{displayDayPLPercent.toFixed(2)}%
+                    <span className="text-[0.8rem] font-medium" style={{ color: (displayDayPLPercent ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
+                      {(displayDayPLPercent ?? 0) >= 0 ? '+' : ''}{((displayDayPLPercent ?? 0)).toFixed(2)}%
                     </span>
                     <span className="text-[0.8rem] text-muted-foreground">
                       {hasLiveData ? 'today' : 'this month'}
@@ -691,27 +691,27 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
               <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Volatility</p>
-              <p className="font-mono text-lg font-semibold">{(metrics.volatility * 100).toFixed(1)}%</p>
+              <p className="font-mono text-lg font-semibold">{(((metrics?.volatility ?? 0) * 100)).toFixed(1)}%</p>
               <p className="text-[0.7rem] text-muted-foreground">annualized</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
               <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Sharpe Ratio</p>
-              <p className={cn("font-mono text-lg font-semibold", metrics.sharpeRatio >= 1 ? 'text-success' : metrics.sharpeRatio >= 0 ? 'text-foreground' : 'text-destructive')}>
-                {metrics.sharpeRatio.toFixed(2)}
+              <p className={cn("font-mono text-lg font-semibold", (metrics?.sharpeRatio ?? 0) >= 1 ? 'text-success' : (metrics?.sharpeRatio ?? 0) >= 0 ? 'text-foreground' : 'text-destructive')}>
+                {((metrics?.sharpeRatio ?? 0)).toFixed(2)}
               </p>
               <p className="text-[0.7rem] text-muted-foreground">risk-adjusted</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
               <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Max Drawdown</p>
               <p className="font-mono text-lg font-semibold text-destructive">
-                {(metrics.maxDrawdown * 100).toFixed(1)}%
+                {(((metrics?.maxDrawdown ?? 0) * 100)).toFixed(1)}%
               </p>
               <p className="text-[0.7rem] text-muted-foreground">worst decline</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
               <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Alpha</p>
-              <p className={cn("font-mono text-lg font-semibold", metrics.alpha >= 0 ? 'text-success' : 'text-destructive')}>
-                {metrics.alpha >= 0 ? '+' : ''}{(metrics.alpha * 100).toFixed(1)}%
+              <p className={cn("font-mono text-lg font-semibold", (metrics?.alpha ?? 0) >= 0 ? 'text-success' : 'text-destructive')}>
+                {(metrics?.alpha ?? 0) >= 0 ? '+' : ''}{(((metrics?.alpha ?? 0) * 100)).toFixed(1)}%
               </p>
               <p className="text-[0.7rem] text-muted-foreground">vs S&P 500</p>
             </div>
@@ -788,8 +788,8 @@ export default function Dashboard() {
                     ) : (
                       <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
                     )}
-                    <span className="text-xs font-medium" style={{ color: pos.unrealizedPL >= 0 ? '#10B981' : '#EF4444' }}>
-                      {pos.unrealizedPL >= 0 ? '+' : ''}{formatCurrency(pos.unrealizedPL)} ({pos.unrealizedPLPercent >= 0 ? '+' : ''}{pos.unrealizedPLPercent.toFixed(2)}%)
+                    <span className="text-xs font-medium" style={{ color: (pos?.unrealizedPL ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
+                      {(pos?.unrealizedPL ?? 0) >= 0 ? '+' : ''}{formatCurrency(pos?.unrealizedPL ?? 0)} ({(pos?.unrealizedPLPercent ?? 0) >= 0 ? '+' : ''}{((pos?.unrealizedPLPercent ?? 0)).toFixed(2)}%)
                     </span>
                   </div>
                 </div>

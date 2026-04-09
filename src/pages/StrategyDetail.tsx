@@ -500,10 +500,10 @@ export default function StrategyDetail() {
                     <CardContent>
                       <div className="space-y-3">
                         {[
-                          { label: 'Annualized Volatility', value: `${strategy.performance.volatility.toFixed(1)}%` },
-                          { label: 'Sharpe Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility, 1) * 3.46).toFixed(2) },
-                          { label: 'Sortino Ratio', value: (strategy.performance.return_30d / Math.max(strategy.performance.volatility * 0.7, 1) * 3.46).toFixed(2) },
-                          { label: 'Beta vs S&P 500', value: (0.6 + (strategy.performance.volatility / 30) * 0.8).toFixed(2) },
+                          { label: 'Annualized Volatility', value: `${((strategy?.performance?.volatility ?? 0)).toFixed(1)}%` },
+                          { label: 'Sharpe Ratio', value: (((strategy?.performance?.return_30d ?? 0)) / Math.max((strategy?.performance?.volatility ?? 1), 1) * 3.46).toFixed(2) },
+                          { label: 'Sortino Ratio', value: (((strategy?.performance?.return_30d ?? 0)) / Math.max((((strategy?.performance?.volatility ?? 0)) * 0.7), 1) * 3.46).toFixed(2) },
+                          { label: 'Beta vs S&P 500', value: (0.6 + (((strategy?.performance?.volatility ?? 0)) / 30) * 0.8).toFixed(2) },
                           { label: 'Worst Drop Duration', value: `${Math.max(5, Math.round(Math.abs(strategy.performance.max_drawdown) * 1.5))} days` },
                         ].map((metric) => (
                           <div key={metric.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
@@ -598,9 +598,9 @@ export default function StrategyDetail() {
                 </div>
                 {allocateAmount && parseFloat(allocateAmount) > 0 && (
                    <div className="p-3 rounded-lg text-sm space-y-1" style={{ background: 'rgba(124, 58, 237, 0.04)', borderRadius: '8px', padding: '12px' }}>
-                     <p className="text-muted-foreground">Alpha fee: <span className="font-mono">${alphaShare.toFixed(2)}</span> ({(alphaFeePct * 100).toFixed(2)}% AUM)</p>
-                     <p className="text-muted-foreground">Platform fee: <span className="font-mono">${platformFee.toFixed(2)}</span> ({(platformFeePct * 100).toFixed(2)}% AUM)</p>
-                     <p className="font-medium">Total: <span className="font-mono">${totalFee.toFixed(2)}</span> ({(totalFeePct * 100).toFixed(2)}% annually)</p>
+                     <p className="text-muted-foreground">Alpha fee: <span className="font-mono">${((alphaShare ?? 0)).toFixed(2)}</span> ({(((alphaFeePct ?? 0) * 100)).toFixed(2)}% AUM)</p>
+                     <p className="text-muted-foreground">Platform fee: <span className="font-mono">${((platformFee ?? 0)).toFixed(2)}</span> ({(((platformFeePct ?? 0) * 100)).toFixed(2)}% AUM)</p>
+                     <p className="font-medium">Total: <span className="font-mono">${((totalFee ?? 0)).toFixed(2)}</span> ({(((totalFeePct ?? 0) * 100)).toFixed(2)}% annually)</p>
                    </div>
                 )}
                 <div className="flex items-start gap-2">

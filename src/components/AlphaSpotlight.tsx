@@ -40,7 +40,7 @@ export function AlphaSpotlight({ strategies }: AlphaSpotlightProps) {
           {topAlphas.map((strategy) => {
             const gemHex = getGemHex(strategy.name);
             const isPositive = strategy.performance.return_30d >= 0;
-            const reputationScore = calculateAlphaScore(strategy).toFixed(1);
+            const reputationScore = ((calculateAlphaScore(strategy) ?? 0)).toFixed(1);
 
             return (
               <Link key={strategy.id} to={`/portfolio/${strategy.id}`}>

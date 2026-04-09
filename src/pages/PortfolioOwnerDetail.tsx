@@ -322,7 +322,7 @@ export default function PortfolioOwnerDetail() {
                         <p>How much returns swing up and down. Higher means more unpredictable performance.</p>
                       </TooltipContent>
                     </Tooltip>
-                    <p className="text-2xl font-bold">{portfolio.performance.volatility.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold">{((portfolio?.performance?.volatility ?? 0)).toFixed(1)}%</p>
                   </CardContent>
                 </Card>
               </TooltipProvider>
@@ -706,7 +706,7 @@ export default function PortfolioOwnerDetail() {
                           </Button>
                         )}
                       </div>
-                      <span className="font-bold">{totalWeight.toFixed(1)}%</span>
+                      <span className="font-bold">{((totalWeight ?? 0)).toFixed(1)}%</span>
                     </div>
 
                     {/* Add New Holding */}

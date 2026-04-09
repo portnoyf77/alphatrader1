@@ -392,9 +392,9 @@ export default function PortfolioBuilder() {
                     <td className="p-3 text-right">
                       <span className={cn(
                         'text-xs font-mono font-semibold',
-                        Math.abs(totalWeight - 100) < 0.01 ? 'text-emerald-400' : 'text-amber-400'
+                        Math.abs((totalWeight ?? 0) - 100) < 0.01 ? 'text-emerald-400' : 'text-amber-400'
                       )}>
-                        {totalWeight.toFixed(0)}%
+                        {((totalWeight ?? 0)).toFixed(0)}%
                       </span>
                     </td>
                     <td className="p-3 text-right font-mono text-xs text-foreground">
@@ -406,9 +406,9 @@ export default function PortfolioBuilder() {
                 </tfoot>
               </table>
             </div>
-            {Math.abs(totalWeight - 100) > 0.01 && (
+            {Math.abs((totalWeight ?? 0) - 100) > 0.01 && (
               <p className="text-xs text-amber-400">
-                Weights total {totalWeight.toFixed(0)}% instead of 100%. Adjust your allocations or reset to defaults.
+                Weights total {((totalWeight ?? 0)).toFixed(0)}% instead of 100%. Adjust your allocations or reset to defaults.
               </p>
             )}
 

@@ -326,7 +326,7 @@ export default function Portfolio() {
               </div>
               {!loading && totalPLPercent !== 0 && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  {totalPLPercent >= 0 ? '+' : ''}{totalPLPercent.toFixed(2)}%
+                  {(totalPLPercent ?? 0) >= 0 ? '+' : ''}{((totalPLPercent ?? 0)).toFixed(2)}%
                 </div>
               )}
             </CardContent>
@@ -353,7 +353,7 @@ export default function Portfolio() {
               </div>
               {!loading && account && account.dayPLPercent !== 0 && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  {account.dayPLPercent >= 0 ? '+' : ''}{account.dayPLPercent.toFixed(2)}%
+                  {(account?.dayPLPercent ?? 0) >= 0 ? '+' : ''}{((account?.dayPLPercent ?? 0)).toFixed(2)}%
                 </div>
               )}
             </CardContent>
@@ -430,14 +430,14 @@ export default function Portfolio() {
                     <TableRow key={pos.symbol}>
                       <TableCell className="font-mono font-semibold">{pos.symbol}</TableCell>
                       <TableCell className="text-right font-mono">{pos.qty}</TableCell>
-                      <TableCell className="text-right font-mono">${pos.avgEntryPrice.toFixed(2)}</TableCell>
-                      <TableCell className="text-right font-mono">${pos.currentPrice.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono">${((pos?.avgEntryPrice ?? 0)).toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono">${((pos?.currentPrice ?? 0)).toFixed(2)}</TableCell>
                       <TableCell className="text-right font-mono">{formatCurrency(pos.marketValue)}</TableCell>
                       <TableCell className={cn('text-right font-mono', pos.unrealizedPL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
                         {pos.unrealizedPL >= 0 ? '+' : ''}{formatCurrency(pos.unrealizedPL)}
                       </TableCell>
-                      <TableCell className={cn('text-right font-mono', pos.unrealizedPLPercent >= 0 ? 'text-emerald-400' : 'text-red-400')}>
-                        {pos.unrealizedPLPercent >= 0 ? '+' : ''}{pos.unrealizedPLPercent.toFixed(2)}%
+                      <TableCell className={cn('text-right font-mono', (pos?.unrealizedPLPercent ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                        {(pos?.unrealizedPLPercent ?? 0) >= 0 ? '+' : ''}{((pos?.unrealizedPLPercent ?? 0)).toFixed(2)}%
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -548,7 +548,7 @@ export default function Portfolio() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-mono">{o.filled_qty}</TableCell>
-                        <TableCell className="text-right font-mono">${fillPrice.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-mono">${((fillPrice ?? 0)).toFixed(2)}</TableCell>
                         <TableCell className="text-right font-mono">{formatCurrency(total)}</TableCell>
                         <TableCell className="text-right text-xs text-muted-foreground">
                           {new Date(o.submitted_at).toLocaleDateString()}
@@ -569,7 +569,7 @@ export default function Portfolio() {
             <AlertDialogTitle>Close position?</AlertDialogTitle>
             <AlertDialogDescription>
               {closeConfirm
-                ? `Are you sure you want to close your position in ${closeConfirm.symbol}? This will sell all ${closeConfirm.qty % 1 === 0 ? closeConfirm.qty : closeConfirm.qty.toFixed(4)} shares at market price.`
+                ? `Are you sure you want to close your position in ${closeConfirm.symbol}? This will sell all ${closeConfirm.qty % 1 === 0 ? closeConfirm.qty : ((closeConfirm?.qty ?? 0)).toFixed(4)} shares at market price.`
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
