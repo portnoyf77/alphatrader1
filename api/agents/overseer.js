@@ -1,221 +1,171 @@
 /**
- * Overseer Agent -- The Decision Maker
+ * Overseer Agent v2 -- The Decision Maker
  *
- * Receives analyses from the News Analyst and Fundamentals Analyst,
- * plus live account/position data, and decides what trades to make.
- * Then executes those trades directly via Alpaca. No human approval needed.
+ * Complete rewrite. Instead of receiving analyses directly from two agents,
+ * the Overseer now:
+ * 1. Reads accumulated intelligence from KV (6 agent reports)
+ * 2. Benchmarks portfolio performance against SPY
+ * 3. Makes aggressive autonomous trading decisions
+ * 4. Executes trades via Alpaca with zero guardrails
  *
- * This is the brain of the autonomous rebalancing system.
- *
- * POST /api/agents/overseer
- * Body: { newsAnalysis, fundamentalsAnalysis }
- *
- * Can also be called from the orchestrator with pre-built analyses.
- *
- * Returns: {
- *   timestamp: string,
- *   decision: { action, reasoning, confidence },
- *   trades: [{ symbol, side, notional/qty, status, orderId }],
- *   portfolioAfter: { ... }
- * }
+ * The goal: beat the S&P 500.
  */
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
-const ALPACA_DATA_BASE = 'https://data.alpaca.markets';
+import { getPositions, getAccount, getBars, getLatestQuotes, placeMarketOrder, closePosition } from './lib/alpaca.js';
+import { askClaude } from './lib/claude.js';
+import { getAllLatestIntelligence, storeBenchmark } from './lib/kv.js';
 
-// ── Alpaca helpers ──────────────────────────────────────────────
+// ── Benchmark calculation ───────────────────────────────────────
 
-function alpacaHeaders() {
-  return {
-    'APCA-API-KEY-ID': process.env.ALPACA_API_KEY,
-    'APCA-API-SECRET-KEY': process.env.ALPACA_SECRET_KEY,
-  };
-}
-
-async function alpacaTrading(path, options = {}) {
-  const res = await fetch(`${ALPACA_PAPER_BASE}${path}`, {
-    ...options,
-    headers: { ...alpacaHeaders(), ...(options.headers || {}) },
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Alpaca ${res.status}: ${body}`);
-  }
-  return res.json();
-}
-
-async function getPositions() {
-  const positions = await alpacaTrading('/v2/positions');
-  return (positions || []).map(p => ({
-    symbol: p.symbol,
-    qty: +p.qty,
-    side: p.side,
-    avgEntry: +parseFloat(p.avg_entry_price).toFixed(2),
-    currentPrice: +parseFloat(p.current_price).toFixed(2),
-    marketValue: +parseFloat(p.market_value).toFixed(2),
-    unrealizedPL: +parseFloat(p.unrealized_pl).toFixed(2),
-    unrealizedPLPct: +((parseFloat(p.unrealized_plpc) || 0) * 100).toFixed(2),
-    costBasis: +parseFloat(p.cost_basis).toFixed(2),
-  }));
-}
-
-async function getAccount() {
-  const a = await alpacaTrading('/v2/account');
-  return {
-    equity: +parseFloat(a.equity).toFixed(2),
-    cash: +parseFloat(a.cash).toFixed(2),
-    buyingPower: +parseFloat(a.buying_power).toFixed(2),
-    portfolioValue: +parseFloat(a.portfolio_value).toFixed(2),
-    dayChangeAmt: +(parseFloat(a.equity) - parseFloat(a.last_equity)).toFixed(2),
-    dayChangePct: +((((parseFloat(a.equity) - parseFloat(a.last_equity)) / parseFloat(a.last_equity)) * 100) || 0).toFixed(2),
-    status: a.status,
-    tradingBlocked: a.trading_blocked,
-    patternDayTrader: a.pattern_day_trader,
-  };
-}
-
-// ── Order execution ─────────────────────────────────────────────
-
-async function placeMarketOrder(symbol, side, notional, qty) {
-  const orderBody = {
-    symbol,
-    side,
-    type: 'market',
-    time_in_force: 'day',
-  };
-
-  // Use notional (dollar amount) for buys, qty for sells
-  if (notional && side === 'buy') {
-    orderBody.notional = notional.toFixed(2);
-  } else if (qty) {
-    orderBody.qty = String(qty);
-  } else {
-    orderBody.notional = notional.toFixed(2);
-  }
-
+async function calculateBenchmark(account) {
   try {
-    const result = await alpacaTrading('/v2/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderBody),
-    });
+    const spyBars = await getBars('SPY', '1Day', 30);
+    if (spyBars.length < 2) return null;
+
+    const spyNow = spyBars[spyBars.length - 1].c;
+    const spy1d = spyBars.length >= 2 ? spyBars[spyBars.length - 2].c : spyNow;
+    const spy5d = spyBars.length >= 5 ? spyBars[spyBars.length - 5].c : spyNow;
+    const spy20d = spyBars.length >= 20 ? spyBars[spyBars.length - 20].c : spyNow;
+
+    const portfolioReturn1d = account.dayChangePct;
 
     return {
-      symbol,
-      side,
-      notional: notional ? +notional.toFixed(2) : null,
-      qty: qty || null,
-      status: 'submitted',
-      orderId: result.id,
-      orderType: result.type,
+      spyPrice: spyNow,
+      spyReturn1d: +((spyNow - spy1d) / spy1d * 100).toFixed(2),
+      spyReturn5d: +((spyNow - spy5d) / spy5d * 100).toFixed(2),
+      spyReturn20d: +((spyNow - spy20d) / spy20d * 100).toFixed(2),
+      portfolioReturn1d,
+      alpha1d: +(portfolioReturn1d - ((spyNow - spy1d) / spy1d * 100)).toFixed(2),
     };
-  } catch (err) {
-    return {
-      symbol,
-      side,
-      notional: notional ? +notional.toFixed(2) : null,
-      qty: qty || null,
-      status: 'failed',
-      error: err.message,
-    };
+  } catch {
+    return null;
   }
 }
 
-// Close an entire position
-async function closePosition(symbol) {
-  try {
-    const res = await fetch(`${ALPACA_PAPER_BASE}/v2/positions/${encodeURIComponent(symbol)}`, {
-      method: 'DELETE',
-      headers: alpacaHeaders(),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      return { symbol, side: 'sell', status: 'failed', error: body };
-    }
-    const result = await res.json();
-    return {
-      symbol,
-      side: 'sell',
-      status: 'submitted',
-      orderId: result.id,
-      action: 'close_position',
-    };
-  } catch (err) {
-    return { symbol, side: 'sell', status: 'failed', error: err.message };
-  }
-}
+// ── Core decision engine ────────────────────────────────────────
 
-// ── Core decision function (importable) ─────────────────────────
-
-export async function makeDecision(newsAnalysis, fundamentalsAnalysis) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
-
-  // Fetch live account + positions
-  const [account, positions] = await Promise.all([
+export async function makeDecision(intelOverride = null) {
+  // Fetch account state and all accumulated intelligence in parallel
+  const [account, positions, intelligence] = await Promise.all([
     getAccount(),
     getPositions(),
+    intelOverride || getAllLatestIntelligence(),
   ]);
 
-  // Check if trading is possible
   if (account.tradingBlocked) {
     return {
       timestamp: new Date().toISOString(),
       agentName: 'overseer',
-      decision: { action: 'none', reasoning: 'Trading is blocked on this account.', confidence: 0 },
+      decision: { action: 'none', reasoning: 'Trading is blocked.', confidence: 0 },
       trades: [],
     };
   }
 
-  const totalPortfolioValue = account.equity;
-  const cashAvailable = account.cash;
-  const now = new Date().toISOString();
+  // Calculate benchmark
+  const benchmark = await calculateBenchmark(account);
 
-  // Build allocation map for current portfolio
-  const currentAllocations = positions.map(p => ({
-    symbol: p.symbol,
-    allocationPct: +((p.marketValue / totalPortfolioValue) * 100).toFixed(1),
+  // Store benchmark data
+  if (benchmark) {
+    await storeBenchmark({
+      timestamp: new Date().toISOString(),
+      portfolioEquity: account.equity,
+      ...benchmark,
+    }).catch(() => {});
+  }
+
+  const totalValue = account.equity;
+  const cashPct = +(account.cash / totalValue * 100).toFixed(1);
+
+  const allocations = positions.map(p => ({
     ...p,
+    allocationPct: +((p.marketValue / totalValue) * 100).toFixed(1),
   }));
 
-  const prompt = `You are the Overseer -- the chief investment officer of an autonomous AI trading system. You receive intelligence from two analyst agents and must decide what trades to execute RIGHT NOW.
+  const timestamp = new Date().toISOString();
 
-This is a paper trading account (simulated money). You have FULL AUTONOMY to buy and sell. Be decisive. The worst outcome is doing nothing when the data clearly points to action.
+  // Build intelligence summary -- handle missing agents gracefully
+  const intelSummary = {};
+  for (const [agent, report] of Object.entries(intelligence)) {
+    if (report) {
+      intelSummary[agent] = {
+        timestamp: report.timestamp,
+        age: report.timestamp ? `${Math.round((Date.now() - new Date(report.timestamp).getTime()) / 60000)} min ago` : 'unknown',
+        ...report,
+      };
+      // Remove raw data to save tokens
+      delete intelSummary[agent].symbolProfiles;
+      delete intelSummary[agent].macroProfiles;
+      delete intelSummary[agent].sectorData;
+    } else {
+      intelSummary[agent] = { status: 'no_data' };
+    }
+  }
 
-CURRENT TIME: ${now}
+  const plan = await askClaude(`You are the Overseer -- the autonomous CIO of an AI trading system. Your ONLY goal is to beat the S&P 500. You have FULL AUTONOMY with ZERO guardrails. This is paper trading -- be aggressive, take concentrated bets, move fast.
 
-== ACCOUNT STATUS ==
+CURRENT TIME: ${timestamp}
+
+== ACCOUNT ==
 ${JSON.stringify(account, null, 2)}
+Cash allocation: ${cashPct}%
 
-== CURRENT POSITIONS & ALLOCATIONS ==
-${JSON.stringify(currentAllocations, null, 2)}
+== POSITIONS & ALLOCATIONS ==
+${JSON.stringify(allocations, null, 2)}
 
-== NEWS ANALYST REPORT ==
-${JSON.stringify(newsAnalysis, null, 2)}
+== S&P 500 BENCHMARK ==
+${benchmark ? JSON.stringify(benchmark, null, 2) : 'Benchmark data unavailable'}
+${benchmark ? `ALPHA (1-day): ${benchmark.alpha1d > 0 ? '+' : ''}${benchmark.alpha1d}%` : ''}
+${benchmark ? `STATUS: ${benchmark.alpha1d > 0 ? 'BEATING S&P' : 'UNDERPERFORMING S&P -- NEED TO ACT'}` : ''}
 
-== FUNDAMENTALS ANALYST REPORT ==
-${JSON.stringify(fundamentalsAnalysis, null, 2)}
+== INTELLIGENCE REPORTS FROM 7 AGENTS ==
 
-== YOUR DECISION FRAMEWORK ==
-1. SELL signals: Exit or reduce positions where both agents agree the outlook is negative, or where fundamentals have deteriorated significantly, or where urgent news warrants immediate action.
-2. BUY signals: Increase positions in holdings where both agents see upside, or deploy cash into new opportunities that align with the portfolio's risk profile.
-3. REBALANCE: If allocations have drifted significantly (e.g., one position is >30% of portfolio), trim back toward balance.
-4. HOLD: If the data is mixed or inconclusive, it's fine to hold. But explain why.
+--- NEWS SENTINEL ---
+${JSON.stringify(intelSummary['news-sentinel'] || { status: 'no_data' }, null, 2)}
+
+--- SECTOR SCANNER ---
+${JSON.stringify(intelSummary['sector-scanner'] || { status: 'no_data' }, null, 2)}
+
+--- EARNINGS SCOUT ---
+${JSON.stringify(intelSummary['earnings-scout'] || { status: 'no_data' }, null, 2)}
+
+--- TECHNICAL ANALYST ---
+${JSON.stringify(intelSummary['technical-analyst'] || { status: 'no_data' }, null, 2)}
+
+--- FUNDAMENTALS ANALYST ---
+${JSON.stringify(intelSummary['fundamentals-analyst'] || { status: 'no_data' }, null, 2)}
+
+--- MACRO ANALYST ---
+${JSON.stringify(intelSummary['macro-analyst'] || { status: 'no_data' }, null, 2)}
+
+--- CATALYST TRACKER (Economic Events, Insider Trades, Analyst Ratings) ---
+${JSON.stringify(intelSummary['catalyst-tracker'] || { status: 'no_data' }, null, 2)}
+
+== DECISION MANDATE ==
+1. BEAT SPY. If underperforming, make bold moves. If outperforming, protect gains but stay aggressive.
+2. Use ALL intelligence. Cross-reference news + technicals + fundamentals + macro. When multiple agents agree, act with high conviction.
+3. Concentrate in winners. Don't diversify for safety -- this is paper money. Go heavy on your best ideas.
+4. Cut losers fast. If technicals + fundamentals both say sell, close the position entirely.
+5. Ride momentum. Stocks going up tend to keep going up. Don't sell winners too early.
+6. Anticipate catalysts. Pre-position before earnings, sector rotations, macro shifts. Reduce exposure ahead of high-impact economic events if uncertain.
+7. Follow the insiders. Cluster insider buying is one of the strongest known buy signals. Cluster insider selling is a red flag. Weight this heavily.
+8. Respect analyst momentum. Multiple upgrades in a short period predict continued price appreciation. Fresh downgrades should trigger immediate review.
+9. New opportunities. If agents identify symbols not currently held that have strong signals (especially insider clusters + analyst upgrades), BUY THEM.
+10. Minimize cash drag. Cash doesn't beat SPY. Deploy it.
 
 CONSTRAINTS:
-- Minimum trade size: $1 (Alpaca minimum for fractional orders)
-- You can buy new symbols not currently held if the data strongly supports it
+- Minimum trade: $1 (Alpaca fractional orders)
+- You can buy ANY stock, not just current holdings
 - You can close positions entirely
-- Consider transaction frequency -- don't churn for tiny improvements
+- Consider if agents' data is stale (check ages) -- discount old intel
 
-Respond with ONLY valid JSON in this exact format:
+Respond with ONLY valid JSON:
 {
   "decision": {
-    "action": "rebalance" | "hold" | "defensive" | "aggressive",
-    "reasoning": "3-5 sentence explanation of your overall strategy this cycle",
+    "action": "aggressive_rebalance" | "tactical_shift" | "hold" | "defensive_pivot" | "full_rotation",
+    "reasoning": "3-5 sentence strategy explanation citing specific agent intelligence",
     "confidence": 1-10,
-    "marketOutlook": "bullish" | "bearish" | "neutral" | "uncertain"
+    "marketOutlook": "bullish" | "bearish" | "neutral" | "uncertain",
+    "alphaStrategy": "how this decision aims to beat SPY"
   },
   "trades": [
     {
@@ -223,72 +173,35 @@ Respond with ONLY valid JSON in this exact format:
       "side": "buy" | "sell",
       "action": "open" | "increase" | "decrease" | "close",
       "method": "notional" | "qty",
-      "amount": 150.00,
-      "reasoning": "1-2 sentence explanation for this specific trade"
+      "amount": 500.00,
+      "reasoning": "1-2 sentence explanation citing agent intelligence",
+      "agentConsensus": "which agents support this trade"
     }
   ],
-  "portfolioAssessment": "2-3 sentence summary of portfolio health after proposed trades",
-  "watchlist": ["symbols to watch for next cycle with brief reason"]
+  "portfolioAssessment": "2-3 sentence post-trade portfolio assessment",
+  "benchmarkStrategy": "how we plan to outperform SPY from here",
+  "watchlist": [{ "symbol": "NVDA", "reason": "strong technicals + earnings catalyst", "triggerCondition": "buy on pullback to $800" }],
+  "nextCycleGuidance": "what to look for in the next 15-minute cycle"
 }
 
-If no trades are warranted, return an empty trades array. For sells, use "method": "qty" and specify share count. For buys, use "method": "notional" and specify dollar amount. To close an entire position, use "action": "close".`;
+For sells: use "method": "qty" with share count. For buys: use "method": "notional" with dollar amount. To close entirely: use "action": "close".`, { maxTokens: 3000 });
 
-  const anthropicRes = await fetch(ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!anthropicRes.ok) {
-    const errText = await anthropicRes.text();
-    throw new Error(`Claude API error ${anthropicRes.status}: ${errText}`);
-  }
-
-  const data = await anthropicRes.json();
-  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-  // Parse JSON robustly (handle markdown fences and preamble text)
-  let plan;
-  try {
-    plan = JSON.parse(text.trim());
-  } catch {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON object found in Claude response');
-    plan = JSON.parse(jsonMatch[0]);
-  }
-
-  // ── Execute the trades ──────────────────────────────────────────
+  // ── Execute trades ──────────────────────────────────────────────
   const executedTrades = [];
 
   for (const trade of (plan.trades || [])) {
     let result;
 
     if (trade.action === 'close') {
-      // Close entire position
       result = await closePosition(trade.symbol);
       result.reasoning = trade.reasoning;
     } else if (trade.side === 'sell') {
-      // Partial sell by qty
       result = await placeMarketOrder(trade.symbol, 'sell', null, trade.amount);
       result.reasoning = trade.reasoning;
     } else {
-      // Buy by notional amount
       const amount = trade.amount;
       if (amount < 1) {
-        result = {
-          symbol: trade.symbol,
-          side: 'buy',
-          status: 'skipped',
-          reason: 'Amount below $1 minimum',
-          reasoning: trade.reasoning,
-        };
+        result = { symbol: trade.symbol, side: 'buy', status: 'skipped', reason: 'Below $1 minimum', reasoning: trade.reasoning };
       } else {
         result = await placeMarketOrder(trade.symbol, 'buy', amount, null);
         result.reasoning = trade.reasoning;
@@ -299,13 +212,16 @@ If no trades are warranted, return an empty trades array. For sells, use "method
   }
 
   return {
-    timestamp: now,
+    timestamp,
     agentName: 'overseer',
     decision: plan.decision,
     proposedTrades: plan.trades || [],
     executedTrades,
     portfolioAssessment: plan.portfolioAssessment,
+    benchmarkStrategy: plan.benchmarkStrategy,
+    benchmark,
     watchlist: plan.watchlist || [],
+    nextCycleGuidance: plan.nextCycleGuidance,
     accountSnapshot: {
       equityBefore: account.equity,
       cashBefore: account.cash,
@@ -323,19 +239,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { newsAnalysis, fundamentalsAnalysis } = req.body || {};
-
-  if (!newsAnalysis || !fundamentalsAnalysis) {
-    return res.status(400).json({
-      error: 'Both newsAnalysis and fundamentalsAnalysis objects are required in the request body',
-    });
-  }
-
   try {
-    const result = await makeDecision(newsAnalysis, fundamentalsAnalysis);
+    const result = await makeDecision();
     return res.status(200).json(result);
   } catch (err) {
     console.error('[overseer] Error:', err);
-    return res.status(500).json({ error: err.message || 'Overseer decision failed' });
+    return res.status(500).json({ error: err.message });
   }
 }

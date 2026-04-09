@@ -1,15 +1,23 @@
 /**
  * Vercel serverless function: AI portfolio generation.
  *
- * Stage 2 of the hybrid portfolio creation flow. Takes the user's
- * onboarding profile + their portfolio refinement choices, pre-fetches
- * Alpaca account/market data, then makes a SINGLE Claude call to
- * generate the actual portfolio allocation.
+ * v2: Now reads accumulated intelligence from the 8-agent system
+ * via Vercel KV, so new portfolio creation is informed by the same
+ * data the Overseer uses for rebalancing:
+ * - Sector rotation signals
+ * - Macro regime (risk-on/risk-off)
+ * - News sentiment
+ * - Earnings landscape
+ * - Insider trading clusters
+ * - Analyst consensus
+ * - Technical market conditions
  *
  * POST /api/generate-portfolio
  * Body: { profile: OnboardingProfile, refinements: PortfolioRefinements }
  * Returns: { holdings: GeneratedHolding[], strategy: StrategyMeta } | { error: string }
  */
+
+import { getAllLatestIntelligence } from './agents/lib/kv.js';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
@@ -26,7 +34,7 @@ function alpacaHeaders() {
 
 async function alpacaTrading(path) {
   const res = await fetch(`${ALPACA_PAPER_BASE}${path}`, { headers: alpacaHeaders() });
-  if (!res.ok) return null; // graceful fallback -- don't block on Alpaca errors
+  if (!res.ok) return null;
   return res.json();
 }
 
@@ -58,16 +66,16 @@ async function fetchPositionsSummary() {
 
 async function fetchMarketSnapshot() {
   const symbols = [
-    'VTI', 'VXUS', 'QQQ', 'SPY', 'IWM',       // broad equity
-    'BND', 'TLT', 'VCIT', 'HYG',                // bonds
-    'GLD', 'SLV', 'GSG',                         // commodities
-    'VNQ', 'XLRE',                                // real estate
-    'XLK', 'XLV', 'XLF', 'XLE', 'XLI', 'XLP',  // sectors
-    'ICLN', 'TAN',                                // clean energy
-    'VEA', 'VWO', 'EEM', 'INDA',                 // international
-    'SCHD', 'VIG', 'DVY',                         // dividend
-    'ARKK', 'SOXX', 'SMH',                        // thematic/tech
-    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA',    // mega-cap stocks
+    'VTI', 'VXUS', 'QQQ', 'SPY', 'IWM',
+    'BND', 'TLT', 'VCIT', 'HYG',
+    'GLD', 'SLV', 'GSG',
+    'VNQ', 'XLRE',
+    'XLK', 'XLV', 'XLF', 'XLE', 'XLI', 'XLP',
+    'ICLN', 'TAN',
+    'VEA', 'VWO', 'EEM', 'INDA',
+    'SCHD', 'VIG', 'DVY',
+    'ARKK', 'SOXX', 'SMH',
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA',
     'META', 'TSLA', 'JPM', 'JNJ', 'UNH',
   ].join(',');
 
@@ -83,19 +91,72 @@ async function fetchMarketSnapshot() {
   } catch { return 'Market data unavailable.'; }
 }
 
-async function fetchTopNews() {
-  try {
-    const data = await alpacaData('/v1beta1/news?limit=5&sort=desc');
-    if (!data || !data.news || data.news.length === 0) return 'No recent news.';
-    return data.news.map(a =>
-      `- ${a.headline} (${(a.symbols || []).join(', ')})`
-    ).join('\n');
-  } catch { return 'News data unavailable.'; }
+// ── Intelligence summary builder ────────────────────────────────
+
+function buildIntelligenceSummary(intelligence) {
+  if (!intelligence) return 'Agent intelligence unavailable (KV not configured).';
+
+  const sections = [];
+
+  // News sentiment
+  const news = intelligence['news-sentinel'];
+  if (news) {
+    sections.push(`MARKET SENTIMENT: ${news.marketSentiment || 'unknown'}${news.sentimentShift ? ` (${news.sentimentShift})` : ''}
+${news.marketSummary || ''}
+${news.urgentAlerts?.length ? `Alerts: ${news.urgentAlerts.join('; ')}` : ''}
+${news.sectorTrends ? `Positive sectors: ${news.sectorTrends.positive?.join(', ') || 'none'}. Negative: ${news.sectorTrends.negative?.join(', ') || 'none'}` : ''}`);
+  }
+
+  // Sector rotation
+  const sectors = intelligence['sector-scanner'];
+  if (sectors) {
+    sections.push(`SECTOR ROTATION: Phase = ${sectors.rotationPhase || 'unknown'}
+${sectors.summary || ''}
+${sectors.sectorRecommendations ? `Overweight: ${sectors.sectorRecommendations.overweight?.join(', ') || 'none'}. Underweight: ${sectors.sectorRecommendations.underweight?.join(', ') || 'none'}` : ''}`);
+  }
+
+  // Macro regime
+  const macro = intelligence['macro-analyst'];
+  if (macro) {
+    sections.push(`MACRO REGIME: ${macro.regime || 'unknown'} (confidence: ${macro.regimeConfidence || '?'}/10)
+${macro.summary || ''}
+${macro.positioning ? `Recommended equity exposure: ${macro.positioning.equityExposure}. Sector bias: ${macro.positioning.sectorBias}` : ''}`);
+  }
+
+  // Earnings landscape
+  const earnings = intelligence['earnings-scout'];
+  if (earnings) {
+    sections.push(`EARNINGS: ${earnings.summary || 'No data'}
+${earnings.earningsSeasonThemes?.length ? `Themes: ${earnings.earningsSeasonThemes.join('; ')}` : ''}`);
+  }
+
+  // Catalyst intelligence
+  const catalysts = intelligence['catalyst-tracker'];
+  if (catalysts && catalysts.status !== 'skipped') {
+    const econ = catalysts.economicOutlook;
+    sections.push(`CATALYSTS:
+${catalysts.summary || ''}
+${econ ? `Key upcoming event: ${econ.keyUpcomingEvent || 'none'} (${econ.expectedImpact || '?'} impact). Positioning: ${econ.positioningAdvice || 'N/A'}` : ''}
+${catalysts.insiderSignals?.newOpportunities?.length ? `Insider cluster buys: ${catalysts.insiderSignals.newOpportunities.map(o => `${o.symbol} (${o.cluster})`).join('; ')}` : ''}`);
+  }
+
+  // Technical conditions
+  const tech = intelligence['technical-analyst'];
+  if (tech) {
+    const mkt = tech.marketTechnicals;
+    sections.push(`TECHNICAL CONDITIONS: ${mkt?.regime || 'unknown'}, breadth: ${mkt?.breadth || 'unknown'}
+${mkt?.summary || ''}
+${tech.highConvictionCalls?.length ? `High conviction: ${tech.highConvictionCalls.join('; ')}` : ''}`);
+  }
+
+  if (sections.length === 0) return 'No agent intelligence available yet. Agents may not have completed their first cycle.';
+
+  return sections.join('\n\n');
 }
 
 // ── System prompt ──────────────────────────────────────────────
 
-function buildPrompt(profile, refinements, account, positions, marketData, news) {
+function buildPrompt(profile, refinements, account, positions, marketData, intelSummary) {
   return `You are Alpha, the AI portfolio architect for Alpha Trader -- a paper trading platform powered by Alpaca. This is a standard investment account (not a retirement account, 401k, or IRA).
 
 ## Your task
@@ -123,19 +184,27 @@ ${positions}
 ## Live market quotes (mid prices)
 ${marketData}
 
-## Recent market news
-${news}
+## AGENT INTELLIGENCE (from 8 AI agents monitoring markets 24/7)
+This is real-time intelligence from our multi-agent system. USE IT to make informed decisions about sector allocation, timing, and stock selection. This is what separates a smart portfolio from a generic template.
+
+${intelSummary}
 
 ## How to build the portfolio
 
-The investor profile tells you WHO this person is. The portfolio specifications tell you WHAT this particular portfolio should be. A single user can create multiple portfolios with different characteristics -- respect the portfolio specs even if they diverge from the profile (e.g., a conservative investor creating an aggressive portfolio is fine).
+The investor profile tells you WHO this person is. The portfolio specifications tell you WHAT this particular portfolio should be. The agent intelligence tells you what's happening in the market RIGHT NOW.
 
 1. Use the portfolio specifications as the primary driver for holdings selection
 2. Use the investor profile for context (experience level affects complexity, account size affects position count)
-3. Consider existing positions to avoid over-concentration
-4. Select 5-8 holdings (ETFs and/or individual stocks) matching the specifications
-5. Use the live quotes to pick from liquid, actively-traded securities
-6. Set allocation percentages that sum to exactly 100
+3. USE THE AGENT INTELLIGENCE to make tactical decisions:
+   - If macro regime is risk-off, lean more defensive even for aggressive portfolios
+   - If sector rotation favors tech, overweight tech ETFs/stocks
+   - If insider clusters signal conviction in a specific stock, consider including it
+   - If earnings season themes highlight a trend, position to benefit from it
+   - If an economic event is imminent (Fed, CPI), consider that in risk sizing
+4. Consider existing positions to avoid over-concentration
+5. Select 5-8 holdings (ETFs and/or individual stocks) matching the specifications
+6. Use the live quotes to pick from liquid, actively-traded securities
+7. Set allocation percentages that sum to exactly 100
 
 ## Output format (CRITICAL -- follow this exactly)
 
@@ -146,13 +215,13 @@ Respond with valid JSON and NOTHING ELSE. No markdown, no backticks, no explanat
 Rules:
 - "allocation" values are integers summing to exactly 100
 - "type" is one of: "ETF", "Stock", "Bond ETF", "Commodity ETF", "REIT"
-- "reasoning" is 1-2 sentences per holding explaining why it fits THIS portfolio's specs
+- "reasoning" should reference specific agent intelligence when relevant (e.g., "Tech sector showing strong rotation signals" or "Insider buying cluster detected")
 - "riskLevel": derive from the portfolio specifications (not the user's profile)
 - "gemType": Pearl for conservative, Sapphire for moderate, Ruby for aggressive
 - ONLY include tradeable US securities available on Alpaca
 - This is paper trading. Be concrete and opinionated, not generic.
 - Genuinely reflect the portfolio specifications. Do NOT give everyone the same 60/40 template.
-- The strategy "description" should reference what makes this portfolio unique.`;
+- The strategy "description" should reference current market conditions from agent intelligence.`;
 }
 
 // ── Main handler ────────────────────────────────────────────────
@@ -179,15 +248,18 @@ export default async function handler(req, res) {
 
   try {
     // Step 1: Pre-fetch ALL data in parallel (~1-2 seconds)
-    const [account, positions, marketData, news] = await Promise.all([
+    // Now includes agent intelligence from KV
+    const [account, positions, marketData, intelligence] = await Promise.all([
       fetchAccountSummary(),
       fetchPositionsSummary(),
       fetchMarketSnapshot(),
-      fetchTopNews(),
+      getAllLatestIntelligence().catch(() => null),
     ]);
 
-    // Step 2: Single Claude call with all data in the prompt (~3-5 seconds)
-    const systemPrompt = buildPrompt(profile, refinements, account, positions, marketData, news);
+    const intelSummary = buildIntelligenceSummary(intelligence);
+
+    // Step 2: Single Claude call with all data + intelligence (~3-5 seconds)
+    const systemPrompt = buildPrompt(profile, refinements, account, positions, marketData, intelSummary);
 
     const anthropicRes = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',
@@ -240,7 +312,13 @@ export default async function handler(req, res) {
 
     // Normalise allocations to sum to exactly 100
     const totalAllocation = parsed.holdings.reduce((sum, h) => sum + (h.allocation || 0), 0);
-    if (totalAllocation !== 100) {
+    if (totalAllocation <= 0) {
+      const equalWeight = Math.floor(100 / parsed.holdings.length);
+      parsed.holdings = parsed.holdings.map((h, i) => ({
+        ...h,
+        allocation: i === 0 ? equalWeight + (100 - equalWeight * parsed.holdings.length) : equalWeight,
+      }));
+    } else if (totalAllocation !== 100) {
       const factor = 100 / totalAllocation;
       parsed.holdings = parsed.holdings.map(h => ({
         ...h,
