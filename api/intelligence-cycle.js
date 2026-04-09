@@ -2,35 +2,69 @@
  * Intelligence Cycle Orchestrator
  *
  * Runs 24/7 (every 30 minutes, all days including weekends).
- * Coordinates the intelligence-gathering agents:
- *   - News Sentinel
- *   - Sector Scanner
- *   - Earnings Scout
- *   - Catalyst Tracker (economic events, insider trades, analyst ratings)
+ * Coordinates the intelligence-gathering agents by calling their
+ * individual HTTP endpoints (each runs in its own serverless function).
  *
- * All agents store their findings in Vercel KV.
- * The Overseer reads accumulated intelligence during execution cycles.
+ * Why HTTP calls instead of direct imports?
+ * Vercel bundles each API route into its own serverless function.
+ * When we import agent code directly, it all runs in ONE function,
+ * which can cause env var resolution and bundling issues.
+ * Calling endpoints ensures each agent gets its own clean context.
  *
  * Vercel Cron: "0,30 * * * *"  (every 30 min, 24/7)
  */
 
-import { runNewsSentinel } from './agents/news-sentinel.js';
-import { runSectorScanner } from './agents/sector-scanner.js';
-import { runEarningsScout } from './agents/earnings-scout.js';
-import { runCatalystTracker } from './agents/catalyst-tracker.js';
+function getBaseUrl(req) {
+  // From request headers (works for both cron and manual calls)
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  if (host) return `${proto}://${host}`;
+  // Fallback to Vercel env
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
 
-async function runIntelligenceCycle() {
+async function callAgent(baseUrl, agentPath, timeoutMs = 55000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${baseUrl}${agentPath}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`${res.status}: ${text.slice(0, 200)}`);
+    }
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
   const cycleStart = Date.now();
   const timestamp = new Date().toISOString();
+  const baseUrl = getBaseUrl(req);
 
-  console.log(`[intelligence-cycle] Starting at ${timestamp}`);
+  console.log(`[intelligence-cycle] Starting at ${timestamp}, base: ${baseUrl}`);
 
-  // Run all four intelligence agents in parallel
+  // Call all four intelligence agents in parallel via their HTTP endpoints
   const [newsResult, sectorResult, earningsResult, catalystResult] = await Promise.allSettled([
-    runNewsSentinel(),
-    runSectorScanner(),
-    runEarningsScout(),
-    runCatalystTracker(),
+    callAgent(baseUrl, '/api/agents/news-sentinel'),
+    callAgent(baseUrl, '/api/agents/sector-scanner'),
+    callAgent(baseUrl, '/api/agents/earnings-scout'),
+    callAgent(baseUrl, '/api/agents/catalyst-tracker'),
   ]);
 
   const duration = Date.now() - cycleStart;
@@ -67,20 +101,5 @@ async function runIntelligenceCycle() {
   console.log(`[intelligence-cycle] Complete in ${duration}ms`);
   console.log(`  News: ${newsResult.status}, Sectors: ${sectorResult.status}, Earnings: ${earningsResult.status}, Catalysts: ${catalystResult.status}`);
 
-  return summary;
-}
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(204).end();
-
-  try {
-    const result = await runIntelligenceCycle();
-    return res.status(200).json(result);
-  } catch (err) {
-    console.error('[intelligence-cycle] Fatal:', err);
-    return res.status(500).json({ error: err.message, timestamp: new Date().toISOString() });
-  }
+  return res.status(200).json(summary);
 }

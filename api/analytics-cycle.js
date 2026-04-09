@@ -2,33 +2,80 @@
  * Analytics Cycle Orchestrator
  *
  * Runs during extended hours (7 AM - 8 PM ET, weekdays), every 15 min.
- * Coordinates the analytics agents:
- *   - Technical Analyst (indicators + price patterns)
- *   - Fundamentals Analyst (financial metrics + valuation)
- *   - Macro Analyst (market regime + risk signals)
- *
- * All agents store results in Vercel KV.
+ * Coordinates the analytics agents by calling their HTTP endpoints.
  *
  * Vercel Cron: "5,20,35,50 11-23,0 * * 1-5"
  * (7:05 AM - 8:50 PM ET on weekdays, offset from intelligence by 5 min)
  */
 
-import { runTechnicalAnalyst } from './agents/technical-analyst.js';
-import { runFundamentalsAnalyst } from './agents/fundamentals-analyst.js';
-import { runMacroAnalyst } from './agents/macro-analyst.js';
-import { isExtendedHours } from './agents/lib/alpaca.js';
+function getBaseUrl(req) {
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  if (host) return `${proto}://${host}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
 
-async function runAnalyticsCycle() {
+async function callAgent(baseUrl, agentPath, timeoutMs = 55000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${baseUrl}${agentPath}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`${res.status}: ${text.slice(0, 200)}`);
+    }
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
+function isExtendedHoursCheck() {
+  const now = new Date();
+  const etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
+  const etDate = new Date(etString);
+  const day = now.getUTCDay();
+  if (day === 0 || day === 6) return false;
+  const mins = etDate.getHours() * 60 + etDate.getMinutes();
+  return mins >= 420 && mins < 1200; // 7:00 AM - 8:00 PM ET
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
+  // Check extended hours (skip outside unless forced)
+  const force = req.body?.force || req.query?.force === 'true';
+  if (!force && !isExtendedHoursCheck()) {
+    return res.status(200).json({
+      skipped: true,
+      reason: 'Outside extended hours (7 AM - 8 PM ET, weekdays)',
+      hint: 'Use ?force=true to override',
+    });
+  }
+
   const cycleStart = Date.now();
   const timestamp = new Date().toISOString();
+  const baseUrl = getBaseUrl(req);
 
-  console.log(`[analytics-cycle] Starting at ${timestamp}`);
+  console.log(`[analytics-cycle] Starting at ${timestamp}, base: ${baseUrl}`);
 
-  // Run all three analytics agents in parallel
+  // Call all three analytics agents in parallel via their HTTP endpoints
   const [techResult, fundResult, macroResult] = await Promise.allSettled([
-    runTechnicalAnalyst(),
-    runFundamentalsAnalyst(),
-    runMacroAnalyst(),
+    callAgent(baseUrl, '/api/agents/technical-analyst'),
+    callAgent(baseUrl, '/api/agents/fundamentals-analyst'),
+    callAgent(baseUrl, '/api/agents/macro-analyst'),
   ]);
 
   const duration = Date.now() - cycleStart;
@@ -60,30 +107,5 @@ async function runAnalyticsCycle() {
   console.log(`[analytics-cycle] Complete in ${duration}ms`);
   console.log(`  Tech: ${techResult.status}, Fund: ${fundResult.status}, Macro: ${macroResult.status}`);
 
-  return summary;
-}
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(204).end();
-
-  // Check extended hours (skip outside unless forced)
-  const force = req.body?.force || req.query?.force === 'true';
-  if (!force && !isExtendedHours()) {
-    return res.status(200).json({
-      skipped: true,
-      reason: 'Outside extended hours (7 AM - 8 PM ET, weekdays)',
-      hint: 'Use ?force=true to override',
-    });
-  }
-
-  try {
-    const result = await runAnalyticsCycle();
-    return res.status(200).json(result);
-  } catch (err) {
-    console.error('[analytics-cycle] Fatal:', err);
-    return res.status(500).json({ error: err.message, timestamp: new Date().toISOString() });
-  }
+  return res.status(200).json(summary);
 }
