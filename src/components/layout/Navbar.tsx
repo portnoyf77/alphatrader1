@@ -23,7 +23,6 @@ const navLinks: { href: string; label: string; icon: LucideIcon; tooltip: string
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Your portfolio overview' },
   { href: '/portfolio-tracker', label: 'Portfolio', icon: BarChart3, tooltip: 'Live Alpaca positions & trades' },
   { href: '/research', label: 'Research', icon: Zap, tooltip: 'Market news & watchlist' },
-  { href: '/build', label: 'Build', icon: Sparkles, tooltip: 'AI Portfolio Builder' },
   { href: '/explore', label: 'Marketplace', icon: Store, tooltip: 'Browse and follow portfolios' },
 ];
 

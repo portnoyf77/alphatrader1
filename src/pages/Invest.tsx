@@ -386,7 +386,7 @@ export default function Create() {
         name: generatedStrategyName,
         objective: objectiveMap[strategyProfile.primaryGoal || 'accumulation'] || 'Growth',
         riskLevel,
-        status: status === 'live' ? 'private' : 'private',
+        status: status === 'live' ? 'live' : 'private',
         holdings: editableHoldings.map(h => ({ ticker: h.ticker, name: h.name, weight: h.weight })),
         descriptionRationale: generatedPortfolio?.rationale,
         sectors: [...new Set(editableHoldings.map(h => h.name.split(' ')[0]))],

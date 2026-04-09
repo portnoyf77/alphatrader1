@@ -171,8 +171,8 @@ export default function Dashboard() {
 
   // Live Alpaca data
   const { account, loading: accountLoading } = useAlpacaAccount();
-  const { positions, totalMarketValue, totalUnrealizedPL, loading: positionsLoading, refetch: refetchPositions } = useAlpacaPositions();
-  const alpacaLoading = accountLoading || positionsLoading;
+  const { positions } = useAlpacaPositions();
+  const alpacaLoading = accountLoading;
 
   // Real news from Alpaca (filtered by position symbols + popular tickers)
   const newsSymbols = useMemo(() => {
@@ -752,59 +752,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Live Alpaca Positions ── */}
-        {hasLiveData && positions.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Live Positions</h2>
-                <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>
-                  {positions.length} open
-                </span>
-              </div>
-              <Link to="/portfolio-tracker" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                View all <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {positions.slice(0, 8).map((pos) => (
-                <div
-                  key={pos.symbol}
-                  className="rounded-xl p-3"
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${pos.unrealizedPL >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}`,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono font-semibold text-sm text-foreground">{pos.symbol}</span>
-                    <span className="text-xs text-muted-foreground">{pos.qty} shares</span>
-                  </div>
-                  <div className="font-mono text-sm text-foreground">{formatCurrency(pos.marketValue)}</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    {pos.unrealizedPL >= 0 ? (
-                      <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                    ) : (
-                      <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
-                    )}
-                    <span className="text-xs font-medium" style={{ color: (pos?.unrealizedPL ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
-                      {(pos?.unrealizedPL ?? 0) >= 0 ? '+' : ''}{formatCurrency(pos?.unrealizedPL ?? 0)} ({(pos?.unrealizedPLPercent ?? 0) >= 0 ? '+' : ''}{((pos?.unrealizedPLPercent ?? 0)).toFixed(2)}%)
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {totalUnrealizedPL !== 0 && (
-              <div className="mt-2 text-right">
-                <span className="text-xs text-muted-foreground">Total unrealized P&L: </span>
-                <span className="text-xs font-mono font-medium" style={{ color: totalUnrealizedPL >= 0 ? '#10B981' : '#EF4444' }}>
-                  {totalUnrealizedPL >= 0 ? '+' : ''}{formatCurrency(totalUnrealizedPL)}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* ── Market News ── */}
         <div>
