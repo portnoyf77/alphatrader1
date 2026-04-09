@@ -61,6 +61,19 @@ export async function makeDecision(intelOverride = null) {
     };
   }
 
+  // Only operate on portfolios that already have positions.
+  // New portfolio creation happens through generate-portfolio.js, not here.
+  if (positions.length === 0) {
+    return {
+      timestamp: new Date().toISOString(),
+      agentName: 'overseer',
+      decision: { action: 'none', reasoning: 'No existing positions to manage. Portfolios are created through the app, not by the rebalancer.', confidence: 0 },
+      executedTrades: [],
+      benchmark: null,
+      accountSnapshot: { equityBefore: account.equity, cashBefore: account.cash, positionCount: 0 },
+    };
+  }
+
   // Calculate benchmark
   const benchmark = await calculateBenchmark(account);
 
@@ -149,13 +162,14 @@ ${JSON.stringify(intelSummary['catalyst-tracker'] || { status: 'no_data' }, null
 6. Anticipate catalysts. Pre-position before earnings, sector rotations, macro shifts. Reduce exposure ahead of high-impact economic events if uncertain.
 7. Follow the insiders. Cluster insider buying is one of the strongest known buy signals. Cluster insider selling is a red flag. Weight this heavily.
 8. Respect analyst momentum. Multiple upgrades in a short period predict continued price appreciation. Fresh downgrades should trigger immediate review.
-9. New opportunities. If agents identify symbols not currently held that have strong signals (especially insider clusters + analyst upgrades), BUY THEM.
-10. Minimize cash drag. Cash doesn't beat SPY. Deploy it.
+9. Flag opportunities. If agents identify symbols not currently held that have strong signals, add them to the watchlist with trigger conditions -- but do NOT buy them. New positions are created through the app's portfolio builder, not the rebalancer.
+10. Manage cash wisely. Redeploy cash into EXISTING holdings when conviction is high. Keep cash if all holdings look weak -- sitting in cash is better than averaging down on losers.
 
 CONSTRAINTS:
 - Minimum trade: $1 (Alpaca fractional orders)
-- You can buy ANY stock, not just current holdings
-- You can close positions entirely
+- You can ONLY trade symbols already in the portfolio. NEVER buy new symbols not currently held.
+- You can increase or decrease existing positions
+- You can close positions entirely (sell 100%)
 - Consider if agents' data is stale (check ages) -- discount old intel
 
 Respond with ONLY valid JSON:
@@ -188,8 +202,21 @@ For sells: use "method": "qty" with share count. For buys: use "method": "notion
 
   // ── Execute trades ──────────────────────────────────────────────
   const executedTrades = [];
+  const heldSymbols = new Set(positions.map(p => p.symbol));
 
   for (const trade of (plan.trades || [])) {
+    // Hard guard: never buy symbols not already in the portfolio
+    if (trade.side === 'buy' && !heldSymbols.has(trade.symbol)) {
+      executedTrades.push({
+        symbol: trade.symbol,
+        side: 'buy',
+        status: 'blocked',
+        reason: 'Not an existing holding -- rebalancer only manages existing positions',
+        reasoning: trade.reasoning,
+      });
+      continue;
+    }
+
     let result;
 
     if (trade.action === 'close') {
