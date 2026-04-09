@@ -315,10 +315,9 @@ export default function Dashboard() {
 
         {/* ── Account Summary ── */}
         <div>
-          {/* Account Value */}
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:gap-10">
-                {/* Account Equity */}
+                {/* Total Assets */}
                 <div className="flex flex-col">
                   <div className="flex items-baseline gap-2">
                     <span className="font-mono text-[2.5rem] font-bold text-foreground leading-tight">
@@ -328,61 +327,67 @@ export default function Dashboard() {
                       <span className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>Live</span>
                     )}
                   </div>
-                  <span className="text-sm text-muted-foreground mt-1">
-                    {hasLiveData ? 'Total Account Equity' : 'Total Invested'}
-                  </span>
-                  <div className="flex items-center gap-1 mt-2">
-                    {displayDayPLPercent >= 0 ? (
-                      <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
-                    ) : (
-                      <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
-                    )}
-                    <span className="text-[0.8rem] font-medium" style={{ color: (displayDayPLPercent ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
-                      {(displayDayPLPercent ?? 0) >= 0 ? '+' : ''}{((displayDayPLPercent ?? 0)).toFixed(2)}%
-                    </span>
-                    <span className="text-[0.8rem] text-muted-foreground">
-                      {hasLiveData ? 'today' : 'this month'}
-                    </span>
-                    {hasLiveData && displayDayPL !== 0 && (
+                  <span className="text-sm text-muted-foreground mt-1">Total Assets</span>
+                  {hasLiveData && displayDayPL !== 0 && (
+                    <div className="flex items-center gap-1 mt-2">
+                      {displayDayPLPercent >= 0 ? (
+                        <ArrowUp className="h-3 w-3" style={{ color: '#10B981' }} />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" style={{ color: '#EF4444' }} />
+                      )}
+                      <span className="text-[0.8rem] font-medium" style={{ color: (displayDayPLPercent ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
+                        {(displayDayPLPercent ?? 0) >= 0 ? '+' : ''}{((displayDayPLPercent ?? 0)).toFixed(2)}% today
+                      </span>
                       <span className="text-[0.8rem] text-muted-foreground ml-1">
                         ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(parseFloat(displayDayPL.toFixed(2)))})
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-                {/* vs S&P 500 */}
-                <div className="flex flex-col">
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-baseline gap-2 cursor-help">
-                          <span className={cn(
-                            "font-mono text-[1.5rem] font-bold",
-                            realVsSP500 >= 0 ? "text-success" : "text-destructive"
-                          )}>
-                            {realVsSP500 >= 0 ? '+' : ''}{animVsSP500}%
-                          </span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">
-                        {portfolioReturn
-                          ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% (30d) · S&P: +${sp500Return}%`
-                          : `You: ${formatPercent(userTotalReturn)} · S&P: ${formatPercent(sp500Return)}`
-                        }
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <span className="text-sm text-muted-foreground mt-1">vs S&P 500</span>
-                  <div className="flex items-center gap-1 mt-2">
-                    <span className="text-[0.8rem] text-muted-foreground">
-                      {portfolioReturn
-                        ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% · S&P: +${sp500Return}%`
-                        : `You: +${userTotalReturn}% · S&P: +${sp500Return}%`
-                      }
+                {/* Cash Available */}
+                {hasLiveData && (
+                  <div className="flex flex-col">
+                    <span className="font-mono text-[1.5rem] font-bold text-foreground">
+                      {formatCurrency(account?.cash ?? 0)}
                     </span>
-                    {portfolioReturn && <span className="text-[0.65rem] text-muted-foreground ml-1">(30d)</span>}
+                    <span className="text-sm text-muted-foreground mt-1">Cash Available</span>
                   </div>
-                </div>
+                )}
+                {/* Invested */}
+                {hasLiveData && (account?.portfolioValue ?? 0) > 0 && (
+                  <div className="flex flex-col">
+                    <span className="font-mono text-[1.5rem] font-bold text-foreground">
+                      {formatCurrency(account?.portfolioValue ?? 0)}
+                    </span>
+                    <span className="text-sm text-muted-foreground mt-1">Invested</span>
+                  </div>
+                )}
+                {/* vs S&P 500 - only show when there are investments */}
+                {hasLiveData && (account?.portfolioValue ?? 0) > 0 && (
+                  <div className="flex flex-col">
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-baseline gap-2 cursor-help">
+                            <span className={cn(
+                              "font-mono text-[1.5rem] font-bold",
+                              realVsSP500 >= 0 ? "text-success" : "text-destructive"
+                            )}>
+                              {realVsSP500 >= 0 ? '+' : ''}{animVsSP500}%
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">
+                          {portfolioReturn
+                            ? `You: ${portfolioReturn.pct >= 0 ? '+' : ''}${portfolioReturn.pct.toFixed(1)}% (30d) · S&P: +${sp500Return}%`
+                            : `You: ${formatPercent(userTotalReturn)} · S&P: ${formatPercent(sp500Return)}`
+                          }
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <span className="text-sm text-muted-foreground mt-1">vs S&P 500</span>
+                  </div>
+                )}
               </div>
               {/* Create New Portfolio Button */}
               <Link to="/invest" className="shrink-0 sm:self-start">
