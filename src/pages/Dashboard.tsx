@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Shield, BarChart3, Wallet, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock, Bot } from 'lucide-react';
-import { AgentActivityCard } from '@/components/dashboard/AgentActivityCard';
+import { TrendingUp, TrendingDown, Shield, BarChart3, ExternalLink, Tag, Briefcase, Handshake, FlaskConical, ChevronRight, ArrowUp, ArrowDown, Plus, Sparkles, Crown, X, RefreshCw, Newspaper, Clock } from 'lucide-react';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { useAlpacaNews } from '@/hooks/useAlpacaNews';
@@ -218,10 +217,8 @@ export default function Dashboard() {
 
   // Use live Alpaca data when available, fall back to mock
   const displayEquity = account ? account.equity : totalMyInvestment + totalInvestedInOthers;
-  const displayPortfolioValue = account ? account.portfolioValue : displayEquity;
   const displayDayPL = account ? account.dayPL : 0;
   const displayDayPLPercent = account ? account.dayPLPercent : 3.2;
-  const displayCash = account ? account.cash : 0;
   const hasLiveData = !!account;
 
   // Use real portfolio history to compute period return when live data is available
@@ -261,7 +258,6 @@ export default function Dashboard() {
 
   // Count-up animations
   const animEquity = useCountUp(displayEquity, 800);
-  const animPortfolioValue = useCountUp(displayPortfolioValue, 800);
   // SP500 benchmark comparison - use live metrics API when available
   const sp500Return = metrics?.sp500Return ?? 9.8;
   const userTotalReturn = metrics?.totalReturn ?? (portfolioReturn ? portfolioReturn.pct : 0);
@@ -317,10 +313,9 @@ export default function Dashboard() {
     <PageLayout>
       <div className="container mx-auto px-4 py-8 space-y-6">
 
-        {/* ── Account Summary + AI Activity Log ── */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Left: Account Value */}
-          <div className="lg:col-span-2">
+        {/* ── Account Summary ── */}
+        <div>
+          {/* Account Value */}
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:gap-10">
                 {/* Account Equity */}
@@ -350,29 +345,10 @@ export default function Dashboard() {
                     </span>
                     {hasLiveData && displayDayPL !== 0 && (
                       <span className="text-[0.8rem] text-muted-foreground ml-1">
-                        ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(displayDayPL)})
+                        ({displayDayPL >= 0 ? '+' : ''}{formatCurrency(parseFloat(displayDayPL.toFixed(2)))})
                       </span>
                     )}
                   </div>
-                </div>
-                {/* Portfolio Value + Cash */}
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-[1.5rem] font-bold text-foreground">
-                      {alpacaLoading ? '...' : formatCurrency(animPortfolioValue)}
-                    </span>
-                  </div>
-                  <span className="text-sm text-muted-foreground mt-1">
-                    {hasLiveData ? 'Portfolio Value' : 'Total Value'}
-                  </span>
-                  {hasLiveData && (
-                    <div className="flex items-center gap-1 mt-2">
-                      <Wallet className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[0.8rem] text-muted-foreground">
-                        {formatCurrency(displayCash)} cash available
-                      </span>
-                    </div>
-                  )}
                 </div>
                 {/* vs S&P 500 */}
                 <div className="flex flex-col">
@@ -418,23 +394,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right: AI Activity Log Placeholder */}
-          <div
-            className="rounded-2xl p-5 flex flex-col"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(12px)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-              minHeight: '180px',
-            }}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="h-4 w-4 text-primary" />
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">AI Activity</span>
-            </div>
-            <AgentActivityCard />
-          </div>
         </div>
 
         {/* ── Portfolio Tab Cards ── */}
@@ -686,37 +645,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Risk Metrics (when live data + metrics available) ── */}
-        {hasLiveData && metrics && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Volatility</p>
-              <p className="font-mono text-lg font-semibold">{(((metrics?.volatility ?? 0) * 100)).toFixed(1)}%</p>
-              <p className="text-[0.7rem] text-muted-foreground">annualized</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Sharpe Ratio</p>
-              <p className={cn("font-mono text-lg font-semibold", (metrics?.sharpeRatio ?? 0) >= 1 ? 'text-success' : (metrics?.sharpeRatio ?? 0) >= 0 ? 'text-foreground' : 'text-destructive')}>
-                {((metrics?.sharpeRatio ?? 0)).toFixed(2)}
-              </p>
-              <p className="text-[0.7rem] text-muted-foreground">risk-adjusted</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Max Drawdown</p>
-              <p className="font-mono text-lg font-semibold text-destructive">
-                {(((metrics?.maxDrawdown ?? 0) * 100)).toFixed(1)}%
-              </p>
-              <p className="text-[0.7rem] text-muted-foreground">worst decline</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-              <p className="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Alpha</p>
-              <p className={cn("font-mono text-lg font-semibold", (metrics?.alpha ?? 0) >= 0 ? 'text-success' : 'text-destructive')}>
-                {(metrics?.alpha ?? 0) >= 0 ? '+' : ''}{(((metrics?.alpha ?? 0) * 100)).toFixed(1)}%
-              </p>
-              <p className="text-[0.7rem] text-muted-foreground">vs S&P 500</p>
-            </div>
-          </div>
-        )}
 
         {/* ── Contextual Alpha Promotion ── */}
         {qualifyingPortfolio && (
