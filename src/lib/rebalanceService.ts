@@ -316,11 +316,12 @@ export function tradeStats(trades: TradeResult[]): {
 } {
   let submitted = 0, failed = 0, skipped = 0, totalBuyValue = 0, totalSellQty = 0;
   for (const t of (trades || [])) {
-    if (t.status === 'submitted') submitted++;
-    else if (t.status === 'failed') failed++;
+    if (!t) continue;
+    if (t?.status === 'submitted') submitted++;
+    else if (t?.status === 'failed') failed++;
     else skipped++;
-    if (t.side === 'buy' && t.notional) totalBuyValue += t.notional;
-    if (t.side === 'sell' && t.qty) totalSellQty += t.qty;
+    if (t?.side === 'buy' && t?.notional) totalBuyValue += t.notional;
+    if (t?.side === 'sell' && t?.qty) totalSellQty += t.qty;
   }
   return { submitted, failed, skipped, totalBuyValue, totalSellQty };
 }

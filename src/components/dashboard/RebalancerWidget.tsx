@@ -445,7 +445,7 @@ export function RebalancerWidget({
             </blockquote>
           )}
 
-          {lastResult && lastResult.trades.length > 0 && (
+          {lastResult && (lastResult.trades || []).length > 0 && (
             <div className="rounded-xl border border-[rgba(255,255,255,0.08)] overflow-hidden">
               <Table>
                 <TableHeader>
@@ -459,46 +459,48 @@ export function RebalancerWidget({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lastResult.trades.map((t, i) => (
-                    <TableRow key={`${t.symbol}-${i}`} className="border-[rgba(255,255,255,0.1)]">
-                      <TableCell className="font-mono font-medium">{t.symbol}</TableCell>
-                      <TableCell>
-                        <span
-                          className={cn(
-                            'font-medium',
-                            t.side === 'buy' ? 'text-emerald-400' : 'text-red-400',
-                          )}
-                        >
-                          {t.side?.toUpperCase()}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right font-mono">{t.qty}</TableCell>
-                      <TableCell className="max-w-[220px] text-xs text-muted-foreground">
-                        {t.reasoning || '—'}
-                      </TableCell>
-                      <TableCell>{tradeStatusBadge(t, !!lastResult.dryRun)}</TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {t.orderId ? (
-                          <span>
-                            {t.orderId.slice(0, 8)}…
-                            {t.orderStatus && (
-                              <span className="block text-[0.65rem]">{t.orderStatus}</span>
+                  {(lastResult?.trades || []).map((t, i) => (
+                    t && (
+                      <TableRow key={`${t?.symbol || 'unknown'}-${i}`} className="border-[rgba(255,255,255,0.1)]">
+                        <TableCell className="font-mono font-medium">{t?.symbol || '?'}</TableCell>
+                        <TableCell>
+                          <span
+                            className={cn(
+                              'font-medium',
+                              t?.side === 'buy' ? 'text-emerald-400' : 'text-red-400',
                             )}
+                          >
+                            {(t?.side || 'buy').toUpperCase()}
                           </span>
-                        ) : t.reason ? (
-                          <span className="text-amber-400/90">{t.reason}</span>
-                        ) : (
-                          '—'
-                        )}
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className="text-right font-mono">{t?.qty || 0}</TableCell>
+                        <TableCell className="max-w-[220px] text-xs text-muted-foreground">
+                          {t?.reasoning || '—'}
+                        </TableCell>
+                        <TableCell>{tradeStatusBadge(t, !!(lastResult?.dryRun))}</TableCell>
+                        <TableCell className="text-xs font-mono text-muted-foreground">
+                          {t?.orderId ? (
+                            <span>
+                              {t.orderId.slice(0, 8)}…
+                              {t?.orderStatus && (
+                                <span className="block text-[0.65rem]">{t.orderStatus}</span>
+                              )}
+                            </span>
+                          ) : t?.reason ? (
+                            <span className="text-amber-400/90">{t.reason}</span>
+                          ) : (
+                            '—'
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
                   ))}
                 </TableBody>
               </Table>
             </div>
           )}
 
-          {lastResult && lastResult.trades.length === 0 && (
+          {lastResult && (lastResult?.trades || []).length === 0 && (
             <p className="text-sm text-muted-foreground">No trades proposed — portfolio within threshold.</p>
           )}
         </CardContent>

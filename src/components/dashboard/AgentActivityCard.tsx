@@ -73,20 +73,21 @@ export function AgentActivityCard({ className }: AgentActivityCardProps) {
     );
   }
 
-  const { submitted, totalBuyValue, totalSellQty } = tradeStats(latestLog.trades);
-  const buyCount = (latestLog.trades || []).filter((t) => t.side === 'buy').length;
-  const sellCount = (latestLog.trades || []).filter((t) => t.side === 'sell').length;
+  const { submitted, totalBuyValue, totalSellQty } = tradeStats(latestLog?.trades || []);
+  const buyCount = (latestLog?.trades || []).filter((t) => t?.side === 'buy').length;
+  const sellCount = (latestLog?.trades || []).filter((t) => t?.side === 'sell').length;
 
   // Determine market outlook badge color
+  const marketOutlook = latestLog?.overseerDecision?.marketOutlook || 'neutral';
   const outlookBg =
-    latestLog.overseerDecision.marketOutlook === 'bullish'
+    marketOutlook === 'bullish'
       ? 'bg-emerald-400/20 text-emerald-400'
-      : latestLog.overseerDecision.marketOutlook === 'bearish'
+      : marketOutlook === 'bearish'
         ? 'bg-red-400/20 text-red-400'
         : 'bg-yellow-400/20 text-yellow-400';
 
   // Confidence dots (1-10 scale)
-  const confidenceLevel = latestLog.overseerDecision.confidence || 5;
+  const confidenceLevel = latestLog?.overseerDecision?.confidence || 5;
   const filledDots = Math.ceil(confidenceLevel / 2); // 5 dots max, each represents 2 confidence points
 
   return (
@@ -114,10 +115,10 @@ export function AgentActivityCard({ className }: AgentActivityCardProps) {
         {/* Market outlook and dry run badges */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className={cn('px-2 py-0.5 rounded text-xs font-medium', outlookBg)}>
-            {latestLog.overseerDecision.marketOutlook.charAt(0).toUpperCase() +
-              latestLog.overseerDecision.marketOutlook.slice(1)}
+            {marketOutlook.charAt(0).toUpperCase() +
+              marketOutlook.slice(1)}
           </span>
-          {latestLog.dryRun && (
+          {latestLog?.dryRun && (
             <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-400/20 text-blue-400">
               DRY RUN
             </span>
@@ -142,7 +143,7 @@ export function AgentActivityCard({ className }: AgentActivityCardProps) {
 
         {/* Overseer reasoning (truncated) */}
         <p className="text-xs text-muted-foreground line-clamp-2">
-          {latestLog.overseerDecision.reasoning}
+          {latestLog?.overseerDecision?.reasoning || 'No reasoning provided'}
         </p>
 
         {/* Trade summary */}

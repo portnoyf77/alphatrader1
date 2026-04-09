@@ -121,11 +121,11 @@ function LogEntryCard({
   activeTab,
   onTabChange,
 }: LogEntryCardProps) {
-  const { submitted, failed, skipped, totalBuyValue, totalSellQty } = tradeStats(log.trades);
+  const { submitted, failed, skipped, totalBuyValue, totalSellQty } = tradeStats(log.trades || []);
   const timeAgo = formatRelativeTime(log.timestamp);
 
   // Determine action type badge
-  const action = log.overseerDecision.action;
+  const action = log.overseerDecision?.action || 'rebalance';
   const actionLabel =
     action === 'buy_heavy'
       ? 'AGGRESSIVE'
@@ -143,19 +143,20 @@ function LogEntryCard({
         : 'bg-yellow-400/20 text-yellow-400';
 
   // Market outlook badge
+  const marketOutlook = log.overseerDecision?.marketOutlook || 'neutral';
   const outlookColor =
-    log.overseerDecision.marketOutlook === 'bullish'
+    marketOutlook === 'bullish'
       ? 'bg-emerald-400/20 text-emerald-400'
-      : log.overseerDecision.marketOutlook === 'bearish'
+      : marketOutlook === 'bearish'
         ? 'bg-red-400/20 text-red-400'
         : 'bg-yellow-400/20 text-yellow-400';
 
   // Confidence dots
-  const confidenceLevel = log.overseerDecision.confidence || 5;
+  const confidenceLevel = log.overseerDecision?.confidence || 5;
   const filledDots = Math.ceil(confidenceLevel / 2);
 
-  const buyCount = (log.trades || []).filter((t) => t.side === 'buy').length;
-  const sellCount = (log.trades || []).filter((t) => t.side === 'sell').length;
+  const buyCount = (log.trades || []).filter((t) => t?.side === 'buy').length;
+  const sellCount = (log.trades || []).filter((t) => t?.side === 'sell').length;
   const tradeCount = buyCount + sellCount;
 
   return (
@@ -179,8 +180,8 @@ function LogEntryCard({
                 {actionLabel}
               </span>
               <span className={cn('px-2 py-0.5 rounded text-xs font-medium', outlookColor)}>
-                {log.overseerDecision.marketOutlook.charAt(0).toUpperCase() +
-                  log.overseerDecision.marketOutlook.slice(1)}
+                {marketOutlook.charAt(0).toUpperCase() +
+                  marketOutlook.slice(1)}
               </span>
               {tradeCount > 0 && (
                 <span className="px-2 py-0.5 rounded text-xs font-medium bg-white/10 text-foreground">
@@ -221,12 +222,12 @@ function LogEntryCard({
           {/* Overseer reasoning and assessment */}
           <div className="space-y-2">
             <div className="text-xs font-semibold text-foreground">Overseer Decision</div>
-            <p className="text-xs text-muted-foreground">{log.overseerDecision.reasoning}</p>
+            <p className="text-xs text-muted-foreground">{log.overseerDecision?.reasoning || 'No reasoning provided'}</p>
             <p className="text-xs text-muted-foreground">
-              <strong>Market Outlook:</strong> {log.overseerDecision.marketOutloak}
+              <strong>Market Outlook:</strong> {log.overseerDecision?.marketOutlook || 'Unknown'}
             </p>
             <p className="text-xs text-muted-foreground">
-              <strong>Portfolio Assessment:</strong> {log.overseerDecision.portfolioAssessment}
+              <strong>Portfolio Assessment:</strong> {log.overseerDecision?.portfolioAssessment || 'No assessment provided'}
             </p>
           </div>
 
@@ -256,58 +257,60 @@ function LogEntryCard({
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-foreground">Trades</div>
                   {(log.trades || []).map((trade, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 rounded bg-white/5 border border-white/10 space-y-1"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {trade.side === 'buy' ? (
-                            <TrendingUp className="w-3 h-3 text-emerald-400" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3 text-red-400" />
+                    trade && (
+                      <div
+                        key={idx}
+                        className="p-2 rounded bg-white/5 border border-white/10 space-y-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {trade.side === 'buy' ? (
+                              <TrendingUp className="w-3 h-3 text-emerald-400" />
+                            ) : (
+                              <TrendingDown className="w-3 h-3 text-red-400" />
+                            )}
+                            <span className="text-xs font-medium text-foreground">
+                              {trade.symbol}
+                            </span>
+                            <span
+                              className={cn(
+                                'px-1.5 py-0.5 rounded text-xs font-medium',
+                                trade.side === 'buy'
+                                  ? 'bg-emerald-400/20 text-emerald-400'
+                                  : 'bg-red-400/20 text-red-400'
+                              )}
+                            >
+                              {(trade.side || 'buy').toUpperCase()}
+                            </span>
+                            <span
+                              className={cn(
+                                'px-1.5 py-0.5 rounded text-xs',
+                                trade.status === 'submitted'
+                                  ? 'bg-emerald-400/20 text-emerald-400'
+                                  : trade.status === 'failed'
+                                    ? 'bg-red-400/20 text-red-400'
+                                    : trade.status === 'skipped'
+                                      ? 'bg-yellow-400/20 text-yellow-400'
+                                      : 'bg-blue-400/20 text-blue-400'
+                              )}
+                            >
+                              {trade.status || 'unknown'}
+                            </span>
+                          </div>
+                          {trade.notional && (
+                            <span className="text-xs font-semibold text-foreground">
+                              {formatCurrency(trade.notional)}
+                            </span>
                           )}
-                          <span className="text-xs font-medium text-foreground">
-                            {trade.symbol}
-                          </span>
-                          <span
-                            className={cn(
-                              'px-1.5 py-0.5 rounded text-xs font-medium',
-                              trade.side === 'buy'
-                                ? 'bg-emerald-400/20 text-emerald-400'
-                                : 'bg-red-400/20 text-red-400'
-                            )}
-                          >
-                            {trade.side.toUpperCase()}
-                          </span>
-                          <span
-                            className={cn(
-                              'px-1.5 py-0.5 rounded text-xs',
-                              trade.status === 'submitted'
-                                ? 'bg-emerald-400/20 text-emerald-400'
-                                : trade.status === 'failed'
-                                  ? 'bg-red-400/20 text-red-400'
-                                  : trade.status === 'skipped'
-                                    ? 'bg-yellow-400/20 text-yellow-400'
-                                    : 'bg-blue-400/20 text-blue-400'
-                            )}
-                          >
-                            {trade.status}
-                          </span>
                         </div>
-                        {trade.notional && (
-                          <span className="text-xs font-semibold text-foreground">
-                            {formatCurrency(trade.notional)}
-                          </span>
+                        {trade.reasoning && (
+                          <p className="text-xs text-muted-foreground">{trade.reasoning}</p>
+                        )}
+                        {trade.error && (
+                          <p className="text-xs text-red-400">{trade.error}</p>
                         )}
                       </div>
-                      {trade.reasoning && (
-                        <p className="text-xs text-muted-foreground">{trade.reasoning}</p>
-                      )}
-                      {trade.error && (
-                        <p className="text-xs text-red-400">{trade.error}</p>
-                      )}
-                    </div>
+                    )
                   ))}
                 </div>
               ) : (
@@ -322,25 +325,25 @@ function LogEntryCard({
                     <div>
                       <span className="text-muted-foreground">Equity:</span>
                       <span className="ml-1 font-semibold text-foreground">
-                        {formatCurrency(log.accountSnapshot.equityBefore)}
+                        {formatCurrency(log.accountSnapshot?.equityBefore || 0)}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Cash:</span>
                       <span className="ml-1 font-semibold text-foreground">
-                        {formatCurrency(log.accountSnapshot.cashBefore)}
+                        {formatCurrency(log.accountSnapshot?.cashBefore || 0)}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Positions:</span>
                       <span className="ml-1 font-semibold text-foreground">
-                        {log.accountSnapshot.positionCount}
+                        {log.accountSnapshot?.positionCount || 0}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Cycle:</span>
                       <span className="ml-1 font-semibold text-foreground">
-                        {(log.cycleDurationMs / 1000).toFixed(1)}s
+                        {((log.cycleDurationMs || 0) / 1000).toFixed(1)}s
                       </span>
                     </div>
                   </div>
@@ -352,26 +355,26 @@ function LogEntryCard({
           {activeTab === 'news' && (
             <div className="space-y-2">
               {log.newsReport?.error ? (
-                <p className="text-xs text-red-400">{log.newsReport.error}</p>
+                <p className="text-xs text-red-400">{log.newsReport?.error || 'Unknown error'}</p>
               ) : log.newsReport ? (
                 <>
                   <div className="text-xs font-semibold text-foreground">
-                    Market Sentiment: {log.newsReport.marketSentiment}
+                    Market Sentiment: {log.newsReport?.marketSentiment || 'unknown'}
                   </div>
-                  <p className="text-xs text-muted-foreground">{log.newsReport.marketSummary}</p>
-                  {log.newsReport.urgentAlerts && log.newsReport.urgentAlerts.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{log.newsReport?.marketSummary || 'No summary available'}</p>
+                  {(log.newsReport?.urgentAlerts?.length || 0) > 0 && (
                     <div className="space-y-1">
                       <div className="text-xs font-semibold text-red-400">Urgent Alerts:</div>
-                      {log.newsReport.urgentAlerts.map((alert, idx) => (
+                      {(log.newsReport?.urgentAlerts || []).map((alert, idx) => (
                         <p key={idx} className="text-xs text-red-400">
-                          • {alert}
+                          • {alert || 'Unknown alert'}
                         </p>
                       ))}
                     </div>
                   )}
-                  {log.newsReport.symbols && log.newsReport.symbols.length > 0 && (
+                  {(log.newsReport?.symbols?.length || 0) > 0 && (
                     <div className="text-xs text-muted-foreground">
-                      Relevant symbols: {log.newsReport.symbols.join(', ')}
+                      Relevant symbols: {(log.newsReport?.symbols || []).map((s) => s?.symbol || '?').join(', ')}
                     </div>
                   )}
                 </>
@@ -384,15 +387,15 @@ function LogEntryCard({
           {activeTab === 'fundamentals' && (
             <div className="space-y-2">
               {log.fundamentalsReport?.error ? (
-                <p className="text-xs text-red-400">{log.fundamentalsReport.error}</p>
+                <p className="text-xs text-red-400">{log.fundamentalsReport?.error || 'Unknown error'}</p>
               ) : log.fundamentalsReport ? (
                 <>
                   <p className="text-xs text-muted-foreground">
-                    {log.fundamentalsReport.overallAssessment}
+                    {log.fundamentalsReport?.overallAssessment || 'No assessment available'}
                   </p>
-                  {log.fundamentalsReport.symbols && log.fundamentalsReport.symbols.length > 0 && (
+                  {(log.fundamentalsReport?.symbols?.length || 0) > 0 && (
                     <div className="text-xs text-muted-foreground">
-                      Reviewed symbols: {log.fundamentalsReport.symbols.join(', ')}
+                      Reviewed symbols: {(log.fundamentalsReport?.symbols || []).map((s) => s?.symbol || '?').join(', ')}
                     </div>
                   )}
                 </>
