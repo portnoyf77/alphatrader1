@@ -12,5 +12,19 @@
       "path": "/api/execution-cycle",
       "schedule": "7,22,37,52 13-20 * * 1-5"
     }
-  ]
+  ],
+  "functions": {
+    "api/agents/overseer.js": {
+      "maxDuration": 120
+    },
+    "api/execution-cycle.js": {
+      "maxDuration": 120
+    },
+    "api/agents/technical-analyst.js": {
+      "maxDuration": 120
+    },
+    "api/agents/fundamentals-analyst.js": {
+      "maxDuration": 120
+    }
+  }
 }

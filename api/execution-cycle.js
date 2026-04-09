@@ -24,7 +24,7 @@ function getBaseUrl(req) {
   return 'http://localhost:3000';
 }
 
-async function callAgent(baseUrl, agentPath, timeoutMs = 55000) {
+async function callAgent(baseUrl, agentPath, timeoutMs = 115000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
