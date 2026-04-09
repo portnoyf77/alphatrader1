@@ -394,8 +394,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-        </div>
-
         {/* ── Portfolio Tab Cards ── */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {tabCards.map(({ key, icon: Icon, label, count, detail }) => (
