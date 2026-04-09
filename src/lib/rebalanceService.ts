@@ -285,14 +285,26 @@ export async function getLatestRebalanceLog(): Promise<RebalanceLogEntry | null>
 
 // ── Agent Log Utility helpers ──────────────────────────────────
 
-export function formatRelativeTime(timestamp: string): string {
+export function formatRelativeTime(timestamp: string | number | null | undefined): string {
+  if (!timestamp) return 'Unknown';
+
   const now = Date.now();
-  const then = new Date(timestamp).getTime();
+  // Handle Unix epoch seconds (number), milliseconds, or ISO strings
+  let then: number;
+  if (typeof timestamp === 'number') {
+    then = timestamp > 1e12 ? timestamp : timestamp * 1000; // seconds vs ms
+  } else {
+    then = new Date(timestamp).getTime();
+  }
+
+  if (isNaN(then)) return 'Unknown';
+
   const diffMs = now - then;
+  if (diffMs < 0) return 'just now';
 
   const minutes = Math.floor(diffMs / 60000);
   if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 60) return `${minutes}m ago`;
 
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
