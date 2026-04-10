@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { NavBar } from '@/components/NavBar';
+import { Navbar as NavBar } from '@/components/layout/Navbar';
 function formatCurrency(v: number): string { return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
 // ── Types ────────────────────────────────────────────────────────
