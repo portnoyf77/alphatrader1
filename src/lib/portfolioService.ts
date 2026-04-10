@@ -120,11 +120,17 @@ export async function executePortfolio(
     throw new Error('No holdings to execute.');
   }
   const orders: AlpacaOrder[] = [];
+  const failed: { symbol: string; error: string }[] = [];
   for (const h of holdings) {
     const notional = (investmentAmount * h.allocation) / 100;
     if (notional < 1) continue;
-    const order = await placeMarketOrderNotional(h.symbol, notional, 'buy');
-    orders.push(order);
+    try {
+      const order = await placeMarketOrderNotional(h.symbol, notional, 'buy');
+      orders.push(order);
+    } catch (err: any) {
+      console.warn(`[execute-portfolio] Skipping ${h.symbol}: ${err.message}`);
+      failed.push({ symbol: h.symbol, error: err.message });
+    }
   }
   if (orders.length === 0) {
     throw new Error('No orders met the minimum notional size.');
