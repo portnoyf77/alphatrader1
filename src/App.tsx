@@ -23,6 +23,7 @@ import ProfileSetup from "./pages/ProfileSetup";
 
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import AlphaCNC from "./pages/AlphaCNC";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import { AlpacaConnectionTest } from "@/components/AlpacaConnectionTest";
 import PaperTrading from "./pages/PaperTrading";
@@ -65,6 +66,7 @@ function GatedApp() {
         <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/faq" element={<FAQ />} />
+        <Route path="/cnc" element={<AlphaCNC />} />
 
         {/* Profile setup (protected but no profile-redirect loop) */}
         <Route
