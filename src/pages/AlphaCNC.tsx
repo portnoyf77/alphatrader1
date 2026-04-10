@@ -875,7 +875,15 @@ export default function AlphaCNC() {
 
       if (intelRes.ok) {
         const data = await intelRes.json();
-        setAgentIntel(data.agents || {});
+        const raw = data.agents || {};
+        const parsed = {};
+        for (const [k, v] of Object.entries(raw)) {
+          if (v && typeof v === 'object' && 'value' in v) {
+            try { parsed[k] = typeof v.value === 'string' ? JSON.parse(v.value) : v.value; }
+            catch { parsed[k] = v; }
+          } else { parsed[k] = v; }
+        }
+        setAgentIntel(parsed);
       }
 
       if (logsRes.ok) {
