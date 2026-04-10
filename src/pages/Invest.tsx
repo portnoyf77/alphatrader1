@@ -89,7 +89,7 @@ const roleIcons: Record<GeneratedHolding['role'], React.ReactNode> = {
 };
 
 /** Max holdings shown after AI generation; weights are renormalized to sum to 100%. */
-const AI_RESULTS_MAX_HOLDINGS = 6;
+const AI_RESULTS_MAX_HOLDINGS = 50;
 
 function capHoldingsByAllocation<T extends { allocation: number }>(holdings: T[], max: number): T[] {
   const sorted = [...holdings].sort((a, b) => b.allocation - a.allocation);
