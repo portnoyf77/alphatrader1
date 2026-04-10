@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { NavBar } from '@/components/NavBar';
-import { formatCurrency } from '@/lib/utils';
+function formatCurrency(v: number): string { return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
 // ── Types ────────────────────────────────────────────────────────
 
