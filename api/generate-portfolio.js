@@ -475,6 +475,57 @@ Rules:
 - Do NOT default to ETFs. Individual stocks are where the agent intelligence creates an edge.`;
 }
 
+
+// ── Validate symbols against Alpaca asset API ──────────────────
+
+async function validateSymbols(holdings) {
+  // Check all symbols in parallel against Alpaca's asset endpoint
+  const results = await Promise.allSettled(
+    holdings.map(async (h) => {
+      try {
+        const res = await fetch(
+          `${ALPACA_PAPER_BASE}/v2/assets/${encodeURIComponent(h.symbol)}`,
+          { headers: alpacaHeaders() }
+        );
+        if (!res.ok) return { ...h, valid: false };
+        const asset = await res.json();
+        // Must be active and tradeable
+        if (asset.status !== 'active' || !asset.tradable) return { ...h, valid: false };
+        return { ...h, valid: true };
+      } catch {
+        return { ...h, valid: false };
+      }
+    })
+  );
+
+  const validated = results
+    .filter(r => r.status === 'fulfilled')
+    .map(r => r.value);
+
+  const valid = validated.filter(h => h.valid);
+  const invalid = validated.filter(h => !h.valid);
+
+  if (invalid.length > 0) {
+    console.log('[generate-portfolio] Removed invalid symbols:', invalid.map(h => h.symbol).join(', '));
+  }
+
+  // Strip the 'valid' flag and renormalize allocations
+  const cleaned = valid.map(({ valid: _, ...h }) => h);
+
+  if (cleaned.length === 0) return [];
+
+  // Renormalize allocations to sum to 100
+  const sum = cleaned.reduce((s, h) => s + h.allocation, 0);
+  if (sum > 0 && sum !== 100) {
+    const factor = 100 / sum;
+    cleaned.forEach(h => { h.allocation = Math.round(h.allocation * factor); });
+    const newSum = cleaned.reduce((s, h) => s + h.allocation, 0);
+    if (newSum !== 100) cleaned[0].allocation += (100 - newSum);
+  }
+
+  return cleaned;
+}
+
 // ── Main handler ────────────────────────────────────────────────
 
 export default async function handler(req, res) {
@@ -579,8 +630,14 @@ export default async function handler(req, res) {
       }
     }
 
+    // Step 5: Validate all symbols against Alpaca (parallel, ~200-300ms)
+    const validatedHoldings = await validateSymbols(parsed.holdings);
+    if (validatedHoldings.length === 0) {
+      return res.status(502).json({ error: 'No valid tradeable symbols returned. Please try again.' });
+    }
+
     return res.status(200).json({
-      holdings: parsed.holdings,
+      holdings: validatedHoldings,
       strategy: parsed.strategy || {
         name: 'AI-Generated Portfolio',
         description: 'Portfolio generated based on your preferences.',

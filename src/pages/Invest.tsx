@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Trash2, ArrowRight, Info, TrendingUp, Shield, Globe, Coins, AlertTriangle, DollarSign, Scale, ChevronDown, PenLine, Loader2 } from 'lucide-react';
 import { generatePortfolio, executePortfolio } from '@/lib/portfolioService';
@@ -165,6 +165,24 @@ export default function Create() {
   const aiResultRef = useRef<GeneratePortfolioResponse | null>(null);
   const aiErrorRef = useRef<string | null>(null);
   const [waitingForAI, setWaitingForAI] = useState(false);
+  const [waitingStatusIdx, setWaitingStatusIdx] = useState(0);
+  const waitingStatusMessages = [
+    'Reading intelligence from 8 AI agents...',
+    'Analyzing sector rotation signals...',
+    'Scanning for insider trading clusters...',
+    'Evaluating technical setups and momentum...',
+    'Cross-referencing earnings catalysts...',
+    'Selecting optimal stock positions...',
+    'Validating symbols with Alpaca...',
+    'Finalizing allocation weights...',
+  ];
+  useEffect(() => {
+    if (!waitingForAI) { setWaitingStatusIdx(0); return; }
+    const interval = setInterval(() => {
+      setWaitingStatusIdx(prev => (prev + 1) % waitingStatusMessages.length);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [waitingForAI]);
   const [investExecuting, setInvestExecuting] = useState(false);
 
   // Fetch live prices when portfolio is generated
@@ -1259,8 +1277,15 @@ export default function Create() {
                 ) : waitingForAI ? (
                   <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-muted-foreground">Finalizing your portfolio with live market data...</p>
-                    <p className="text-xs text-muted-foreground">Almost there</p>
+                    <p className="text-muted-foreground transition-opacity duration-500">{waitingStatusMessages[waitingStatusIdx]}</p>
+                    <div className="flex gap-1.5 mt-1">
+                      {waitingStatusMessages.map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-1 w-1 rounded-full transition-colors duration-300 ${i <= waitingStatusIdx ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <ParticleCrystallizationAnimation
