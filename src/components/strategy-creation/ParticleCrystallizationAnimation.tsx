@@ -19,16 +19,16 @@ interface ParticleCrystallizationAnimationProps {
 type AnimationPhase = 'gathering' | 'crystallizing' | 'reveal';
 
 const PHASE_TIMINGS = {
-  gathering: 3000,
-  crystallizing: 3000,
-  reveal: 3000,
+  gathering: 4000,
+  crystallizing: 5000,
+  reveal: 5000,
 };
 
 const PROGRESS_MESSAGES = [
-  'Analyzing your investment profile...',
-  'Matching optimal asset allocations...',
-  'Calculating risk-adjusted portfolios...',
-  'Crystallizing your portfolio...',
+  'Reading intelligence from 8 AI agents...',
+  'Analyzing sector rotation and macro signals...',
+  'Selecting stocks based on agent consensus...',
+  'Validating symbols and finalizing allocation...',
 ];
 
 const PARTICLE_COUNT = 120;
