@@ -23,18 +23,33 @@ export default async function handler(req, res) {
       if (!portfolio) {
         return res.status(404).json({ error: 'Portfolio not found' });
       }
-      return res.status(200).json({ portfolio });
+      // Unwrap KV envelope if present
+      const unwrapped = portfolio && typeof portfolio === 'object' && 'value' in portfolio
+        ? (typeof portfolio.value === 'string' ? JSON.parse(portfolio.value) : portfolio.value)
+        : portfolio;
+      return res.status(200).json({ portfolio: unwrapped });
     }
 
     // List all portfolios
-    const ids = await kvLrange('portfolio:index', 0, 49);
+    const rawIds = await kvLrange('portfolio:index', 0, 49);
+    const ids = rawIds.map(id => {
+      if (id && typeof id === 'object' && 'value' in id) return id.value;
+      return id;
+    });
     if (ids.length === 0) {
       return res.status(200).json({ portfolios: [] });
     }
 
-    const portfolios = await Promise.all(
+    const rawPortfolios = await Promise.all(
       ids.map(pid => kvGet(`portfolio:${pid}`))
     );
+    const portfolios = rawPortfolios.map(p => {
+      if (p && typeof p === 'object' && 'value' in p) {
+        try { return typeof p.value === 'string' ? JSON.parse(p.value) : p.value; }
+        catch { return p; }
+      }
+      return p;
+    });
 
     return res.status(200).json({
       portfolios: portfolios.filter(Boolean),
