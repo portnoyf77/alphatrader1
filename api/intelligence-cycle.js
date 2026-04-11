@@ -2,24 +2,15 @@
  * Intelligence Cycle Orchestrator
  *
  * Runs 24/7 (every 30 minutes, all days including weekends).
- * Coordinates the intelligence-gathering agents by calling their
- * individual HTTP endpoints (each runs in its own serverless function).
+ * Calls all 7 intelligence agents SEQUENTIALLY to avoid rate limits.
  *
- * Why HTTP calls instead of direct imports?
- * Vercel bundles each API route into its own serverless function.
- * When we import agent code directly, it all runs in ONE function,
- * which can cause env var resolution and bundling issues.
- * Calling endpoints ensures each agent gets its own clean context.
- *
- * Vercel Cron: "0,30 * * * *"  (every 30 min, 24/7)
+ * Vercel Cron: "0,30 * * * *"
  */
 
 function getBaseUrl(req) {
-  // From request headers (works for both cron and manual calls)
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const proto = req.headers['x-forwarded-proto'] || 'https';
   if (host) return `${proto}://${host}`;
-  // Fallback to Vercel env
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
 }
@@ -47,6 +38,20 @@ async function callAgent(baseUrl, agentPath, timeoutMs = 55000) {
   }
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const AGENTS = [
+  { name: 'news-sentinel', path: '/api/agents/news-sentinel' },
+  { name: 'sector-scanner', path: '/api/agents/sector-scanner' },
+  { name: 'earnings-scout', path: '/api/agents/earnings-scout' },
+  { name: 'catalyst-tracker', path: '/api/agents/catalyst-tracker' },
+  { name: 'technical-analyst', path: '/api/agents/technical-analyst' },
+  { name: 'fundamentals-analyst', path: '/api/agents/fundamentals-analyst' },
+  { name: 'macro-analyst', path: '/api/agents/macro-analyst' },
+];
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -59,13 +64,22 @@ export default async function handler(req, res) {
 
   console.log(`[intelligence-cycle] Starting at ${timestamp}, base: ${baseUrl}`);
 
-  // Call all four intelligence agents in parallel via their HTTP endpoints
-  const [newsResult, sectorResult, earningsResult, catalystResult] = await Promise.allSettled([
-    callAgent(baseUrl, '/api/agents/news-sentinel'),
-    callAgent(baseUrl, '/api/agents/sector-scanner'),
-    callAgent(baseUrl, '/api/agents/earnings-scout'),
-    callAgent(baseUrl, '/api/agents/catalyst-tracker'),
-  ]);
+  const results = {};
+
+  for (const agent of AGENTS) {
+    try {
+      console.log(`[intelligence-cycle] Running ${agent.name}...`);
+      const data = await callAgent(baseUrl, agent.path);
+      results[agent.name] = { status: 'fulfilled', data };
+      console.log(`[intelligence-cycle] ${agent.name} complete`);
+    } catch (err) {
+      console.error(`[intelligence-cycle] ${agent.name} failed: ${err.message}`);
+      results[agent.name] = { status: 'rejected', error: err.message };
+    }
+
+    // Pause between agents to respect rate limits
+    await sleep(3000);
+  }
 
   const duration = Date.now() - cycleStart;
 
@@ -73,33 +87,21 @@ export default async function handler(req, res) {
     timestamp,
     cycle: 'intelligence',
     durationMs: duration,
-    agents: {
-      'news-sentinel': {
-        status: newsResult.status,
-        sentiment: newsResult.status === 'fulfilled' ? newsResult.value.marketSentiment : null,
-        newsCount: newsResult.status === 'fulfilled' ? newsResult.value.newsCount : 0,
-        error: newsResult.status === 'rejected' ? newsResult.reason?.message : null,
-      },
-      'sector-scanner': {
-        status: sectorResult.status,
-        rotationPhase: sectorResult.status === 'fulfilled' ? sectorResult.value.rotationPhase : null,
-        error: sectorResult.status === 'rejected' ? sectorResult.reason?.message : null,
-      },
-      'earnings-scout': {
-        status: earningsResult.status,
-        upcomingCount: earningsResult.status === 'fulfilled' ? earningsResult.value.upcomingEarningsCount : 0,
-        error: earningsResult.status === 'rejected' ? earningsResult.reason?.message : null,
-      },
-      'catalyst-tracker': {
-        status: catalystResult.status,
-        dataPoints: catalystResult.status === 'fulfilled' ? catalystResult.value.dataPoints : null,
-        error: catalystResult.status === 'rejected' ? catalystResult.reason?.message : null,
-      },
-    },
+    agentCount: AGENTS.length,
+    succeeded: Object.values(results).filter(r => r.status === 'fulfilled').length,
+    failed: Object.values(results).filter(r => r.status === 'rejected').length,
+    agents: {},
   };
 
-  console.log(`[intelligence-cycle] Complete in ${duration}ms`);
-  console.log(`  News: ${newsResult.status}, Sectors: ${sectorResult.status}, Earnings: ${earningsResult.status}, Catalysts: ${catalystResult.status}`);
+  for (const agent of AGENTS) {
+    const r = results[agent.name];
+    summary.agents[agent.name] = {
+      status: r.status,
+      error: r.status === 'rejected' ? r.error : null,
+    };
+  }
+
+  console.log(`[intelligence-cycle] Complete in ${duration}ms. ${summary.succeeded}/${AGENTS.length} succeeded.`);
 
   return res.status(200).json(summary);
 }

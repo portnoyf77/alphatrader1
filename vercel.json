@@ -18,6 +18,9 @@
     }
   ],
   "functions": {
+    "api/intelligence-cycle.js": {
+      "maxDuration": 300
+    },
     "api/agents/overseer.js": {
       "maxDuration": 120
     },
