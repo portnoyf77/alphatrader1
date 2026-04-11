@@ -24,11 +24,13 @@ import {
   type AiWizardState,
 } from '@/components/strategy-creation/AiLedPortfolioCreation';
 import { ParticleCrystallizationAnimation } from '@/components/strategy-creation/ParticleCrystallizationAnimation';
+import { GemSwirl } from '@/components/GemSwirl';
 import { ManualPortfolioBuilder } from '@/components/strategy-creation/ManualPortfolioBuilder';
 import {
   StrategyProfile,
   initialProfile,
   deriveRiskLevel,
+  deriveGemstone,
   explainRiskScoring,
   buildStrategyProfileFromAiFlow,
 } from '@/lib/strategyProfile';
@@ -165,6 +167,7 @@ export default function Create() {
   const aiResultRef = useRef<GeneratePortfolioResponse | null>(null);
   const aiErrorRef = useRef<string | null>(null);
   const [waitingForAI, setWaitingForAI] = useState(false);
+  const [generationReady, setGenerationReady] = useState(false);
   const [waitingStatusIdx, setWaitingStatusIdx] = useState(0);
   const waitingStatusMessages = [
     'Reading intelligence from 8 AI agents...',
@@ -207,15 +210,18 @@ export default function Create() {
       aiResultRef.current = null;
       aiErrorRef.current = null;
       setAiGenerationError(null);
+      setGenerationReady(false);
       generatePortfolio(onboarding, refinements)
         .then((result) => {
           aiResultRef.current = result;
+          setGenerationReady(true);
         })
         .catch((err) => {
           console.error('[Invest] AI portfolio generation failed:', err);
           const msg = err instanceof Error ? err.message : 'Portfolio generation failed';
           aiErrorRef.current = msg;
           setAiGenerationError(msg);
+          setGenerationReady(false);
         });
     },
     [],
@@ -386,6 +392,7 @@ export default function Create() {
     aiFlowActiveRef.current = false;
     aiResultRef.current = null;
     aiErrorRef.current = null;
+    setGenerationReady(false);
     setInvestExecuting(false);
   };
 
@@ -1276,7 +1283,21 @@ export default function Create() {
                   </div>
                 ) : waitingForAI ? (
                   <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                      <GemSwirl
+                        ready={generationReady}
+                        gemType={(() => {
+                          const g = deriveGemstone(gemAnimationProfile);
+                          if (g === 'Pearl') return 'pearl';
+                          if (g === 'Ruby') return 'ruby';
+                          return 'sapphire';
+                        })()}
+                        size={200}
+                      />
+                      <p className="text-lg text-gray-300">
+                        Alpha is analyzing your profile...
+                      </p>
+                    </div>
                     <p className="text-muted-foreground transition-opacity duration-500">{waitingStatusMessages[waitingStatusIdx]}</p>
                     <div className="flex gap-1.5 mt-1">
                       {waitingStatusMessages.map((_, i) => (

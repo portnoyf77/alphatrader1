@@ -131,40 +131,36 @@ export default async function handler(req, res) {
       });
     }
 
-    // ── Save portfolio to Vercel KV ──────────────────────────
+    // -- Auto-save portfolio to KV --
     const portfolioId = `portfolio_${Date.now()}`;
-    const derivedStatus = submitted.length === holdings.length ? 'active'
-      : submitted.length > 0 ? 'partial' : 'pending';
-
+    const derivedStatus = failed.length === 0 ? 'active' : submitted.length > 0 ? 'partial' : 'failed';
     try {
-      const portfolioRecord = {
-        id: portfolioId,
-        name: portfolioName || strategy?.name || 'AI Portfolio',
-        holdings,
-        strategy: strategy || null,
+      const record = {
+        portfolioId,
+        portfolioName: portfolioName || strategy?.strategyName || 'AI Portfolio',
+        strategy: strategy || {},
+        holdings: holdings || [],
         investmentAmount,
         orders,
         status: derivedStatus,
+        createdAt: new Date().toISOString(),
         orderSummary: {
           submitted: submitted.length,
           failed: failed.length,
           skipped: orders.filter(o => o.status === 'skipped').length,
-          total: holdings.length,
         },
-        createdAt: new Date().toISOString(),
       };
-      await kvSet(`portfolio:${portfolioId}`, portfolioRecord, 7776000); // 90-day TTL
+      await kvSet(`portfolio:${portfolioId}`, record, 7776000);
       await kvLpush('portfolio:index', portfolioId);
-      await kvLtrim('portfolio:index', 0, 49); // Keep last 50
-      console.log('[execute-portfolio] Saved portfolio:', portfolioId, derivedStatus);
+      await kvLtrim('portfolio:index', 0, 49);
     } catch (saveErr) {
-      console.error('[execute-portfolio] KV save failed (non-blocking):', saveErr.message);
+      console.error('[execute-portfolio] Portfolio save failed (non-blocking):', saveErr.message);
     }
 
     return res.status(200).json({
       success: true,
       portfolioId,
-      portfolioName: portfolioName || strategy?.name || 'AI Portfolio',
+      portfolioName: portfolioName || strategy?.strategyName || 'AI Portfolio',
       totalInvested: submitted.reduce((s, o) => s + parseFloat(o.notional), 0),
       orders,
       summary: `${submitted.length} orders placed, ${failed.length} failed`,

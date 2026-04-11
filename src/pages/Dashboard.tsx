@@ -162,11 +162,24 @@ function DashboardEquityChart() {
   );
 }
 
+interface SavedPortfolio {
+  portfolioId: string;
+  portfolioName: string;
+  strategy: { strategyName?: string; gemType?: string; riskLevel?: string };
+  holdings: { symbol: string; allocation: number }[];
+  investmentAmount: number;
+  status: 'active' | 'partial' | 'pending' | 'failed';
+  createdAt: string;
+  orderSummary: { submitted: number; failed: number; skipped: number };
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useMockAuth();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
   const [dismissedPublishPrompt, setDismissedPublishPrompt] = useState(false);
+  const [savedPortfolios, setSavedPortfolios] = useState<SavedPortfolio[]>([]);
+  const [loadingPortfolios, setLoadingPortfolios] = useState(true);
 
   // Live Alpaca data
   const { account, loading: accountLoading } = useAlpacaAccount();
@@ -256,6 +269,24 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [hasLiveData]);
 
+  const fetchPortfolios = async () => {
+    try {
+      const res = await fetch('/api/get-portfolios');
+      if (res.ok) {
+        const data = await res.json();
+        setSavedPortfolios(data.portfolios || []);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch portfolios:', err);
+    } finally {
+      setLoadingPortfolios(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPortfolios();
+  }, []);
+
   // Count-up animations
   const animEquity = useCountUp(displayEquity, 800);
   // SP500 benchmark comparison - use live metrics API when available
@@ -309,9 +340,138 @@ export default function Dashboard() {
     });
   }, [livePortfolios, dismissedPublishPrompt, user]);
 
+  const savedKvCount = savedPortfolios.length;
+  const savedKvInvestedTotal = savedPortfolios
+    .filter((p) => p.status === 'active' || p.status === 'partial')
+    .reduce((acc, p) => acc + (p.investmentAmount || 0), 0);
+  const savedKvSimulating = savedPortfolios.filter((p) => p.status === 'pending').length;
+
+  const savedStatusBadgeClass = (status: SavedPortfolio['status']) =>
+    cn(
+      'inline-flex rounded px-2 py-0.5 text-xs font-medium capitalize',
+      status === 'active' && 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35',
+      status === 'partial' && 'bg-amber-500/20 text-amber-300 border border-amber-500/35',
+      (status === 'pending' || status === 'failed') && 'bg-gray-600/50 text-gray-300 border border-gray-600/60',
+    );
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-8 space-y-6">
+
+        {/* ── My Portfolios (KV) ── */}
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div
+              className={cn(
+                'rounded-xl border border-gray-800 bg-gray-900 p-5 text-white shadow-sm',
+                'flex flex-col gap-1',
+              )}
+            >
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <Briefcase className="h-4 w-4 shrink-0" />
+                <span>My Portfolios</span>
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums">
+                {loadingPortfolios ? '—' : savedKvCount}
+              </div>
+              <p className="text-xs text-gray-500">From Alpha invest flow</p>
+            </div>
+            <div
+              className={cn(
+                'rounded-xl border border-gray-800 bg-gray-900 p-5 text-white shadow-sm',
+                'flex flex-col gap-1',
+              )}
+            >
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <Handshake className="h-4 w-4 shrink-0" />
+                <span>Invested In</span>
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums">
+                {loadingPortfolios ? '—' : formatCurrency(savedKvInvestedTotal)}
+              </div>
+              <p className="text-xs text-gray-500">Active &amp; partial executions</p>
+            </div>
+            <div
+              className={cn(
+                'rounded-xl border border-gray-800 bg-gray-900 p-5 text-white shadow-sm',
+                'flex flex-col gap-1',
+              )}
+            >
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <FlaskConical className="h-4 w-4 shrink-0" />
+                <span>Simulating</span>
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums">
+                {loadingPortfolios ? '—' : savedKvSimulating}
+              </div>
+              <p className="text-xs text-gray-500">Pending placement</p>
+            </div>
+          </div>
+
+          {loadingPortfolios ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-36 rounded-xl border border-gray-800 bg-gray-900/80" />
+              ))}
+            </div>
+          ) : savedPortfolios.length === 0 ? (
+            <div
+              className={cn(
+                'rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-white',
+                'flex flex-col items-center gap-4',
+              )}
+            >
+              <Sparkles className="h-10 w-10 text-gray-500" aria-hidden />
+              <div>
+                <h3 className="text-lg font-semibold">No saved portfolios yet</h3>
+                <p className="mt-1 text-sm text-gray-400 max-w-md mx-auto">
+                  Execute a portfolio on the Invest page to see it listed here.
+                </p>
+              </div>
+              <Link to="/invest">
+                <Button className="gap-2 bg-white text-gray-900 hover:bg-white/90">
+                  Go to Invest
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {savedPortfolios.map((sp) => (
+                <div
+                  key={sp.portfolioId}
+                  className={cn(
+                    'rounded-xl border border-gray-800 bg-gray-900 p-4 text-white shadow-sm',
+                    'flex flex-col gap-3 transition-colors hover:border-gray-700',
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{sp.portfolioName}</p>
+                      <p className="text-xs text-gray-500 font-mono truncate">{sp.portfolioId}</p>
+                    </div>
+                    <span className={savedStatusBadgeClass(sp.status)}>{sp.status}</span>
+                  </div>
+                  <div className="text-sm text-gray-300 space-y-1">
+                    <p>
+                      <span className="text-gray-500">Strategy: </span>
+                      {sp.strategy?.strategyName ?? '—'}
+                      {sp.strategy?.riskLevel ? (
+                        <span className="text-gray-500"> · {sp.strategy.riskLevel}</span>
+                      ) : null}
+                    </p>
+                    <p className="font-mono text-lg">{formatCurrency(sp.investmentAmount)}</p>
+                    <p className="text-xs text-gray-500">
+                      Orders: {sp.orderSummary.submitted} ok · {sp.orderSummary.failed} failed ·{' '}
+                      {sp.orderSummary.skipped} skipped
+                    </p>
+                    <p className="text-xs text-gray-500">{timeSince(sp.createdAt)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* ── Account Summary ── */}
         <div>

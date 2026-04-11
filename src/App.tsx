@@ -139,6 +139,14 @@ function GatedApp() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/alpha-cnc"
+          element={
+            <ProtectedRoute>
+              <AlphaCNC />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
