@@ -26,6 +26,7 @@ import { useMyPortfolios, useFollowedPortfolios } from '@/hooks/usePortfolios';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
+import { useToast } from '@/hooks/use-toast';
 import {
   getPortfolioHistory,
   closePosition,
@@ -348,6 +349,7 @@ function OpenPositionsTable({
 }
 
 export default function Dashboard() {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useMockAuth();
   const [activeTab, setActiveTab] = useState<'my-portfolios' | 'invested' | 'simulating'>('my-portfolios');
@@ -386,10 +388,26 @@ export default function Dashboard() {
     setCloseAllConfirm(false);
     setClosingAll(true);
     try {
-      await closeAllPositions();
+      const { closed, failed } = await closeAllPositions();
+      if (failed.length > 0) {
+        toast({
+          title: 'Some positions did not close',
+          description: `${failed.length} error(s). First: ${failed[0]?.symbol} — ${failed[0]?.message?.slice(0, 120)}`,
+          variant: 'destructive',
+        });
+      } else if (closed.length > 0) {
+        toast({
+          title: 'Close orders submitted',
+          description: `Market sells sent for ${closed.length} symbol(s). Refresh if rows remain.`,
+        });
+      }
       refetchPositions();
-    } catch {
-      /* swallow */
+    } catch (e) {
+      toast({
+        title: 'Close all failed',
+        description: e instanceof Error ? e.message : String(e),
+        variant: 'destructive',
+      });
     } finally {
       setClosingAll(false);
     }

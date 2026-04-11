@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/formatters';
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
+import { useToast } from '@/hooks/use-toast';
 import {
   getOrders,
   getPortfolioHistory,
@@ -208,6 +209,7 @@ function OpenPositionsSkeletonRows() {
 // ── Main Page ──
 
 export default function Portfolio() {
+  const { toast } = useToast();
   const { account, loading: acctLoading, refetch: refetchAccount } = useAlpacaAccount();
   const { positions, totalMarketValue, totalUnrealizedPL, loading: posLoading, refetch: refetchPositions } = useAlpacaPositions();
   const [orders, setOrders] = useState<AlpacaOrder[]>([]);
@@ -285,12 +287,28 @@ export default function Portfolio() {
     setCloseAllConfirm(false);
     setClosingAll(true);
     try {
-      await closeAllPositions();
+      const { closed, failed } = await closeAllPositions();
+      if (failed.length > 0) {
+        toast({
+          title: 'Some positions did not close',
+          description: `${failed.length} error(s). First: ${failed[0]?.symbol} — ${failed[0]?.message?.slice(0, 120)}`,
+          variant: 'destructive',
+        });
+      } else if (closed.length > 0) {
+        toast({
+          title: 'Close orders submitted',
+          description: `Market sells sent for ${closed.length} symbol(s). Rows may take a few seconds to clear.`,
+        });
+      }
       refetchPositions();
       refetchAccount();
       await fetchOrders();
-    } catch {
-      /* swallow */
+    } catch (e) {
+      toast({
+        title: 'Close all failed',
+        description: e instanceof Error ? e.message : String(e),
+        variant: 'destructive',
+      });
     } finally {
       setClosingAll(false);
     }
