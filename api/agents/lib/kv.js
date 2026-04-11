@@ -117,6 +117,27 @@ export async function kvLtrim(key, start, stop) {
   } catch { return false; }
 }
 
+/** Delete a key (Upstash REST: POST /del/{key}). */
+export async function kvDel(key) {
+  const kv = kvConfig();
+  if (!kv) return false;
+  try {
+    const res = await fetch(`${kv.url}/del/${encodeURIComponent(key)}`, {
+      method: 'POST',
+      headers: kvHeaders(kv.token),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      console.error(`[kv] DEL ${key} failed: ${res.status} ${text}`);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(`[kv] DEL ${key} failed:`, err.message);
+    return false;
+  }
+}
+
 // ── Intelligence storage helpers ────────────────────────────────
 
 /**
