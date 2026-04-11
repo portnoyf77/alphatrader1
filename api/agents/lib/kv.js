@@ -23,7 +23,7 @@ export async function kvSet(key, value, ttlSeconds = 86400) {
     await fetch(`${kv.url}/set/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: kvHeaders(kv.token),
-      body: JSON.stringify({ ex: ttlSeconds, value: JSON.stringify(value) }),
+      body: JSON.stringify([JSON.stringify(value), 'EX', ttlSeconds]),
     });
     return true;
   } catch (err) {
@@ -56,7 +56,7 @@ export async function kvLpush(key, value) {
     await fetch(`${kv.url}/lpush/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: kvHeaders(kv.token),
-      body: JSON.stringify({ value: typeof value === 'string' ? value : JSON.stringify(value) }),
+      body: JSON.stringify([typeof value === 'string' ? value : JSON.stringify(value)]),
     });
     return true;
   } catch (err) {
