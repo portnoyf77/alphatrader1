@@ -20,11 +20,21 @@ export async function kvSet(key, value, ttlSeconds = 86400) {
   const kv = kvConfig();
   if (!kv) return false;
   try {
-    await fetch(`${kv.url}/set/${encodeURIComponent(key)}`, {
-      method: 'POST',
-      headers: kvHeaders(kv.token),
-      body: JSON.stringify([JSON.stringify(value), 'EX', ttlSeconds]),
-    });
+    // Upstash: POST /set/{key}?EX=ttl — body is the raw string value only (not a JSON command array).
+    const payload = typeof value === 'string' ? value : JSON.stringify(value);
+    const res = await fetch(
+      `${kv.url}/set/${encodeURIComponent(key)}?EX=${encodeURIComponent(ttlSeconds)}`,
+      {
+        method: 'POST',
+        headers: kvHeaders(kv.token),
+        body: payload,
+      }
+    );
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      console.error(`[kv] SET ${key} failed: ${res.status} ${text}`);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error(`[kv] SET ${key} failed:`, err.message);
@@ -42,7 +52,13 @@ export async function kvGet(key) {
     if (!res.ok) return null;
     const data = await res.json();
     if (data.result === null || data.result === undefined) return null;
-    return typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+    const raw = data.result;
+    if (typeof raw !== 'string') return raw;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
   } catch (err) {
     console.error(`[kv] GET ${key} failed:`, err.message);
     return null;
@@ -53,11 +69,17 @@ export async function kvLpush(key, value) {
   const kv = kvConfig();
   if (!kv) return false;
   try {
-    await fetch(`${kv.url}/lpush/${encodeURIComponent(key)}`, {
+    const payload = typeof value === 'string' ? value : JSON.stringify(value);
+    const res = await fetch(`${kv.url}/lpush/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: kvHeaders(kv.token),
-      body: JSON.stringify([typeof value === 'string' ? value : JSON.stringify(value)]),
+      body: payload,
     });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      console.error(`[kv] LPUSH ${key} failed: ${res.status} ${text}`);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error(`[kv] LPUSH ${key} failed:`, err.message);

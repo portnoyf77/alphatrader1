@@ -4,7 +4,7 @@
  * Diagnostic endpoint to check agent system health.
  */
 
-import { kvGet, kvLrange, getAllLatestIntelligence } from './agents/lib/kv.js';
+import { kvGet, kvLrange, kvSet, getAllLatestIntelligence } from './agents/lib/kv.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,13 +30,25 @@ export default async function handler(req, res) {
 
   checks.envStatus = missingVars.length === 0 ? 'all set' : `missing: ${missingVars.join(', ')}`;
 
-  // 2. KV connectivity
+  // 2. KV connectivity + SET/GET round-trip (validates Upstash body format)
   try {
     if (!process.env.KV_REST_API_URL) {
       checks.kv = { connected: false, reason: 'KV_REST_API_URL not set' };
     } else {
-      const testVal = await kvGet('health:test');
-      checks.kv = { connected: true, testRead: testVal !== undefined };
+      const probe = { timestamp: new Date().toISOString(), kvProbe: true };
+      const probeKey = 'health:kv:setget-probe';
+      const setOk = await kvSet(probeKey, probe, 120);
+      const readBack = await kvGet(probeKey);
+      const roundTripOk =
+        setOk &&
+        readBack &&
+        typeof readBack === 'object' &&
+        readBack.kvProbe === true &&
+        readBack.timestamp === probe.timestamp;
+      checks.kv = {
+        connected: true,
+        setGetProbe: { setOk, roundTripOk, hasTimestamp: !!(readBack && readBack.timestamp) },
+      };
     }
   } catch (err) {
     checks.kv = { connected: false, error: err.message };
@@ -67,12 +79,12 @@ export default async function handler(req, res) {
   // 4. Execution logs
   try {
     const latest = await kvGet('execution:log:latest');
-    if (latest) {
+    if (latest && latest.timestamp) {
       const age = Date.now() - new Date(latest.timestamp).getTime();
       checks.overseer = {
         hasRun: true,
         lastDecision: latest.timestamp,
-        ageHours: (age / 3600000).toFixed(1),
+        ageHours: Number.isFinite(age) ? (age / 3600000).toFixed(1) : null,
         action: latest.overseerDecision?.action,
         tradesExecuted: (latest.trades || []).length,
       };

@@ -44,24 +44,24 @@ async function storeLog(logEntry) {
     const timestamp = logEntry.timestamp || new Date().toISOString();
     const logKey = `rebalance:log:${timestamp}`;
 
-    // Store individual log entry
-    await fetch(`${kvUrl}/set/${encodeURIComponent(logKey)}`, {
+    const logJson = JSON.stringify(logEntry);
+    // Upstash: POST /set/{key}?EX=ttl — body is the raw string value only
+    await fetch(`${kvUrl}/set/${encodeURIComponent(logKey)}?EX=2592000`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${kvToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ex: 2592000, value: JSON.stringify(logEntry) }), // 30-day TTL
+      body: logJson,
     });
 
-    // Prepend to the log index (list of timestamps, newest first)
-    await fetch(`${kvUrl}/lpush/rebalance:log:index`, {
+    await fetch(`${kvUrl}/lpush/${encodeURIComponent('rebalance:log:index')}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${kvToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ value: timestamp }),
+      body: timestamp,
     });
 
     // Trim index to last 200 entries
@@ -73,14 +73,13 @@ async function storeLog(logEntry) {
       },
     });
 
-    // Update "latest" pointer
-    await fetch(`${kvUrl}/set/rebalance:log:latest`, {
+    await fetch(`${kvUrl}/set/${encodeURIComponent('rebalance:log:latest')}?EX=2592000`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${kvToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ value: JSON.stringify(logEntry) }),
+      body: logJson,
     });
 
     return true;
