@@ -120,7 +120,7 @@ Respond with ONLY valid JSON:
   "valuationOpportunities": ["MSFT trading below DCF by 15%", "sector rotation creating value in XYZ"]
 }
 
-Include ALL held symbols. Be data-driven -- reference actual numbers.`, { maxTokens: 4096 });
+Include ALL held symbols. Be data-driven -- reference actual numbers.`, { maxTokens: 4096, model: 'claude-haiku-4-5-20251001' });
 
   const report = {
     timestamp,
