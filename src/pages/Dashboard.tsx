@@ -4,10 +4,20 @@ import { TrendingUp, TrendingDown, Shield, BarChart3, ExternalLink, Tag, Briefca
 import { useAlpacaAccount } from '@/hooks/useAlpacaAccount';
 import { useAlpacaPositions } from '@/hooks/useAlpacaPositions';
 import { useAlpacaNews } from '@/hooks/useAlpacaNews';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { GemDot } from '@/components/GemDot';
@@ -16,7 +26,8 @@ import { useMyPortfolios, useFollowedPortfolios } from '@/hooks/usePortfolios';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getPortfolioHistory, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
+import { getPortfolioHistory, closePosition, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
+import type { PositionSummary } from '@/hooks/useAlpacaPositions';
 
 function getUserCreatedPortfolios(): any[] {
   try { return JSON.parse(localStorage.getItem('userCreatedPortfolios') || '[]'); } catch { return []; }
@@ -173,6 +184,164 @@ interface SavedPortfolio {
   orderSummary: { submitted: number; failed: number; skipped: number };
 }
 
+function groupPositionsBySavedPortfolios(saved: SavedPortfolio[], positions: PositionSummary[]) {
+  const symbolToPortfolioId = new Map<string, string>();
+  for (const sp of saved) {
+    for (const h of sp.holdings || []) {
+      const sym = String(h.symbol || '').toUpperCase().trim();
+      if (!sym) continue;
+      if (!symbolToPortfolioId.has(sym)) {
+        symbolToPortfolioId.set(sym, sp.portfolioId);
+      }
+    }
+  }
+  const byPid = new Map<string, PositionSummary[]>();
+  const other: PositionSummary[] = [];
+  for (const p of positions) {
+    const sym = p.symbol.toUpperCase();
+    const pid = symbolToPortfolioId.get(sym);
+    if (pid) {
+      if (!byPid.has(pid)) byPid.set(pid, []);
+      byPid.get(pid)!.push(p);
+    } else {
+      other.push(p);
+    }
+  }
+  const sections = saved.map((portfolio) => {
+    const pos = byPid.get(portfolio.portfolioId) || [];
+    const totalMarketValue = pos.reduce((s, x) => s + x.marketValue, 0);
+    const totalUnrealizedPL = pos.reduce((s, x) => s + x.unrealizedPL, 0);
+    const totalCostBasis = pos.reduce((s, x) => s + x.avgEntryPrice * x.qty, 0);
+    return { portfolio, positions: pos, totalMarketValue, totalUnrealizedPL, totalCostBasis };
+  });
+  const otherTotals = {
+    totalMarketValue: other.reduce((s, x) => s + x.marketValue, 0),
+    totalUnrealizedPL: other.reduce((s, x) => s + x.unrealizedPL, 0),
+    totalCostBasis: other.reduce((s, x) => s + x.avgEntryPrice * x.qty, 0),
+  };
+  return { sections, other, otherTotals };
+}
+
+function PositionTotalsRow({
+  totalMarketValue,
+  totalUnrealizedPL,
+  totalCostBasis,
+}: {
+  totalMarketValue: number;
+  totalUnrealizedPL: number;
+  totalCostBasis: number;
+}) {
+  const plPct = totalCostBasis > 0 ? (totalUnrealizedPL / totalCostBasis) * 100 : 0;
+  return (
+    <TableRow className="bg-gray-800/60 border-t border-gray-800">
+      <TableCell colSpan={4} className="text-gray-400 font-medium">
+        Total
+      </TableCell>
+      <TableCell className="text-right font-mono text-white">{formatCurrency(totalMarketValue)}</TableCell>
+      <TableCell
+        className={cn(
+          'text-right font-mono',
+          totalUnrealizedPL >= 0 ? 'text-emerald-400' : 'text-red-400',
+        )}
+      >
+        {totalUnrealizedPL >= 0 ? '+' : ''}
+        {formatCurrency(totalUnrealizedPL)}
+      </TableCell>
+      <TableCell
+        className={cn(
+          'text-right font-mono',
+          plPct >= 0 ? 'text-emerald-400' : 'text-red-400',
+        )}
+      >
+        {plPct >= 0 ? '+' : ''}
+        {plPct.toFixed(2)}%
+      </TableCell>
+      <TableCell />
+    </TableRow>
+  );
+}
+
+function OpenPositionsTable({
+  positions: rows,
+  onCloseClick,
+  closingSymbol,
+  totals,
+}: {
+  positions: PositionSummary[];
+  onCloseClick: (pos: PositionSummary) => void;
+  closingSymbol: string | null;
+  totals: { totalMarketValue: number; totalUnrealizedPL: number; totalCostBasis: number };
+}) {
+  return (
+    <div className="rounded-lg overflow-hidden border border-gray-800">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-gray-800 hover:bg-transparent">
+            <TableHead className="text-gray-400">Symbol</TableHead>
+            <TableHead className="text-right text-gray-400">Qty</TableHead>
+            <TableHead className="text-right text-gray-400">Avg Entry</TableHead>
+            <TableHead className="text-right text-gray-400">Current</TableHead>
+            <TableHead className="text-right text-gray-400">Market Value</TableHead>
+            <TableHead className="text-right text-gray-400">P&amp;L</TableHead>
+            <TableHead className="text-right text-gray-400">P&amp;L %</TableHead>
+            <TableHead className="text-right text-gray-400">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((pos) => (
+            <TableRow
+              key={pos.symbol}
+              className="border-gray-800 hover:bg-gray-800/40"
+            >
+              <TableCell className="font-mono font-semibold text-white">{pos.symbol}</TableCell>
+              <TableCell className="text-right font-mono text-gray-200">{pos.qty}</TableCell>
+              <TableCell className="text-right font-mono text-gray-200">${pos.avgEntryPrice.toFixed(2)}</TableCell>
+              <TableCell className="text-right font-mono text-gray-200">${pos.currentPrice.toFixed(2)}</TableCell>
+              <TableCell className="text-right font-mono text-gray-200">{formatCurrency(pos.marketValue)}</TableCell>
+              <TableCell
+                className={cn(
+                  'text-right font-mono',
+                  pos.unrealizedPL >= 0 ? 'text-emerald-400' : 'text-red-400',
+                )}
+              >
+                {pos.unrealizedPL >= 0 ? '+' : ''}
+                {formatCurrency(pos.unrealizedPL)}
+              </TableCell>
+              <TableCell
+                className={cn(
+                  'text-right font-mono',
+                  (pos.unrealizedPLPercent ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400',
+                )}
+              >
+                {(pos.unrealizedPLPercent ?? 0) >= 0 ? '+' : ''}
+                {(pos.unrealizedPLPercent ?? 0).toFixed(2)}%
+              </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  disabled={closingSymbol === pos.symbol}
+                  onClick={() => onCloseClick(pos)}
+                >
+                  {closingSymbol === pos.symbol ? 'Closing...' : 'Close'}
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+          {rows.length > 0 && (
+            <PositionTotalsRow
+              totalMarketValue={totals.totalMarketValue}
+              totalUnrealizedPL={totals.totalUnrealizedPL}
+              totalCostBasis={totals.totalCostBasis}
+            />
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useMockAuth();
@@ -183,8 +352,28 @@ export default function Dashboard() {
 
   // Live Alpaca data
   const { account, loading: accountLoading } = useAlpacaAccount();
-  const { positions } = useAlpacaPositions();
+  const { positions, loading: positionsLoading, refetch: refetchPositions } = useAlpacaPositions();
   const alpacaLoading = accountLoading;
+
+  const [closingSymbol, setClosingSymbol] = useState<string | null>(null);
+  const [closeConfirm, setCloseConfirm] = useState<{ symbol: string; qty: number } | null>(null);
+
+  const groupedPositions = useMemo(
+    () => groupPositionsBySavedPortfolios(savedPortfolios, positions),
+    [savedPortfolios, positions],
+  );
+
+  const handleClosePosition = async (symbol: string) => {
+    setClosingSymbol(symbol);
+    try {
+      await closePosition(symbol);
+      refetchPositions();
+    } catch {
+      /* swallow */
+    } finally {
+      setClosingSymbol(null);
+    }
+  };
 
   // Real news from Alpaca (filtered by position symbols + popular tickers)
   const newsSymbols = useMemo(() => {
@@ -798,6 +987,126 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* ── Open Positions (grouped by saved portfolio) ── */}
+        <section className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              Open Positions
+              {!positionsLoading && positions.length > 0 && (
+                <span className="text-sm font-normal text-gray-500">({positions.length})</span>
+              )}
+            </h2>
+            {hasLiveData && (
+              <span
+                className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}
+              >
+                Live
+              </span>
+            )}
+          </div>
+
+          {positionsLoading || loadingPortfolios ? (
+            <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+              <Skeleton className="h-48 w-full rounded-lg bg-gray-800/80" />
+            </div>
+          ) : positions.length === 0 ? (
+            <p className="text-sm text-gray-500">No open positions.</p>
+          ) : savedPortfolios.length === 0 ? (
+            <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-white shadow-sm">
+              <p className="text-sm text-gray-400 mb-3">
+                No portfolios saved from Invest yet — showing all positions.
+              </p>
+              <OpenPositionsTable
+                positions={groupedPositions.other}
+                onCloseClick={(pos) => setCloseConfirm({ symbol: pos.symbol, qty: pos.qty })}
+                closingSymbol={closingSymbol}
+                totals={{
+                  totalMarketValue: groupedPositions.otherTotals.totalMarketValue,
+                  totalUnrealizedPL: groupedPositions.otherTotals.totalUnrealizedPL,
+                  totalCostBasis: groupedPositions.otherTotals.totalCostBasis,
+                }}
+              />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {groupedPositions.sections.map(
+                ({
+                  portfolio,
+                  positions: sectionPos,
+                  totalMarketValue,
+                  totalUnrealizedPL,
+                  totalCostBasis,
+                }) => (
+                  <div
+                    key={portfolio.portfolioId}
+                    className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-white shadow-sm space-y-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-semibold truncate">{portfolio.portfolioName}</p>
+                        <p className="text-xs text-gray-500 font-mono truncate">{portfolio.portfolioId}</p>
+                        <p className="text-sm text-gray-300">
+                          <span className="text-gray-500">Strategy: </span>
+                          {portfolio.strategy?.strategyName ?? '—'}
+                          {portfolio.strategy?.riskLevel ? (
+                            <span className="text-gray-500"> · {portfolio.strategy.riskLevel}</span>
+                          ) : null}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Total value{' '}
+                          <span className="font-mono text-white">{formatCurrency(totalMarketValue)}</span>
+                          {portfolio.investmentAmount > 0 && (
+                            <span className="text-gray-600">
+                              {' '}
+                              · Invested {formatCurrency(portfolio.investmentAmount)}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <span className={savedStatusBadgeClass(portfolio.status)}>{portfolio.status}</span>
+                    </div>
+                    {sectionPos.length === 0 ? (
+                      <p className="text-sm text-gray-500 py-2">No matching open positions for this portfolio.</p>
+                    ) : (
+                      <OpenPositionsTable
+                        positions={sectionPos}
+                        onCloseClick={(pos) => setCloseConfirm({ symbol: pos.symbol, qty: pos.qty })}
+                        closingSymbol={closingSymbol}
+                        totals={{
+                          totalMarketValue,
+                          totalUnrealizedPL,
+                          totalCostBasis,
+                        }}
+                      />
+                    )}
+                  </div>
+                ),
+              )}
+              {groupedPositions.other.length > 0 && (
+                <div className="rounded-xl border border-amber-500/25 bg-gray-900 p-4 text-white shadow-sm space-y-3">
+                  <div>
+                    <p className="font-semibold text-amber-200/90">Other Positions</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Symbols not listed in any saved portfolio (manual trades or legacy holdings).
+                    </p>
+                  </div>
+                  <OpenPositionsTable
+                    positions={groupedPositions.other}
+                    onCloseClick={(pos) => setCloseConfirm({ symbol: pos.symbol, qty: pos.qty })}
+                    closingSymbol={closingSymbol}
+                    totals={{
+                      totalMarketValue: groupedPositions.otherTotals.totalMarketValue,
+                      totalUnrealizedPL: groupedPositions.otherTotals.totalUnrealizedPL,
+                      totalCostBasis: groupedPositions.otherTotals.totalCostBasis,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
         {/* ── Equity Chart (when live data available) ── */}
         {hasLiveData && (
           <div
@@ -971,6 +1280,36 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={closeConfirm !== null} onOpenChange={(open) => !open && setCloseConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close position?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {closeConfirm
+                ? `Are you sure you want to close your position in ${closeConfirm.symbol}? This will sell all ${
+                    closeConfirm.qty % 1 === 0 ? closeConfirm.qty : closeConfirm.qty.toFixed(4)
+                  } shares at market price.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={closingSymbol !== null}
+              onClick={() => {
+                if (!closeConfirm) return;
+                const sym = closeConfirm.symbol;
+                setCloseConfirm(null);
+                void handleClosePosition(sym);
+              }}
+            >
+              Close position
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageLayout>
   );
 }
