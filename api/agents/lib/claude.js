@@ -18,7 +18,7 @@ export async function askClaude(prompt, options = {}) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { maxTokens = 2000, model = 'claude-haiku-4-5-20251001', maxRetries = 1 } = options;
+  const { maxTokens = 2000, model = 'claude-sonnet-4-20250514', maxRetries = 1 } = options;
 
   let lastError;
 
