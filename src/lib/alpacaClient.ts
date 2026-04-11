@@ -406,3 +406,27 @@ export async function closePosition(symbol: string): Promise<AlpacaOrder> {
   if (!res.ok) await throwAlpacaError(res);
   return res.json() as Promise<AlpacaOrder>;
 }
+
+/**
+ * Close every open position (market sell 100% per symbol). Uses the same proxy/auth as single close.
+ */
+export async function closeAllPositions(): Promise<{
+  closed: string[];
+  failed: { symbol: string; message: string }[];
+}> {
+  const raw = await getPositions();
+  const closed: string[] = [];
+  const failed: { symbol: string; message: string }[] = [];
+  for (const p of raw) {
+    try {
+      await closePosition(p.symbol);
+      closed.push(p.symbol);
+    } catch (e) {
+      failed.push({
+        symbol: p.symbol,
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+  return { closed, failed };
+}

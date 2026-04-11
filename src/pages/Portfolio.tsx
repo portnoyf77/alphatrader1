@@ -25,6 +25,7 @@ import {
   getPortfolioHistory,
   cancelOrder,
   closePosition,
+  closeAllPositions,
   placeOrder,
   type AlpacaOrder,
   type AlpacaPortfolioHistoryPoint,
@@ -216,6 +217,8 @@ export default function Portfolio() {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [closingSymbol, setClosingSymbol] = useState<string | null>(null);
   const [closeConfirm, setCloseConfirm] = useState<{ symbol: string; qty: number } | null>(null);
+  const [closeAllConfirm, setCloseAllConfirm] = useState(false);
+  const [closingAll, setClosingAll] = useState(false);
 
   const loading = acctLoading || posLoading;
 
@@ -275,6 +278,21 @@ export default function Portfolio() {
       /* swallow */
     } finally {
       setClosingSymbol(null);
+    }
+  };
+
+  const handleCloseAllPositions = async () => {
+    setCloseAllConfirm(false);
+    setClosingAll(true);
+    try {
+      await closeAllPositions();
+      refetchPositions();
+      refetchAccount();
+      await fetchOrders();
+    } catch {
+      /* swallow */
+    } finally {
+      setClosingAll(false);
     }
   };
 
@@ -398,12 +416,26 @@ export default function Portfolio() {
 
         {/* Positions Table */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            Open Positions
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              Open Positions
+              {positions.length > 0 && (
+                <span className="text-xs text-muted-foreground font-normal">({positions.length})</span>
+              )}
+            </h2>
             {positions.length > 0 && (
-              <span className="text-xs text-muted-foreground font-normal">({positions.length})</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs text-red-400 border-red-400/40 hover:bg-red-400/10"
+                disabled={closingAll || !!closingSymbol}
+                onClick={() => setCloseAllConfirm(true)}
+              >
+                {closingAll ? 'Closing all…' : 'Close all'}
+              </Button>
             )}
-          </h2>
+          </div>
           {loading ? (
             <OpenPositionsSkeletonRows />
           ) : positions.length === 0 ? (
@@ -586,6 +618,28 @@ export default function Portfolio() {
               }}
             >
               Close position
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={closeAllConfirm} onOpenChange={(open) => !open && setCloseAllConfirm(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close all positions?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will submit market sell orders to close all {positions.length} open position
+              {positions.length === 1 ? '' : 's'} in your paper account. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={closingAll}
+              onClick={() => void handleCloseAllPositions()}
+            >
+              Close all
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

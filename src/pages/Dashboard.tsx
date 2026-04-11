@@ -26,7 +26,12 @@ import { useMyPortfolios, useFollowedPortfolios } from '@/hooks/usePortfolios';
 import { cn, riskDisplayLabel } from '@/lib/utils';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useMockAuth } from '@/contexts/MockAuthContext';
-import { getPortfolioHistory, closePosition, type AlpacaPortfolioHistoryPoint } from '@/lib/alpacaClient';
+import {
+  getPortfolioHistory,
+  closePosition,
+  closeAllPositions,
+  type AlpacaPortfolioHistoryPoint,
+} from '@/lib/alpacaClient';
 import type { PositionSummary } from '@/hooks/useAlpacaPositions';
 
 function getUserCreatedPortfolios(): any[] {
@@ -357,6 +362,8 @@ export default function Dashboard() {
 
   const [closingSymbol, setClosingSymbol] = useState<string | null>(null);
   const [closeConfirm, setCloseConfirm] = useState<{ symbol: string; qty: number } | null>(null);
+  const [closeAllConfirm, setCloseAllConfirm] = useState(false);
+  const [closingAll, setClosingAll] = useState(false);
 
   const groupedPositions = useMemo(
     () => groupPositionsBySavedPortfolios(savedPortfolios, positions),
@@ -372,6 +379,19 @@ export default function Dashboard() {
       /* swallow */
     } finally {
       setClosingSymbol(null);
+    }
+  };
+
+  const handleCloseAllPositions = async () => {
+    setCloseAllConfirm(false);
+    setClosingAll(true);
+    try {
+      await closeAllPositions();
+      refetchPositions();
+    } catch {
+      /* swallow */
+    } finally {
+      setClosingAll(false);
     }
   };
 
@@ -996,14 +1016,28 @@ export default function Dashboard() {
                 <span className="text-sm font-normal text-gray-500">({positions.length})</span>
               )}
             </h2>
-            {hasLiveData && (
-              <span
-                className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}
-              >
-                Live
-              </span>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {!positionsLoading && positions.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs text-red-400 border-red-500/35 hover:bg-red-500/10 bg-gray-900"
+                  disabled={closingAll || !!closingSymbol}
+                  onClick={() => setCloseAllConfirm(true)}
+                >
+                  {closingAll ? 'Closing all…' : 'Close all'}
+                </Button>
+              )}
+              {hasLiveData && (
+                <span
+                  className="text-[0.6rem] uppercase tracking-wider px-1.5 py-0.5 rounded"
+                  style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}
+                >
+                  Live
+                </span>
+              )}
+            </div>
           </div>
 
           {positionsLoading || loadingPortfolios ? (
@@ -1306,6 +1340,28 @@ export default function Dashboard() {
               }}
             >
               Close position
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={closeAllConfirm} onOpenChange={(open) => !open && setCloseAllConfirm(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close all positions?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will submit market sell orders to close all {positions.length} open position
+              {positions.length === 1 ? '' : 's'} in your paper account. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={closingAll}
+              onClick={() => void handleCloseAllPositions()}
+            >
+              Close all
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
