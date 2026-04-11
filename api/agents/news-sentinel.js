@@ -94,7 +94,7 @@ Respond with ONLY valid JSON:
   "newOpportunities": ["symbols NOT currently held that news suggests are worth investigating"]
 }
 
-Include analysis for EVERY held symbol. If no specific news exists for a symbol, assess based on sector/market conditions.`, { maxTokens: 2500 });
+Include analysis for EVERY held symbol. If no specific news exists for a symbol, assess based on sector/market conditions.`, { maxTokens: 4096 });
 
   const report = {
     timestamp: now,
